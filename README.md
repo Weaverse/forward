@@ -21,7 +21,7 @@ A cross-platform notification system that integrates with command-line AI coding
 Quick start:
 ```bash
 curl -o ~/.claude/claude-code-notifier.sh \
-  https://raw.githubusercontent.com/hta218/claude-code-notifier/main/claude/claude-code-notifier.sh
+  https://raw.githubusercontent.com/hta218/ai-agents-notifier/main/claude/claude-code-notifier.sh
 chmod +x ~/.claude/claude-code-notifier.sh
 ```
 
@@ -36,7 +36,7 @@ Then configure `~/.claude/settings.json` - see [claude/settings.example.json](cl
 Quick start:
 ```bash
 curl -o ~/.copilot/copilot-cli-notifier.sh \
-  https://raw.githubusercontent.com/hta218/claude-code-notifier/main/copilot/copilot-cli-notifier.sh
+  https://raw.githubusercontent.com/hta218/ai-agents-notifier/main/copilot/copilot-cli-notifier.sh
 chmod +x ~/.copilot/copilot-cli-notifier.sh
 ```
 

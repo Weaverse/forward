@@ -14,7 +14,7 @@ brew install terminal-notifier
 ### Step 2: Download the notification script
 ```bash
 curl -o ~/.copilot/copilot-cli-notifier.sh \
-  https://raw.githubusercontent.com/hta218/claude-code-notifier/main/copilot-cli-notifier.sh
+  https://raw.githubusercontent.com/hta218/ai-agents-notifier/main/copilot/copilot-cli-notifier.sh
 ```
 
 ### Step 3: Make it executable (macOS/Linux)
