@@ -7,214 +7,66 @@ A cross-platform notification system that integrates with AI coding assistants t
 ## Supported AI Tools
 
 - **Claude Code** - Native hook integration
-- **GitHub Copilot CLI** - Shell wrapper integration
+- **GitHub Copilot CLI** - Native hook integration
 
 ## Installation
 
-### For Claude Code
+### Claude Code
 
-See detailed instructions in [claude/SETUP.md](claude/SETUP.md)
+📖 **[See claude/SETUP.md for installation instructions](claude/SETUP.md)**
 
-#### Quick Start
+Quick start:
 ```bash
 curl -o ~/.claude/claude-code-notifier.sh \
   https://raw.githubusercontent.com/hta218/claude-code-notifier/main/claude/claude-code-notifier.sh
 chmod +x ~/.claude/claude-code-notifier.sh
 ```
 
-Then configure hooks in `~/.claude/settings.json` - see [claude/SETUP.md](claude/SETUP.md) for full configuration.
+Then configure `~/.claude/settings.json` - see [claude/settings.example.json](claude/settings.example.json)
 
 ---
 
-### For GitHub Copilot CLI
+### GitHub Copilot CLI
 
-See detailed instructions in [copilot/SETUP.md](copilot/SETUP.md)
+📖 **[See copilot/SETUP.md for installation instructions](copilot/SETUP.md)**
 
-#### Quick Start
+Quick start:
 ```bash
 curl -o ~/.copilot/copilot-cli-notifier.sh \
   https://raw.githubusercontent.com/hta218/claude-code-notifier/main/copilot/copilot-cli-notifier.sh
 chmod +x ~/.copilot/copilot-cli-notifier.sh
 ```
 
-Then configure hooks in `~/.copilot/hooks-config.json` - see [copilot/SETUP.md](copilot/SETUP.md) and [copilot/hooks-config.example.json](copilot/hooks-config.example.json).
-
----
-```bash
-brew install terminal-notifier
-```
-
-### Step 2: Create the script file
-```bash
-curl -o ~/.claude/claude-code-notifier.sh https://raw.githubusercontent.com/hta218/claude-code-notifier/main/claude-code-notifier.sh
-```
-
-### Step 3: Make it executable (macOS/Linux)
-```bash
-chmod +x ~/.claude/claude-code-notifier.sh
-```
-**Note**: Windows users can skip this step.
-
-### Step 4: Enable notifications on your system
-Make sure notifications are enabled for Terminal/your shell application in your system settings.
-
-![Enable Terminal Notifications](https://cdn.shopify.com/s/files/1/0669/0262/2504/files/terminal-notifier.png?v=1756888696)
-
-### Step 5: Add configuration to Claude settings
-Create or edit `~/.claude/settings.json` and add:
-```json
-{
-  "hooks": {
-    "Notification": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/claude-code-notifier.sh"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/claude-code-notifier.sh"
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/claude-code-notifier.sh"
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/claude-code-notifier.sh"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-### Step 6: Restart Claude Code
-Restart Claude Code to apply the changes then simply prompt 'Hello' to see notifications in action.
-
----
-
-### For GitHub Copilot CLI
-
-Copilot CLI supports native hooks configuration.
-
-#### Step 1: Install terminal-notifier (macOS only)
-```bash
-brew install terminal-notifier
-```
-
-#### Step 2: Download the script
-```bash
-curl -o ~/.copilot/copilot-cli-notifier.sh \
-  https://raw.githubusercontent.com/hta218/claude-code-notifier/main/copilot-cli-notifier.sh
-chmod +x ~/.copilot/copilot-cli-notifier.sh
-```
-
-#### Step 3: Create hooks configuration
-Create or edit `~/.copilot/hooks-config.json` (see [hooks-config.example.json](hooks-config.example.json)):
-
-```json
-{
-  "version": 1,
-  "hooks": {
-    "sessionStart": [
-      {
-        "type": "command",
-        "bash": "~/.copilot/copilot-cli-notifier.sh",
-        "powershell": "~/.copilot/copilot-cli-notifier.sh"
-      }
-    ],
-    "sessionEnd": [
-      {
-        "type": "command",
-        "bash": "~/.copilot/copilot-cli-notifier.sh",
-        "powershell": "~/.copilot/copilot-cli-notifier.sh"
-      }
-    ],
-    "errorOccurred": [
-      {
-        "type": "command",
-        "bash": "~/.copilot/copilot-cli-notifier.sh",
-        "powershell": "~/.copilot/copilot-cli-notifier.sh"
-      }
-    ]
-  }
-}
-```
-
-See [COPILOT_SETUP.md](COPILOT_SETUP.md) for more details and optional hooks.
+Then configure `~/.copilot/hooks-config.json` - see [copilot/settings.example.json](copilot/settings.example.json)
 
 ---
 
 ## Usage
 
-### Claude Code Usage
+### Claude Code
 
-### Claude Code Usage
+📖 **[See claude/SETUP.md](claude/SETUP.md)**
 
-Once installed, the script will automatically trigger notifications with default System sounds when Claude Code:
-- Starts sessions (SessionStart hook)
-- Requests permissions or user input (Notification hook)
-- Completes tasks or responses (Stop hook)
-- Ends sessions (SessionEnd hook)
+Notifications appear for:
+- SessionStart → "Session started 🚀"
+- SessionEnd → "Session completed ✅"
+- Stop → "Response finished 🏁"
+- Notification → Original message from Claude
 
 ![Notification Preview](https://cdn.shopify.com/s/files/1/0669/0262/2504/files/terminal-notifier-noties.png?v=1756889242)
 
-### Copilot CLI Usage
+---
 
-Once hooks are configured, notifications appear automatically when you:
-- Start a Copilot CLI session → "New session started 🚀"
-- Resume a session → "Session resumed ♻️"
-- Complete successfully → "Session completed ✅"
-- Exit with errors → "Session ended with errors ❌"
-- Encounter errors → "Error: [error type] ⚠️"
+### GitHub Copilot CLI
 
-## Event Types
+📖 **[See copilot/SETUP.md](copilot/SETUP.md)**
 
-### Claude Code Events
+Notifications appear for:
+- sessionStart → "New session started 🚀" / "Session resumed ♻️"
+- sessionEnd → "Session completed ✅" / "Session ended with errors ❌"
+- errorOccurred → "Error: [error type] ⚠️"
 
-### Claude Code Events
-
-The claude-code-notifier.sh script handles different notification types:
-
-- **SessionStart**: Shows "Session started 🚀"
-- **SessionEnd**: Shows "Session completed ✅"
-- **Stop**: Shows "Response finished 🏁"  
-- **Notification**: Shows the original message from Claude
-- **Other events**: Shows the event name with the message
-
-### Copilot CLI Events
-
-The copilot-cli-notifier.sh script handles:
-- **sessionStart** - "New session started 🚀" / "Session resumed ♻️" / "Copilot CLI started ⚡"
-- **sessionEnd** - Different messages based on reason:
-  - complete → "Session completed ✅"
-  - error → "Session ended with errors ❌"
-  - abort → "Session aborted 🛑"
-  - timeout → "Session timed out ⏱️"
-  - user_exit → "Session exited 👋"
-- **errorOccurred** - "Error: [error type] ⚠️"
-- **userPromptSubmitted** (optional) - "Prompt submitted 💬"
+---
 
 ## Requirements
 
@@ -233,12 +85,11 @@ The copilot-cli-notifier.sh script handles:
 
 ## Customization
 
-You can modify the script to:
-- Change notification messages
-- Add different sounds
-- Log notifications to a file (uncomment the last line)
-- Customize notification appearance
+See each agent's SETUP.md for customization options:
+- [claude/SETUP.md](claude/SETUP.md)
+- [copilot/SETUP.md](copilot/SETUP.md)
 
 ## Contributing
 
 Feel free to submit issues and pull requests to improve the script!
+

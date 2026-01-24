@@ -23,7 +23,7 @@ chmod +x ~/.copilot/copilot-cli-notifier.sh
 ```
 
 ### Step 4: Create hooks configuration
-Create or edit `~/.copilot/hooks-config.json`:
+Create or edit `~/.copilot/hooks-config.json` (see [settings.example.json](settings.example.json)):
 
 ```json
 {

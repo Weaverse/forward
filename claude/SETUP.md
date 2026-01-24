@@ -23,7 +23,7 @@ chmod +x ~/.claude/claude-code-notifier.sh
 Make sure notifications are enabled for Terminal/your shell application in your system settings.
 
 ### Step 5: Add configuration to Claude settings
-Create or edit `~/.claude/settings.json` and add:
+Create or edit `~/.claude/settings.json` (see [settings.example.json](settings.example.json)):
 ```json
 {
   "hooks": {
