@@ -64,6 +64,7 @@ Notifications appear for:
 Notifications appear for:
 - sessionStart → "New session started 🚀" / "Session resumed ♻️"
 - sessionEnd → "Session completed ✅" / "Session ended with errors ❌"
+- preToolUse → "Permission: [tool] 🔔" (when about to execute)
 - errorOccurred → "Error: [error type] ⚠️"
 
 ---

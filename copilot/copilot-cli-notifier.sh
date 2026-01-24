@@ -68,6 +68,21 @@ case "$hook_type" in
     message="Prompt submitted 💬"
     ;;
     
+  "preToolUse")
+    tool_name=$(echo "$input" | jq -r '.toolName // "unknown"')
+    # Extract command preview if it's a bash tool
+    if [ "$tool_name" = "bash" ]; then
+      command=$(echo "$input" | jq -r '.toolArgs' | jq -r '.command // empty' 2>/dev/null | head -c 50)
+      if [ -n "$command" ]; then
+        message="Permission: Run command 🔔"
+      else
+        message="Permission: ${tool_name} 🔔"
+      fi
+    else
+      message="Permission: ${tool_name} 🔔"
+    fi
+    ;;
+    
   "errorOccurred")
     error_msg=$(echo "$input" | jq -r '.error.message // "Unknown error"')
     error_name=$(echo "$input" | jq -r '.error.name // "Error"')

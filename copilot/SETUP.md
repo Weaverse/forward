@@ -43,6 +43,13 @@ Create or edit `~/.copilot/hooks-config.json` (see [settings.example.json](setti
         "powershell": "~/.copilot/copilot-cli-notifier.sh"
       }
     ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "~/.copilot/copilot-cli-notifier.sh",
+        "powershell": "~/.copilot/copilot-cli-notifier.sh"
+      }
+    ],
     "errorOccurred": [
       {
         "type": "command",
@@ -57,6 +64,7 @@ Create or edit `~/.copilot/hooks-config.json` (see [settings.example.json](setti
 ### Step 5: Test the setup
 Run `copilot` and you should see notifications when:
 - Session starts 🚀
+- Copilot requests permission to use tools 🔔
 - Session ends ✅
 - Errors occur ⚠️
 
@@ -74,6 +82,11 @@ You can also enable notifications for additional events by adding these to your 
 ]
 ```
 
+### Note about preToolUse
+The `preToolUse` hook notifies you whenever Copilot is about to execute a tool (bash command, file edit, etc.). This is similar to Claude Code's "Notification" hook - it fires at the "permission moment" before Copilot performs actions.
+
+If you find this too noisy, you can remove the `preToolUse` hook from your configuration.
+
 ## Customization
 
 Edit `~/.copilot/copilot-cli-notifier.sh` to:
@@ -86,8 +99,9 @@ Edit `~/.copilot/copilot-cli-notifier.sh` to:
 The script handles different event types:
 - **sessionStart** - "New session started 🚀" / "Session resumed ♻️"
 - **sessionEnd** - Different messages based on reason (complete ✅ / error ❌ / timeout ⏱️)
+- **preToolUse** - "Permission: [tool] 🔔" (when Copilot is about to use a tool)
 - **errorOccurred** - Shows error type ⚠️
-- **userPromptSubmitted** - "Prompt submitted 💬"
+- **userPromptSubmitted** - "Prompt submitted 💬" (optional)
 
 ## Troubleshooting
 

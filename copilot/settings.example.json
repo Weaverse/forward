@@ -17,6 +17,14 @@
         "comment": "Show notification when session ends"
       }
     ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "~/.copilot/copilot-cli-notifier.sh",
+        "powershell": "~/.copilot/copilot-cli-notifier.sh",
+        "comment": "Show notification when Copilot requests permission to use tools"
+      }
+    ],
     "errorOccurred": [
       {
         "type": "command",
