@@ -4,24 +4,24 @@
     "sessionEnd": [
       {
         "type": "command",
-        "bash": "~/.copilot/copilot-cli-notifier.sh",
-        "powershell": "~/.copilot/copilot-cli-notifier.sh",
+        "bash": "$HOME/.copilot/copilot-cli-notifier.sh",
+        "powershell": "$HOME/.copilot/copilot-cli-notifier.sh",
         "comment": "Show notification when response completes"
       }
     ],
     "preToolUse": [
       {
         "type": "command",
-        "bash": "~/.copilot/copilot-cli-notifier.sh",
-        "powershell": "~/.copilot/copilot-cli-notifier.sh",
+        "bash": "$HOME/.copilot/copilot-cli-notifier.sh",
+        "powershell": "$HOME/.copilot/copilot-cli-notifier.sh",
         "comment": "Show notification when Copilot requests permission to use tools"
       }
     ],
     "errorOccurred": [
       {
         "type": "command",
-        "bash": "~/.copilot/copilot-cli-notifier.sh",
-        "powershell": "~/.copilot/copilot-cli-notifier.sh",
+        "bash": "$HOME/.copilot/copilot-cli-notifier.sh",
+        "powershell": "$HOME/.copilot/copilot-cli-notifier.sh",
         "comment": "Show notification when errors occur"
       }
     ]

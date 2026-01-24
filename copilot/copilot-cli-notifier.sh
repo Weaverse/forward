@@ -8,11 +8,17 @@
 # Read JSON input from stdin
 input=$(cat)
 
+# Debug logging
+echo "$(date): Hook called" >> ~/copilot-hook-debug.log
+echo "Input: $input" >> ~/copilot-hook-debug.log
+
 # Detect hook type from JSON payload structure since COPILOT_HOOK_TYPE is not set
-if echo "$input" | jq -e '.source' >/dev/null 2>&1; then
-  hook_type="sessionStart"
-elif echo "$input" | jq -e '.reason' >/dev/null 2>&1; then
+# Note: We ignore sessionStart because it fires when submitting prompt, not when starting CLI
+if echo "$input" | jq -e '.reason' >/dev/null 2>&1; then
   hook_type="sessionEnd"
+elif echo "$input" | jq -e '.source' >/dev/null 2>&1; then
+  # This is sessionStart - ignore it (fires when submitting prompt, not needed)
+  exit 0
 elif echo "$input" | jq -e '.prompt' >/dev/null 2>&1; then
   hook_type="userPromptSubmitted"
 elif echo "$input" | jq -e '.toolName' >/dev/null 2>&1; then
@@ -26,6 +32,9 @@ elif echo "$input" | jq -e '.error' >/dev/null 2>&1; then
 else
   hook_type="unknown"
 fi
+
+echo "Detected hook_type: $hook_type" >> ~/copilot-hook-debug.log
+echo "---" >> ~/copilot-hook-debug.log
 
 # Extract fields from JSON input using jq
 timestamp=$(echo "$input" | jq -r '.timestamp // empty')
@@ -60,22 +69,22 @@ case "$hook_type" in
     reason=$(echo "$input" | jq -r '.reason // "unknown"')
     case "$reason" in
       "complete")
-        message="Session completed ✅"
+        message="Response finished 🏁"
         ;;
       "error")
-        message="Session ended with errors ❌"
+        message="Response ended with errors ❌"
         ;;
       "abort")
-        message="Session aborted 🛑"
+        message="Response aborted 🛑"
         ;;
       "timeout")
-        message="Session timed out ⏱️"
+        message="Response timed out ⏱️"
         ;;
       "user_exit")
         message="Session exited 👋"
         ;;
       *)
-        message="Session ended"
+        message="Response completed"
         ;;
     esac
     ;;
@@ -119,7 +128,12 @@ case "$(uname -s)" in
   Darwin*)
     # macOS - use terminal-notifier
     if command -v terminal-notifier >/dev/null 2>&1; then
-      terminal-notifier -title "GitHub Copilot CLI" -message "$message" -sound default
+      terminal-notifier -title "GitHub Copilot CLI" \
+        -message "$message" \
+        -sound default \
+        -group "copilot-cli-notifier" \
+        -sender com.apple.Terminal \
+        -timeout 10
     else
       echo "Copilot CLI: $message"
     fi

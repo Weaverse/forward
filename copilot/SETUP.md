@@ -41,34 +41,36 @@ Create `hooks.json` in your project root (see [settings.example.json](settings.e
     "sessionStart": [
       {
         "type": "command",
-        "bash": "~/.copilot/copilot-cli-notifier.sh",
-        "powershell": "~/.copilot/copilot-cli-notifier.sh"
+        "bash": "$HOME/.copilot/copilot-cli-notifier.sh",
+        "powershell": "$HOME/.copilot/copilot-cli-notifier.sh"
       }
     ],
     "sessionEnd": [
       {
         "type": "command",
-        "bash": "~/.copilot/copilot-cli-notifier.sh",
-        "powershell": "~/.copilot/copilot-cli-notifier.sh"
+        "bash": "$HOME/.copilot/copilot-cli-notifier.sh",
+        "powershell": "$HOME/.copilot/copilot-cli-notifier.sh"
       }
     ],
     "preToolUse": [
       {
         "type": "command",
-        "bash": "~/.copilot/copilot-cli-notifier.sh",
-        "powershell": "~/.copilot/copilot-cli-notifier.sh"
+        "bash": "$HOME/.copilot/copilot-cli-notifier.sh",
+        "powershell": "$HOME/.copilot/copilot-cli-notifier.sh"
       }
     ],
     "errorOccurred": [
       {
         "type": "command",
-        "bash": "~/.copilot/copilot-cli-notifier.sh",
-        "powershell": "~/.copilot/copilot-cli-notifier.sh"
+        "bash": "$HOME/.copilot/copilot-cli-notifier.sh",
+        "powershell": "$HOME/.copilot/copilot-cli-notifier.sh"
       }
     ]
   }
 }
 ```
+
+**Note:** Use `$HOME` instead of `~` for the script path, as the Copilot CLI hook system doesn't expand tilde. Alternatively, you can use the absolute path (e.g., `/Users/yourusername/.copilot/copilot-cli-notifier.sh`).
 
 ### Step 5: Test the setup
 Run `copilot` and you should see notifications when:
@@ -86,7 +88,7 @@ You can also enable notifications for additional events by adding these to your 
 "userPromptSubmitted": [
   {
     "type": "command",
-    "bash": "~/.copilot/copilot-cli-notifier.sh"
+    "bash": "$HOME/.copilot/copilot-cli-notifier.sh"
   }
 ]
 ```
@@ -117,8 +119,9 @@ The script handles different event types:
 If notifications don't appear:
 1. Verify terminal-notifier is installed: `which terminal-notifier`
 2. Check Terminal has notification permissions in System Settings
-3. Test manually: `echo '{"source":"new"}' | COPILOT_HOOK_TYPE=sessionStart ~/.copilot/copilot-cli-notifier.sh`
-4. Check the hook configuration path is correct
+3. Test manually: `echo '{"reason":"complete"}' | ~/.copilot/copilot-cli-notifier.sh`
+4. Check the debug log: `cat ~/copilot-hook-debug.log`
+5. Ensure the hook configuration path uses `$HOME` or absolute path (not `~`)
 
 ## References
 
