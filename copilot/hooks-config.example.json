@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "~/.copilot/copilot-cli-notifier.sh",
+        "powershell": "~/.copilot/copilot-cli-notifier.sh",
+        "comment": "Show notification when session starts"
+      }
+    ],
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "~/.copilot/copilot-cli-notifier.sh",
+        "powershell": "~/.copilot/copilot-cli-notifier.sh",
+        "comment": "Show notification when session ends"
+      }
+    ],
+    "errorOccurred": [
+      {
+        "type": "command",
+        "bash": "~/.copilot/copilot-cli-notifier.sh",
+        "powershell": "~/.copilot/copilot-cli-notifier.sh",
+        "comment": "Show notification when errors occur"
+      }
+    ]
+  }
+}

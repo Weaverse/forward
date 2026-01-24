@@ -1,17 +1,26 @@
-# CLAUDE.md
+# agent.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI coding assistants when working with code in this repository.
 
 ## Project Overview
 
-This is a Claude Code notification system that provides cross-platform system notifications for Claude Code events. The project consists of a shell script (`claude-code-notifier.sh`) that integrates with Claude Code hooks to display notifications when various events occur.
+This is an AI coding assistant notification system that provides cross-platform system notifications for AI coding events. The project includes:
+- `claude-code-notifier.sh` - Integrates with Claude Code hooks
+- `copilot-cli-notifier.sh` - Wrapper for GitHub Copilot CLI notifications
 
 ## Key Components
 
-- **claude-code-notifier.sh**: Main notification script that handles cross-platform notification display
-  - Supports macOS (via terminal-notifier), Linux (via notify-send), and Windows (via PowerShell toast notifications)
-  - Processes JSON input from Claude Code hooks
-  - Customizes notification messages based on event types (SessionStart, SessionEnd, Stop, Notification)
+- **claude-code-notifier.sh**: Claude Code notification script
+  - Integrates with Claude Code native hooks via ~/.claude/settings.json
+  - Processes JSON input from hooks
+  - Event types: SessionStart, SessionEnd, Stop, Notification
+
+- **copilot-cli-notifier.sh**: GitHub Copilot CLI notification script
+  - Integrates with Copilot CLI native hooks via ~/.copilot/hooks-config.json
+  - Reads $COPILOT_HOOK_TYPE environment variable
+  - Event types: sessionStart, sessionEnd, errorOccurred, userPromptSubmitted
+  
+Both scripts support macOS (terminal-notifier), Linux (notify-send), and Windows (PowerShell toast)
 
 ## Dependencies
 
@@ -27,17 +36,26 @@ This is a Claude Code notification system that provides cross-platform system no
 
 ## Configuration
 
-The script is designed to be placed in `~/.claude/claude-code-notifier.sh` and configured in Claude Code's `~/.claude/settings.json` with hooks for:
-- SessionStart
-- SessionEnd  
-- Stop
-- Notification
+### Claude Code
+The script is placed in `~/.claude/claude-code-notifier.sh` and configured in `~/.claude/settings.json` with hooks for:
+- SessionStart, SessionEnd, Stop, Notification
+
+### Copilot CLI
+The script is placed in `~/.copilot/copilot-cli-notifier.sh` and configured in `~/.copilot/hooks-config.json` with hooks for:
+- sessionStart, sessionEnd, errorOccurred, userPromptSubmitted (optional)
 
 ## Testing
 
-To test the notification script manually:
+### Claude Code
+To test the Claude Code notification script manually:
 ```bash
 echo '{"message":"Test notification","hook_event_name":"Notification"}' | ./claude-code-notifier.sh
+```
+
+### Copilot CLI
+To test the Copilot CLI notification script manually:
+```bash
+echo '{"source":"new"}' | COPILOT_HOOK_TYPE=sessionStart ./copilot-cli-notifier.sh
 ```
 
 ## Architecture
