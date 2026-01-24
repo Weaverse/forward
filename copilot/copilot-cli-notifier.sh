@@ -8,10 +8,28 @@
 # Read JSON input from stdin
 input=$(cat)
 
+# Detect hook type from JSON payload structure since COPILOT_HOOK_TYPE is not set
+if echo "$input" | jq -e '.source' >/dev/null 2>&1; then
+  hook_type="sessionStart"
+elif echo "$input" | jq -e '.reason' >/dev/null 2>&1; then
+  hook_type="sessionEnd"
+elif echo "$input" | jq -e '.prompt' >/dev/null 2>&1; then
+  hook_type="userPromptSubmitted"
+elif echo "$input" | jq -e '.toolName' >/dev/null 2>&1; then
+  if echo "$input" | jq -e '.toolResult' >/dev/null 2>&1; then
+    hook_type="postToolUse"
+  else
+    hook_type="preToolUse"
+  fi
+elif echo "$input" | jq -e '.error' >/dev/null 2>&1; then
+  hook_type="errorOccurred"
+else
+  hook_type="unknown"
+fi
+
 # Extract fields from JSON input using jq
 timestamp=$(echo "$input" | jq -r '.timestamp // empty')
 cwd=$(echo "$input" | jq -r '.cwd // empty')
-hook_type="$COPILOT_HOOK_TYPE"  # Automatically set by Copilot CLI
 
 # Default message
 message="Copilot CLI Notification"

@@ -24,15 +24,15 @@ chmod +x ~/.copilot/copilot-cli-notifier.sh
 
 ### Step 4: Create hooks configuration in your project
 
-**Important:** Copilot CLI hooks are **project-based**. You need to create `.github/hooks/hooks.json` in each repository.
+**Important:** For Copilot CLI, hooks must be in the **project root** as `hooks.json`, NOT in `.github/hooks/`.
 
 In your project directory:
 ```bash
 cd /path/to/your/project
-mkdir -p .github/hooks
+# Create hooks.json in the project root
 ```
 
-Create `.github/hooks/hooks.json` (see [settings.example.json](settings.example.json)):
+Create `hooks.json` in your project root (see [settings.example.json](settings.example.json)):
 
 ```json
 {

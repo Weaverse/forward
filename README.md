@@ -37,9 +37,9 @@ curl -o ~/.copilot/copilot-cli-notifier.sh \
 chmod +x ~/.copilot/copilot-cli-notifier.sh
 ```
 
-Then configure hooks **per-project** in `.github/hooks/hooks.json` - see [copilot/settings.example.json](copilot/settings.example.json)
+Then configure hooks **per-project** in `hooks.json` (project root) - see [copilot/settings.example.json](copilot/settings.example.json)
 
-**Note:** Copilot CLI hooks are **project-based**, not global. You need to create `.github/hooks/hooks.json` in each repository where you want notifications.
+**Note:** Copilot CLI hooks are **project-based**. You need to create `hooks.json` in the root of each repository where you want notifications.
 
 ---
 
