@@ -1,17 +1,20 @@
-# AI Code Assistant Notifications
+# AI Agents Notifier
 
-📢 Send system notifications for Claude Code and GitHub Copilot CLI events
+📢 Desktop notifications for **CLI-based AI coding agents**
 
-A cross-platform notification system that integrates with AI coding assistants to show desktop notifications for sessions, completions, and permission requests.
+A cross-platform notification system that integrates with command-line AI coding agents to show desktop notifications for sessions, completions, and permission requests.
 
-## Supported AI Tools
+> **Note:** This is specifically for **CLI/terminal-based AI agents**, not IDE extensions or web-based coding assistants.
 
-- **Claude Code** - Native hook integration
-- **GitHub Copilot CLI** - Native hook integration
+## Supported AI Agents
+
+- ✅ **Claude Code CLI** - Native hook integration
+- ✅ **GitHub Copilot CLI** - Native hook integration
+- 🔜 **Gemini CLI** - Not yet implemented (PRs welcome!)
 
 ## Installation
 
-### Claude Code
+### Claude Code CLI
 
 📖 **[See claude/SETUP.md for installation instructions](claude/SETUP.md)**
 
@@ -45,7 +48,7 @@ Then configure hooks **per-project** in `hooks.json` (project root) - see [copil
 
 ## Usage
 
-### Claude Code
+### Claude Code CLI
 
 📖 **[See claude/SETUP.md](claude/SETUP.md)**
 
@@ -94,5 +97,11 @@ See each agent's SETUP.md for customization options:
 
 ## Contributing
 
-Feel free to submit issues and pull requests to improve the script!
+Contributions are welcome!
+
+**Want to add support for another CLI-based AI agent?**
+- Gemini CLI integration needed
+- Other CLI AI coding agents welcome
+
+Feel free to submit issues and pull requests!
 
