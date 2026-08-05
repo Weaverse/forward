@@ -2,7 +2,8 @@
 
 ## Project
 
-Forward is a fresh Next.js App Router storefront theme for Shopify, powered by Weaverse.
+Forward is a fresh Next.js App Router storefront theme using
+`@shopify/hydrogen@preview`, powered by Weaverse.
 
 ## Architecture constraints
 
@@ -16,6 +17,9 @@ Forward is a fresh Next.js App Router storefront theme for Shopify, powered by W
 
 - Package manager: npm.
 - Framework: Next.js App Router with strict TypeScript.
+- Shopify runtime: the preview-tagged `@shopify/hydrogen` package bootstrapped
+  with `npx @shopify/hydrogen@preview setup`. Follow the generated
+  `.agents/skills/` guidance for Hydrogen wiring in this Next.js app.
 - Use Server Components by default; add Client Components only for real interactivity.
 - Keep route definitions and route-check fixtures centralized rather than duplicating path strings.
 - Do not add live Shopify, Customer Account, or Weaverse credentials. Use explicit shell/placeholder states until integration work is approved.

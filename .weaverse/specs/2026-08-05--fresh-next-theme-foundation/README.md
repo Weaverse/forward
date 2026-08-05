@@ -6,7 +6,7 @@ Shared contract: `0.3-draft`
 
 ## Goal
 
-Create the first production-theme slice for Forward as a fresh Next.js App Router application. This slice establishes the repository foundation, branded global shell, complete Shopify storefront route topology, route-contract validation, and executable quality gates. It does not connect to live Shopify, Customer Account, Weaverse Studio, or deployment infrastructure.
+Create the first production-theme slice for Forward as a fresh Next.js App Router application bootstrapped with `@shopify/hydrogen@preview`. This slice establishes the repository foundation, branded global shell, complete Shopify storefront route topology, route-contract validation, and executable quality gates. It does not connect to live Shopify, Customer Account, Weaverse Studio, or deployment infrastructure.
 
 ## Non-goals
 
@@ -23,6 +23,9 @@ Create the first production-theme slice for Forward as a fresh Next.js App Route
 - npm.
 - Next.js App Router `16.3.0`.
 - React/React DOM `19.2.8`.
+- `@shopify/hydrogen@preview`, initialized in the existing app through
+  `npx @shopify/hydrogen@preview setup`; the generated `.agents/skills/`
+  guidance is part of the repository baseline.
 - Strict TypeScript.
 - Tailwind CSS v4 or a comparably small first-party CSS setup; avoid a component-framework dependency in this foundation slice.
 - ESLint using the Next.js-supported flat configuration.

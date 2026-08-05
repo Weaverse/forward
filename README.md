@@ -4,7 +4,7 @@ Forward is a fresh Next.js App Router storefront theme for Shopify, powered by W
 
 ## Status
 
-Foundation slice implemented: repository setup, branded global shell, complete storefront route topology, route-contract validation, and executable quality gates. Live Shopify data, cart mutations, Customer Account OAuth, Weaverse Studio integration, locale/market routing, demo integration, and deployment are intentionally deferred to later slices.
+Foundation slice implemented: repository setup, branded global shell, complete storefront route topology, route-contract validation, and executable quality gates. The app is bootstrapped with the current `@shopify/hydrogen@preview` package and its generated local agent skills. Live Shopify data, cart mutations, Customer Account OAuth, Weaverse Studio integration, locale/market routing, demo integration, and deployment are intentionally deferred to later slices.
 
 ## Setup
 
@@ -19,6 +19,16 @@ npm run dev
 
 Open [http://localhost:5555](http://localhost:5555). The development script
 uses port `5555` by default.
+
+The Hydrogen baseline was initialized in this existing Next.js app with:
+
+```bash
+npx @shopify/hydrogen@preview setup
+```
+
+That deterministic command installs the preview package and copies Shopify's
+Hydrogen implementation skills into `.agents/skills/`. Storefront client,
+request-handler, cart, and account wiring remain explicit implementation work.
 
 ## Commands
 
@@ -81,7 +91,7 @@ Dynamic routes are smoke-tested with approved fixture handles only (`weatherline
 
 ## Route checking vs. `shopify hydrogen check routes`
 
-Shopify's `shopify hydrogen check routes` inspects a Hydrogen (Remix) project's file-based routes for Shopify's standard route list. This repository is Next.js, not Hydrogen, so that CLI does not apply. The equivalent here is `npm run check:routes`, which validates the generated App Router manifests in `.next/` (not source filenames) against this repo's own route contract, plus `npm run smoke:routes`, which verifies live HTTP behavior — including permanent redirects — against a production server.
+Shopify's `shopify hydrogen check routes` inspects the file-based routes of Shopify's React Router Hydrogen skeleton. Forward uses the Hydrogen preview package inside Next.js App Router, so that framework-specific route checker is not authoritative here. The equivalent is `npm run check:routes`, which validates generated App Router manifests in `.next/` (not source filenames) against this repo's own route contract, plus `npm run smoke:routes`, which verifies live HTTP behavior — including permanent redirects — against a production server.
 
 ## Deferred by design
 

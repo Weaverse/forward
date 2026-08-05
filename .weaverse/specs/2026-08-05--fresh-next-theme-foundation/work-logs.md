@@ -90,3 +90,44 @@ separate review-fix change.
   produced the expected single 404 network entry.
 - Ports 4973, 4981, and 4982 confirmed free after QA; temporary Chrome/CDP
   artifacts removed.
+
+## 2026-08-05 — Hydrogen preview bootstrap correction
+
+The existing Next.js working tree was initialized with Shopify's current
+preview setup command rather than being converted to the React Router Hydrogen
+skeleton:
+
+```bash
+npx --yes @shopify/hydrogen@preview setup
+```
+
+### Generated baseline
+
+- Installed `@shopify/hydrogen@0.0.0-preview-116d5d7-20260730141607` and
+  synchronized `package-lock.json`.
+- Copied 16 packaged Hydrogen skills (54 files including references) into
+  `.agents/skills/` for the agent-driven Next.js implementation phase.
+- Preserved the project-specific development port at `5555`; the setup/package
+  default must not override the local Forward handoff.
+- Added no Shopify credentials, environment files, Storefront client, request
+  handlers, cart mutations, or account session implementation. The generated
+  `hydrogen-setup` workflow explicitly treats those as the next implementation
+  phase after deterministic package/skill bootstrap.
+
+### Verification
+
+- Runtime import probe confirmed `createStorefrontClient`,
+  `createShopifyRequestContext`, `handleShopifyRoutes`, and
+  `handleShopifyRedirects` are exported functions.
+- `npm run check` — pass: typecheck, lint, 17/17 tests, Next production build,
+  19 route patterns, and 4 redirects.
+- `npm run smoke:routes` — pass: 24/24 production HTTP checks; owned server
+  stopped.
+- `npm audit --omit=dev --audit-level=high` — 0 vulnerabilities.
+- Generated-skill secret scan — 0 credential-value matches. Copilot autoreview
+  failed at its NDJSON parser (`Extra data`), so the required manual fallback
+  verified all 54 generated files are byte-for-byte identical to the installed
+  Shopify package skills; both trees hash to
+  `91d17a0fa642750b12f6abcb75f3158a41ee5634e981d1ce6a9b77b831cca889`.
+  The reviewer's sensitive-file guard identified only the documented SvelteKit
+  environment identifier `PRIVATE_STOREFRONT_API_TOKEN`, not a token value.
