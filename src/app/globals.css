@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  /* Forward palette */
+  --color-bone: #f3f0e8;
+  --color-parchment: #eae6da;
+  --color-mist: #d6d1c2;
+  --color-ink: #1d211c;
+  --color-slate: #4c534a;
+  --color-pine: #24402f;
+  --color-pine-deep: #182b20;
+  --color-moss: #6f7d5e;
+  --color-clay: #c14f19;
+  --color-clay-deep: #9c3e12;
+
+  --font-sans:
+    "Avenir Next", "Helvetica Neue", Helvetica, Arial, ui-sans-serif,
+    system-ui, sans-serif;
+  --font-display:
+    "Futura", "Avenir Next Condensed", "Helvetica Neue", Arial,
+    ui-sans-serif, system-ui, sans-serif;
+
+  --tracking-wordmark: 0.18em;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-bone text-ink font-sans antialiased;
+  }
+
+  ::selection {
+    background-color: var(--color-clay);
+    color: var(--color-bone);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-clay);
+    outline-offset: 3px;
+    border-radius: 1px;
+  }
+}

@@ -193,3 +193,4 @@ Update `README.md` with:
 
 Implementation handoff: `claude-handoff.md` in this folder.
 Verification results and follow-up slices must be appended to this spec after implementation.
+Implementation work log with verification results: `work-logs.md` (2026-08-05).
