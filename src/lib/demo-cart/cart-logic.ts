@@ -11,6 +11,9 @@ import type { Money, StorefrontImage } from "@/lib/storefront/types";
 
 export const MAX_LINE_QUANTITY = 9;
 
+const HANDLE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const PRODUCT_IMAGE_PATTERN = /^\/images\/products\/[a-z0-9-]+\.webp$/;
+
 export interface DemoCartLine {
   /** Stable identity for a product + colorway + size combination. */
   key: string;
@@ -110,6 +113,27 @@ export function total(lines: readonly DemoCartLine[]): Money {
   };
 }
 
+function isPositiveInteger(value: unknown): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isInteger(value) &&
+    value > 0 &&
+    value <= 10_000
+  );
+}
+
+function isCanonicalProductHref(
+  href: string,
+  productHandle: string,
+  colorwayId: string,
+): boolean {
+  const base = `/products/${productHandle}`;
+  return (
+    href === base ||
+    href === `${base}?colorway=${encodeURIComponent(colorwayId)}`
+  );
+}
+
 /** Validates lines revived from storage; malformed entries are dropped. */
 export function sanitizeLines(value: unknown): readonly DemoCartLine[] {
   if (!Array.isArray(value)) {
@@ -136,14 +160,26 @@ export function sanitizeLines(value: unknown): readonly DemoCartLine[] {
     }
     const unitPrice = line.unitPrice as Record<string, unknown> | undefined;
     const image = line.image as Record<string, unknown> | undefined;
+    const size = typeof line.size === "string" ? line.size : undefined;
     if (
       unitPrice === undefined ||
       typeof unitPrice.amount !== "number" ||
+      !Number.isFinite(unitPrice.amount) ||
+      unitPrice.amount < 0 ||
+      unitPrice.currencyCode !== "USD" ||
       image === undefined ||
       typeof image.src !== "string" ||
+      !PRODUCT_IMAGE_PATTERN.test(image.src) ||
       typeof image.alt !== "string" ||
-      typeof image.width !== "number" ||
-      typeof image.height !== "number"
+      image.alt.trim().length === 0 ||
+      !isPositiveInteger(image.width) ||
+      !isPositiveInteger(image.height) ||
+      line.title.trim().length === 0 ||
+      line.colorwayName.trim().length === 0 ||
+      !HANDLE_PATTERN.test(line.productHandle) ||
+      !HANDLE_PATTERN.test(line.colorwayId) ||
+      line.key !== lineKey(line.productHandle, line.colorwayId, size) ||
+      !isCanonicalProductHref(line.href, line.productHandle, line.colorwayId)
     ) {
       continue;
     }
@@ -154,7 +190,7 @@ export function sanitizeLines(value: unknown): readonly DemoCartLine[] {
       title: line.title,
       colorwayId: line.colorwayId,
       colorwayName: line.colorwayName,
-      size: typeof line.size === "string" ? line.size : undefined,
+      size,
       quantity: clampQuantity(line.quantity),
       unitPrice: { amount: unitPrice.amount, currencyCode: "USD" },
       image: {

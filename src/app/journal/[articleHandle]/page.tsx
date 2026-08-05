@@ -11,6 +11,13 @@ interface ArticlePageProps {
   params: Promise<{ articleHandle: string }>;
 }
 
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+  const articles = await storefront.listArticles();
+  return articles.map((article) => ({ articleHandle: article.handle }));
+}
+
 export async function generateMetadata({
   params,
 }: ArticlePageProps): Promise<Metadata> {

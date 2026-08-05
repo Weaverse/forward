@@ -154,6 +154,7 @@ export type DemoOrderStatus = "delivered" | "in-transit" | "processing";
 export interface DemoOrderLine {
   productHandle: string;
   title: string;
+  colorwayId: string;
   colorwayName: string;
   size?: string;
   quantity: number;

@@ -3,8 +3,8 @@
  *
  * This module is the single owner of the route topology defined in
  * `.weaverse/specs/2026-08-05--fresh-next-theme-foundation/README.md`
- * (Shared Contract 0.3-draft). Build validation (`npm run check:routes`),
- * production smoke (`npm run smoke:routes`), unit tests, and shell UI all
+ * (Shared Contract 0.5-draft). Build validation (`bun run check:routes`),
+ * production smoke (`bun run smoke:routes`), unit tests, and shell UI all
  * read from here instead of duplicating path strings.
  */
 
@@ -239,6 +239,20 @@ export const NOT_FOUND_SMOKE: RouteSmoke = {
   expectedStatus: 404,
   expectedContentType: "text/html",
 };
+
+/** Dynamic fixture routes must reject unknown handles rather than invent data. */
+export const DYNAMIC_NOT_FOUND_SMOKES: readonly RouteSmoke[] = [
+  "/shop/__forward-missing__",
+  "/products/__forward-missing__",
+  "/journal/__forward-missing__",
+  "/pages/__forward-missing__",
+  "/policies/__forward-missing__",
+  "/account/orders/__forward-missing__",
+].map((path) => ({
+  path,
+  expectedStatus: 404,
+  expectedContentType: "text/html",
+}));
 
 /**
  * Shopify-compatibility redirects. Order matters: the literal

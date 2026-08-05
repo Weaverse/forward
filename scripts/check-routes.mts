@@ -1,5 +1,5 @@
 /**
- * Static route-contract gate (`npm run check:routes`).
+ * Static route-contract gate (`bun run check:routes`).
  *
  * Validates actual Next.js build output, not source filenames:
  * - `.next/app-path-routes-manifest.json` must contain every canonical,
@@ -7,10 +7,10 @@
  * - `.next/routes-manifest.json` must contain every compatibility redirect
  *   with permanent-redirect semantics.
  *
- * Run `npm run build` first; this script never starts a server.
+ * Run `bun run build` first; this script never starts a server.
  */
 
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
@@ -23,6 +23,15 @@ import {
 } from "../src/lib/routes/route-contract.ts";
 
 const BUILD_DIR = path.join(process.cwd(), ".next");
+
+try {
+  await access(path.join(BUILD_DIR, "BUILD_ID"));
+} catch {
+  console.error(
+    "check:routes: no production build found — run `bun run build` first.",
+  );
+  process.exit(1);
+}
 
 interface ManifestRedirect {
   source: string;
@@ -38,7 +47,7 @@ async function readJson<T>(relativePath: string): Promise<T> {
     return JSON.parse(await readFile(filePath, "utf8")) as T;
   } catch (error) {
     console.error(
-      `check:routes: cannot read ${filePath} — run \`npm run build\` first.`,
+      `check:routes: cannot read ${filePath} — run \`bun run build\` first.`,
     );
     throw error;
   }

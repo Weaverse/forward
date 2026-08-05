@@ -11,6 +11,15 @@ interface CollectionPageProps {
   params: Promise<{ collectionHandle: string }>;
 }
 
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+  const collections = await storefront.listCollections();
+  return collections.map((collection) => ({
+    collectionHandle: collection.handle,
+  }));
+}
+
 export async function generateMetadata({
   params,
 }: CollectionPageProps): Promise<Metadata> {

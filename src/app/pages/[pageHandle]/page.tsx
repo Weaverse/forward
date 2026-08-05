@@ -9,6 +9,13 @@ interface StorePageProps {
   params: Promise<{ pageHandle: string }>;
 }
 
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+  const pages = await storefront.listPages();
+  return pages.map((page) => ({ pageHandle: page.handle }));
+}
+
 export async function generateMetadata({
   params,
 }: StorePageProps): Promise<Metadata> {

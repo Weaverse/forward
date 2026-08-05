@@ -6,9 +6,18 @@ import { notFound } from "next/navigation";
 import { AccountShell } from "@/components/account-shell";
 import { storefront } from "@/lib/storefront/data-source";
 import { formatDate, formatMoney } from "@/lib/storefront/format";
+import { productColorwayHref } from "@/lib/storefront/product-state";
+import type { DemoOrderLine } from "@/lib/storefront/types";
 
 interface OrderPageProps {
   params: Promise<{ orderId: string }>;
+}
+
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+  const orders = await storefront.listDemoOrders();
+  return orders.map((order) => ({ orderId: order.id }));
 }
 
 export async function generateMetadata({
@@ -22,12 +31,27 @@ export async function generateMetadata({
   return { title: `Order ${order.number} · Account` };
 }
 
+/** Deep link back to the exact ordered colorway of a line's product. */
+async function orderLineHref(line: DemoOrderLine): Promise<string> {
+  const product = await storefront.getProduct(line.productHandle);
+  if (product === null) {
+    return `/products/${line.productHandle}`;
+  }
+  return productColorwayHref(product, line.colorwayId);
+}
+
 export default async function OrderPage({ params }: OrderPageProps) {
   const { orderId } = await params;
   const order = await storefront.getDemoOrder(orderId);
   if (order === null) {
     notFound();
   }
+  const lines = await Promise.all(
+    order.lines.map(async (line) => ({
+      line,
+      href: await orderLineHref(line),
+    })),
+  );
 
   return (
     <AccountShell
@@ -36,12 +60,12 @@ export default async function OrderPage({ params }: OrderPageProps) {
       lede={`Placed ${formatDate(order.placedAt)} · ${order.statusDetail}.`}
     >
       <ul className="divide-y divide-mist border-y border-mist">
-        {order.lines.map((line) => (
+        {lines.map(({ line, href }) => (
           <li
-            key={`${line.productHandle}-${line.colorwayName}-${line.size ?? ""}`}
+            key={`${line.productHandle}-${line.colorwayId}-${line.size ?? ""}`}
             className="flex items-start gap-5 py-5"
           >
-            <Link href={`/products/${line.productHandle}`} className="shrink-0">
+            <Link href={href} className="shrink-0">
               <Image
                 src={line.image.src}
                 alt={line.image.alt}
@@ -53,10 +77,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
             </Link>
             <div className="flex-1">
               <h2 className="font-display text-lg text-pine">
-                <Link
-                  href={`/products/${line.productHandle}`}
-                  className="hover:text-clay"
-                >
+                <Link href={href} className="hover:text-clay">
                   {line.title}
                 </Link>
               </h2>

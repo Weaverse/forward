@@ -10,6 +10,13 @@ interface PolicyPageProps {
   params: Promise<{ policyHandle: string }>;
 }
 
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+  const policies = await storefront.listPolicies();
+  return policies.map((policy) => ({ policyHandle: policy.handle }));
+}
+
 export async function generateMetadata({
   params,
 }: PolicyPageProps): Promise<Metadata> {

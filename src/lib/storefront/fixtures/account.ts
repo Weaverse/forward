@@ -17,6 +17,7 @@ export const DEMO_ORDER_FIXTURES: readonly DemoOrder[] = [
       {
         productHandle: "weatherline-shell",
         title: "Weatherline Shell",
+        colorwayId: "charcoal",
         colorwayName: "Charcoal",
         size: "M",
         quantity: 1,
@@ -31,6 +32,7 @@ export const DEMO_ORDER_FIXTURES: readonly DemoOrder[] = [
       {
         productHandle: "talus-trail-shoe",
         title: "Talus Trail Shoe",
+        colorwayId: "limestone",
         colorwayName: "Limestone",
         size: "EU 43",
         quantity: 1,
@@ -57,6 +59,7 @@ export const DEMO_ORDER_FIXTURES: readonly DemoOrder[] = [
       {
         productHandle: "ridge-30-field-pack",
         title: "Ridge 30 Field Pack",
+        colorwayId: "dune",
         colorwayName: "Dune",
         quantity: 1,
         unitPrice: { amount: 168, currencyCode: "USD" },

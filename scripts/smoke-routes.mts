@@ -1,5 +1,5 @@
 /**
- * Production HTTP route smoke (`npm run smoke:routes`).
+ * Production HTTP route smoke (`bun run smoke:routes`).
  *
  * Starts `next start` against the existing production build, verifies every
  * contract smoke path and compatibility redirect over real HTTP, then shuts
@@ -15,6 +15,7 @@ import process from "node:process";
 import { setTimeout as delay } from "node:timers/promises";
 
 import {
+  DYNAMIC_NOT_FOUND_SMOKES,
   NOT_FOUND_SMOKE,
   PERMANENT_REDIRECT_STATUS,
   REDIRECT_CONTRACT,
@@ -50,7 +51,7 @@ try {
   await access(path.join(process.cwd(), ".next", "BUILD_ID"));
 } catch {
   console.error(
-    "smoke:routes: no production build found — run `npm run build` first.",
+    "smoke:routes: no production build found — run `bun run build` first.",
   );
   process.exit(1);
 }
@@ -238,6 +239,9 @@ try {
     await checkStatus(route.smoke);
   }
   await checkStatus(NOT_FOUND_SMOKE);
+  for (const smoke of DYNAMIC_NOT_FOUND_SMOKES) {
+    await checkStatus(smoke);
+  }
   for (const redirect of REDIRECT_CONTRACT) {
     await checkRedirect(redirect.smoke.path, redirect.smoke.expectedLocation);
   }
