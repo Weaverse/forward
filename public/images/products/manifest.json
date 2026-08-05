@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "note": "Repository-owned normalized manifest for the approved branded Forward product catalog. Source of the renders: forward-product-image-spike/branded-variant-gallery (approved branded WebP set, 24 files). Model: Product -> Colorway -> Primary / Alternate / Detail / Context.",
+  "aspectRatio": "4:5",
+  "dimensions": {
+    "width": 1600,
+    "height": 2000
+  },
+  "colorSpace": "sRGB",
+  "roles": ["primary", "alternate", "detail", "context"],
+  "products": [
+    {
+      "handle": "weatherline-shell",
+      "colorways": [
+        {
+          "id": "charcoal",
+          "name": "Charcoal",
+          "images": {
+            "primary": "/images/products/weatherline-charcoal-primary.webp",
+            "alternate": "/images/products/weatherline-charcoal-alternate.webp",
+            "detail": "/images/products/weatherline-charcoal-detail.webp",
+            "context": "/images/products/weatherline-charcoal-context.webp"
+          }
+        },
+        {
+          "id": "claystone",
+          "name": "Claystone",
+          "images": {
+            "primary": "/images/products/weatherline-claystone-primary.webp",
+            "alternate": "/images/products/weatherline-claystone-alternate.webp",
+            "detail": "/images/products/weatherline-claystone-detail.webp",
+            "context": "/images/products/weatherline-claystone-context.webp"
+          }
+        }
+      ]
+    },
+    {
+      "handle": "ridge-30-field-pack",
+      "colorways": [
+        {
+          "id": "charcoal",
+          "name": "Charcoal",
+          "images": {
+            "primary": "/images/products/ridge-charcoal-primary.webp",
+            "alternate": "/images/products/ridge-charcoal-alternate.webp",
+            "detail": "/images/products/ridge-charcoal-detail.webp",
+            "context": "/images/products/ridge-charcoal-context.webp"
+          }
+        },
+        {
+          "id": "dune",
+          "name": "Dune",
+          "images": {
+            "primary": "/images/products/ridge-dune-primary.webp",
+            "alternate": "/images/products/ridge-dune-alternate.webp",
+            "detail": "/images/products/ridge-dune-detail.webp",
+            "context": "/images/products/ridge-dune-context.webp"
+          }
+        }
+      ]
+    },
+    {
+      "handle": "talus-trail-shoe",
+      "colorways": [
+        {
+          "id": "charcoal",
+          "name": "Charcoal",
+          "images": {
+            "primary": "/images/products/talus-charcoal-primary.webp",
+            "alternate": "/images/products/talus-charcoal-alternate.webp",
+            "detail": "/images/products/talus-charcoal-detail.webp",
+            "context": "/images/products/talus-charcoal-context.webp"
+          }
+        },
+        {
+          "id": "limestone",
+          "name": "Limestone",
+          "images": {
+            "primary": "/images/products/talus-limestone-primary.webp",
+            "alternate": "/images/products/talus-limestone-alternate.webp",
+            "detail": "/images/products/talus-limestone-detail.webp",
+            "context": "/images/products/talus-limestone-context.webp"
+          }
+        }
+      ]
+    }
+  ]
+}
