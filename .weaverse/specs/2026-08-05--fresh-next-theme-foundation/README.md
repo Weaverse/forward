@@ -150,6 +150,36 @@ talus-trail-shoe
 
 Use neutral fixture handles such as `field-gear`, `walking-the-long-light`, `about-forward`, and `shipping-policy` for unresolved resource classes, clearly labeled as route-smoke fixtures.
 
+## Async review correction addendum
+
+The post-implementation independent audits are accepted as foundation
+corrections. The route shell must additionally:
+
+- Model every route with a public path, route kind (`page`, `handler`, or
+  `metadata`), and required HTTP methods.
+- Reserve Shopify compatibility handlers `/cart/[lines]` and
+  `/discount/[code]`. Until live cart/discount integration, their declared
+  methods must return honest `501` responses and must never become permanent
+  redirects.
+- Add the exact permanent redirect `/collections -> /shop` before the dynamic
+  collection rule.
+- Represent Customer Account protocol accurately: `/account/login` and
+  `/account/authorize` are `GET` handlers; `/account/logout` declares `GET` and
+  `POST`. All remain honest `501` placeholders in this foundation.
+- Include `global-error.tsx`, the branded icon convention, and real 404 behavior
+  for unknown fixture-backed commerce/content handles.
+- Reject parallel-route slot manifest entries as evidence for canonical pages.
+  A slot route cannot satisfy a missing required primary route.
+- Bound every production-smoke HTTP request with an abort timeout. Timeout or
+  occupied-port failure must still clean up only the smoke-owned process group.
+- Keep UI paths and approved fixture handles derived from the central route
+  module or its exported path builders rather than duplicating literals.
+
+These additions are a Theme-local compatibility superset of Shared Contract
+`0.3-draft`; they do not change Store handles, data schemas, or publication
+requirements. Cross-track contract versioning remains deferred to the next
+shared sync gate.
+
 ## Package scripts and quality gates
 
 At minimum provide working scripts for:
