@@ -73,7 +73,9 @@ let failed = false;
 
 if (missingRoutes.length > 0) {
   failed = true;
-  console.error("check:routes: required route patterns missing from build output:");
+  console.error(
+    "check:routes: required route patterns missing from build output:",
+  );
   for (const pattern of missingRoutes) {
     console.error(`  ✗ ${pattern}`);
   }

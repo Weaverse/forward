@@ -6,7 +6,8 @@ import { SHELL_PRODUCTS } from "@/lib/shell-fixtures";
 
 export const metadata: Metadata = {
   title: "Shop",
-  description: "Browse the full Forward catalog of shells, packs, and footwear.",
+  description:
+    "Browse the full Forward catalog of shells, packs, and footwear.",
 };
 
 export default function ShopPage() {

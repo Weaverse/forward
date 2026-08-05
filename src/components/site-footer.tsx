@@ -29,7 +29,10 @@ const FOOTER_COLUMNS: readonly FooterColumn[] = [
     heading: "Support",
     links: [
       { href: "/account", label: "Account" },
-      { href: `/policies/${SMOKE_FIXTURES.policyHandle}`, label: "Shipping policy" },
+      {
+        href: `/policies/${SMOKE_FIXTURES.policyHandle}`,
+        label: "Shipping policy",
+      },
     ],
   },
 ] as const;

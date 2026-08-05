@@ -77,8 +77,8 @@ export default function HomePage() {
           </h3>
           <p className="mt-3 text-sm leading-relaxed text-slate">
             This storefront shell ships before its Shopify, Customer Account,
-            and Weaverse Studio integrations. Every surface states the live
-            data it is waiting on.
+            and Weaverse Studio integrations. Every surface states the live data
+            it is waiting on.
           </p>
         </div>
       </section>

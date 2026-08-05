@@ -20,8 +20,8 @@ export default function LoginPage() {
           Not yet available
         </p>
         <p className="mt-2 text-sm leading-relaxed text-slate">
-          Authentication lands in a later slice. This page exists so the
-          account route topology is complete and reviewable.
+          Authentication lands in a later slice. This page exists so the account
+          route topology is complete and reviewable.
         </p>
       </div>
     </SurfaceShell>

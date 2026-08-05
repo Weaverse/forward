@@ -51,8 +51,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
               Purchase
             </p>
             <p className="mt-1 text-sm text-slate">
-              Variant selection and add-to-cart are wired up when cart
-              mutations land in a later slice.
+              Variant selection and add-to-cart are wired up when cart mutations
+              land in a later slice.
             </p>
           </div>
         </div>

@@ -39,7 +39,9 @@ const NEXT_BIN = path.join(
 function parsePort(rawPort: string): number {
   const port = Number(rawPort);
   if (!Number.isInteger(port) || port < 1 || port > 65_535) {
-    throw new Error(`smoke:routes: invalid SMOKE_PORT ${JSON.stringify(rawPort)}`);
+    throw new Error(
+      `smoke:routes: invalid SMOKE_PORT ${JSON.stringify(rawPort)}`,
+    );
   }
   return port;
 }
@@ -47,7 +49,9 @@ function parsePort(rawPort: string): number {
 try {
   await access(path.join(process.cwd(), ".next", "BUILD_ID"));
 } catch {
-  console.error("smoke:routes: no production build found — run `npm run build` first.");
+  console.error(
+    "smoke:routes: no production build found — run `npm run build` first.",
+  );
   process.exit(1);
 }
 
@@ -133,7 +137,9 @@ async function stopServer(child: ChildProcess): Promise<void> {
 
   signalServerGroup(child, "SIGKILL");
   if (!(await waitForPortToClose(STOP_TIMEOUT_MS))) {
-    throw new Error(`smoke:routes: server still listens on ${HOST}:${PORT} after SIGKILL`);
+    throw new Error(
+      `smoke:routes: server still listens on ${HOST}:${PORT} after SIGKILL`,
+    );
   }
 }
 
@@ -141,7 +147,9 @@ async function waitUntilReady(child: ChildProcess): Promise<void> {
   const deadline = Date.now() + READY_TIMEOUT_MS;
   while (Date.now() < deadline) {
     if (child.exitCode !== null) {
-      throw new Error(`server exited before readiness with code ${child.exitCode}`);
+      throw new Error(
+        `server exited before readiness with code ${child.exitCode}`,
+      );
     }
     try {
       await fetch(`${BASE_URL}/`, { redirect: "manual" });
@@ -199,10 +207,9 @@ async function checkRedirect(
   });
   await response.arrayBuffer();
   const location = response.headers.get("location");
-  const normalizedLocation =
-    location !== null && location.startsWith(BASE_URL)
-      ? location.slice(BASE_URL.length)
-      : location;
+  const normalizedLocation = location?.startsWith(BASE_URL)
+    ? location.slice(BASE_URL.length)
+    : location;
   if (
     response.status !== PERMANENT_REDIRECT_STATUS ||
     normalizedLocation !== expectedLocation

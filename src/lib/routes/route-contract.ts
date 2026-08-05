@@ -297,9 +297,7 @@ export function normalizeAppRoutePattern(manifestKey: string): string | null {
   }
   const pathSegments = segments
     .slice(0, -1)
-    .filter(
-      (segment) => !(segment.startsWith("(") && segment.endsWith(")")),
-    )
+    .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
     .filter((segment) => !segment.startsWith("@"));
   if (pathSegments.some((segment) => segment === "_not-found")) {
     return null;

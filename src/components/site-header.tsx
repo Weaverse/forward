@@ -19,7 +19,10 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-8 gap-y-3 px-5 py-4 sm:px-8">
         <Wordmark />
         {/* Static links only — the nav stays fully usable without JavaScript. */}
-        <nav aria-label="Primary" className="order-last w-full sm:order-none sm:w-auto">
+        <nav
+          aria-label="Primary"
+          className="order-last w-full sm:order-none sm:w-auto"
+        >
           <ul className="flex flex-wrap items-center gap-x-6 gap-y-2">
             {PRIMARY_NAV.map((item) => (
               <li key={item.href}>
