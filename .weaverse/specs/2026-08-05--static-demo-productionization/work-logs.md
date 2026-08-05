@@ -60,3 +60,85 @@ Static demo productionization pass on `feat/static-demo` (worktree
 
 - No push, deploy, PR, Shopify store connection, credentials, or `.env`.
 - Pilot and POC source were not inspected.
+
+## 2026-08-05 — @hta218 (Hermes review closeout)
+
+Independent source review requested changes for two medium and four low findings.
+All six were resolved or closed with concrete evidence:
+
+- `check:routes` now requires `.next/BUILD_ID`, so stale development manifests
+  cannot satisfy the standalone production-build gate. A negative probe with
+  `BUILD_ID` temporarily absent exited `1` and named `bun run build`.
+- Bun is pinned as `packageManager: bun@1.3.14`; active route-gate comments and
+  diagnostics no longer instruct maintainers to use npm, and the route-contract
+  comment references Shared Contract `0.5-draft`.
+- Browser-owned cart lines now reject non-finite/negative prices, non-USD money,
+  unsafe product links, external product images, invalid image dimensions,
+  non-canonical keys, and malformed handles. Focused revival tests cover the
+  rejected states.
+- Production HTTP smoke now covers unknown collection, product, article, page,
+  policy, and order handles. Fixture-backed dynamic routes use
+  `generateStaticParams` with `dynamicParams = false`; the PDP moved only its
+  query-driven colorway state into a scoped Client Component so it remains SSG
+  while preserving `?colorway=` deep links and browser history.
+- Demo order lines carry `colorwayId`, validate against normalized products,
+  and link back to the exact ordered colorway. Tests and production-browser DOM
+  assertions cover the Limestone and Dune non-default links.
+- Required browser acceptance evidence is recorded below rather than inferred
+  from unit/build success.
+
+### Final verification
+
+- `bun install --frozen-lockfile --ignore-scripts` — no changes.
+- TypeScript, Biome lint, Biome format, Bun tests, Next production build, and
+  `check:routes` — pass.
+- `bun run smoke:routes` — 30 production HTTP checks passed: 19 canonical
+  route/resource surfaces, six unknown-handle 404s, the root 404, and four 308
+  compatibility redirects.
+- Real Chrome production acceptance at desktop `1440×1000` and true mobile
+  `390×844` — 20 route/viewport sweeps, zero console errors, zero horizontal
+  overflow, and zero broken or pending images.
+- Commerce flow — removed both seeded lines, added two Claystone/M Weatherline
+  Shells, verified navigation persistence, increased quantity to three, then
+  removed the line back to the explicit empty state.
+- Colorway/navigation — canonical default → Claystone query → browser Back
+  restored Charcoal; three real Shop ↔ Weatherline PDP client-navigation cycles
+  preserved the canonical page state.
+- Order links — order `1001` exposes the Limestone Talus deep link and order
+  `1002` exposes the Dune Ridge deep link.
+- Lighthouse accessibility — `1.00` on home and the post-refactor Claystone PDP;
+  no failed binary accessibility audits on the PDP.
+- Post-refactor desktop/mobile PDP and mobile order screenshots were visually
+  reviewed with no blocking overlap, clipping, duplicated Suspense content, or
+  selected-state regression.
+- `git diff --check` — clean.
+
+Durable evidence:
+
+```text
+/Users/hta218/Documents/work/artifacts/forward-static-demo-qa-2026-08-05/
+  results.json
+  forward-final-qa.py
+  lighthouse-home.json
+  lighthouse-pdp.json
+  desktop-pdp-1440x1000.png
+  mobile-home-390x844.png
+  mobile-shop-390x844.png
+  mobile-products-weatherline-shell-390x844.png
+  mobile-cart-390x844.png
+  mobile-account-orders-1001-390x844.png
+```
+
+### Observed framework caveat
+
+Next.js 16.3.0 logs `Internal: NoFallbackError` when `next start` receives the
+six expected misses rejected by `dynamicParams = false`. The HTTP contract is
+still correct and verified (`404` for every miss), but the noisy framework log
+should be rechecked when the Next baseline changes or when each static domain is
+replaced by a live Shopify adapter.
+
+### Boundaries reconfirmed
+
+- No live Shopify/Hydrogen data request, checkout, Customer Account mutation,
+  Weaverse runtime connection, credential, `.env`, push, deploy, or PR action.
+- Cart and account remain explicitly labeled browser-local/static demo states.
