@@ -1,22 +1,21 @@
 import Link from "next/link";
 
+import { CartCount } from "@/components/cart-count";
 import { Wordmark } from "@/components/wordmark";
+import { storefront } from "@/lib/storefront/data-source";
 
-const PRIMARY_NAV = [
-  { href: "/shop", label: "Shop" },
-  { href: "/journal", label: "Journal" },
-  { href: "/search", label: "Search" },
-] as const;
+export async function SiteHeader() {
+  const [navigation, themeContent] = await Promise.all([
+    storefront.getNavigation(),
+    storefront.getThemeContent(),
+  ]);
 
-const UTILITY_NAV = [
-  { href: "/account", label: "Account" },
-  { href: "/cart", label: "Cart" },
-] as const;
-
-export function SiteHeader() {
   return (
     <header className="border-b border-mist bg-bone">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-8 gap-y-3 px-5 py-4 sm:px-8">
+      <p className="field-label border-b border-pine-deep/60 bg-pine-deep px-5 py-2 text-center text-moss-light sm:px-8">
+        {themeContent.announcement}
+      </p>
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-8 gap-y-3 px-5 py-4 sm:px-8">
         <Wordmark />
         {/* Static links only — the nav stays fully usable without JavaScript. */}
         <nav
@@ -24,11 +23,11 @@ export function SiteHeader() {
           className="order-last w-full sm:order-none sm:w-auto"
         >
           <ul className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            {PRIMARY_NAV.map((item) => (
+            {navigation.primary.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="text-sm font-medium uppercase tracking-[0.12em] text-slate transition-colors hover:text-pine"
+                  className="field-label inline-flex min-h-11 items-center text-slate transition-colors hover:text-pine"
                 >
                   {item.label}
                 </Link>
@@ -38,13 +37,14 @@ export function SiteHeader() {
         </nav>
         <nav aria-label="Utility" className="ml-auto">
           <ul className="flex items-center gap-x-5">
-            {UTILITY_NAV.map((item) => (
+            {navigation.utility.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="text-sm font-medium uppercase tracking-[0.12em] text-slate transition-colors hover:text-pine"
+                  className="field-label inline-flex min-h-11 items-center text-slate transition-colors hover:text-pine"
                 >
                   {item.label}
+                  {item.href === "/cart" ? <CartCount /> : null}
                 </Link>
               </li>
             ))}

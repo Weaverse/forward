@@ -1,36 +1,59 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
-import { SurfaceShell } from "@/components/surface-shell";
+import { CartView } from "@/components/cart-view";
+import type { DemoCartLine } from "@/lib/demo-cart/cart-logic";
+import { lineKey } from "@/lib/demo-cart/cart-logic";
+import { storefront } from "@/lib/storefront/data-source";
+import {
+  productColorwayHref,
+  resolveColorway,
+} from "@/lib/storefront/product-state";
 
 export const metadata: Metadata = {
   title: "Cart",
-  description: "Your Forward cart.",
+  description: "Your Forward demo cart.",
 };
 
-export default function CartPage() {
+/** Resolves the demo seed lines against the catalog on the server. */
+async function buildSeedLines(): Promise<readonly DemoCartLine[]> {
+  const seed = await storefront.getDemoCartSeed();
+  const lines: DemoCartLine[] = [];
+  for (const entry of seed) {
+    const product = await storefront.getProduct(entry.productHandle);
+    if (product === null) {
+      continue;
+    }
+    const colorway = resolveColorway(product, entry.colorwayId);
+    lines.push({
+      key: lineKey(product.handle, colorway.id, entry.size),
+      productHandle: product.handle,
+      title: product.title,
+      colorwayId: colorway.id,
+      colorwayName: colorway.name,
+      size: entry.size,
+      quantity: entry.quantity,
+      unitPrice: product.price,
+      image: colorway.images.primary,
+      href: productColorwayHref(product, colorway.id),
+    });
+  }
+  return lines;
+}
+
+export default async function CartPage() {
+  const seedLines = await buildSeedLines();
+
   return (
-    <SurfaceShell
-      eyebrow="Cart"
-      title="Your cart"
-      description="Line items, totals, and checkout arrive with live cart mutations."
-      dataDependency="This surface will read and mutate a Shopify cart. No cart state exists in the foundation slice, so the empty state below is the only state."
-    >
-      <div className="max-w-xl border border-mist bg-parchment px-6 py-10 text-center">
-        <p className="font-display text-lg font-semibold uppercase tracking-[0.06em] text-pine">
-          Nothing packed yet
-        </p>
-        <p className="mt-2 text-sm leading-relaxed text-slate">
-          When live commerce lands, items you add will show up here with
-          quantities, totals, and a path to checkout.
-        </p>
-        <Link
-          href="/shop"
-          className="mt-6 inline-block bg-clay px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-bone transition-colors hover:bg-clay-deep"
-        >
-          Browse the shop
-        </Link>
+    <div className="mx-auto w-full max-w-7xl px-5 py-12 sm:px-8">
+      <header className="max-w-2xl">
+        <p className="field-label text-clay">Staging area · demo only</p>
+        <h1 className="mt-3 font-display text-4xl text-pine sm:text-5xl">
+          Cart
+        </h1>
+      </header>
+      <div className="mt-8">
+        <CartView seedLines={seedLines} />
       </div>
-    </SurfaceShell>
+    </div>
   );
 }

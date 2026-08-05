@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* Forward palette */
+  /* Forward palette — warm cream canvas, near-black pine, field-note accents */
   --color-bone: #f3f0e8;
   --color-parchment: #eae6da;
   --color-mist: #d6d1c2;
@@ -11,6 +11,7 @@
   --color-pine-deep: #182b20;
   --color-moss: #536143;
   --color-moss-light: #b8c3a6;
+  --color-acid: #b5c04a;
   --color-clay: #a94316;
   --color-clay-deep: #87330f;
   --color-clay-light: #f3aa86;
@@ -18,16 +19,37 @@
   --font-sans:
     "Avenir Next", "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui,
     sans-serif;
+  /* Editorial serif display — large readable headlines */
   --font-display:
-    "Futura", "Avenir Next Condensed", "Helvetica Neue", Arial, ui-sans-serif,
-    system-ui, sans-serif;
+    "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+    "Times New Roman", ui-serif, serif;
+  /* Monospace field labels, plate numbers, coordinates */
+  --font-field:
+    "SF Mono", ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
 
   --tracking-wordmark: 0.18em;
+  --tracking-field: 0.16em;
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      /* biome-ignore-start lint/complexity/noImportantStyles: reduced-motion reset must beat inline styles and utility-layer specificity */
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      /* biome-ignore-end lint/complexity/noImportantStyles: reduced-motion reset */
+    }
   }
 
   body {
@@ -44,4 +66,12 @@
     outline-offset: 3px;
     border-radius: 1px;
   }
+}
+
+/* Field-report label treatment: mono, small, tracked-out uppercase. */
+@utility field-label {
+  font-family: var(--font-field);
+  font-size: 0.6875rem;
+  letter-spacing: var(--tracking-field);
+  text-transform: uppercase;
 }

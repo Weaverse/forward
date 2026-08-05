@@ -1,35 +1,47 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { SurfaceShell } from "@/components/surface-shell";
-import { SMOKE_FIXTURES } from "@/lib/routes/route-contract";
+import { AccountShell } from "@/components/account-shell";
+import { storefront } from "@/lib/storefront/data-source";
+import { formatDate, formatMoney } from "@/lib/storefront/format";
 
 export const metadata: Metadata = {
-  title: "Order history",
-  description: "Your Forward order history.",
+  title: "Order history · Account",
+  description: "Forward prototype order history.",
 };
 
-export default function OrdersPage() {
+export default async function OrdersPage() {
+  const orders = await storefront.listDemoOrders();
+
   return (
-    <SurfaceShell
-      eyebrow="Account"
-      title="Order history"
-      description="Past orders appear here once Customer Account authentication and order data are connected."
-      dataDependency="This surface will list orders from the Shopify Customer Account API. The sample row below is a route-smoke fixture."
+    <AccountShell
+      activePath="/account/orders"
+      title="Orders"
+      lede="Every order on the demo record, newest first."
     >
-      <div className="max-w-2xl border border-mist bg-parchment">
-        <Link
-          href={`/account/orders/${SMOKE_FIXTURES.orderId}`}
-          className="flex items-center justify-between px-5 py-4 text-sm text-pine transition-colors hover:text-clay"
-        >
-          <span className="font-semibold uppercase tracking-[0.08em]">
-            Order #{SMOKE_FIXTURES.orderId}
-          </span>
-          <span className="text-xs uppercase tracking-[0.12em] text-moss">
-            Fixture — view shell
-          </span>
-        </Link>
-      </div>
-    </SurfaceShell>
+      <ul className="divide-y divide-mist border-y border-mist">
+        {[...orders].reverse().map((order) => (
+          <li key={order.id}>
+            <Link
+              href={`/account/orders/${order.id}`}
+              className="group grid gap-2 py-5 sm:grid-cols-12 sm:items-center"
+            >
+              <span className="font-display text-xl text-pine group-hover:text-clay sm:col-span-3">
+                {order.number}
+              </span>
+              <span className="field-label text-slate sm:col-span-3">
+                {formatDate(order.placedAt)}
+              </span>
+              <span className="field-label text-moss sm:col-span-4">
+                {order.statusDetail}
+              </span>
+              <span className="field-label text-ink sm:col-span-2 sm:text-right">
+                {formatMoney(order.total)}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </AccountShell>
   );
 }
