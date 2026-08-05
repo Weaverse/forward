@@ -8,7 +8,7 @@
     "node": ">=22.18.0"
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 3333",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",

@@ -17,11 +17,14 @@ npm install
 npm run dev
 ```
 
+Open [http://localhost:5555](http://localhost:5555). The development script
+uses port `5555` by default.
+
 ## Commands
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Start the development server. |
+| `npm run dev` | Start the development server on `http://localhost:5555`. |
 | `npm run build` | Create the production build. |
 | `npm run start` | Serve the production build. |
 | `npm run typecheck` | Strict TypeScript check (`tsc --noEmit`). |
