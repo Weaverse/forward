@@ -7,7 +7,7 @@
  * port is already occupied, so the gate can never pass against another server.
  */
 
-import { spawn, type ChildProcess } from "node:child_process";
+import { type ChildProcess, spawn } from "node:child_process";
 import { access } from "node:fs/promises";
 import { connect, createServer } from "node:net";
 import path from "node:path";
