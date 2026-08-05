@@ -142,3 +142,16 @@ replaced by a live Shopify adapter.
 - No live Shopify/Hydrogen data request, checkout, Customer Account mutation,
   Weaverse runtime connection, credential, `.env`, push, deploy, or PR action.
 - Cart and account remain explicitly labeled browser-local/static demo states.
+
+## 2026-08-05 — @hta218 (GitHub handoff)
+
+- Split the verified review closeout into logical production, regression-test,
+  and QA-evidence commits.
+- Pushed `feat/static-demo` without rewriting history or modifying the earlier
+  `feat/fresh-next-theme-foundation` branch.
+- Opened PR [#50](https://github.com/Weaverse/forward/pull/50),
+  `feat/static-demo` → `main`.
+- The foundation branch is a complete ancestor of `feat/static-demo`; it is
+  retained until PR review/merge and can be removed during post-merge cleanup.
+- No merge, deployment, live integration, credential, or primary-checkout
+  mutation was performed.
