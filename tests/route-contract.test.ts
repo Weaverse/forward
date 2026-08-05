@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  DYNAMIC_NOT_FOUND_SMOKES,
   findMissingRoutePatterns,
   NOT_FOUND_SMOKE,
   normalizeAppRoutePattern,
@@ -131,6 +132,24 @@ describe("route contract shape", () => {
     assert.ok(
       !ROUTE_CONTRACT.some((route) => route.pattern === NOT_FOUND_SMOKE.path),
     );
+  });
+
+  it("smokes unknown handles for every fixture-backed dynamic route", () => {
+    assert.deepEqual(
+      DYNAMIC_NOT_FOUND_SMOKES.map((smoke) => smoke.path),
+      [
+        "/shop/__forward-missing__",
+        "/products/__forward-missing__",
+        "/journal/__forward-missing__",
+        "/pages/__forward-missing__",
+        "/policies/__forward-missing__",
+        "/account/orders/__forward-missing__",
+      ],
+    );
+    for (const smoke of DYNAMIC_NOT_FOUND_SMOKES) {
+      assert.equal(smoke.expectedStatus, 404);
+      assert.equal(smoke.expectedContentType, "text/html");
+    }
   });
 
   it("checks resource response media types", () => {

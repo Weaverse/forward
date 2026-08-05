@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { storefront } from "../src/lib/storefront/data-source.ts";
+import { productColorwayHref } from "../src/lib/storefront/product-state.ts";
 
 describe("StaticStorefrontDataSource unknown handles", () => {
   it("resolves unknown product handles to null", async () => {
@@ -50,6 +51,26 @@ describe("StaticStorefrontDataSource known handles", () => {
         assert.ok(collection.productHandles.includes(product.handle));
       }
     }
+  });
+
+  it("keeps every demo order line linked to its exact product colorway", async () => {
+    const hrefs: string[] = [];
+    for (const order of await storefront.listDemoOrders()) {
+      for (const line of order.lines) {
+        const product = await storefront.getProduct(line.productHandle);
+        assert.ok(
+          product !== null,
+          `Unknown order product: ${line.productHandle}`,
+        );
+        assert.ok(
+          product.colorways.some((colorway) => colorway.id === line.colorwayId),
+          `Unknown ${line.productHandle} colorway: ${line.colorwayId}`,
+        );
+        hrefs.push(productColorwayHref(product, line.colorwayId));
+      }
+    }
+    assert.ok(hrefs.includes("/products/talus-trail-shoe?colorway=limestone"));
+    assert.ok(hrefs.includes("/products/ridge-30-field-pack?colorway=dune"));
   });
 });
 

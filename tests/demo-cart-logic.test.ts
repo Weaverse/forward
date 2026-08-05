@@ -26,7 +26,12 @@ function makeLine(overrides: Partial<DemoCartLine> = {}): DemoCartLine {
     size: "M",
     quantity: 1,
     unitPrice: { amount: 100, currencyCode: "USD" },
-    image: { src: "/images/x.webp", alt: "x", width: 800, height: 1000 },
+    image: {
+      src: "/images/products/weatherline-charcoal-primary.webp",
+      alt: "Weatherline Shell in Charcoal",
+      width: 1600,
+      height: 2000,
+    },
     href: "/products/weatherline-shell",
     ...overrides,
   };
@@ -171,10 +176,28 @@ describe("sanitizeLines", () => {
     assert.equal(lines[0]?.quantity, MAX_LINE_QUANTITY);
   });
 
-  it("drops non-string sizes without dropping the line", () => {
+  it("drops lines whose revived size no longer matches their key", () => {
     const valid = makeLine();
     const lines = sanitizeLines([{ ...valid, size: 42 }]);
-    assert.equal(lines.length, 1);
-    assert.equal(lines[0]?.size, undefined);
+    assert.deepEqual(lines, []);
+  });
+
+  it("drops unsafe or stale browser-owned fields", () => {
+    const valid = makeLine();
+    const invalid = [
+      { ...valid, key: "wrong" },
+      { ...valid, unitPrice: { amount: -1, currencyCode: "USD" } },
+      { ...valid, unitPrice: { amount: 100, currencyCode: "EUR" } },
+      { ...valid, href: "javascript:alert(1)" },
+      {
+        ...valid,
+        image: {
+          ...valid.image,
+          src: "https://invalid.example/product.webp",
+        },
+      },
+      { ...valid, image: { ...valid.image, width: -1 } },
+    ];
+    assert.deepEqual(sanitizeLines(invalid), []);
   });
 });
