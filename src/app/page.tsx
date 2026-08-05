@@ -8,7 +8,7 @@ export default function HomePage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
       <section className="border border-mist bg-pine px-6 py-14 text-bone sm:px-12 sm:py-20">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-clay">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-clay-light">
           Forward — Fall 2026
         </p>
         <h1 className="mt-4 max-w-xl font-display text-4xl font-semibold uppercase leading-[1.05] tracking-[0.04em] sm:text-5xl">

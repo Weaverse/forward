@@ -17,7 +17,13 @@ export function Wordmark({ size = "header" }: WordmarkProps) {
       )}
     >
       <span>For</span>
-      <span aria-hidden="true" className="translate-y-[-0.08em] text-clay">
+      <span
+        aria-hidden="true"
+        className={cn(
+          "translate-y-[-0.08em]",
+          size === "footer" ? "text-clay-light" : "text-clay",
+        )}
+      >
         /
       </span>
       <span>Ward</span>

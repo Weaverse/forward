@@ -9,9 +9,11 @@
   --color-slate: #4c534a;
   --color-pine: #24402f;
   --color-pine-deep: #182b20;
-  --color-moss: #6f7d5e;
-  --color-clay: #c14f19;
-  --color-clay-deep: #9c3e12;
+  --color-moss: #536143;
+  --color-moss-light: #b8c3a6;
+  --color-clay: #a94316;
+  --color-clay-deep: #87330f;
+  --color-clay-light: #f3aa86;
 
   --font-sans:
     "Avenir Next", "Helvetica Neue", Helvetica, Arial, ui-sans-serif,

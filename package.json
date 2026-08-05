@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Forward — a fresh Next.js App Router storefront theme for Shopify, powered by Weaverse.",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.18.0"
   },
   "scripts": {
     "dev": "next dev",

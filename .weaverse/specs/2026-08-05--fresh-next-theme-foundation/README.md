@@ -1,7 +1,7 @@
 # Fresh Next.js Theme Foundation
 
 Date: 2026-08-05
-Status: approved for implementation
+Status: verified complete
 Shared contract: `0.3-draft`
 
 ## Goal
@@ -194,3 +194,8 @@ Update `README.md` with:
 Implementation handoff: `claude-handoff.md` in this folder.
 Verification results and follow-up slices must be appended to this spec after implementation.
 Implementation work log with verification results: `work-logs.md` (2026-08-05).
+
+All eight acceptance criteria were independently verified by Hermes on
+2026-08-05. The foundation remains intentionally fixture-backed and
+undeployed; live Shopify, Customer Account, Weaverse Studio, locale/market,
+and hosting work stay in later slices.

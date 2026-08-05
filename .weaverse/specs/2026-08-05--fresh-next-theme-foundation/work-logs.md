@@ -40,3 +40,53 @@ Implemented the approved foundation slice in the working tree on `feat/fresh-nex
 - Next.js build tooling amended `tsconfig.json` (`jsx: react-jsx`, added `.next/dev/types` include) — kept as generated.
 - Browser-based console-error and overflow audits were done only via static HTML/asset checks; a real-browser pass (desktop + mobile viewports) is a cheap follow-up once a browser harness is available.
 - Follow-up slices remain: live Shopify data clients, cart mutations, Customer Account OAuth, Weaverse Studio bridge, locale/market routing, deployment.
+
+## 2026-08-05 — Hermes (independent review and verification)
+
+Reviewed the fixed implementation range `dd0f933..8e5a324`, reproduced the
+quality-gate behavior independently, and corrected the blocking findings in a
+separate review-fix change.
+
+### Review corrections
+
+- Hardened `smoke:routes` so an occupied port fails before any HTTP check. The
+  script now validates the port, monitors early server exit, stops the whole
+  POSIX process group, waits for the port to close, and escalates to `SIGKILL`
+  only when required.
+- Expanded production smoke from 23 to 24 checks: unknown-path 404, expected
+  media types for resource/protocol routes, and compatibility-query
+  preservation are now executable assertions.
+- Raised the supported Node floor to `>=22.18.0`. Node 22.6.0 was tested and
+  failed direct `.ts` execution without the experimental flag; Node 22.18.0
+  ran the full 17-test suite successfully.
+- Corrected small-text color pairs to WCAG AA contrast and added separate
+  light accent tokens for dark pine surfaces.
+- Added a generated Forward app icon after real-browser QA found a normal-page
+  `/favicon.ico` 404.
+- Centralized total route-segment display decoding and added regression tests
+  for valid encoded and malformed direct-call values.
+
+### Final evidence
+
+- Clean local clone: `npm ci` followed by `npm run typecheck` — pass before any
+  Next build generated local type artifacts.
+- `npm audit --omit=dev --audit-level=high` — 0 vulnerabilities.
+- `git diff --check` — pass.
+- `npm run check` — pass: strict typecheck, ESLint, 17/17 unit tests, Next
+  16.3.0 production build, 19 route patterns, and 4 permanent redirects.
+- `npm run smoke:routes` — pass: 24/24 checks; port 4973 confirmed free after
+  shutdown.
+- Occupied-port negative test — smoke exited 1 before testing and preserved
+  the unrelated fake server; the test process was then stopped explicitly.
+- Node 22.18.0 minimum-runtime test — 17/17 tests pass.
+- Contrast calculations — all normal small-text token pairs pass at 4.81:1 to
+  8.11:1.
+- Desktop Chrome at 1280 px — coherent branded shell, no horizontal overflow,
+  no console errors.
+- Mobile Chrome CDP at 390 × 844 — ten route loads across home, shop, product,
+  account, journal, 404, and repeated navigation cycles; every load reported
+  `scrollWidth=390`, all header links stayed within 20–370 px, and normal
+  routes produced zero runtime/console issues. The intentional 404 navigation
+  produced the expected single 404 network entry.
+- Ports 4973, 4981, and 4982 confirmed free after QA; temporary Chrome/CDP
+  artifacts removed.

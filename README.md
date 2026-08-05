@@ -8,7 +8,9 @@ Foundation slice implemented: repository setup, branded global shell, complete s
 
 ## Setup
 
-Requires Node.js >= 22 and npm.
+Requires Node.js >= 22.18.0 and npm. The route tooling executes TypeScript
+directly with Node's built-in type stripping; Node 22.18.0 is the verified
+minimum that runs these scripts without an experimental flag.
 
 ```bash
 npm install

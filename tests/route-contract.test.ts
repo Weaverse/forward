@@ -3,11 +3,17 @@ import { describe, it } from "node:test";
 
 import {
   findMissingRoutePatterns,
+  NOT_FOUND_SMOKE,
   normalizeAppRoutePattern,
   REDIRECT_CONTRACT,
+  RESOURCE_ROUTES,
   ROUTE_CONTRACT,
   SMOKE_FIXTURES,
 } from "../src/lib/routes/route-contract.ts";
+import {
+  formatRouteSegment,
+  safeDecodeRouteSegment,
+} from "../src/lib/routes/segments.ts";
 
 describe("normalizeAppRoutePattern", () => {
   it("normalizes page manifest keys to route patterns", () => {
@@ -104,6 +110,36 @@ describe("route contract shape", () => {
     }
   });
 
+  it("preserves compatibility-redirect query strings in HTTP smoke", () => {
+    const collectionsAll = REDIRECT_CONTRACT.find(
+      (entry) => entry.source === "/collections/all",
+    );
+    assert.ok(collectionsAll);
+    assert.equal(
+      collectionsAll.smoke.path,
+      "/collections/all?utm_source=route-smoke",
+    );
+    assert.equal(
+      collectionsAll.smoke.expectedLocation,
+      "/shop?utm_source=route-smoke",
+    );
+  });
+
+  it("defines an unknown-path 404 smoke outside the route contract", () => {
+    assert.equal(NOT_FOUND_SMOKE.expectedStatus, 404);
+    assert.equal(NOT_FOUND_SMOKE.expectedContentType, "text/html");
+    assert.ok(
+      !ROUTE_CONTRACT.some((route) => route.pattern === NOT_FOUND_SMOKE.path),
+    );
+  });
+
+  it("checks resource response media types", () => {
+    assert.deepEqual(
+      RESOURCE_ROUTES.map((route) => route.smoke.expectedContentType),
+      ["text/plain", "application/xml"],
+    );
+  });
+
   it("smokes dynamic patterns with approved fixture handles", () => {
     const productSmoke = ROUTE_CONTRACT.find(
       (entry) => entry.pattern === "/products/[productHandle]",
@@ -120,6 +156,22 @@ describe("route contract shape", () => {
       const entry = ROUTE_CONTRACT.find((route) => route.pattern === pattern);
       assert.ok(entry, `${pattern} missing from contract`);
       assert.equal(entry.smoke.expectedStatus, 501);
+      assert.equal(entry.smoke.expectedContentType, "text/plain");
     }
+  });
+});
+
+describe("route-segment display helpers", () => {
+  it("decodes valid URL segments once", () => {
+    assert.equal(safeDecodeRouteSegment("ridge%2030"), "ridge 30");
+    assert.equal(
+      formatRouteSegment("ridge-30-field-pack"),
+      "Ridge 30 Field Pack",
+    );
+  });
+
+  it("does not throw for malformed raw percent sequences", () => {
+    assert.equal(safeDecodeRouteSegment("100%"), "100%");
+    assert.equal(formatRouteSegment("100%"), "100%");
   });
 });

@@ -9,6 +9,7 @@
  */
 
 import { SMOKE_FIXTURES } from "@/lib/routes/route-contract";
+import { formatRouteSegment } from "@/lib/routes/segments";
 
 export interface ShellProduct {
   handle: string;
@@ -55,9 +56,5 @@ export const SHELL_ARTICLE: ShellArticle = {
 
 /** Turns a URL handle into readable display text for shell pages. */
 export function formatHandle(handle: string): string {
-  const words = decodeURIComponent(handle)
-    .split("-")
-    .filter(Boolean)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1));
-  return words.length > 0 ? words.join(" ") : handle;
+  return formatRouteSegment(handle);
 }

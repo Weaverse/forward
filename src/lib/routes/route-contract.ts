@@ -22,6 +22,8 @@ export interface RouteSmoke {
   path: string;
   /** Expected HTTP status from `next start`. */
   expectedStatus: number;
+  /** Optional media type prefix expected from the response. */
+  expectedContentType?: string;
 }
 
 export interface RouteContractEntry {
@@ -184,13 +186,21 @@ export const ACCOUNT_PROTOCOL_ROUTES: readonly RouteContractEntry[] = [
     pattern: "/account/authorize",
     label: "OAuth authorize callback (placeholder)",
     category: "account-protocol",
-    smoke: { path: "/account/authorize", expectedStatus: 501 },
+    smoke: {
+      path: "/account/authorize",
+      expectedStatus: 501,
+      expectedContentType: "text/plain",
+    },
   },
   {
     pattern: "/account/logout",
     label: "Logout endpoint (placeholder)",
     category: "account-protocol",
-    smoke: { path: "/account/logout", expectedStatus: 501 },
+    smoke: {
+      path: "/account/logout",
+      expectedStatus: 501,
+      expectedContentType: "text/plain",
+    },
   },
 ] as const;
 
@@ -199,13 +209,21 @@ export const RESOURCE_ROUTES: readonly RouteContractEntry[] = [
     pattern: "/robots.txt",
     label: "Robots",
     category: "resource",
-    smoke: { path: "/robots.txt", expectedStatus: 200 },
+    smoke: {
+      path: "/robots.txt",
+      expectedStatus: 200,
+      expectedContentType: "text/plain",
+    },
   },
   {
     pattern: "/sitemap.xml",
     label: "Sitemap",
     category: "resource",
-    smoke: { path: "/sitemap.xml", expectedStatus: 200 },
+    smoke: {
+      path: "/sitemap.xml",
+      expectedStatus: 200,
+      expectedContentType: "application/xml",
+    },
   },
 ] as const;
 
@@ -214,6 +232,13 @@ export const ROUTE_CONTRACT: readonly RouteContractEntry[] = [
   ...ACCOUNT_PROTOCOL_ROUTES,
   ...RESOURCE_ROUTES,
 ] as const;
+
+/** A path that must exercise the root `not-found.tsx`, never a dynamic route. */
+export const NOT_FOUND_SMOKE: RouteSmoke = {
+  path: "/__forward-route-smoke-missing__",
+  expectedStatus: 404,
+  expectedContentType: "text/html",
+};
 
 /**
  * Shopify-compatibility redirects. Order matters: the literal
@@ -224,7 +249,10 @@ export const REDIRECT_CONTRACT: readonly RedirectContractEntry[] = [
     source: "/collections/all",
     destination: "/shop",
     permanent: true,
-    smoke: { path: "/collections/all", expectedLocation: "/shop" },
+    smoke: {
+      path: "/collections/all?utm_source=route-smoke",
+      expectedLocation: "/shop?utm_source=route-smoke",
+    },
   },
   {
     source: "/collections/:collectionHandle",
