@@ -1,0 +1,59 @@
+/**
+ * Static navigation and theme-content fixture records. Only the data source
+ * may import this file.
+ */
+
+import type { SiteNavigation, ThemeContent } from "../types";
+import { EDITORIAL_IMAGES } from "./editorial-images";
+
+export const NAVIGATION_FIXTURE: SiteNavigation = {
+  primary: [
+    { href: "/shop", label: "Shop" },
+    { href: "/journal", label: "Journal" },
+    { href: "/pages/about-forward", label: "Field Standard" },
+    { href: "/search", label: "Search" },
+  ],
+  utility: [
+    { href: "/account", label: "Account" },
+    { href: "/cart", label: "Cart" },
+  ],
+  footerColumns: [
+    {
+      heading: "Shop",
+      links: [
+        { href: "/shop", label: "All products" },
+        { href: "/shop/field-gear", label: "Field gear" },
+        { href: "/shop/high-route", label: "High route" },
+        { href: "/shop/camp-craft", label: "Camp craft" },
+      ],
+    },
+    {
+      heading: "Company",
+      links: [
+        { href: "/journal", label: "Journal" },
+        { href: "/pages/about-forward", label: "The field standard" },
+        { href: "/pages/repairs", label: "Repairs" },
+      ],
+    },
+    {
+      heading: "Support",
+      links: [
+        { href: "/account", label: "Account" },
+        { href: "/policies/shipping-policy", label: "Shipping" },
+        { href: "/policies/return-policy", label: "Returns" },
+        { href: "/policies/privacy-policy", label: "Privacy" },
+        { href: "/policies/terms-of-service", label: "Terms" },
+      ],
+    },
+  ],
+} as const;
+
+export const THEME_CONTENT_FIXTURE: ThemeContent = {
+  announcement: "Free shipping over $150 · Repairs for life",
+  footerTagline:
+    "Gear for moving through weather, not around it. A short catalog, built slowly and repaired indefinitely.",
+  demoNotice:
+    "Forward is running as a static demonstration storefront. Catalog, cart, and account data are local fixtures — no live store is connected and nothing you do here is sent anywhere.",
+  homeHeroImage: EDITORIAL_IMAGES.heroOpenSky,
+  standardBandImage: EDITORIAL_IMAGES.mountainRidges,
+} as const;

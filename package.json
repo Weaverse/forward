@@ -1,0 +1,39 @@
+{
+  "name": "forward",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "bun@1.3.14",
+  "type": "module",
+  "description": "Forward — a fresh Next.js App Router storefront theme for Shopify, powered by Weaverse.",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "dev": "next dev --port 3333",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "test": "bun test tests",
+    "check:routes": "node scripts/check-routes.mts",
+    "smoke:routes": "node scripts/smoke-routes.mts",
+    "check": "bun run typecheck && bun run lint && bun run format:check && bun run test && bun run build && bun run check:routes"
+  },
+  "dependencies": {
+    "@shopify/hydrogen": "0.0.0-preview-116d5d7-20260730141607",
+    "next": "16.3.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.7",
+    "@tailwindcss/postcss": "^4.1.0",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.8.0"
+  }
+}
