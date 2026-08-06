@@ -14,6 +14,10 @@ export const metadata: Metadata = {
   description: "Your Forward demo cart.",
 };
 
+// Next requires a literal route-segment value. Keep this equal to
+// CATALOG_REVALIDATE_SECONDS in the adapter contract test.
+export const revalidate = 3600;
+
 /** Resolves the demo seed lines against the catalog on the server. */
 async function buildSeedLines(): Promise<readonly DemoCartLine[]> {
   const seed = await storefront.getDemoCartSeed();

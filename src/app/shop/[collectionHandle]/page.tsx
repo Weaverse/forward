@@ -12,6 +12,9 @@ interface CollectionPageProps {
 
 export const dynamicParams = false;
 
+/* Bounded catalog freshness — see the note on the product route. */
+export const revalidate = 3600;
+
 export async function generateStaticParams() {
   const collections = await storefront.listCollections();
   return collections.map((collection) => ({

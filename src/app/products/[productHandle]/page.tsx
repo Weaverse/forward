@@ -15,6 +15,14 @@ interface ProductPageProps {
 
 export const dynamicParams = false;
 
+/*
+ * Bounded catalog freshness. Must stay equal to `CATALOG_REVALIDATE_SECONDS`
+ * (`src/lib/storefront/shopify/data-source.ts`); the literal is inlined because
+ * Next requires a statically analyzable segment value, and a unit test asserts
+ * the two never drift. The route stays static — no request-time API is called.
+ */
+export const revalidate = 3600;
+
 export async function generateStaticParams() {
   const products = await storefront.listProducts();
   return products.map((product) => ({ productHandle: product.handle }));

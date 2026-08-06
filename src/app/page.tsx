@@ -33,6 +33,9 @@ const RUNWAY_HANDLES = [
 
 const TILE_HANDLES = ["field-gear", "high-route", "camp-craft"] as const;
 
+/* Bounded catalog freshness — see the note on `/products/[productHandle]`. */
+export const revalidate = 3600;
+
 /** Splits a title so the canonical two-line headline treatment still works. */
 function splitTitle(title: string): { lead: string; rest: string } {
   const firstSpace = title.indexOf(" ");

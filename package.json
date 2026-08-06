@@ -10,16 +10,19 @@
   },
   "scripts": {
     "dev": "next dev --port 3333",
-    "build": "next build",
+    "clean:next": "node -e \"require('node:fs').rmSync('.next',{recursive:true,force:true})\"",
+    "build": "bun run clean:next && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "format:check": "biome format .",
     "test": "bun test tests",
+    "check:graphql": "hydrogen gql check",
     "check:routes": "node scripts/check-routes.mts",
     "smoke:routes": "node scripts/smoke-routes.mts",
-    "check": "bun run typecheck && bun run lint && bun run format:check && bun run test && bun run build && bun run check:routes"
+    "verify:shopify": "bun scripts/verify-shopify.mts",
+    "check": "bun run typecheck && bun run lint && bun run format:check && bun run test && bun run check:graphql && bun run build && bun run check:routes"
   },
   "dependencies": {
     "@shopify/hydrogen": "0.0.0-preview-116d5d7-20260730141607",

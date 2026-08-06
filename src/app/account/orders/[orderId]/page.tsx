@@ -15,6 +15,11 @@ interface OrderPageProps {
 
 export const dynamicParams = false;
 
+// This static route derives product colorway links from the live catalog.
+// Next requires a literal route-segment value; the contract test pins it to the
+// shared catalog window.
+export const revalidate = 3600;
+
 export async function generateStaticParams() {
   const orders = await storefront.listDemoOrders();
   return orders.map((order) => ({ orderId: order.id }));
