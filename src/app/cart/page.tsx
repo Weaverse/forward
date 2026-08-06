@@ -43,10 +43,7 @@ async function buildSeedLines(): Promise<readonly DemoCartLine[]> {
 export default async function CartPage() {
   const seedLines = await buildSeedLines();
 
-  return (
-    <div className="mx-auto w-full max-w-7xl px-5 py-12 sm:px-8">
-      {/* CartView owns the heading so the live item count can join the title. */}
-      <CartView seedLines={seedLines} />
-    </div>
-  );
+  /* CartView owns the canonical `.cart-page` shell so the live item count can
+     join the heading. */
+  return <CartView seedLines={seedLines} />;
 }
