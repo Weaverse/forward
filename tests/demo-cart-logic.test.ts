@@ -182,6 +182,16 @@ describe("sanitizeLines", () => {
     assert.deepEqual(lines, []);
   });
 
+  it("keeps persisted cart lines backed by owned Shopify media", () => {
+    const line = makeLine({
+      image: {
+        ...makeLine().image,
+        src: "https://cdn.shopify.com/s/files/1/0978/4757/4828/files/weatherline-charcoal-primary.webp?v=1785922447",
+      },
+    });
+    assert.deepEqual(sanitizeLines([line]), [line]);
+  });
+
   it("drops unsafe or stale browser-owned fields", () => {
     const valid = makeLine();
     const invalid = [
@@ -194,6 +204,13 @@ describe("sanitizeLines", () => {
         image: {
           ...valid.image,
           src: "https://invalid.example/product.webp",
+        },
+      },
+      {
+        ...valid,
+        image: {
+          ...valid.image,
+          src: "https://cdn.shopify.com/s/files/9/9999/9999/9999/files/foreign.webp",
         },
       },
       { ...valid, image: { ...valid.image, width: -1 } },

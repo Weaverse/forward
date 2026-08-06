@@ -7,12 +7,12 @@
  * browser and never talks to a checkout.
  */
 
+import { isAllowedProductImageSrc } from "@/lib/storefront/image-source";
 import type { Money, StorefrontImage } from "@/lib/storefront/types";
 
 export const MAX_LINE_QUANTITY = 9;
 
 const HANDLE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const PRODUCT_IMAGE_PATTERN = /^\/images\/products\/[a-z0-9-]+\.webp$/;
 
 export interface DemoCartLine {
   /** Stable identity for a product + colorway + size combination. */
@@ -169,7 +169,9 @@ export function sanitizeLines(value: unknown): readonly DemoCartLine[] {
       unitPrice.currencyCode !== "USD" ||
       image === undefined ||
       typeof image.src !== "string" ||
-      !PRODUCT_IMAGE_PATTERN.test(image.src) ||
+      /* Static mode stores local catalog paths; Shopify mode stores owned CDN
+         media URLs. Anything else is dropped on revive. */
+      !isAllowedProductImageSrc(image.src) ||
       typeof image.alt !== "string" ||
       image.alt.trim().length === 0 ||
       !isPositiveInteger(image.width) ||

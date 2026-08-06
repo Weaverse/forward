@@ -1,18 +1,28 @@
 /**
- * StaticStorefrontDataSource — the replaceable seam between static fixture
- * records and route composition.
+ * StorefrontDataSource — the replaceable seam between storefront records and
+ * route composition.
  *
  * Routes and visual components must consume storefront data exclusively
- * through the `storefront` instance exported here. A later Shopify adapter
- * implements `StorefrontDataSource` one domain at a time (products first,
- * then collections, and so on) without touching page composition. Methods are
- * async for exactly that reason, even though the static implementation
- * resolves synchronously.
+ * through the `storefront` instance exported here. No page or component may
+ * import fixture records, Shopify queries, or raw Shopify shapes.
+ *
+ * Mode selection is explicit and fails closed:
+ *
+ * - no Shopify environment -> `StaticStorefrontDataSource` (the deterministic
+ *   default used by tests and any environment without credentials);
+ * - complete Shopify environment -> `ShopifyCatalogDataSource`, which owns
+ *   products, search, and canonical-collection product resolution, and
+ *   delegates every other domain to the static implementation;
+ * - partial Shopify environment -> sanitized `ShopifyConfigurationError`.
  *
  * Unknown handles resolve to `null`; routes translate that into `notFound()`
  * rather than inventing content.
  */
 
+import {
+  filterAndSortProducts,
+  searchNormalizedProducts,
+} from "./catalog-query";
 import {
   DEMO_ADDRESS_FIXTURES,
   DEMO_CART_SEED,
@@ -27,6 +37,12 @@ import {
 import { PAGE_FIXTURES } from "./fixtures/pages";
 import { POLICY_FIXTURES } from "./fixtures/policies";
 import { PRODUCT_FIXTURES } from "./fixtures/products";
+import {
+  type CatalogQueryExecutorOptions,
+  createCatalogQueryExecutor,
+} from "./shopify/client";
+import { ShopifyCatalogDataSource } from "./shopify/data-source";
+import { type EnvSource, readShopifyCatalogConfig } from "./shopify/env";
 import type {
   Collection,
   DemoAddress,
@@ -66,63 +82,13 @@ export interface StorefrontDataSource {
   getDemoCartSeed(): Promise<readonly DemoCartSeedLine[]>;
 }
 
-function sortProducts(
-  products: readonly Product[],
-  sort: ProductSort,
-): readonly Product[] {
-  if (sort === "featured") {
-    return products;
-  }
-  const sorted = [...products];
-  switch (sort) {
-    case "price-asc":
-      sorted.sort((a, b) => a.price.amount - b.price.amount);
-      break;
-    case "price-desc":
-      sorted.sort((a, b) => b.price.amount - a.price.amount);
-      break;
-    case "name":
-      sorted.sort((a, b) => a.title.localeCompare(b.title));
-      break;
-  }
-  return sorted;
-}
-
-function matchesFilter(product: Product, filter: ProductListFilter): boolean {
-  if (filter.category !== undefined && product.category !== filter.category) {
-    return false;
-  }
-  if (
-    filter.activity !== undefined &&
-    !product.activities.includes(filter.activity)
-  ) {
-    return false;
-  }
-  return true;
-}
-
-function searchableText(product: Product): string {
-  return [
-    product.title,
-    product.subtitle,
-    product.description,
-    product.category,
-    ...product.activities,
-    ...product.colorways.map((entry) => entry.name),
-  ]
-    .join(" ")
-    .toLowerCase();
-}
-
-class StaticStorefrontDataSource implements StorefrontDataSource {
+/** Fixture-backed implementation; the no-credential default. */
+export class StaticStorefrontDataSource implements StorefrontDataSource {
   async listProducts(
     filter: ProductListFilter = {},
     sort: ProductSort = "featured",
   ): Promise<readonly Product[]> {
-    const filtered = PRODUCT_FIXTURES.filter((product) =>
-      matchesFilter(product, filter),
-    );
-    return sortProducts(filtered, sort);
+    return filterAndSortProducts(PRODUCT_FIXTURES, filter, sort);
   }
 
   async getProduct(handle: string): Promise<Product | null> {
@@ -158,14 +124,7 @@ class StaticStorefrontDataSource implements StorefrontDataSource {
   }
 
   async searchProducts(query: string): Promise<readonly Product[]> {
-    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
-    if (terms.length === 0) {
-      return [];
-    }
-    return PRODUCT_FIXTURES.filter((product) => {
-      const haystack = searchableText(product);
-      return terms.every((term) => haystack.includes(term));
-    });
+    return searchNormalizedProducts(PRODUCT_FIXTURES, query);
   }
 
   async listArticles(): Promise<readonly JournalArticle[]> {
@@ -219,6 +178,28 @@ class StaticStorefrontDataSource implements StorefrontDataSource {
   }
 }
 
-/** The storefront data source used by all routes in the static demo. */
-export const storefront: StorefrontDataSource =
-  new StaticStorefrontDataSource();
+/**
+ * Resolves the data source for an environment.
+ *
+ * The environment source is a parameter so mode selection stays injectable and
+ * tests never mutate `process.env`.
+ */
+export function createStorefrontDataSource(
+  env: EnvSource = process.env,
+  catalogQueryOptions: CatalogQueryExecutorOptions = {},
+): StorefrontDataSource {
+  const base = new StaticStorefrontDataSource();
+  const config = readShopifyCatalogConfig(env);
+  if (config === null) {
+    return base;
+  }
+  const useNextCache = catalogQueryOptions.useNextCache ?? true;
+  return new ShopifyCatalogDataSource({
+    base,
+    execute: createCatalogQueryExecutor(config, catalogQueryOptions),
+    useProcessCache: !useNextCache,
+  });
+}
+
+/** The storefront data source used by all routes. */
+export const storefront: StorefrontDataSource = createStorefrontDataSource();
