@@ -1,5 +1,7 @@
 # Home canonical parity correction
 
+> **Superseded for implementation.** This screenshot-reconstruction handoff produced PR #52, which Leo rejected as still not matching the canonical POC. Do not continue this method or scope the correction to Home. Use [`full-canonical-source-port-handoff.md`](./full-canonical-source-port-handoff.md), which ports the owned POC source across the shared shell and every rendered route.
+
 Date: 2026-08-06
 Branch: `fix/home-canonical-parity`
 Base: merged `main@9f506d304e3d26e60156c4228a8acaa14d0fe0f9`
@@ -50,7 +52,7 @@ Only touch another presentation file if absolutely necessary and explain why in 
 - Keep all three real Forward products and collections; no fake fourth product.
 - Keep local approved media; no hotlinks and no new images.
 - Preserve semantic headings, links, alt text, keyboard access, reduced motion, and mobile no-overflow behavior.
-- Do not copy the POC source implementation; reproduce rendered composition from evidence.
+- Superseded: do not reproduce the POC from screenshots and do not scope the source port to Home. Follow `full-canonical-source-port-handoff.md` and port the pinned owned source across the shared shell and every rendered route, excluding only the static runtime/hash router/prototype state.
 - Do not commit, push, deploy, open/update PRs, or modify the primary checkout/server.
 
 ## Desktop acceptance

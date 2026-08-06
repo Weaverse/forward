@@ -358,3 +358,12 @@ push/deploy; no credentials; no live auth/checkout/Shopify/Weaverse.
 - Broad Home desktop/mobile QA remained `0 failures`. Accessible controls increased full-page height only from `7888` to `7907` desktop and from `9663` to `9721` mobile; section structure and canonical composition remain unchanged.
 - Final narrow read-only review returned `APPROVE`: no blocking findings; measured targets, selected state/name, pointer/keyboard behavior, href/image updates, hydration, console, overflow, and desktop/mobile QA all passed against the exact post-a11y diff.
 - Publication remained deferred until the final reviewer approval. User design approval remains pending before Shopify adapters, Weaverse sections/schemas, or production deployment.
+
+## 2026-08-06 — canonical source-port reset
+
+- Leo rejected the screenshot-reconstructed correction again and identified the root procedural error: the Advanced POC source is owned by this project and should have been used directly instead of recreated from screenshots.
+- PR #52 was merged as requested. Remote and primary local `main` are clean and synced at merge commit `cf289917091e7a1aeb54d8521402a4b58ab50717`; the completed corrective worktree was removed while branch refs were retained.
+- Verified the canonical source checkout at `/Users/hta218/Documents/work/workspace/weaverse-hydrogen-next-poc`: local `main` and `origin/main` both equal deployed source commit `7e416404b5c9d7d8b9fed27bed2b897c36c9b7a4` (`Rename advanced Outdoor preview to Forward`).
+- Source authority is now explicit: `public/theme-preview-advanced/app.js:87–359` owns shared/product/route structures; `styles.css:1–948` owns the base plus effective Advanced shell/Home/commerce/account/editorial/content/footer/responsive cascade; `index.html` owns the Literata/Manrope/IBM Plex Mono font contract.
+- Added `full-canonical-source-port-handoff.md` for Claude. It requires a one-to-one React/Next translation of the pinned source across the shared shell and every rendered route, preserves Forward's normalized data/routes/interactions, excludes only the static runtime/hash router/prototype data, and uses screenshots strictly for per-route overlay/diff verification.
+- Leo explicitly rejected the intermediate Home-only scope: the required unit of work is the full canonical source-port. The old screenshot-driven and Home-only instructions were marked superseded to prevent another partial/approximate pass. No production code, Shopify/Weaverse runtime, credentials, commit, push, PR, or deployment was added by this spec reset.

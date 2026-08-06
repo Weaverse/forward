@@ -1,40 +1,19 @@
-# Claude implementation handoff
+# Claude implementation handoff — superseded
 
-Read in order:
+The original `feat/advanced-visual-realignment` handoff and the later Home-only screenshot correction are complete/rejected. Their screenshot-first instructions are invalid for the next pass.
 
-1. `/Users/hta218/Documents/work/worktrees/forward-advanced-realignment/AGENTS.md`
-2. `.weaverse/specs/2026-08-05--advanced-visual-realignment/README.md`
-3. `.weaverse/specs/2026-08-05--static-demo-productionization/README.md`
-4. Existing `src/lib/storefront/**`, `src/lib/routes/**`, and `src/lib/demo-cart/**` contracts.
-5. Current pages/components/styles.
+For the next implementation, read and follow:
 
-Canonical reference:
+```text
+.weaverse/specs/2026-08-05--advanced-visual-realignment/full-canonical-source-port-handoff.md
+```
 
-`https://weaverse-hydrogen-next-poc.vercel.app/theme-preview-advanced/index.html#/home`
+That handoff pins:
 
-Use its page picker to inspect all listed reference routes. Treat rendered visual behavior—not source code—as canonical. Do not inspect/copy Pilot and do not copy the POC implementation wholesale.
+- Forward base `main@cf289917091e7a1aeb54d8521402a4b58ab50717`;
+- canonical POC source `Weaverse/weaverse-hydrogen-next-poc@7e416404b5c9d7d8b9fed27bed2b897c36c9b7a4`;
+- every canonical route render function and effective CSS range;
+- full Forward route mapping, normalized data, and interaction seams;
+- per-route overlay/diff verification.
 
-Durable reference/current evidence is available under:
-
-`/Users/hta218/Documents/work/artifacts/forward-advanced-realignment-reference-2026-08-05/`
-
-It includes full-page `reference-{home,shop,pdp}-{desktop,mobile}.png`, matching current-state captures, and desktop/mobile metrics JSON. Read the reference screenshots directly before implementing each corresponding route.
-
-Task:
-
-1. Use `/feature-plan` or equivalent plan-first reasoning to write `plan.md` in this spec folder.
-2. Implement the approved visual realignment in this worktree.
-3. Preserve the technical substrate and all route/data/cart contracts.
-4. Run focused checks while iterating; leave full final verification to Hermes after implementation stabilizes.
-5. Update `work-logs.md` with files changed, design mapping, commands/results, known gaps, and any manual QA still required.
-
-Constraints:
-
-- Branch: `feat/advanced-visual-realignment` from `main@962a008`.
-- Do not push, open/merge PRs, or deploy.
-- Do not add credentials or live Shopify/Weaverse runtime.
-- Do not modify the primary checkout or port `3333`.
-- Do not replace approved local media with unrelated POC media.
-- Do not weaken route, sanitization, or test contracts to make the UI easier.
-- Prefer Server Components; use Client Components only for interaction.
-- Ensure accessible mobile navigation, controls, focus states, and reduced motion.
+Do not reuse the old branch, removed worktree, Home-only scope, or screenshot-reconstruction method. Do not inspect/copy Pilot. Port the owned canonical POC DOM/CSS source directly across the shared shell and every rendered Next.js route as specified.

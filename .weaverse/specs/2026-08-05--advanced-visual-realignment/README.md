@@ -2,7 +2,7 @@
 
 ## Status
 
-Approved for implementation by Leo on 2026-08-05. Implementation and review-preview QA completed on 2026-08-06; Leo visual approval remains pending.
+The screenshot-reconstructed correction merged through PR #52 on 2026-08-06 but Leo rejected the result as still not matching the owned canonical POC. The prior rendered-evidence approach is superseded across the full storefront. The next implementation must port the canonical source directly for the shared shell and every rendered route using [`full-canonical-source-port-handoff.md`](./full-canonical-source-port-handoff.md). Leo visual approval remains pending.
 
 ## Original request
 
@@ -139,7 +139,7 @@ Bring search, cart, account, order, journal, article, content, policy, loading, 
 - Use the current Forward products, prices, copy, collections, journal entries, and approved local media.
 - Match POC composition and treatment; do not import the POC's throwaway products or unrelated third-party product media.
 - Do not inspect or copy Pilot.
-- Do not copy the POC implementation wholesale; implement from rendered visual behavior and this spec.
+- Do not embed the POC's static `app.js`, hash router, prototype state, or fictional data wholesale. Port its pinned canonical DOM/CSS source directly into Next components for the shared shell and every rendered route at the normalized data/route seams defined in `full-canonical-source-port-handoff.md`; screenshots are verification evidence, not the implementation source.
 
 ## Responsive requirements
 
