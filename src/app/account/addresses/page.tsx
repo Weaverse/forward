@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   description: "Forward prototype saved addresses.",
 };
 
+/**
+ * Addresses — the canonical `.account-grid` / `.account-block` grammar from
+ * `accountPage()` (source `app.js:316`), filled with normalized demo
+ * addresses. Editing belongs to the live customer-account slice.
+ */
 export default async function AddressesPage() {
   const addresses = await storefront.listDemoAddresses();
 
@@ -18,39 +23,29 @@ export default async function AddressesPage() {
       title="Where the gear ships."
       lede="Editing is part of the live customer-account slice; these records are fixed demo data."
     >
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="account-header">
+        <p className="eyebrow">Saved trailheads</p>
+        <h2 className="h2">Addresses</h2>
+      </div>
+      <div className="account-grid">
         {addresses.map((address) => (
-          <section
-            key={address.id}
-            className="border border-carbon/30 px-6 py-6"
-          >
-            <div className="flex items-baseline justify-between gap-3">
-              <h2 className="field-label text-pine">{address.label}</h2>
-              {address.isDefault ? (
-                <p className="field-label bg-acid px-2 py-1 text-carbon">
-                  Default
-                </p>
-              ) : null}
-            </div>
-            <address className="mt-3 not-italic">
-              <p className="font-display text-2xl text-carbon">
-                {address.name}
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-slate">
-                {address.lines.map((line) => (
-                  <span key={line} className="block">
-                    {line}
-                  </span>
-                ))}
-              </p>
+          <article key={address.id} className="account-block">
+            <p className="eyebrow">
+              {address.label}
+              {address.isDefault ? " / Default" : ""}
+            </p>
+            <h3>{address.name}</h3>
+            <address>
+              {address.lines.map((line) => (
+                <span key={line}>
+                  {line}
+                  <br />
+                </span>
+              ))}
             </address>
-          </section>
+          </article>
         ))}
       </div>
-      <p className="field-label mt-8 max-w-2xl normal-case tracking-normal text-slate">
-        Adding or editing addresses requires live customer accounts, which are
-        intentionally not connected in this demo.
-      </p>
     </AccountShell>
   );
 }

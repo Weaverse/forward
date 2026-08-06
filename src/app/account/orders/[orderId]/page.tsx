@@ -40,6 +40,11 @@ async function orderLineHref(line: DemoOrderLine): Promise<string> {
   return productColorwayHref(product, line.colorwayId);
 }
 
+/**
+ * Order detail — port of the canonical `orderDetailPage()` (source
+ * `app.js:320`): status in the page hero, the `.cart-list` line manifest, and
+ * the delivery/total `.account-grid` blocks.
+ */
 export default async function OrderPage({ params }: OrderPageProps) {
   const { orderId } = await params;
   const [order, addresses] = await Promise.all([
@@ -63,98 +68,97 @@ export default async function OrderPage({ params }: OrderPageProps) {
       activePath="/account/orders"
       eyebrow="Field account / Order"
       title={order.number}
-      lede={`Placed ${formatDate(order.placedAt)}. Repair coverage remains available for the useful life of each product.`}
+      heroAside={
+        <div>
+          <span className="order-status">{order.statusDetail}</span>
+          <p className="lede">Placed {formatDate(order.placedAt)}</p>
+        </div>
+      }
     >
-      <div className="flex flex-wrap items-baseline justify-between gap-4">
-        <p className="field-label text-pine">{order.statusDetail}</p>
-        <Link
-          href="/account/orders"
-          className="field-label inline-flex min-h-11 items-center gap-2 text-carbon hover:text-pine"
-        >
-          Back to orders →
-        </Link>
+      <Link className="text-link" href="/account/orders">
+        Back to orders
+      </Link>
+      <div className="account-header section-tight">
+        <p className="eyebrow">{order.statusDetail}</p>
+        <h2 className="h2">Ready for the next route.</h2>
+        <p className="lede">
+          Repair coverage remains available for the useful life of each product.
+        </p>
       </div>
 
-      <ul className="mt-4 divide-y divide-hairline border-y border-hairline">
+      <div className="cart-list">
         {lines.map(({ line, href }) => (
-          <li
+          <article
             key={`${line.productHandle}-${line.colorwayId}-${line.size ?? ""}`}
-            className="flex items-start gap-6 py-6"
+            className="cart-line"
           >
-            <Link href={href} className="shrink-0">
+            <Link href={href}>
               <Image
                 src={line.image.src}
                 alt={line.image.alt}
                 width={line.image.width}
                 height={line.image.height}
-                sizes="112px"
-                className="aspect-4/5 w-24 border border-hairline object-cover sm:w-28"
+                sizes="190px"
               />
             </Link>
-            <div className="flex-1">
-              <h2 className="font-display text-2xl text-carbon">
-                <Link href={href} className="hover:text-pine">
-                  {line.title}
-                </Link>
+            <div>
+              <h2>
+                <Link href={href}>{line.title}</Link>
               </h2>
-              <p className="field-label mt-2 text-slate">
+              <p className="muted">
                 {line.colorwayName}
                 {line.size !== undefined ? ` · ${line.size}` : ""} · Qty{" "}
                 {line.quantity}
               </p>
             </div>
-            <p className="text-sm text-carbon">
+            <div className="line-price">
               {formatMoney({
                 amount: line.unitPrice.amount * line.quantity,
                 currencyCode: "USD",
               })}
-            </p>
-          </li>
+            </div>
+          </article>
         ))}
-      </ul>
+      </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <section className="border border-carbon/30 px-6 py-6">
-          <h2 className="field-label text-pine">Delivery address</h2>
+      <div className="account-grid section-tight">
+        <article className="account-block">
+          <p className="eyebrow">Delivery address</p>
           {deliveryAddress !== undefined ? (
-            <address className="mt-3 not-italic">
-              <p className="font-display text-2xl text-carbon">
-                {deliveryAddress.name}
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-slate">
+            <>
+              <h3>{deliveryAddress.name}</h3>
+              <address>
                 {deliveryAddress.lines.map((line) => (
-                  <span key={line} className="block">
+                  <span key={line}>
                     {line}
+                    <br />
                   </span>
                 ))}
-              </p>
-            </address>
+              </address>
+            </>
           ) : (
-            <p className="mt-3 text-sm text-slate">No address on record.</p>
+            <p className="muted">No address on record.</p>
           )}
-        </section>
-
-        <section className="border border-carbon/30 px-6 py-6">
-          <h2 className="field-label text-pine">Order total</h2>
-          <dl className="mt-4 space-y-3 text-sm text-slate">
-            <div className="flex justify-between border-b border-hairline pb-3">
-              <dt>Subtotal</dt>
-              <dd className="text-carbon">{formatMoney(order.subtotal)}</dd>
-            </div>
-            <div className="flex justify-between border-b border-hairline pb-3">
-              <dt>Delivery</dt>
-              <dd className="text-carbon">
-                {order.shipping.amount === 0
-                  ? "Complimentary"
-                  : formatMoney(order.shipping)}
-              </dd>
-            </div>
-            <div className="flex items-baseline justify-between pt-1 font-display text-2xl text-carbon">
-              <dt>Total</dt>
-              <dd>{formatMoney(order.total)}</dd>
-            </div>
-          </dl>
-        </section>
+        </article>
+        <article className="account-block">
+          <p className="eyebrow">Order total</p>
+          <div className="summary-row">
+            <span>Subtotal</span>
+            <span>{formatMoney(order.subtotal)}</span>
+          </div>
+          <div className="summary-row">
+            <span>Delivery</span>
+            <span>
+              {order.shipping.amount === 0
+                ? "Complimentary"
+                : formatMoney(order.shipping)}
+            </span>
+          </div>
+          <div className="summary-row summary-total">
+            <span>Total</span>
+            <strong>{formatMoney(order.total)}</strong>
+          </div>
+        </article>
       </div>
     </AccountShell>
   );

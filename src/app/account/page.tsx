@@ -10,6 +10,11 @@ export const metadata: Metadata = {
   description: "Forward prototype account overview.",
 };
 
+/**
+ * Account overview — port of the canonical `accountPage()` (source
+ * `app.js:316`): account header, `.order-table` history, and the bordered
+ * `.account-grid` blocks. Records come from the normalized demo account data.
+ */
 export default async function AccountPage() {
   const [orders, addresses] = await Promise.all([
     storefront.listDemoOrders(),
@@ -24,95 +29,76 @@ export default async function AccountPage() {
       title="The state of your kit."
       lede="Recent orders, where they ship, and the standing repairs offer — in one quiet place."
     >
-      <section aria-labelledby="recent-orders-heading">
-        <p className="field-label text-clay">Order history</p>
-        <h2
-          id="recent-orders-heading"
-          className="display-large mt-3 text-carbon"
-        >
-          Recent orders
-        </h2>
-        {recentOrders.length > 0 ? (
-          <div className="mt-6">
-            <div className="field-label hidden border-b border-carbon pb-2 text-slate sm:grid sm:grid-cols-12 sm:gap-4">
-              <span className="sm:col-span-3">Order</span>
-              <span className="sm:col-span-3">Date</span>
-              <span className="sm:col-span-4">Status</span>
-              <span className="sm:col-span-2 sm:text-right">Total</span>
-            </div>
-            <ul className="divide-y divide-hairline border-b border-hairline">
-              {recentOrders.map((order) => (
-                <li key={order.id}>
-                  <Link
-                    href={`/account/orders/${order.id}`}
-                    className="group grid gap-1 py-4 sm:grid-cols-12 sm:items-baseline sm:gap-4"
-                  >
-                    <span className="field-label text-carbon group-hover:text-pine sm:col-span-3">
+      <div className="account-header">
+        <p className="eyebrow">Order history</p>
+        <h2 className="h2">Recent orders</h2>
+      </div>
+      {recentOrders.length > 0 ? (
+        <table className="order-table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {recentOrders.map((order) => (
+              <tr key={order.id}>
+                <td data-label="Order">
+                  <strong>
+                    <Link href={`/account/orders/${order.id}`}>
                       {order.number}
-                    </span>
-                    <span className="text-sm text-slate sm:col-span-3">
-                      {formatDate(order.placedAt)}
-                    </span>
-                    <span className="field-label text-pine sm:col-span-4">
-                      {order.statusDetail}
-                    </span>
-                    <span className="text-sm text-carbon sm:col-span-2 sm:text-right">
-                      {formatMoney(order.total)}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : (
-          <p className="mt-6 text-sm text-slate">No orders on record yet.</p>
-        )}
-      </section>
+                    </Link>
+                  </strong>
+                </td>
+                <td data-label="Date">{formatDate(order.placedAt)}</td>
+                <td data-label="Status">
+                  <span className="order-status">{order.statusDetail}</span>
+                </td>
+                <td data-label="Total">{formatMoney(order.total)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p className="muted">No orders on record yet.</p>
+      )}
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-2">
-        <section className="border border-carbon/30 px-6 py-6">
-          <h2 className="field-label text-pine">Repair desk</h2>
-          <p className="mt-3 font-display text-2xl text-carbon">
-            Keep good gear moving.
+      <div className="account-grid">
+        <article className="account-block">
+          <p className="eyebrow">Repair desk</p>
+          <h3>Keep good gear moving.</h3>
+          <p className="muted">
+            Anything bought from Forward can come back for repair — defects
+            free, everything else at an honest quoted cost.
           </p>
-          <p className="mt-3 max-w-md text-sm leading-relaxed text-slate">
-            Anything you have bought from Forward can come back for repair —
-            defects free, everything else at an honest quoted cost. Start with
-            the program page and have your order number nearby.
-          </p>
-          <Link
-            href="/pages/repairs"
-            className="field-label mt-5 inline-flex min-h-11 items-center border border-carbon px-5 text-carbon transition-colors hover:bg-carbon hover:text-cream"
-          >
-            The repairs program
+          <Link className="button" href="/pages/repairs">
+            The repairs programme
           </Link>
-        </section>
-
-        <section className="border border-carbon/30 px-6 py-6">
-          <h2 className="field-label text-pine">Default trailhead</h2>
+        </article>
+        <article className="account-block">
+          <p className="eyebrow">Default trailhead</p>
           {defaultAddress !== undefined ? (
             <>
-              <p className="mt-3 font-display text-2xl text-carbon">
-                {defaultAddress.name}
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-slate">
+              <h3>{defaultAddress.name}</h3>
+              <p>
                 {defaultAddress.lines.map((line) => (
-                  <span key={line} className="block">
+                  <span key={line}>
                     {line}
+                    <br />
                   </span>
                 ))}
               </p>
-              <Link
-                href="/account/addresses"
-                className="field-label mt-5 inline-flex min-h-11 items-center border border-carbon px-5 text-carbon transition-colors hover:bg-carbon hover:text-cream"
-              >
+              <Link className="button" href="/account/addresses">
                 Manage addresses
               </Link>
             </>
           ) : (
-            <p className="mt-3 text-sm text-slate">No addresses saved.</p>
+            <p className="muted">No addresses saved.</p>
           )}
-        </section>
+        </article>
       </div>
     </AccountShell>
   );
