@@ -12,10 +12,22 @@ import "./canonical-source.css";
  * Canonical font contract, ported from the Advanced POC document head
  * (source `index.html:11`): Literata (display), Manrope (UI), IBM Plex Mono
  * (field labels). Served by Next instead of hotlinked from Google Fonts.
+ *
+ * The source requests `Literata:opsz,wght@7..72,400;7..72,500;7..72,600` — the
+ * variable font including its optical-size axis. Declaring discrete weights
+ * here would download static instances cut at the default `opsz` of 14, the
+ * text optical size, so the oversized display headlines would render in a
+ * body-text cut: blunter serifs, lower stroke contrast, looser spacing.
+ * Requesting the `opsz` axis instead lets the browser's default
+ * `font-optical-sizing: auto` pick the display cut at hero sizes, and the
+ * variable `wght` axis still covers every weight the stylesheet asks for.
+ *
+ * Manrope and IBM Plex Mono stay on discrete weights because the source
+ * requests them the same way (`wght@400;500;600;700` and `wght@400;500`).
  */
 const literata = Literata({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  axes: ["opsz"],
   display: "swap",
   variable: "--font-literata",
 });
