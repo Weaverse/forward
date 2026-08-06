@@ -1,10 +1,38 @@
 import type { Metadata, Viewport } from "next";
+import { IBM_Plex_Mono, Literata, Manrope } from "next/font/google";
 import type { ReactNode } from "react";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
 import "./globals.css";
+import "./canonical-source.css";
+
+/*
+ * Canonical font contract, ported from the Advanced POC document head
+ * (source `index.html:11`): Literata (display), Manrope (UI), IBM Plex Mono
+ * (field labels). Served by Next instead of hotlinked from Google Fonts.
+ */
+const literata = Literata({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  variable: "--font-literata",
+});
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-manrope",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
+  variable: "--font-plex-mono",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -16,23 +44,21 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#12130f",
+  themeColor: "#11130f",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className="flex min-h-dvh flex-col">
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-carbon focus:px-4 focus:py-2 focus:font-field focus:text-sm focus:font-semibold focus:text-acid"
-        >
+    <html
+      lang="en"
+      className={`${literata.variable} ${manrope.variable} ${plexMono.variable}`}
+    >
+      <body>
+        <a className="skip-link" href="#main-content">
           Skip to content
         </a>
         <SiteHeader />
-        <main id="main-content" className="flex-1">
-          {children}
-        </main>
+        <main id="main-content">{children}</main>
         <SiteFooter />
       </body>
     </html>
