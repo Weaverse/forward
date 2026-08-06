@@ -11,21 +11,23 @@ export async function SiteFooter() {
 
   return (
     <footer data-surface="dark" className="bg-carbon-deep text-cream">
-      <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-        <div>
+      <div className="mx-auto grid max-w-7xl gap-14 px-5 py-20 sm:px-8 lg:grid-cols-[minmax(0,6fr)_minmax(0,6fr)] lg:gap-20 lg:py-28">
+        <div className="flex flex-col justify-between gap-12">
           <Wordmark size="stacked" />
-          <p className="mt-6 max-w-sm text-sm leading-relaxed text-cream/70">
-            {themeContent.footerTagline}
-          </p>
-          <p className="field-label mt-6 text-acid">
-            Field office · 54.4609° N, 3.0886° W
-          </p>
+          <div>
+            <p className="max-w-sm text-sm leading-relaxed text-cream/70">
+              {themeContent.footerTagline}
+            </p>
+            <p className="field-label mt-7 text-acid">
+              Field office · 54.4609° N, 3.0886° W
+            </p>
+          </div>
         </div>
-        <div className="grid gap-10 sm:grid-cols-3">
+        <div className="grid gap-10 sm:grid-cols-3 lg:gap-12 lg:pl-10 lg:pt-4">
           {navigation.footerColumns.map((column) => (
             <nav key={column.heading} aria-label={column.heading}>
               <h2 className="field-label text-cream/50">{column.heading}</h2>
-              <ul className="mt-4 space-y-1">
+              <ul className="mt-5 space-y-1">
                 {column.links.map((link) => (
                   <li key={link.href}>
                     <Link
@@ -42,7 +44,7 @@ export async function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-cream/15">
-        <div className="field-label mx-auto flex max-w-7xl flex-wrap items-baseline justify-between gap-x-8 gap-y-2 px-5 py-5 text-cream/50 sm:px-8">
+        <div className="field-label mx-auto flex max-w-7xl flex-wrap items-baseline justify-between gap-x-8 gap-y-3 px-5 py-7 text-cream/50 sm:px-8">
           <p className="max-w-3xl normal-case tracking-normal">
             © 2026 Forward. {themeContent.demoNotice}
           </p>

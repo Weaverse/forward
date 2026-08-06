@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-import { ProductCard } from "@/components/product-card";
+import { HomeEquipmentPlate } from "@/components/home-equipment-plate";
 import { cn } from "@/lib/cn";
 import { storefront } from "@/lib/storefront/data-source";
 import type {
@@ -18,35 +18,62 @@ export const metadata: Metadata = {
     "A short catalog of outdoor gear built for weather: shell, pack, and trail shoe. Built slowly, repaired indefinitely.",
 };
 
-/** Hero dossier: asymmetric grid, stepped oversized headline, telemetry rail. */
-function HeroDossier({
-  heroImage,
-  metrics,
-}: {
-  heroImage: StorefrontImage;
-  metrics: ReadonlyArray<{ value: string; label: string }>;
-}) {
+interface HomeMetric {
+  value: string;
+  label: string;
+}
+
+/** First sentence of a normalized description, used for card captions. */
+function firstSentence(text: string): string {
+  const end = text.indexOf(". ");
+  return end === -1 ? text : text.slice(0, end + 1);
+}
+
+/**
+ * Hero canvas: near-viewport editorial plate. The image dominates the right
+ * two thirds while the headline crosses it on a cream strip; the left rail
+ * carries the field-report marks.
+ */
+function HeroDossier({ heroImage }: { heroImage: StorefrontImage }) {
   return (
-    <section aria-label="Introduction" className="border-b border-carbon">
-      <div className="mx-auto grid max-w-7xl lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-        <div className="flex flex-col justify-between gap-10 px-5 py-12 sm:px-8 lg:py-16">
-          <div>
+    <section
+      aria-label="Introduction"
+      className="relative overflow-hidden border-b border-carbon/15 bg-parchment"
+    >
+      <span
+        aria-hidden="true"
+        className="absolute left-7 top-28 hidden h-[28rem] w-px bg-carbon/25 lg:block"
+      />
+      <span
+        aria-hidden="true"
+        className="field-label absolute left-9 top-32 hidden origin-top-left rotate-90 text-slate/70 lg:block"
+      >
+        Forward — advanced field system
+      </span>
+      <div className="mx-auto max-w-[150rem] px-5 pb-16 pt-10 sm:px-8 lg:px-16 lg:pb-28 lg:pt-14">
+        <div className="lg:grid lg:grid-cols-12 lg:items-start">
+          <div className="relative z-10 lg:col-span-7 lg:col-start-1 lg:row-start-1 lg:min-w-0 lg:pt-20">
             <p className="field-label text-slate">
-              Forward / High country system · Est. 2026
+              Forward / High country system
             </p>
-            <h1 className="display-huge mt-6 text-carbon">
-              <span className="block">Gear for moving</span>
-              <span className="block pl-[0.08em] sm:pl-[1.5em]">
-                through weather,
+            <h1 className="display-mega mt-8 text-carbon lg:mt-10">
+              <span className="block">Move until</span>
+              {/*
+               * Desktop keeps the second line unbroken so it crosses the image
+               * as one cream strip; `min-w-0` on the column stops the nowrap
+               * line from widening the grid track. Mobile still wraps.
+               */}
+              <span className="mt-2 block lg:whitespace-nowrap lg:pl-[2.2em]">
+                <span className="box-decoration-clone bg-cream px-3 py-1">
+                  the map runs out.
+                </span>
               </span>
-              <span className="block italic text-pine">not around it.</span>
             </h1>
-            <p className="mt-8 max-w-sm text-base leading-relaxed text-slate">
-              Three products. A shell, a pack, and a trail shoe — built slowly,
-              specified honestly, and repaired for as long as you keep going
-              out.
+            <p className="mt-12 max-w-xs border-l border-carbon/30 pl-5 text-sm leading-relaxed text-slate lg:mt-20">
+              Purposeful layers and field equipment for uncertain weather,
+              useful distance, and the quiet beyond the marked route.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap items-center gap-6">
               <Link
                 href="/shop"
                 className="field-label inline-flex min-h-11 items-center bg-acid px-6 text-carbon transition-colors hover:bg-carbon hover:text-acid"
@@ -55,36 +82,34 @@ function HeroDossier({
               </Link>
               <Link
                 href="/pages/about-forward"
-                className="field-label inline-flex min-h-11 items-center border border-carbon px-6 text-carbon transition-colors hover:bg-carbon hover:text-cream"
+                className="field-label inline-flex min-h-11 items-center gap-2 text-carbon hover:text-clay"
               >
-                The field standard
+                The field standard →
               </Link>
             </div>
           </div>
-          <dl className="grid grid-cols-3 gap-6 border-t border-carbon/20 pt-6">
-            {metrics.map((metric) => (
-              <div key={metric.label}>
-                <dd className="font-display text-4xl leading-none text-carbon">
-                  {metric.value}
-                </dd>
-                <dt className="field-label mt-2 text-slate">{metric.label}</dt>
-              </div>
-            ))}
-          </dl>
-        </div>
-        <div className="relative border-t border-carbon lg:border-l lg:border-t-0">
-          <Image
-            src={heroImage.src}
-            alt={heroImage.alt}
-            width={heroImage.width}
-            height={heroImage.height}
-            priority
-            sizes="(min-width: 1024px) 42vw, 100vw"
-            className="h-full max-h-[34rem] w-full object-cover lg:max-h-none"
-          />
-          <div className="field-label absolute bottom-0 left-0 right-0 flex flex-wrap justify-between gap-x-6 gap-y-1 bg-carbon/85 px-4 py-3 text-cream/80">
-            <span>Conditions — variable, wind over the col</span>
-            <span>54.4609° N / 3.0886° W</span>
+          <div className="relative mt-10 lg:col-span-8 lg:col-start-5 lg:row-start-1 lg:mt-0">
+            <Image
+              src={heroImage.src}
+              alt={heroImage.alt}
+              width={heroImage.width}
+              height={heroImage.height}
+              priority
+              sizes="(min-width: 1024px) 66vw, 100vw"
+              className="aspect-4/3 w-full object-cover lg:aspect-7/5"
+            />
+            <dl className="field-label absolute bottom-0 right-0 hidden w-72 bg-carbon/90 px-4 py-3 text-cream/70 lg:block">
+              <dt className="sr-only">Current field conditions</dt>
+              <dd className="text-cream/90">Current field conditions</dd>
+              <dt className="sr-only">Wind</dt>
+              <dd className="mt-2 border-t border-cream/15 pt-2">
+                Wind — variable, over the col
+              </dd>
+              <dt className="sr-only">Position</dt>
+              <dd className="mt-2 border-t border-cream/15 pt-2">
+                54.4609° N / 3.0886° W
+              </dd>
+            </dl>
           </div>
         </div>
       </div>
@@ -92,150 +117,199 @@ function HeroDossier({
   );
 }
 
-/** Operating premise: ghost plate number, two-tone headline, field-standard link. */
-function OperatingPremise() {
+/** Operating premise: ghost plate number, three-column premise grid, metrics. */
+function OperatingPremise({ metrics }: { metrics: ReadonlyArray<HomeMetric> }) {
   return (
     <section
       aria-labelledby="premise-heading"
-      className="relative overflow-hidden border-b border-carbon/20"
+      className="border-b border-carbon/15"
     >
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-8 right-2 font-display text-[10rem] leading-none text-carbon/10 sm:text-[16rem]"
-      >
-        01
-      </span>
-      <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
-        <p className="field-label text-clay">Operating premise</p>
-        <h2 id="premise-heading" className="display-large mt-4 max-w-3xl">
-          <span className="text-carbon">Built to be worn out. </span>
-          <span className="italic text-pine">Made to be repaired.</span>
-        </h2>
-        <p className="mt-6 max-w-md text-base leading-relaxed text-slate">
-          Every product answers three questions before it ships: does it work
-          when the weather turns, does it carry its weight, and can we fix it
-          when you finally wear it out.
-        </p>
-        <Link
-          href="/pages/about-forward"
-          className="field-label mt-8 inline-flex min-h-11 items-center gap-2 border-b border-carbon text-carbon hover:text-clay"
-        >
-          Read the field standard →
-        </Link>
+      <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:py-36">
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-10">
+          <span
+            aria-hidden="true"
+            className="plate-ghost block text-carbon/15 lg:col-span-2"
+          >
+            01
+          </span>
+          <div className="lg:col-span-5">
+            <p className="field-label text-slate">Operating premise</p>
+            <h2 id="premise-heading" className="display-section mt-5">
+              <span className="block text-carbon">Carry less.</span>
+              <span className="block text-moss">Notice more.</span>
+            </h2>
+          </div>
+          <div className="lg:col-span-5">
+            <p className="max-w-md text-base leading-relaxed text-slate">
+              We build adaptable outdoor goods around a strict premise: every
+              piece must earn its weight, survive a change of plan, and become
+              quieter with use.
+            </p>
+            <dl className="mt-12 grid grid-cols-3 gap-6 border-y border-carbon/20 py-7">
+              {metrics.map((metric) => (
+                <div key={metric.label}>
+                  <dd className="font-display text-4xl leading-none text-carbon lg:text-5xl">
+                    {metric.value}
+                  </dd>
+                  <dt className="field-label mt-3 text-slate">
+                    {metric.label}
+                  </dt>
+                </div>
+              ))}
+            </dl>
+            <Link
+              href="/pages/about-forward"
+              className="field-label mt-10 inline-flex min-h-11 items-center gap-2 border-b border-carbon text-carbon hover:text-clay"
+            >
+              Read the field standard →
+            </Link>
+          </div>
+        </div>
       </div>
     </section>
   );
 }
 
-/** Overlapping editorial dossier: stacked flow on mobile, offset planes on lg. */
+/**
+ * Field dossier: a large landscape plate with a circular altitude mark, an
+ * acid-edged detail plate overlapping it, and the pull quote below the overlap.
+ */
 function FieldDossier({
   primary,
   overlay,
-  detail,
 }: {
   primary: StorefrontImage;
   overlay: StorefrontImage;
-  detail: StorefrontImage;
 }) {
   return (
     <section
       aria-label="Field imagery"
-      className="border-b border-carbon/20 bg-parchment"
+      className="border-b border-carbon/15 bg-parchment"
     >
-      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-12 lg:gap-0">
-        <div className="relative lg:col-span-8">
-          <Image
-            src={primary.src}
-            alt={primary.alt}
-            width={primary.width}
-            height={primary.height}
-            sizes="(min-width: 1024px) 60vw, 100vw"
-            className="aspect-4/3 w-full object-cover"
-          />
-          <p className="field-label mt-2 text-slate">
-            Traverse study / 02 · high route, late season
-          </p>
-          <div className="mt-6 lg:absolute lg:-right-24 lg:bottom-16 lg:mt-0 lg:w-72">
-            <div className="lg:bg-acid lg:p-2">
+      <div className="mx-auto max-w-[90rem] px-5 py-24 sm:px-8 lg:py-36">
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-0">
+          <div className="relative lg:col-span-7">
+            <Image
+              src={primary.src}
+              alt={primary.alt}
+              width={primary.width}
+              height={primary.height}
+              sizes="(min-width: 1024px) 58vw, 100vw"
+              className="aspect-4/3 w-full object-cover lg:aspect-9/8"
+            />
+            <span
+              aria-hidden="true"
+              className="absolute -right-14 top-12 hidden size-36 flex-col items-center justify-center rounded-full border border-carbon/40 bg-cream/85 text-center text-carbon lg:flex"
+            >
+              <span className="field-label text-slate">Field tested</span>
+              <span className="mt-1 font-display text-2xl leading-none">
+                4,000 ft
+              </span>
+            </span>
+            <p className="field-label mt-3 text-slate">
+              Traverse study / 03 · high route, late season
+            </p>
+          </div>
+          <div className="lg:col-span-5 lg:pt-44">
+            <div className="lg:-ml-32 lg:w-[27rem] lg:bg-acid lg:pb-3 lg:pl-3">
               <Image
                 src={overlay.src}
                 alt={overlay.alt}
                 width={overlay.width}
                 height={overlay.height}
-                sizes="(min-width: 1024px) 18rem, 100vw"
+                sizes="(min-width: 1024px) 27rem, 100vw"
                 className="aspect-4/3 w-full object-cover"
               />
             </div>
+            <p className="mt-8 max-w-sm font-display text-2xl leading-snug text-carbon lg:mt-12 lg:pl-6 lg:text-4xl">
+              A clothing system should disappear while moving and become exactly
+              enough when the weather turns.
+            </p>
           </div>
-          <span
-            aria-hidden="true"
-            className="field-label absolute left-4 top-4 hidden size-24 items-center justify-center rounded-full border border-cream/80 text-center text-cream lg:flex"
-          >
-            Field
-            <br />
-            tested
-          </span>
-        </div>
-        <div className="flex flex-col justify-end gap-8 lg:col-span-4 lg:pl-16">
-          <Image
-            src={detail.src}
-            alt={detail.alt}
-            width={detail.width}
-            height={detail.height}
-            sizes="(min-width: 1024px) 24vw, 100vw"
-            className="hidden aspect-3/4 w-2/3 object-cover lg:block"
-          />
-          <p className="max-w-xs font-display text-2xl leading-snug text-carbon">
-            A kit should disappear while moving and become exactly enough when
-            the weather turns.
-          </p>
         </div>
       </div>
     </section>
   );
 }
 
-/** Equipment index: staggered numbered product cards. */
+/** Equipment index: three real products staged as differently scaled plates. */
 function EquipmentIndex({ products }: { products: readonly Product[] }) {
+  const [lead, middle, trailing] = products;
+
   return (
     <section
       aria-labelledby="catalog-heading"
-      className="border-b border-carbon/20"
+      className="border-b border-carbon/15"
     >
-      <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
+      <div className="mx-auto max-w-[90rem] px-5 py-24 sm:px-8 lg:py-36">
         <p className="field-label text-slate">
           Equipment index / 01–{String(products.length).padStart(2, "0")}
         </p>
-        <div className="mt-4 flex flex-wrap items-end justify-between gap-6">
-          <h2 id="catalog-heading" className="display-large max-w-2xl">
-            <span className="block text-carbon">The catalog,</span>
-            <span className="block italic text-pine">complete.</span>
+        <div className="mt-5 grid gap-8 lg:grid-cols-12 lg:items-end">
+          <h2 id="catalog-heading" className="display-section lg:col-span-6">
+            <span className="block text-carbon">Objects for</span>
+            <span className="block text-moss">going farther.</span>
           </h2>
-          <Link
-            href="/shop"
-            className="field-label inline-flex min-h-11 items-center gap-2 border border-carbon px-5 text-carbon transition-colors hover:bg-carbon hover:text-cream"
-          >
-            Complete index →
-          </Link>
+          <p className="field-label text-slate lg:col-span-3">
+            Three pieces, one system. Built to layer, carry, and repair.
+          </p>
+          <div className="lg:col-span-3 lg:text-right">
+            <Link
+              href="/shop"
+              className="field-label inline-flex min-h-11 items-center gap-2 border border-carbon px-5 text-carbon transition-colors hover:bg-carbon hover:text-cream"
+            >
+              Complete index →
+            </Link>
+          </div>
         </div>
-        <div className="mt-10 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((product, index) => (
-            <ProductCard
-              key={product.handle}
-              product={product}
-              plate={product.plate}
-              stagger={index % 3 === 1}
-              priority={index === 0}
+        <div className="mt-14 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:mt-24 lg:grid-cols-12 lg:items-start">
+          {lead !== undefined ? (
+            <HomeEquipmentPlate
+              product={lead}
+              tag={lead.activities[0] ?? "Field tested"}
+              aspect="aspect-3/4"
+              priority
+              className="lg:col-span-5"
             />
-          ))}
+          ) : null}
+          {middle !== undefined ? (
+            <HomeEquipmentPlate
+              product={middle}
+              tag={middle.activities[0] ?? "Field tested"}
+              aspect="aspect-4/5"
+              withContext
+              className="lg:col-span-3 lg:mt-28"
+            />
+          ) : null}
+          {trailing !== undefined ? (
+            <HomeEquipmentPlate
+              product={trailing}
+              tag={trailing.activities[0] ?? "Field tested"}
+              aspect="aspect-4/5"
+              className="lg:col-span-4 lg:mt-10"
+            />
+          ) : null}
         </div>
       </div>
     </section>
   );
 }
 
-/** Dark dispatch split from the lead journal article. */
-function DispatchSplit({ article }: { article: JournalArticle }) {
+/**
+ * Dark dispatch: near-viewport split of a dominant image and an editorial
+ * panel. The dominant frame is the wide mountain panorama band rather than the
+ * article's own trail frame, which the field dossier carries instead.
+ */
+function DispatchSplit({
+  article,
+  image,
+}: {
+  article: JournalArticle;
+  image: StorefrontImage;
+}) {
+  const [firstWord, ...restWords] = article.title.split(" ");
+  const note = article.body.find((block) => block.type === "paragraph");
+
   return (
     <section
       aria-labelledby="dispatch-heading"
@@ -244,38 +318,42 @@ function DispatchSplit({ article }: { article: JournalArticle }) {
     >
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-10 right-0 font-display text-[12rem] leading-none text-cream/5 sm:text-[18rem]"
+        className="pointer-events-none absolute -bottom-16 right-4 font-display text-[14rem] leading-none text-cream/5 sm:text-[22rem]"
       >
         {article.plate.replace(/\D/g, "")}
       </span>
-      <div className="mx-auto grid max-w-7xl lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-        <Image
-          src={article.heroImage.src}
-          alt={article.heroImage.alt}
-          width={article.heroImage.width}
-          height={article.heroImage.height}
-          sizes="(min-width: 1024px) 58vw, 100vw"
-          className="h-full max-h-[30rem] w-full object-cover lg:max-h-none"
-        />
-        <div className="relative flex flex-col justify-center gap-6 px-5 py-14 sm:px-8 lg:py-20">
+      <div className="grid lg:min-h-[85vh] lg:grid-cols-[minmax(0,62fr)_minmax(0,38fr)]">
+        <div className="relative aspect-4/3 lg:aspect-auto">
+          <Image
+            src={image.src}
+            alt={image.alt}
+            fill
+            sizes="(min-width: 1024px) 62vw, 100vw"
+            className="object-cover"
+          />
+          <p className="field-label absolute bottom-0 left-0 bg-acid px-3 py-2 text-carbon">
+            {article.location} · {article.readingMinutes} min read
+          </p>
+        </div>
+        <div className="relative flex flex-col justify-center gap-7 px-5 py-16 sm:px-8 lg:py-24 lg:pl-16 lg:pr-14">
           <p className="field-label text-clay-light">
             Dispatch {article.plate} / {article.location}
           </p>
-          <h2 id="dispatch-heading" className="display-large">
-            <span className="text-cream">{article.title.split(" ")[0]} </span>
-            <span className="italic text-acid">
-              {article.title.split(" ").slice(1).join(" ")}
-            </span>
+          <h2 id="dispatch-heading" className="display-section">
+            <span className="block text-cream">{firstWord}</span>
+            <span className="block text-acid">{restWords.join(" ")}</span>
           </h2>
-          <p className="max-w-sm font-display text-lg italic leading-relaxed text-cream/80">
+          <p className="max-w-md font-display text-xl italic leading-relaxed text-cream/90 lg:text-2xl">
             “{article.excerpt}”
           </p>
-          <p className="field-label text-cream/60">
-            Filed from {article.coordinates} · {article.readingMinutes} min read
-          </p>
+          {note !== undefined ? (
+            <p className="max-w-md text-sm leading-relaxed text-cream/60">
+              {note.text}
+            </p>
+          ) : null}
           <Link
             href={`/journal/${article.handle}`}
-            className="field-label inline-flex min-h-11 w-fit items-center border border-cream/60 px-6 text-cream transition-colors hover:bg-acid hover:border-acid hover:text-carbon"
+            className="field-label mt-2 inline-flex min-h-12 items-center justify-center border border-cream/50 px-6 text-cream transition-colors hover:border-acid hover:bg-acid hover:text-carbon"
           >
             Open dispatch {article.plate} →
           </Link>
@@ -285,21 +363,27 @@ function DispatchSplit({ article }: { article: JournalArticle }) {
   );
 }
 
-/** Movement systems: three staggered dark collection cards. */
+/** Movement systems: staggered collection plates over dark caption blocks. */
 function MovementSystems({
   collections,
 }: {
   collections: readonly Collection[];
 }) {
+  const layouts = [
+    { span: "lg:col-span-3 lg:mt-16", aspect: "aspect-3/4" },
+    { span: "lg:col-span-5", aspect: "aspect-4/5" },
+    { span: "lg:col-span-4 lg:mt-28", aspect: "aspect-square" },
+  ];
+
   return (
     <section aria-labelledby="movement-heading">
-      <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
+      <div className="mx-auto max-w-[90rem] px-5 py-24 sm:px-8 lg:py-36">
         <p className="field-label text-slate">
           Movement systems / 01–{String(collections.length).padStart(2, "0")}
         </p>
-        <div className="mt-4 flex flex-wrap items-end justify-between gap-6">
-          <h2 id="movement-heading" className="display-large text-carbon">
-            Ways into the kit.
+        <div className="mt-5 flex flex-wrap items-end justify-between gap-6">
+          <h2 id="movement-heading" className="display-section text-carbon">
+            Choose your ground.
           </h2>
           <Link
             href="/shop"
@@ -308,42 +392,50 @@ function MovementSystems({
             All products →
           </Link>
         </div>
-        <div className="mt-10 grid gap-6 sm:grid-cols-3">
-          {collections.map((collection, index) => (
-            <Link
-              key={collection.handle}
-              href={`/shop/${collection.handle}`}
-              data-surface="dark"
-              className={cn(
-                "group relative block overflow-hidden bg-carbon text-cream",
-                index % 2 === 1 && "sm:mt-16",
-              )}
-            >
-              <Image
-                src={collection.heroImage.src}
-                alt={collection.heroImage.alt}
-                width={collection.heroImage.width}
-                height={collection.heroImage.height}
-                sizes="(min-width: 640px) 30vw, 100vw"
-                className="aspect-3/4 w-full object-cover opacity-75 transition-opacity group-hover:opacity-90"
-              />
-              <span
-                aria-hidden="true"
-                className="plate-number absolute left-4 top-4 text-cream"
+        <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:mt-24 lg:grid-cols-12 lg:items-start">
+          {collections.map((collection, index) => {
+            const layout = layouts[index % layouts.length];
+            return (
+              <Link
+                key={collection.handle}
+                href={`/shop/${collection.handle}`}
+                data-surface="dark"
+                className={cn("group block", layout?.span)}
               >
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <span className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-carbon/90 to-transparent px-4 pb-4 pt-12">
-                <span className="block font-display text-2xl">
-                  {collection.title}
-                </span>
-                <span className="field-label mt-1 block text-cream/70">
-                  {collection.fieldCode} · {collection.productHandles.length}{" "}
-                  products
-                </span>
-              </span>
-            </Link>
-          ))}
+                <div className="relative">
+                  <Image
+                    src={collection.heroImage.src}
+                    alt={collection.heroImage.alt}
+                    width={collection.heroImage.width}
+                    height={collection.heroImage.height}
+                    sizes="(min-width: 1024px) 34vw, (min-width: 640px) 45vw, 90vw"
+                    className={cn(
+                      "w-full object-cover transition-opacity group-hover:opacity-90",
+                      layout?.aspect,
+                    )}
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="plate-mark absolute left-4 top-2 text-cream/90 [text-shadow:0_1px_12px_rgb(0_0_0/0.35)]"
+                  >
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                </div>
+                <div className="bg-carbon px-5 pb-7 pt-5 text-cream">
+                  <span className="field-label block text-acid">
+                    {collection.fieldCode} · {collection.productHandles.length}{" "}
+                    products
+                  </span>
+                  <span className="mt-3 block font-display text-3xl leading-none lg:text-4xl">
+                    {collection.title}
+                  </span>
+                  <span className="mt-3 block text-sm leading-relaxed text-cream/65">
+                    {firstSentence(collection.description)}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -362,7 +454,7 @@ export default async function HomePage() {
     (total, product) => total + product.colorways.length,
     0,
   );
-  const metrics = [
+  const metrics: readonly HomeMetric[] = [
     {
       value: String(products.length).padStart(2, "0"),
       label: "Catalog plates",
@@ -377,20 +469,20 @@ export default async function HomePage() {
     },
   ];
   const overlayImage = collections[2]?.heroImage ?? themeContent.homeHeroImage;
-  const detailImage = collections[1]?.heroImage ?? themeContent.homeHeroImage;
+  const dossierImage =
+    collections[1]?.heroImage ?? themeContent.standardBandImage;
 
   return (
     <div>
-      <HeroDossier heroImage={themeContent.homeHeroImage} metrics={metrics} />
-      <OperatingPremise />
-      <FieldDossier
-        primary={themeContent.standardBandImage}
-        overlay={overlayImage}
-        detail={detailImage}
-      />
+      <HeroDossier heroImage={themeContent.homeHeroImage} />
+      <OperatingPremise metrics={metrics} />
+      <FieldDossier primary={dossierImage} overlay={overlayImage} />
       <EquipmentIndex products={products} />
       {leadArticle !== undefined ? (
-        <DispatchSplit article={leadArticle} />
+        <DispatchSplit
+          article={leadArticle}
+          image={themeContent.standardBandImage}
+        />
       ) : null}
       <MovementSystems collections={collections} />
     </div>

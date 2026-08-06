@@ -13,7 +13,7 @@ export function Wordmark({ size = "header" }: WordmarkProps) {
       <Link
         href="/"
         aria-label="Forward — home"
-        className="inline-block font-display font-semibold uppercase leading-[0.86] tracking-[-0.01em] text-[clamp(4.5rem,10vw,9rem)]"
+        className="inline-block font-display font-semibold uppercase leading-[0.84] tracking-[-0.015em] text-[clamp(4.5rem,8vw,8rem)]"
       >
         <span className="block">For</span>
         <span className="block">Ward</span>

@@ -326,3 +326,35 @@ push/deploy; no credentials; no live auth/checkout/Shopify/Weaverse.
   uncommitted. Nothing was committed, pushed, merged, or opened as a PR pending
   Leo's visual review. Canonical primary `main` was left clean and its local
   server was restored on port 3333.
+
+## 2026-08-06 — screenshot-driven Home canonical parity correction
+
+- Leo rejected the merged Home as visually completely different from the canonical Advanced POC. This invalidates the prior final-verification statement that no blocker-level Home alignment defect remained. The technical and interaction results stayed valid, but they did not prove visual parity.
+- Locked Leo's exact 2560px-wide captures as authoritative evidence:
+  - merged Preview: `screencapture-forward-abhk47fol-hta218-vercel-app-2026-08-06-09_38_41.png` (`2560×5247`);
+  - canonical Advanced POC: `screencapture-weaverse-hydrogen-next-poc-vercel-app-theme-preview-advanced-index-html-2026-08-06-09_38_30.png` (`2560×7389`).
+  Durable copies and five side-by-side views live under `/Users/hta218/Documents/work/artifacts/forward-home-canonical-parity-user-evidence-2026-08-06/`.
+- Created isolated branch/worktree `fix/home-canonical-parity` at merged `main@9f506d3`; primary `main` and its `3333` server remained unchanged.
+- Rebuilt `src/app/page.tsx` from the screenshot's macro composition rather than the previous token-level interpretation:
+  - two-line `Move until / the map runs out.` hero crossing a dominant image;
+  - three-column `Carry less. / Notice more.` operating premise;
+  - large hikers/tent overlap dossier with altitude mark;
+  - Home-specific asymmetric plates for the three real normalized products;
+  - near-viewport mountain dispatch split;
+  - staggered movement cards and a taller canonical-style footer.
+- Added Home-only display/plate utilities in `globals.css`; adjusted only the shared stacked footer wordmark/footer scale. No direct fixture imports and no changes under `src/lib`, tests, scripts, public assets, package/lock/config, routes, cart, Shopify, or Weaverse runtime.
+- Exact-width production-mode final Home capture is `2560×7888`; section sequence, dominant geometry, overlap, image roles, and dark/light cadence now materially follow the `2560×7389` canonical screenshot. The extra height is produced by the real three-product/editorial composition, not empty padding.
+- Remaining visual differences are explicit data/media contracts rather than hidden parity claims: Forward has three real products versus four POC placeholders, uses approved Forward product photography, and uses the normalized Camp Craft tent image instead of the POC campfire frame.
+- Final verification after all code edits:
+  - `bun run check` — green; 56/56 tests, 33 generated pages, 19 route patterns + 4 redirects;
+  - `bun run smoke:routes` — 30/30 HTTP checks;
+  - `bun audit --production` — no vulnerabilities;
+  - `git diff --check` — clean;
+  - production-mode Home interaction QA — three repeated Home/Shop navigation cycles, product deep-link, mobile menu, requested-image health, severe console logs, and desktop/mobile overflow all passed with `0 failures`;
+  - final visual/mobile evidence: `/Users/hta218/Documents/work/artifacts/forward-home-canonical-parity-local-qa-2026-08-06/`.
+- Copilot autoreview could not produce a report because CLI NDJSON session events triggered the documented parser-noise failure. The required fresh read-only Hermes fallback returned `BLOCK`: the first visual rewrite removed the Home product-card colorway radios, image swap, and selected-colorway deep links.
+- Fixed the accepted interaction blocker with `src/components/home-equipment-plate.tsx`, a Home-specific client plate that preserves the asymmetric composition while restoring named radio groups, pointer/keyboard selection, primary/context image swaps, and selected-colorway URLs. Native production Selenium verified Charcoal → Claystone by pointer, Claystone → Charcoal by keyboard, and both Ridge primary/context frames → Dune; href and checked-state assertions all passed.
+- The first focused post-fix review returned `BLOCK` on two accessibility details: the new swatch labels measured only `16×16`, and the selected state/name was not visible. The follow-up now mirrors the shared `ProductCard`: every label measures `44×44`, the selected swatch gets a visible carbon ring, and the row shows `activeColorway.name · NN colorways`. Production Selenium verified target sizes, settled selected/unselected border colors, visible active-name transitions, pointer/keyboard behavior, hrefs, and images with `0 failures`; evidence: `home-swatch-a11y-post-review-qa.json` in the local QA artifact folder.
+- Broad Home desktop/mobile QA remained `0 failures`. Accessible controls increased full-page height only from `7888` to `7907` desktop and from `9663` to `9721` mobile; section structure and canonical composition remain unchanged.
+- Final narrow read-only review returned `APPROVE`: no blocking findings; measured targets, selected state/name, pointer/keyboard behavior, href/image updates, hydration, console, overflow, and desktop/mobile QA all passed against the exact post-a11y diff.
+- Publication remained deferred until the final reviewer approval. User design approval remains pending before Shopify adapters, Weaverse sections/schemas, or production deployment.
