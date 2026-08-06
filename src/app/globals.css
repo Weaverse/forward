@@ -1,29 +1,39 @@
 @import "tailwindcss";
 
 @theme {
-  /* Forward palette — warm cream canvas, near-black pine, field-note accents */
-  --color-bone: #f3f0e8;
-  --color-parchment: #eae6da;
-  --color-mist: #d6d1c2;
-  --color-ink: #1d211c;
-  --color-slate: #4c534a;
-  --color-pine: #24402f;
-  --color-pine-deep: #182b20;
-  --color-moss: #536143;
-  --color-moss-light: #b8c3a6;
-  --color-acid: #b5c04a;
-  --color-clay: #a94316;
-  --color-clay-deep: #87330f;
-  --color-clay-light: #f3aa86;
+  /*
+   * Forward palette — Advanced field system: cream canvas, near-black carbon
+   * surfaces, neon acid status rail. Legacy names (bone/parchment/mist/ink/
+   * pine/…) stay mapped onto the new values so untouched files keep compiling
+   * during the migration; unused ones are removed in the final cleanup pass.
+   */
+  --color-cream: #efece1;
+  --color-carbon: #12130f;
+  --color-carbon-deep: #0a0b08;
+  --color-acid: #d8f636;
+  --color-hairline: #d8d4c5;
+
+  --color-bone: #efece1;
+  --color-parchment: #e7e3d5;
+  --color-mist: #d8d4c5;
+  --color-ink: #12130f;
+  --color-slate: #5a5c50;
+  --color-pine: #3c4a2c;
+  --color-pine-deep: #161710;
+  --color-moss: #5c6b3f;
+  --color-moss-light: #c8d3a8;
+  --color-clay: #b0491f;
+  --color-clay-deep: #8f3812;
+  --color-clay-light: #e8a37e;
 
   --font-sans:
     "Avenir Next", "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui,
     sans-serif;
-  /* Editorial serif display — large readable headlines */
+  /* Editorial serif display — oversized high-contrast headlines */
   --font-display:
     "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
     "Times New Roman", ui-serif, serif;
-  /* Monospace field labels, plate numbers, coordinates */
+  /* Monospace field labels, plate numbers, coordinates, report codes */
   --font-field:
     "SF Mono", ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
 
@@ -53,18 +63,24 @@
   }
 
   body {
-    @apply bg-bone text-ink font-sans antialiased;
+    @apply bg-cream text-ink font-sans antialiased;
   }
 
   ::selection {
-    background-color: var(--color-clay);
-    color: var(--color-bone);
+    background-color: var(--color-acid);
+    color: var(--color-carbon);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-clay);
+    outline: 2px solid var(--color-carbon);
     outline-offset: 3px;
     border-radius: 1px;
+  }
+
+  /* Carbon/acid surfaces flip the focus ring so it stays visible. */
+  [data-surface="dark"] :focus-visible,
+  [data-surface="dark"]:focus-visible {
+    outline-color: var(--color-acid);
   }
 }
 
@@ -74,4 +90,28 @@
   font-size: 0.6875rem;
   letter-spacing: var(--tracking-field);
   text-transform: uppercase;
+}
+
+/* Oversized editorial display headline — hero / masthead scale. */
+@utility display-huge {
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 7.5vw, 6.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.015em;
+}
+
+/* Oversized display headline — section scale. */
+@utility display-large {
+  font-family: var(--font-display);
+  font-size: clamp(2.125rem, 4.5vw, 4rem);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+}
+
+/* Giant serif plate/index numbers overlapping card imagery. */
+@utility plate-number {
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 4.5vw, 4.25rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
 }

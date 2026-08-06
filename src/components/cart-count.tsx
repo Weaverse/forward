@@ -17,7 +17,7 @@ export function CartCount() {
       </span>
       <span
         aria-hidden="true"
-        className="ml-1.5 inline-flex min-w-5 items-center justify-center border border-current px-1 font-field text-[0.625rem] leading-4"
+        className="inline-flex size-5 items-center justify-center rounded-full bg-acid font-field text-[0.625rem] leading-none text-carbon"
       >
         {count}
       </span>

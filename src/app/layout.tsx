@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#182b20",
+  themeColor: "#12130f",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="flex min-h-dvh flex-col">
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-clay focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-bone"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-carbon focus:px-4 focus:py-2 focus:font-field focus:text-sm focus:font-semibold focus:text-acid"
         >
           Skip to content
         </a>
