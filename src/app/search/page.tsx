@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: "Search the Forward catalog.",
 };
 
+const COMMON_SEARCHES = ["shell", "pack", "trail", "charcoal", "alpine"];
+
 interface SearchPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
@@ -23,46 +25,46 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-5 py-12 sm:px-8">
-      <header className="max-w-2xl">
-        <p className="field-label text-clay">Index · full catalog</p>
-        <h1 className="mt-3 font-display text-4xl text-pine sm:text-5xl">
-          Search
+      <header>
+        <p className="field-label text-clay">Search the field catalog</p>
+        <h1 className="display-huge mt-6 text-carbon">
+          What are you looking for?
         </h1>
       </header>
 
       {/* GET form: search works without JavaScript. */}
-      <form method="get" action="/search" className="mt-8 max-w-xl">
-        <label htmlFor="search-input" className="field-label text-ink">
+      <form method="get" action="/search" className="mt-10">
+        <label htmlFor="search-input" className="sr-only">
           Search the store
         </label>
-        <div className="mt-2 flex">
+        <div className="flex items-end gap-6 border-b-2 border-carbon pb-3">
           <input
             id="search-input"
             type="search"
             name="q"
             defaultValue={rawQuery}
-            placeholder="Try “shell”, “pack”, or “charcoal”"
-            className="min-h-11 w-full border border-mist bg-bone px-4 text-base text-ink placeholder:text-slate/60"
+            placeholder="trail"
+            className="display-large w-full min-w-0 bg-transparent text-carbon placeholder:text-carbon/30"
           />
           <button
             type="submit"
-            className="field-label inline-flex min-h-11 items-center border border-l-0 border-pine bg-pine px-6 text-bone transition-colors hover:bg-pine-deep"
+            className="field-label inline-flex min-h-11 shrink-0 items-center gap-2 text-carbon transition-colors hover:text-pine"
           >
-            Search
+            Search →
           </button>
         </div>
       </form>
 
-      <div className="mt-8">
+      <div className="mt-12">
         {!hasQuery ? (
-          <div className="max-w-xl border-t border-mist pt-6">
+          <div>
             <p className="field-label text-slate">Common searches</p>
-            <ul className="mt-3 flex flex-wrap gap-2">
-              {["shell", "pack", "trail", "charcoal", "alpine"].map((term) => (
+            <ul className="mt-4 flex flex-wrap gap-3">
+              {COMMON_SEARCHES.map((term) => (
                 <li key={term}>
                   <Link
                     href={`/search?q=${term}`}
-                    className="field-label inline-flex min-h-11 items-center border border-mist px-4 text-slate transition-colors hover:border-pine hover:text-pine"
+                    className="field-label inline-flex min-h-11 items-center border border-carbon/40 px-5 text-carbon transition-colors hover:bg-carbon hover:text-cream"
                   >
                     {term}
                   </Link>
@@ -72,33 +74,55 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </div>
         ) : results.length > 0 ? (
           <>
-            <p className="field-label text-slate" aria-live="polite">
-              {results.length} {results.length === 1 ? "result" : "results"} for
-              “{query}”
-            </p>
-            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {results.map((product) => (
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="display-large text-carbon">
+                Results for “{query}”
+              </h2>
+              <p className="field-label text-slate" aria-live="polite">
+                {results.length} found
+              </p>
+            </div>
+            <div className="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+              {results.map((product, index) => (
                 <ProductCard
                   key={product.handle}
                   product={product}
                   plate={product.plate}
+                  priority={index < 3}
                 />
               ))}
             </div>
           </>
         ) : (
-          <div className="max-w-xl border border-mist bg-parchment px-6 py-10">
-            <p className="font-display text-2xl text-pine">
-              Nothing found for “{query}”
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-slate">
+          <div className="max-w-2xl">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="display-large text-carbon">
+                Nothing for “{query}”
+              </h2>
+              <p className="field-label text-slate" aria-live="polite">
+                0 found
+              </p>
+            </div>
+            <p className="mt-4 max-w-md text-base leading-relaxed text-slate">
               The catalog is three products deep, so search is unforgiving. Try
-              a broader term like “shell”, “pack”, or a colorway such as
-              “charcoal” — or browse everything at once.
+              a broader term or one of the common searches — or browse
+              everything at once.
             </p>
+            <ul className="mt-6 flex flex-wrap gap-3">
+              {COMMON_SEARCHES.map((term) => (
+                <li key={term}>
+                  <Link
+                    href={`/search?q=${term}`}
+                    className="field-label inline-flex min-h-11 items-center border border-carbon/40 px-5 text-carbon transition-colors hover:bg-carbon hover:text-cream"
+                  >
+                    {term}
+                  </Link>
+                </li>
+              ))}
+            </ul>
             <Link
               href="/shop"
-              className="field-label mt-6 inline-flex min-h-11 items-center border border-pine px-5 text-pine transition-colors hover:bg-pine hover:text-bone"
+              className="field-label mt-8 inline-flex min-h-11 items-center bg-carbon px-6 text-cream transition-colors hover:bg-acid hover:text-carbon"
             >
               Browse the catalog
             </Link>

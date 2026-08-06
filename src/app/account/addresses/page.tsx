@@ -14,39 +14,40 @@ export default async function AddressesPage() {
   return (
     <AccountShell
       activePath="/account/addresses"
-      title="Addresses"
-      lede="Where the gear ships. Editing is part of the live customer-account slice; these records are fixed demo data."
+      eyebrow="Field account / Addresses"
+      title="Where the gear ships."
+      lede="Editing is part of the live customer-account slice; these records are fixed demo data."
     >
       <div className="grid gap-6 sm:grid-cols-2">
         {addresses.map((address) => (
           <section
             key={address.id}
-            className="border border-mist bg-parchment px-5 py-5"
+            className="border border-carbon/30 px-6 py-6"
           >
             <div className="flex items-baseline justify-between gap-3">
-              <h2 className="font-display text-2xl text-pine">
-                {address.label}
-              </h2>
+              <h2 className="field-label text-pine">{address.label}</h2>
               {address.isDefault ? (
-                <p className="field-label border border-moss px-2 py-1 text-moss">
+                <p className="field-label bg-acid px-2 py-1 text-carbon">
                   Default
                 </p>
               ) : null}
             </div>
-            <address className="mt-3 text-sm not-italic leading-relaxed text-slate">
-              {address.name}
-              <br />
-              {address.lines.map((line) => (
-                <span key={line}>
-                  {line}
-                  <br />
-                </span>
-              ))}
+            <address className="mt-3 not-italic">
+              <p className="font-display text-2xl text-carbon">
+                {address.name}
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-slate">
+                {address.lines.map((line) => (
+                  <span key={line} className="block">
+                    {line}
+                  </span>
+                ))}
+              </p>
             </address>
           </section>
         ))}
       </div>
-      <p className="mt-6 text-xs leading-relaxed text-slate">
+      <p className="field-label mt-8 max-w-2xl normal-case tracking-normal text-slate">
         Adding or editing addresses requires live customer accounts, which are
         intentionally not connected in this demo.
       </p>
