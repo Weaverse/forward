@@ -15,9 +15,9 @@ interface AddToCartFormProps {
 }
 
 /**
- * Size, quantity, and add-to-demo-cart controls. Everything happens in the
- * browser: the "cart" is honest prototype state and no request leaves the
- * page.
+ * Size, quantity, and add-to-demo-cart controls, styled for the carbon
+ * purchase panel. Everything happens in the browser: the "cart" is honest
+ * prototype state and no request leaves the page.
  */
 export function AddToCartForm({ product, colorway }: AddToCartFormProps) {
   const sizeOption = product.options[0];
@@ -56,18 +56,18 @@ export function AddToCartForm({ product, colorway }: AddToCartFormProps) {
     <div className="space-y-5">
       {sizeOption !== undefined ? (
         <fieldset aria-describedby={`${groupId}-hint`}>
-          <legend className="field-label text-ink">{sizeOption.name}</legend>
-          <div className="mt-2 flex flex-wrap gap-2">
+          <legend className="field-label text-cream">{sizeOption.name}</legend>
+          <div className="mt-3 flex flex-wrap gap-2">
             {sizeOption.values.map((value) => {
               const selected = size === value;
               return (
                 <label
                   key={value}
                   className={cn(
-                    "field-label inline-flex size-11 cursor-pointer items-center justify-center border transition-colors has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-clay",
+                    "field-label inline-flex size-11 cursor-pointer items-center justify-center border transition-colors has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-acid",
                     selected
-                      ? "border-pine bg-pine text-bone"
-                      : "border-mist text-ink hover:border-pine",
+                      ? "border-acid bg-acid text-carbon"
+                      : "border-cream/40 text-cream hover:border-cream",
                   )}
                 >
                   <input
@@ -90,7 +90,7 @@ export function AddToCartForm({ product, colorway }: AddToCartFormProps) {
             id={`${groupId}-hint`}
             className={cn(
               "mt-2 text-xs",
-              sizeError ? "text-clay-deep" : "text-slate",
+              sizeError ? "text-clay-light" : "text-cream/60",
             )}
           >
             {sizeError
@@ -100,54 +100,48 @@ export function AddToCartForm({ product, colorway }: AddToCartFormProps) {
         </fieldset>
       ) : null}
 
-      <div className="flex flex-wrap items-end gap-3">
-        <div>
-          <label htmlFor={`${groupId}-qty`} className="field-label text-ink">
-            Quantity
-          </label>
-          <div className="mt-2 flex items-center border border-mist">
-            <button
-              type="button"
-              aria-label="Decrease quantity"
-              onClick={() => setQuantity((current) => Math.max(1, current - 1))}
-              className="inline-flex size-11 items-center justify-center text-ink transition-colors hover:bg-parchment"
-            >
-              −
-            </button>
-            <output
-              id={`${groupId}-qty`}
-              className="field-label w-10 text-center text-ink"
-            >
-              {quantity}
-            </output>
-            <button
-              type="button"
-              aria-label="Increase quantity"
-              onClick={() =>
-                setQuantity((current) =>
-                  Math.min(MAX_LINE_QUANTITY, current + 1),
-                )
-              }
-              className="inline-flex size-11 items-center justify-center text-ink transition-colors hover:bg-parchment"
-            >
-              +
-            </button>
-          </div>
+      <div className="flex flex-wrap items-stretch gap-3">
+        <div className="flex items-center border border-cream/40">
+          <button
+            type="button"
+            aria-label="Decrease quantity"
+            onClick={() => setQuantity((current) => Math.max(1, current - 1))}
+            className="inline-flex size-11 items-center justify-center text-cream transition-colors hover:bg-cream/10"
+          >
+            −
+          </button>
+          <output
+            id={`${groupId}-qty`}
+            aria-label="Quantity"
+            className="field-label w-10 text-center text-cream"
+          >
+            {quantity}
+          </output>
+          <button
+            type="button"
+            aria-label="Increase quantity"
+            onClick={() =>
+              setQuantity((current) => Math.min(MAX_LINE_QUANTITY, current + 1))
+            }
+            className="inline-flex size-11 items-center justify-center text-cream transition-colors hover:bg-cream/10"
+          >
+            +
+          </button>
         </div>
         <button
           type="button"
           onClick={handleAdd}
-          className="field-label inline-flex min-h-11 flex-1 items-center justify-center bg-pine px-6 text-bone transition-colors hover:bg-pine-deep"
+          className="field-label inline-flex min-h-11 flex-1 items-center justify-center bg-acid px-6 text-carbon transition-colors hover:bg-cream"
         >
           Add to cart — {formatMoney(product.price)}
         </button>
       </div>
 
-      <p aria-live="polite" role="status" className="min-h-5 text-sm text-moss">
+      <p aria-live="polite" role="status" className="min-h-5 text-sm text-acid">
         {status}
       </p>
 
-      <p className="border-l-2 border-moss bg-parchment px-4 py-3 text-xs leading-relaxed text-slate">
+      <p className="border-l-2 border-acid bg-cream/5 px-4 py-3 text-xs leading-relaxed text-cream/70">
         Demo cart only — items are kept in this browser and there is no real
         checkout. No live store is connected.
       </p>

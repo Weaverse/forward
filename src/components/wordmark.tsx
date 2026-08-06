@@ -3,10 +3,24 @@ import Link from "next/link";
 import { cn } from "@/lib/cn";
 
 interface WordmarkProps {
-  size?: "header" | "footer";
+  size?: "header" | "footer" | "stacked";
 }
 
 export function Wordmark({ size = "header" }: WordmarkProps) {
+  if (size === "stacked") {
+    // Oversized stacked footer wordmark: two hard-broken display lines.
+    return (
+      <Link
+        href="/"
+        aria-label="Forward — home"
+        className="inline-block font-display font-semibold uppercase leading-[0.86] tracking-[-0.01em] text-[clamp(4.5rem,10vw,9rem)]"
+      >
+        <span className="block">For</span>
+        <span className="block">Ward</span>
+      </Link>
+    );
+  }
+
   return (
     <Link
       href="/"
@@ -21,7 +35,7 @@ export function Wordmark({ size = "header" }: WordmarkProps) {
         aria-hidden="true"
         className={cn(
           "translate-y-[-0.08em]",
-          size === "footer" ? "text-clay-light" : "text-clay",
+          size === "footer" ? "text-acid" : "text-clay",
         )}
       >
         /

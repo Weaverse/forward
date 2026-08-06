@@ -45,15 +45,8 @@ export default async function CartPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-5 py-12 sm:px-8">
-      <header className="max-w-2xl">
-        <p className="field-label text-clay">Staging area · demo only</p>
-        <h1 className="mt-3 font-display text-4xl text-pine sm:text-5xl">
-          Cart
-        </h1>
-      </header>
-      <div className="mt-8">
-        <CartView seedLines={seedLines} />
-      </div>
+      {/* CartView owns the heading so the live item count can join the title. */}
+      <CartView seedLines={seedLines} />
     </div>
   );
 }

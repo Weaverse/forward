@@ -42,7 +42,10 @@ async function orderLineHref(line: DemoOrderLine): Promise<string> {
 
 export default async function OrderPage({ params }: OrderPageProps) {
   const { orderId } = await params;
-  const order = await storefront.getDemoOrder(orderId);
+  const [order, addresses] = await Promise.all([
+    storefront.getDemoOrder(orderId),
+    storefront.listDemoAddresses(),
+  ]);
   if (order === null) {
     notFound();
   }
@@ -52,18 +55,31 @@ export default async function OrderPage({ params }: OrderPageProps) {
       href: await orderLineHref(line),
     })),
   );
+  const deliveryAddress =
+    addresses.find((entry) => entry.isDefault) ?? addresses[0];
 
   return (
     <AccountShell
       activePath="/account/orders"
-      title={`Order ${order.number}`}
-      lede={`Placed ${formatDate(order.placedAt)} · ${order.statusDetail}.`}
+      eyebrow="Field account / Order"
+      title={order.number}
+      lede={`Placed ${formatDate(order.placedAt)}. Repair coverage remains available for the useful life of each product.`}
     >
-      <ul className="divide-y divide-mist border-y border-mist">
+      <div className="flex flex-wrap items-baseline justify-between gap-4">
+        <p className="field-label text-pine">{order.statusDetail}</p>
+        <Link
+          href="/account/orders"
+          className="field-label inline-flex min-h-11 items-center gap-2 text-carbon hover:text-pine"
+        >
+          Back to orders →
+        </Link>
+      </div>
+
+      <ul className="mt-4 divide-y divide-hairline border-y border-hairline">
         {lines.map(({ line, href }) => (
           <li
             key={`${line.productHandle}-${line.colorwayId}-${line.size ?? ""}`}
-            className="flex items-start gap-5 py-5"
+            className="flex items-start gap-6 py-6"
           >
             <Link href={href} className="shrink-0">
               <Image
@@ -71,23 +87,23 @@ export default async function OrderPage({ params }: OrderPageProps) {
                 alt={line.image.alt}
                 width={line.image.width}
                 height={line.image.height}
-                sizes="96px"
-                className="aspect-4/5 w-20 border border-mist object-cover"
+                sizes="112px"
+                className="aspect-4/5 w-24 border border-hairline object-cover sm:w-28"
               />
             </Link>
             <div className="flex-1">
-              <h2 className="font-display text-lg text-pine">
-                <Link href={href} className="hover:text-clay">
+              <h2 className="font-display text-2xl text-carbon">
+                <Link href={href} className="hover:text-pine">
                   {line.title}
                 </Link>
               </h2>
-              <p className="field-label mt-1 text-slate">
+              <p className="field-label mt-2 text-slate">
                 {line.colorwayName}
-                {line.size !== undefined ? ` · ${line.size}` : ""} · qty{" "}
+                {line.size !== undefined ? ` · ${line.size}` : ""} · Qty{" "}
                 {line.quantity}
               </p>
             </div>
-            <p className="field-label text-ink">
+            <p className="text-sm text-carbon">
               {formatMoney({
                 amount: line.unitPrice.amount * line.quantity,
                 currencyCode: "USD",
@@ -97,29 +113,49 @@ export default async function OrderPage({ params }: OrderPageProps) {
         ))}
       </ul>
 
-      <dl className="ml-auto mt-6 max-w-xs space-y-2 text-sm text-slate">
-        <div className="flex justify-between">
-          <dt>Subtotal</dt>
-          <dd className="text-ink">{formatMoney(order.subtotal)}</dd>
-        </div>
-        <div className="flex justify-between">
-          <dt>Shipping</dt>
-          <dd className="text-ink">
-            {order.shipping.amount === 0 ? "Free" : formatMoney(order.shipping)}
-          </dd>
-        </div>
-        <div className="flex justify-between border-t border-mist pt-3 font-display text-lg text-ink">
-          <dt>Total</dt>
-          <dd>{formatMoney(order.total)}</dd>
-        </div>
-      </dl>
+      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        <section className="border border-carbon/30 px-6 py-6">
+          <h2 className="field-label text-pine">Delivery address</h2>
+          {deliveryAddress !== undefined ? (
+            <address className="mt-3 not-italic">
+              <p className="font-display text-2xl text-carbon">
+                {deliveryAddress.name}
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-slate">
+                {deliveryAddress.lines.map((line) => (
+                  <span key={line} className="block">
+                    {line}
+                  </span>
+                ))}
+              </p>
+            </address>
+          ) : (
+            <p className="mt-3 text-sm text-slate">No address on record.</p>
+          )}
+        </section>
 
-      <Link
-        href="/account/orders"
-        className="field-label mt-8 inline-flex min-h-11 items-center text-clay hover:text-clay-deep"
-      >
-        ← All orders
-      </Link>
+        <section className="border border-carbon/30 px-6 py-6">
+          <h2 className="field-label text-pine">Order total</h2>
+          <dl className="mt-4 space-y-3 text-sm text-slate">
+            <div className="flex justify-between border-b border-hairline pb-3">
+              <dt>Subtotal</dt>
+              <dd className="text-carbon">{formatMoney(order.subtotal)}</dd>
+            </div>
+            <div className="flex justify-between border-b border-hairline pb-3">
+              <dt>Delivery</dt>
+              <dd className="text-carbon">
+                {order.shipping.amount === 0
+                  ? "Complimentary"
+                  : formatMoney(order.shipping)}
+              </dd>
+            </div>
+            <div className="flex items-baseline justify-between pt-1 font-display text-2xl text-carbon">
+              <dt>Total</dt>
+              <dd>{formatMoney(order.total)}</dd>
+            </div>
+          </dl>
+        </section>
+      </div>
     </AccountShell>
   );
 }

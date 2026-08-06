@@ -47,11 +47,15 @@ function parseSort(value: string | undefined): ProductSort {
 
 function shopHref(
   category: ProductCategory | undefined,
+  activity: string | undefined,
   sort: ProductSort,
 ): string {
   const params = new URLSearchParams();
   if (category !== undefined) {
     params.set("category", category);
+  }
+  if (activity !== undefined) {
+    params.set("activity", activity);
   }
   if (sort !== "featured") {
     params.set("sort", sort);
@@ -72,108 +76,190 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const sort = parseSort(
     typeof params.sort === "string" ? params.sort : undefined,
   );
-  const filter: ProductListFilter = { category };
+  const catalog = await storefront.listProducts();
+  const activities = [
+    ...new Set(catalog.flatMap((product) => product.activities)),
+  ];
+  const requestedActivity =
+    typeof params.activity === "string" ? params.activity : undefined;
+  const activity = activities.includes(requestedActivity ?? "")
+    ? requestedActivity
+    : undefined;
+  const filter: ProductListFilter = { category, activity };
   const products = await storefront.listProducts(filter, sort);
 
-  return (
-    <div className="mx-auto w-full max-w-7xl px-5 py-12 sm:px-8">
-      <header className="max-w-2xl">
-        <p className="field-label text-clay">Catalog · complete inventory</p>
-        <h1 className="mt-3 font-display text-4xl text-pine sm:text-5xl">
-          Shop
-        </h1>
-        <p className="mt-4 text-base leading-relaxed text-slate">
-          A short list, on purpose. Every product here answers for its weight,
-          its weather, and its repairability.
-        </p>
-      </header>
+  const filterGroups = [
+    {
+      heading: "Activity",
+      links: [
+        {
+          key: "all-activities",
+          label: "All activities",
+          href: shopHref(category, undefined, sort),
+          selected: activity === undefined,
+        },
+        ...activities.map((entry) => ({
+          key: entry,
+          label: entry,
+          href: shopHref(category, entry, sort),
+          selected: entry === activity,
+        })),
+      ],
+    },
+    {
+      heading: "Category",
+      links: CATEGORY_FILTERS.map((entry) => ({
+        key: entry.label,
+        label: entry.label,
+        href: shopHref(entry.value, activity, sort),
+        selected: entry.value === category,
+      })),
+    },
+  ];
 
-      <div className="mt-10 flex flex-wrap items-end justify-between gap-x-8 gap-y-4 border-y border-mist py-3">
-        <nav aria-label="Filter by category">
-          <ul className="flex flex-wrap items-center gap-1">
-            {CATEGORY_FILTERS.map((entry) => {
-              const selected = entry.value === category;
-              return (
-                <li key={entry.label}>
-                  <Link
-                    href={shopHref(entry.value, sort)}
-                    aria-current={selected ? "page" : undefined}
+  const filterNav = (
+    <nav aria-label="Filter products" className="space-y-8">
+      {filterGroups.map((group) => (
+        <div key={group.heading}>
+          <p className="field-label border-b border-carbon/20 pb-2 text-carbon">
+            {group.heading}
+          </p>
+          <ul className="mt-3 space-y-1">
+            {group.links.map((link) => (
+              <li key={link.key}>
+                <Link
+                  href={link.href}
+                  aria-current={link.selected ? "page" : undefined}
+                  className={cn(
+                    "field-label inline-flex min-h-9 items-center gap-2 capitalize transition-colors",
+                    link.selected
+                      ? "text-carbon"
+                      : "text-slate hover:text-carbon",
+                  )}
+                >
+                  <span
+                    aria-hidden="true"
                     className={cn(
-                      "field-label inline-flex min-h-11 items-center px-4 transition-colors",
-                      selected
-                        ? "bg-pine text-bone"
-                        : "text-slate hover:text-pine",
+                      "size-2 rounded-full border border-carbon/40",
+                      link.selected && "bg-acid border-carbon",
                     )}
-                  >
-                    {entry.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-        {/* GET form: sorting works without JavaScript. */}
-        <form method="get" action="/shop" className="flex items-center gap-2">
-          {category !== undefined ? (
-            <input type="hidden" name="category" value={category} />
-          ) : null}
-          <label htmlFor="shop-sort" className="field-label text-slate">
-            Sort
-          </label>
-          <select
-            id="shop-sort"
-            name="sort"
-            defaultValue={sort}
-            className="field-label min-h-11 border border-mist bg-bone px-3 text-ink"
-          >
-            {SORT_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
+                  />
+                  {link.label}
+                </Link>
+              </li>
             ))}
-          </select>
-          <button
-            type="submit"
-            className="field-label inline-flex min-h-11 items-center border border-pine px-4 text-pine transition-colors hover:bg-pine hover:text-bone"
-          >
-            Apply
-          </button>
-        </form>
+          </ul>
+        </div>
+      ))}
+    </nav>
+  );
+
+  return (
+    <div>
+      {/* Dark editorial masthead */}
+      <section
+        data-surface="dark"
+        className="bg-carbon text-cream"
+        aria-label="Shop masthead"
+      >
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 pb-12 pt-10 sm:px-8 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)] lg:items-end">
+          <div>
+            <p className="field-label text-acid">Explore / All equipment</p>
+            <h1 className="display-huge mt-4">Shop the complete catalog.</h1>
+          </div>
+          <p className="max-w-sm text-base leading-relaxed text-cream/75">
+            A short list, on purpose. Every product here answers for its weight,
+            its weather, and its repairability.
+          </p>
+        </div>
+      </section>
+
+      {/* Acid inventory/sort rail — sorting stays a plain GET form. */}
+      <div className="border-b border-carbon bg-acid">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-8 gap-y-2 px-5 py-2 sm:px-8">
+          <p className="field-label text-carbon" aria-live="polite">
+            {products.length} {products.length === 1 ? "product" : "products"}
+            {category !== undefined ? ` · ${category}` : ""}
+            {activity !== undefined ? ` · ${activity}` : ""}
+          </p>
+          <form method="get" action="/shop" className="flex items-center gap-2">
+            {category !== undefined ? (
+              <input type="hidden" name="category" value={category} />
+            ) : null}
+            {activity !== undefined ? (
+              <input type="hidden" name="activity" value={activity} />
+            ) : null}
+            <label htmlFor="shop-sort" className="field-label text-carbon">
+              Sort
+            </label>
+            <select
+              id="shop-sort"
+              name="sort"
+              defaultValue={sort}
+              className="field-label min-h-11 border border-carbon bg-cream px-3 text-carbon"
+            >
+              {SORT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="field-label inline-flex min-h-11 items-center bg-carbon px-4 text-acid transition-colors hover:text-cream"
+            >
+              Apply
+            </button>
+          </form>
+        </div>
       </div>
 
-      <p className="field-label mt-6 text-slate" aria-live="polite">
-        {products.length} {products.length === 1 ? "product" : "products"}
-        {category !== undefined ? ` · ${category}` : ""}
-      </p>
+      <div className="mx-auto w-full max-w-7xl px-5 py-10 sm:px-8">
+        {/* Mobile filter disclosure — no JavaScript required. */}
+        <details className="mb-8 border border-carbon/30 lg:hidden">
+          <summary className="field-label flex min-h-11 cursor-pointer list-none items-center justify-between px-4 text-carbon">
+            Filters
+            <span aria-hidden="true">+</span>
+          </summary>
+          <div className="border-t border-carbon/20 px-4 py-5">{filterNav}</div>
+        </details>
 
-      {products.length > 0 ? (
-        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((product, index) => (
-            <ProductCard
-              key={product.handle}
-              product={product}
-              plate={product.plate}
-              priority={index < 3}
-            />
-          ))}
+        <div className="lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,9fr)] lg:gap-10">
+          <aside className="hidden lg:block">{filterNav}</aside>
+          <div>
+            {products.length > 0 ? (
+              <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+                {products.map((product, index) => (
+                  <ProductCard
+                    key={product.handle}
+                    product={product}
+                    plate={product.plate}
+                    stagger={index % 3 === 1}
+                    priority={index < 3}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="border border-carbon/30 bg-parchment px-6 py-14 text-center">
+                <p className="field-label text-clay">No matching plates</p>
+                <p className="mt-3 font-display text-3xl text-carbon">
+                  Nothing in this drawer.
+                </p>
+                <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-slate">
+                  No products match this filter. The full catalog is three
+                  products deep — try widening the view.
+                </p>
+                <Link
+                  href="/shop"
+                  className="field-label mt-6 inline-flex min-h-11 items-center bg-carbon px-5 text-cream transition-colors hover:bg-acid hover:text-carbon"
+                >
+                  View all products
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
-      ) : (
-        <div className="mt-6 border border-mist bg-parchment px-6 py-12 text-center">
-          <p className="font-display text-2xl text-pine">
-            Nothing in this drawer
-          </p>
-          <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-slate">
-            No products match this filter. The full catalog is three products
-            deep — try widening the view.
-          </p>
-          <Link
-            href="/shop"
-            className="field-label mt-6 inline-flex min-h-11 items-center border border-pine px-5 text-pine transition-colors hover:bg-pine hover:text-bone"
-          >
-            View all products
-          </Link>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

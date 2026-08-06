@@ -14,26 +14,35 @@ import type { Product } from "@/lib/storefront/types";
 
 interface ProductCardProps {
   product: Product;
-  /** Plate index shown in the field-report frame, e.g. "01". */
+  /** Plate index shown as the oversized card number, e.g. "01". */
   plate?: string;
+  /** Pushes the card down on large screens for the staggered editorial grid. */
+  stagger?: boolean;
   priority?: boolean;
 }
 
 /**
- * PLP/search product card. Selecting a swatch swaps the card's primary image
- * and retargets the deep link to that exact colorway state.
+ * Numbered editorial product card shared by home/PLP/collection/search.
+ * Selecting a swatch swaps the card's primary image and retargets the deep
+ * link to that exact colorway state.
  */
-export function ProductCard({ product, plate, priority }: ProductCardProps) {
+export function ProductCard({
+  product,
+  plate,
+  stagger,
+  priority,
+}: ProductCardProps) {
   const [activeColorwayId, setActiveColorwayId] = useState(
     product.colorways[0]?.id ?? "",
   );
   const swatchGroupName = useId();
   const activeColorway = resolveColorway(product, activeColorwayId);
   const href = productColorwayHref(product, activeColorway.id);
+  const tag = product.activities[0];
 
   return (
-    <article className="group flex flex-col border border-mist bg-parchment">
-      <Link href={href} className="relative block">
+    <article className={cn("group flex flex-col", stagger && "lg:mt-16")}>
+      <Link href={href} className="relative block bg-parchment">
         <Image
           src={activeColorway.images.primary.src}
           alt={activeColorway.images.primary.alt}
@@ -43,36 +52,45 @@ export function ProductCard({ product, plate, priority }: ProductCardProps) {
           priority={priority}
           className="aspect-4/5 w-full object-cover"
         />
+        {tag !== undefined ? (
+          <span
+            aria-hidden="true"
+            className="field-label absolute right-0 top-3 bg-acid px-2 py-1 text-carbon"
+          >
+            {tag}
+          </span>
+        ) : null}
         {plate !== undefined ? (
           <span
             aria-hidden="true"
-            className="field-label absolute left-3 top-3 border border-ink/20 bg-bone/90 px-2 py-1 text-ink"
+            className="plate-number pointer-events-none absolute bottom-1 left-3 text-cream/90 [text-shadow:0_1px_12px_rgb(0_0_0/0.35)]"
           >
-            Plate {plate}
+            {plate}
           </span>
         ) : null}
       </Link>
-      <div className="flex flex-1 flex-col gap-2 border-t border-mist px-4 py-4">
+      <div className="flex flex-1 flex-col gap-1.5 pt-3">
         <div className="flex items-baseline justify-between gap-3">
-          <h3 className="font-display text-lg text-pine">
-            <Link href={href} className="hover:text-clay">
+          <h3 className="font-display text-xl leading-tight text-carbon">
+            <Link href={href} className="hover:underline">
               {product.title}
             </Link>
           </h3>
-          <p className="field-label text-ink">{formatMoney(product.price)}</p>
+          <p className="field-label text-carbon">
+            {formatMoney(product.price)}
+          </p>
         </div>
-        <p className="text-sm leading-snug text-slate">{product.subtitle}</p>
-        <fieldset className="mt-auto flex min-w-0 items-center gap-2 pt-2">
+        <p className="field-label text-slate">
+          {product.category} / {product.activities.join(" · ")}
+        </p>
+        <fieldset className="mt-auto flex min-w-0 items-center pt-1">
           <legend className="sr-only">{product.title} colorway</legend>
           {product.colorways.map((entry) => {
             const selected = entry.id === activeColorway.id;
             return (
               <label
                 key={entry.id}
-                className={cn(
-                  "flex size-11 cursor-pointer items-center justify-center transition-colors has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-clay",
-                  selected ? "border border-ink" : "border border-transparent",
-                )}
+                className="flex size-11 cursor-pointer items-center justify-center has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-carbon"
               >
                 <input
                   type="radio"
@@ -85,9 +103,16 @@ export function ProductCard({ product, plate, priority }: ProductCardProps) {
                 <span className="sr-only">{entry.name} colorway</span>
                 <span
                   aria-hidden="true"
-                  className="block size-6 border border-ink/25"
-                  style={{ backgroundColor: entry.swatchColor }}
-                />
+                  className={cn(
+                    "flex size-5 items-center justify-center rounded-full border transition-colors",
+                    selected ? "border-carbon" : "border-transparent",
+                  )}
+                >
+                  <span
+                    className="block size-3 rounded-full border border-carbon/25"
+                    style={{ backgroundColor: entry.swatchColor }}
+                  />
+                </span>
               </label>
             );
           })}
