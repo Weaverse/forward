@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
-import { cn } from "@/lib/cn";
 import { storefront } from "@/lib/storefront/data-source";
 import type {
   ProductCategory,
@@ -20,7 +19,7 @@ const CATEGORY_FILTERS: ReadonlyArray<{
   value: ProductCategory | undefined;
   label: string;
 }> = [
-  { value: undefined, label: "All" },
+  { value: undefined, label: "All categories" },
   { value: "shells", label: "Shells" },
   { value: "packs", label: "Packs" },
   { value: "footwear", label: "Footwear" },
@@ -28,9 +27,9 @@ const CATEGORY_FILTERS: ReadonlyArray<{
 
 const SORT_OPTIONS: ReadonlyArray<{ value: ProductSort; label: string }> = [
   { value: "featured", label: "Featured" },
-  { value: "price-asc", label: "Price, low to high" },
-  { value: "price-desc", label: "Price, high to low" },
-  { value: "name", label: "Name, A–Z" },
+  { value: "price-asc", label: "Price low–high" },
+  { value: "price-desc", label: "Price high–low" },
+  { value: "name", label: "Name A–Z" },
 ];
 
 function parseCategory(value: string | undefined): ProductCategory | undefined {
@@ -64,10 +63,68 @@ function shopHref(
   return query.length > 0 ? `/shop?${query}` : "/shop";
 }
 
+interface FilterLink {
+  key: string;
+  label: string;
+  href: string;
+  selected: boolean;
+}
+
+interface FilterGroup {
+  heading: string;
+  links: readonly FilterLink[];
+}
+
+/**
+ * Canonical `.filter-sidebar` hierarchy (source `app.js:109–139`). The
+ * canonical prototype mutates global state from radio/checkbox inputs; Forward
+ * keeps its no-JavaScript query contract, so each row is a link carrying the
+ * validated `activity`/`category`/`sort` parameters.
+ */
+function FilterSidebar({
+  groups,
+  idPrefix,
+}: {
+  groups: readonly FilterGroup[];
+  idPrefix: string;
+}) {
+  return (
+    <div className="filter-sidebar">
+      {groups.map((group) => (
+        <details
+          key={`${idPrefix}-${group.heading}`}
+          className="filter-group"
+          open
+        >
+          <summary>{group.heading}</summary>
+          <div className="filter-options">
+            {group.links.map((link) => (
+              <Link
+                key={link.key}
+                className="check-row"
+                href={link.href}
+                aria-current={link.selected ? "page" : undefined}
+              >
+                <span className="check-dot" aria-hidden="true" />
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </details>
+      ))}
+    </div>
+  );
+}
+
 interface ShopPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
+/**
+ * Shop / PLP — port of the canonical `shopPage()` (source `app.js:252–263`):
+ * dark page hero, signal count/sort rail, filter sidebar, and the 12-column
+ * asymmetric grid whose cadence lives in the `.plp-grid` nth-child rules.
+ */
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const params = await searchParams;
   const category = parseCategory(
@@ -88,7 +145,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const filter: ProductListFilter = { category, activity };
   const products = await storefront.listProducts(filter, sort);
 
-  const filterGroups = [
+  const filterGroups: readonly FilterGroup[] = [
     {
       heading: "Activity",
       links: [
@@ -117,149 +174,97 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     },
   ];
 
-  const filterNav = (
-    <nav aria-label="Filter products" className="space-y-8">
-      {filterGroups.map((group) => (
-        <div key={group.heading}>
-          <p className="field-label border-b border-carbon/20 pb-2 text-carbon">
-            {group.heading}
-          </p>
-          <ul className="mt-3 space-y-1">
-            {group.links.map((link) => (
-              <li key={link.key}>
-                <Link
-                  href={link.href}
-                  aria-current={link.selected ? "page" : undefined}
-                  className={cn(
-                    "field-label inline-flex min-h-9 items-center gap-2 capitalize transition-colors",
-                    link.selected
-                      ? "text-carbon"
-                      : "text-slate hover:text-carbon",
-                  )}
-                >
-                  <span
-                    aria-hidden="true"
-                    className={cn(
-                      "size-2 rounded-full border border-carbon/40",
-                      link.selected && "bg-acid border-carbon",
-                    )}
-                  />
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </nav>
-  );
-
   return (
-    <div>
-      {/* Dark editorial masthead */}
-      <section
-        data-surface="dark"
-        className="bg-carbon text-cream"
-        aria-label="Shop masthead"
-      >
-        <div className="mx-auto grid max-w-7xl gap-8 px-5 pb-12 pt-10 sm:px-8 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)] lg:items-end">
+    <>
+      <header className="page-hero">
+        <div className="page-hero-inner">
           <div>
-            <p className="field-label text-acid">Explore / All equipment</p>
-            <h1 className="display-huge mt-4">Shop the complete catalog.</h1>
+            <p className="breadcrumbs">
+              <Link href="/">Home</Link> / Shop
+            </p>
+            <p className="eyebrow">Explore / All equipment</p>
+            <h1 className="h1">Field goods for moving outside.</h1>
           </div>
-          <p className="max-w-sm text-base leading-relaxed text-cream/75">
-            A short list, on purpose. Every product here answers for its weight,
-            its weather, and its repairability.
+          <p className="lede">
+            A compact system of weather protection, carry, and footwear.
+            Designed to work hard together and age well apart.
           </p>
         </div>
-      </section>
+      </header>
 
-      {/* Acid inventory/sort rail — sorting stays a plain GET form. */}
-      <div className="border-b border-carbon bg-acid">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-8 gap-y-2 px-5 py-2 sm:px-8">
-          <p className="field-label text-carbon" aria-live="polite">
+      <div className="collection-tools">
+        <div className="collection-tools-left">
+          <span className="result-copy" aria-live="polite">
             {products.length} {products.length === 1 ? "product" : "products"}
             {category !== undefined ? ` · ${category}` : ""}
             {activity !== undefined ? ` · ${activity}` : ""}
-          </p>
-          <form method="get" action="/shop" className="flex items-center gap-2">
-            {category !== undefined ? (
-              <input type="hidden" name="category" value={category} />
-            ) : null}
-            {activity !== undefined ? (
-              <input type="hidden" name="activity" value={activity} />
-            ) : null}
-            <label htmlFor="shop-sort" className="field-label text-carbon">
-              Sort
-            </label>
-            <select
-              id="shop-sort"
-              name="sort"
-              defaultValue={sort}
-              className="field-label min-h-11 border border-carbon bg-cream px-3 text-carbon"
-            >
-              {SORT_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <button
-              type="submit"
-              className="field-label inline-flex min-h-11 items-center bg-carbon px-4 text-acid transition-colors hover:text-cream"
-            >
-              Apply
-            </button>
-          </form>
+          </span>
         </div>
+        {/* Sorting stays a plain GET form so it works without JavaScript. */}
+        <form className="collection-tools-right" method="get" action="/shop">
+          {category !== undefined ? (
+            <input type="hidden" name="category" value={category} />
+          ) : null}
+          {activity !== undefined ? (
+            <input type="hidden" name="activity" value={activity} />
+          ) : null}
+          <label className="meta" htmlFor="sort-products">
+            Sort
+          </label>
+          <select
+            className="sort-select"
+            id="sort-products"
+            name="sort"
+            defaultValue={sort}
+          >
+            {SORT_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <button className="tool-button" type="submit">
+            Apply
+          </button>
+        </form>
       </div>
 
-      <div className="mx-auto w-full max-w-7xl px-5 py-10 sm:px-8">
-        {/* Mobile filter disclosure — no JavaScript required. */}
-        <details className="mb-8 border border-carbon/30 lg:hidden">
-          <summary className="field-label flex min-h-11 cursor-pointer list-none items-center justify-between px-4 text-carbon">
-            Filters
-            <span aria-hidden="true">+</span>
-          </summary>
-          <div className="border-t border-carbon/20 px-4 py-5">{filterNav}</div>
-        </details>
-
-        <div className="lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,9fr)] lg:gap-10">
-          <aside className="hidden lg:block">{filterNav}</aside>
-          <div>
-            {products.length > 0 ? (
-              <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-                {products.map((product, index) => (
-                  <ProductCard
-                    key={product.handle}
-                    product={product}
-                    plate={product.plate}
-                    stagger={index % 3 === 1}
-                    priority={index < 3}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="border border-carbon/30 bg-parchment px-6 py-14 text-center">
-                <p className="field-label text-clay">No matching plates</p>
-                <p className="mt-3 font-display text-3xl text-carbon">
-                  Nothing in this drawer.
-                </p>
-                <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-slate">
+      <div className="shell plp-layout">
+        <FilterSidebar groups={filterGroups} idPrefix="desktop" />
+        <section aria-label="Products">
+          {/* Mobile filters: the canonical drawer is a JS prototype, so
+              Forward uses a no-JavaScript disclosure instead. */}
+          <details className="filter-disclosure">
+            <summary>Filters</summary>
+            <FilterSidebar groups={filterGroups} idPrefix="mobile" />
+          </details>
+          {products.length > 0 ? (
+            <div className="plp-grid">
+              {products.map((product, index) => (
+                <ProductCard
+                  key={product.handle}
+                  product={product}
+                  priority={index < 2}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <div className="empty-state-inner">
+                <p className="eyebrow">No matching plates</p>
+                <h2 className="h3">Nothing in this drawer.</h2>
+                <p className="muted">
                   No products match this filter. The full catalog is three
                   products deep — try widening the view.
                 </p>
-                <Link
-                  href="/shop"
-                  className="field-label mt-6 inline-flex min-h-11 items-center bg-carbon px-5 text-cream transition-colors hover:bg-acid hover:text-carbon"
-                >
+                <Link className="button button-primary" href="/shop">
                   View all products
                 </Link>
               </div>
-            )}
-          </div>
-        </div>
+            </div>
+          )}
+        </section>
       </div>
-    </div>
+    </>
   );
 }

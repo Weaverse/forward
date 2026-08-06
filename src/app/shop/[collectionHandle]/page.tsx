@@ -4,7 +4,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProductCard } from "@/components/product-card";
-import { cn } from "@/lib/cn";
 import { storefront } from "@/lib/storefront/data-source";
 
 interface CollectionPageProps {
@@ -34,111 +33,130 @@ export async function generateMetadata({
   };
 }
 
+/**
+ * Collection landing — port of the canonical `activityPage()` (source
+ * `app.js:265–273`): split image/dark-copy activity hero, the shifted guide
+ * image with its signal shadow, a field-system product section, and the
+ * closing field-practice grid.
+ *
+ * Title, copy, hero image, kit rows, and products all come from the
+ * normalized collection model.
+ */
 export default async function CollectionPage({ params }: CollectionPageProps) {
   const { collectionHandle } = await params;
-  const [collection, products, allCollections] = await Promise.all([
+  const [collection, products, themeContent, articles] = await Promise.all([
     storefront.getCollection(collectionHandle),
     storefront.getCollectionProducts(collectionHandle),
-    storefront.listCollections(),
+    storefront.getThemeContent(),
+    storefront.listArticles(),
   ]);
   if (collection === null || products === null) {
     notFound();
   }
+  const guideArticle = articles[0];
 
   return (
-    <div>
-      {/* Dark editorial masthead with the collection image plane. */}
-      <section
-        data-surface="dark"
-        className="bg-carbon text-cream"
-        aria-label="Collection masthead"
-      >
-        <div className="mx-auto grid max-w-7xl lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-          <div className="flex flex-col justify-end gap-6 px-5 pb-12 pt-10 sm:px-8 lg:py-16">
-            <p className="field-label text-acid">
-              Movement system / {collection.fieldCode}
-            </p>
-            <h1 className="display-huge">{collection.title}</h1>
-            <p className="max-w-md text-base leading-relaxed text-cream/75">
-              {collection.description}
-            </p>
-          </div>
-          <div className="relative">
+    <>
+      <section className="activity-hero">
+        <div className="activity-hero-media">
+          <Image
+            src={collection.heroImage.src}
+            alt={collection.heroImage.alt}
+            width={collection.heroImage.width}
+            height={collection.heroImage.height}
+            sizes="(min-width: 820px) 65vw, 100vw"
+            priority
+          />
+        </div>
+        <div className="activity-hero-content">
+          <p className="eyebrow">Movement system / {collection.fieldCode}</p>
+          <h1 className="display">{collection.title}</h1>
+          <p className="lede">{collection.description}</p>
+          <Link className="button button-signal" href="/shop">
+            Shop the complete index
+          </Link>
+        </div>
+      </section>
+
+      <section className="section shell">
+        <div className="activity-guide">
+          <div>
             <Image
-              src={collection.heroImage.src}
-              alt={collection.heroImage.alt}
-              width={collection.heroImage.width}
-              height={collection.heroImage.height}
-              priority
-              sizes="(min-width: 1024px) 42vw, 100vw"
-              className="h-full max-h-[24rem] w-full object-cover lg:max-h-none"
+              src={themeContent.standardBandImage.src}
+              alt={themeContent.standardBandImage.alt}
+              width={themeContent.standardBandImage.width}
+              height={themeContent.standardBandImage.height}
+              sizes="(min-width: 820px) 38vw, 100vw"
+              loading="lazy"
             />
-            <span
-              aria-hidden="true"
-              className="field-label absolute left-4 top-4 bg-carbon/80 px-2 py-1 text-cream"
-            >
-              {collection.fieldCode}
-            </span>
+          </div>
+          <div className="activity-guide-copy">
+            <p className="eyebrow">The system</p>
+            <h2 className="h2">Prepare for change, not every possibility.</h2>
+            <p className="lede">
+              Start with a layer that moves moisture, add warmth you can vent,
+              and finish with a shell that packs small enough to bring every
+              time. This kit is built to work as one system.
+            </p>
+            <ul className="kit-list">
+              {products.map((product) => (
+                <li key={product.handle}>
+                  <span>
+                    {product.plate} / {product.title}
+                  </span>
+                  <span>{product.category}</span>
+                </li>
+              ))}
+            </ul>
+            {guideArticle !== undefined ? (
+              <Link
+                className="text-link"
+                href={`/journal/${guideArticle.handle}`}
+              >
+                Read the field note
+              </Link>
+            ) : null}
           </div>
         </div>
       </section>
 
-      {/* Acid rail: count + collection index links. */}
-      <div className="border-b border-carbon bg-acid">
-        <nav
-          aria-label="Collections"
-          className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-8 gap-y-2 px-5 py-2 sm:px-8"
-        >
-          <p className="field-label text-carbon">
-            {products.length} {products.length === 1 ? "product" : "products"}{" "}
-            in this kit
-          </p>
-          <ul className="flex flex-wrap items-center">
-            {allCollections.map((entry) => {
-              const selected = entry.handle === collection.handle;
-              return (
-                <li key={entry.handle}>
-                  <Link
-                    href={`/shop/${entry.handle}`}
-                    aria-current={selected ? "page" : undefined}
-                    data-surface={selected ? "dark" : undefined}
-                    className={cn(
-                      "field-label inline-flex min-h-11 items-center px-3 transition-colors",
-                      selected
-                        ? "bg-carbon text-acid"
-                        : "text-carbon hover:bg-carbon/10",
-                    )}
-                  >
-                    {entry.title}
-                  </Link>
-                </li>
-              );
-            })}
-            <li>
-              <Link
-                href="/shop"
-                className="field-label inline-flex min-h-11 items-center px-3 text-carbon transition-colors hover:bg-carbon/10"
-              >
-                All products
-              </Link>
-            </li>
-          </ul>
-        </nav>
-      </div>
-
-      <div className="mx-auto w-full max-w-7xl px-5 py-10 sm:px-8">
-        <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((product, index) => (
-            <ProductCard
-              key={product.handle}
-              product={product}
-              plate={product.plate}
-              stagger={index % 3 === 1}
-              priority={index < 3}
-            />
-          ))}
+      <section className="section field-notes">
+        <div className="shell">
+          <div className="section-head">
+            <div>
+              <p className="eyebrow">{collection.title} essentials</p>
+              <h2 className="h2">A focused kit for a full day out.</h2>
+            </div>
+            <Link className="button button-light" href="/shop">
+              View all equipment
+            </Link>
+          </div>
+          <div className="product-grid">
+            {products.map((product) => (
+              <ProductCard key={product.handle} product={product} />
+            ))}
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
+
+      <section className="section shell">
+        <div className="intro-grid">
+          <div>
+            <p className="eyebrow">Field practice / {collection.fieldCode}</p>
+            <h2 className="h2">Let the route set the pace.</h2>
+          </div>
+          <div>
+            <p className="lede">
+              Efficient movement is not about speed. It is about keeping effort
+              even, noticing what changes, and reaching the last descent with
+              enough attention left to enjoy it.
+            </p>
+            <Link className="text-link" href="/journal">
+              More field stories
+            </Link>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }
