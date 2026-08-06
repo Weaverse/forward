@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { storefront } from "../src/lib/storefront/data-source.ts";
+import { StaticStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
 import { productColorwayHref } from "../src/lib/storefront/product-state.ts";
+
+const storefront = new StaticStorefrontDataSource();
 
 describe("StaticStorefrontDataSource unknown handles", () => {
   it("resolves unknown product handles to null", async () => {
