@@ -108,6 +108,41 @@
   letter-spacing: -0.01em;
 }
 
+/*
+ * Home canvas scale. The Home page runs one step larger than the interior
+ * routes so its hero, section headings, and plate marks hold the canonical
+ * editorial proportions at desktop widths.
+ */
+@utility display-mega {
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 6.4vw, 10rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+
+@utility display-section {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 3.9vw, 5.5rem);
+  line-height: 1;
+  letter-spacing: -0.015em;
+}
+
+/* Oversized ghost index number sitting behind/beside section copy. */
+@utility plate-ghost {
+  font-family: var(--font-display);
+  font-size: clamp(4.5rem, 9.5vw, 13rem);
+  line-height: 0.8;
+  letter-spacing: -0.03em;
+}
+
+/* Plate mark overlapping Home imagery — one step above `plate-number`. */
+@utility plate-mark {
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 4.2vw, 6rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
 /* Giant serif plate/index numbers overlapping card imagery. */
 @utility plate-number {
   font-family: var(--font-display);
