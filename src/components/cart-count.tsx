@@ -4,8 +4,8 @@ import { totalQuantity } from "@/lib/demo-cart/cart-logic";
 import { useDemoCartLines } from "@/lib/demo-cart/use-demo-cart";
 
 /**
- * Live item count rendered next to the Cart link. Announced politely so
- * assistive tech hears cart updates from anywhere in the app.
+ * Canonical `.cart-count` badge (source `app.js:155`), kept live and
+ * announced politely so assistive tech hears cart updates from anywhere.
  */
 export function CartCount() {
   const lines = useDemoCartLines();
@@ -15,10 +15,7 @@ export function CartCount() {
       <span className="sr-only">
         , {count} {count === 1 ? "item" : "items"} in cart
       </span>
-      <span
-        aria-hidden="true"
-        className="inline-flex size-5 items-center justify-center rounded-full bg-acid font-field text-[0.625rem] leading-none text-carbon"
-      >
+      <span aria-hidden="true" className="cart-count">
         {count}
       </span>
     </span>

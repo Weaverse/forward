@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import {
   type DemoCartLine,
   FREE_SHIPPING_THRESHOLD,
-  MAX_LINE_QUANTITY,
   shipping,
   subtotal,
   total,
@@ -26,6 +25,15 @@ interface CartViewProps {
   seedLines: readonly DemoCartLine[];
 }
 
+/**
+ * Cart — port of the canonical `cartPage()` (source `app.js:302–309`):
+ * heading with live count, the `.cart-line` manifest hierarchy, the signal
+ * `.order-summary` panel, and the empty state.
+ *
+ * Everything below the markup stays Forward-owned: browser-local persistence,
+ * sanitized lines, quantity limits, live-region announcements, and an honest
+ * disabled checkout instead of the canonical prototype's fake toast.
+ */
 export function CartView({ seedLines }: CartViewProps) {
   const lines = useDemoCartLines();
   const [hydrated, setHydrated] = useState(false);
@@ -41,7 +49,7 @@ export function CartView({ seedLines }: CartViewProps) {
     setAnnouncement(
       next < 1
         ? `Removed ${line.title} from the cart.`
-        : `${line.title} quantity set to ${Math.min(next, MAX_LINE_QUANTITY)}.`,
+        : `${line.title} quantity set to ${next}.`,
     );
   }
 
@@ -56,172 +64,133 @@ export function CartView({ seedLines }: CartViewProps) {
   const itemCount = totalQuantity(lines);
 
   return (
-    <div>
+    <div className="shell cart-page">
       {/* Cart status changes are announced without stealing focus. */}
       <p aria-live="polite" role="status" className="sr-only">
         {announcement}
       </p>
-
-      <header>
-        <p className="field-label text-clay">Your field bag · demo only</p>
-        <h1 className="display-huge mt-4 text-carbon">
-          Cart
-          {hydrated && lines.length > 0
-            ? ` · ${itemCount} ${itemCount === 1 ? "item" : "items"}`
-            : ""}
-        </h1>
-      </header>
+      <p className="eyebrow">Your field bag · demo only</p>
+      <h1 className="h1">
+        Cart
+        {hydrated
+          ? ` · ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+          : ""}
+      </h1>
 
       {!hydrated ? (
-        <p className="field-label mt-10 border-y border-hairline py-10 text-center text-slate">
-          Opening the cart…
-        </p>
-      ) : lines.length === 0 ? (
-        <div className="mt-10 max-w-2xl border-t-2 border-carbon pt-8">
-          <p className="display-large text-carbon">The pack is empty.</p>
-          <p className="mt-4 max-w-sm text-base leading-relaxed text-slate">
-            Nothing staged for the next trip yet. The catalog is short and the
-            weather is coming — start with the shell.
-          </p>
-          <Link
-            href="/shop"
-            className="field-label mt-8 inline-flex min-h-11 items-center bg-carbon px-6 text-cream transition-colors hover:bg-acid hover:text-carbon"
-          >
-            Shop the catalog
-          </Link>
+        <div className="empty-state section-tight">
+          <div className="empty-state-inner">
+            <p className="eyebrow">Opening the cart…</p>
+          </div>
         </div>
-      ) : (
-        <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:items-start">
-          <ul className="divide-y divide-hairline border-y border-hairline lg:col-span-8">
+      ) : lines.length > 0 ? (
+        <div className="cart-layout section-tight">
+          <section className="cart-list" aria-label="Cart items">
             {lines.map((line) => (
-              <li key={line.key} className="flex gap-6 py-8">
-                <Link href={line.href} className="shrink-0">
+              <article key={line.key} className="cart-line">
+                <Link href={line.href}>
                   <Image
                     src={line.image.src}
                     alt={line.image.alt}
                     width={line.image.width}
                     height={line.image.height}
-                    sizes="112px"
-                    className="aspect-4/5 w-24 border border-hairline object-cover sm:w-28"
+                    sizes="190px"
                   />
                 </Link>
-                <div className="flex flex-1 flex-wrap content-start gap-x-6 gap-y-4">
-                  <div className="min-w-40 flex-1">
-                    <h3 className="font-display text-2xl text-carbon">
-                      <Link href={line.href} className="hover:text-pine">
-                        {line.title}
-                      </Link>
-                    </h3>
-                    <p className="mt-1 text-sm text-slate">
-                      {line.colorwayName}
-                      {line.size !== undefined ? ` · ${line.size}` : ""}
-                    </p>
-                    <div className="mt-4 flex flex-wrap items-center gap-5">
-                      <fieldset className="min-w-0">
-                        <legend className="sr-only">
-                          Quantity for {line.title}
-                        </legend>
-                        <div className="flex items-center border border-carbon/50">
-                          <button
-                            type="button"
-                            aria-label={`Decrease quantity of ${line.title}`}
-                            onClick={() =>
-                              updateQuantity(line, line.quantity - 1)
-                            }
-                            className="inline-flex size-11 items-center justify-center text-carbon transition-colors hover:bg-parchment"
-                          >
-                            −
-                          </button>
-                          <span
-                            aria-live="polite"
-                            className="field-label w-10 text-center text-carbon"
-                          >
-                            {line.quantity}
-                          </span>
-                          <button
-                            type="button"
-                            aria-label={`Increase quantity of ${line.title}`}
-                            onClick={() =>
-                              updateQuantity(line, line.quantity + 1)
-                            }
-                            className="inline-flex size-11 items-center justify-center text-carbon transition-colors hover:bg-parchment"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </fieldset>
+                <div>
+                  <h2>
+                    <Link href={line.href}>{line.title}</Link>
+                  </h2>
+                  <p className="muted">
+                    {line.colorwayName}
+                    {line.size !== undefined ? ` · ${line.size}` : ""}
+                  </p>
+                  <div className="line-controls">
+                    {/* Each control names its own line, so the canonical
+                        `.quantity` div needs no wrapper role. */}
+                    <div className="quantity">
                       <button
                         type="button"
-                        onClick={() => remove(line)}
-                        className="field-label inline-flex min-h-11 items-center text-slate underline decoration-hairline underline-offset-4 transition-colors hover:text-carbon"
+                        aria-label={`Decrease quantity of ${line.title}`}
+                        onClick={() => updateQuantity(line, line.quantity - 1)}
                       >
-                        Remove
-                        <span className="sr-only"> {line.title} from cart</span>
+                        −
+                      </button>
+                      <output aria-live="polite">{line.quantity}</output>
+                      <button
+                        type="button"
+                        aria-label={`Increase quantity of ${line.title}`}
+                        onClick={() => updateQuantity(line, line.quantity + 1)}
+                      >
+                        +
                       </button>
                     </div>
+                    <button
+                      className="remove-button"
+                      type="button"
+                      onClick={() => remove(line)}
+                    >
+                      Remove
+                      <span className="sr-only"> {line.title} from cart</span>
+                    </button>
                   </div>
-                  <p className="ml-auto self-start text-base text-carbon">
-                    {formatMoney({
-                      amount: line.unitPrice.amount * line.quantity,
-                      currencyCode: "USD",
-                    })}
-                  </p>
                 </div>
-              </li>
+                <div className="line-price">
+                  {formatMoney({
+                    amount: line.unitPrice.amount * line.quantity,
+                    currencyCode: "USD",
+                  })}
+                </div>
+              </article>
             ))}
-          </ul>
-
-          <aside aria-label="Order summary" className="lg:col-span-4">
-            <div className="bg-acid px-6 py-6 text-carbon">
-              <h2 className="field-label">
-                Order summary · {itemCount} {itemCount === 1 ? "item" : "items"}
-              </h2>
-              <dl className="mt-5 space-y-3 text-sm">
-                <div className="flex justify-between border-b border-carbon/25 pb-3">
-                  <dt>Subtotal</dt>
-                  <dd>{formatMoney(cartSubtotal)}</dd>
-                </div>
-                <div className="flex justify-between border-b border-carbon/25 pb-3">
-                  <dt>Ground delivery</dt>
-                  <dd>
-                    {cartShipping.amount === 0
-                      ? "Complimentary"
-                      : formatMoney(cartShipping)}
-                  </dd>
-                </div>
-                {cartSubtotal.amount < FREE_SHIPPING_THRESHOLD ? (
-                  <p className="text-xs">
-                    {formatMoney({
-                      amount: FREE_SHIPPING_THRESHOLD - cartSubtotal.amount,
-                      currencyCode: "USD",
-                    })}{" "}
-                    away from free shipping.
-                  </p>
-                ) : null}
-                <div className="flex items-baseline justify-between pt-2 font-display text-3xl">
-                  <dt>Total</dt>
-                  <dd>{formatMoney(cartTotal)}</dd>
-                </div>
-              </dl>
-              <p
-                aria-disabled="true"
-                className="field-label mt-6 flex min-h-11 cursor-not-allowed items-center justify-center bg-carbon/15 text-carbon/70"
-              >
-                Checkout — not connected
-              </p>
-              <p className="mt-4 text-xs leading-relaxed">
-                This is a demonstration cart held in your browser. No live
-                store, payment, or checkout is connected, and nothing here is
-                sent anywhere.
-              </p>
+          </section>
+          <aside className="order-summary" aria-label="Order summary">
+            <p className="eyebrow">Order summary</p>
+            <div className="summary-row">
+              <span>Subtotal</span>
+              <strong>{formatMoney(cartSubtotal)}</strong>
             </div>
-            <Link
-              href="/shop"
-              className="field-label mt-5 inline-flex min-h-11 items-center gap-2 text-carbon hover:text-pine"
-            >
-              Continue shopping →
-            </Link>
+            <div className="summary-row">
+              <span>Ground delivery</span>
+              <span>
+                {cartShipping.amount === 0
+                  ? "Complimentary"
+                  : formatMoney(cartShipping)}
+              </span>
+            </div>
+            <div className="summary-row summary-total">
+              <span>Total</span>
+              <strong>{formatMoney(cartTotal)}</strong>
+            </div>
+            <p className="summary-note">
+              {cartSubtotal.amount < FREE_SHIPPING_THRESHOLD
+                ? `${formatMoney({
+                    amount: FREE_SHIPPING_THRESHOLD - cartSubtotal.amount,
+                    currencyCode: "USD",
+                  })} away from free ground delivery.`
+                : "Ground delivery is included on this order."}
+            </p>
+            <p className="button button-primary button-block" aria-disabled>
+              Checkout — not connected
+            </p>
+            <p className="summary-note">
+              This is a demonstration cart held in your browser. No live store,
+              payment, or checkout is connected, and nothing here is sent
+              anywhere.
+            </p>
           </aside>
+        </div>
+      ) : (
+        <div className="empty-state section-tight">
+          <div className="empty-state-inner">
+            <h2 className="h3">Nothing packed yet.</h2>
+            <p className="muted">
+              Build a field system around the weather and miles ahead.
+            </p>
+            <Link className="button button-primary" href="/shop">
+              Explore all gear
+            </Link>
+          </div>
         </div>
       )}
     </div>

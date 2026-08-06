@@ -367,3 +367,105 @@ push/deploy; no credentials; no live auth/checkout/Shopify/Weaverse.
 - Source authority is now explicit: `public/theme-preview-advanced/app.js:87–359` owns shared/product/route structures; `styles.css:1–948` owns the base plus effective Advanced shell/Home/commerce/account/editorial/content/footer/responsive cascade; `index.html` owns the Literata/Manrope/IBM Plex Mono font contract.
 - Added `full-canonical-source-port-handoff.md` for Claude. It requires a one-to-one React/Next translation of the pinned source across the shared shell and every rendered route, preserves Forward's normalized data/routes/interactions, excludes only the static runtime/hash router/prototype data, and uses screenshots strictly for per-route overlay/diff verification.
 - Leo explicitly rejected the intermediate Home-only scope: the required unit of work is the full canonical source-port. The old screenshot-driven and Home-only instructions were marked superseded to prevent another partial/approximate pass. No production code, Shopify/Weaverse runtime, credentials, commit, push, PR, or deployment was added by this spec reset.
+
+## 2026-08-06 — full canonical source-port
+
+- Implemented `full-canonical-source-port-handoff.md` on `fix/full-canonical-source-port`
+  in the isolated worktree `/Users/hta218/Documents/work/worktrees/forward-full-canonical-source-port`,
+  branched from `main@728c1e3c8de26eeb13298b88737df27eabba8dc3`. Preflight confirmed the canonical
+  source checkout at `weaverse-hydrogen-next-poc@7e416404b5c9d7d8b9fed27bed2b897c36c9b7a4`.
+- Read the complete pinned source (`app.js` 482 lines, `styles.css` 948 lines, `index.html`)
+  before writing any code. Screenshots were used only as per-route verification evidence.
+
+### Source-to-target checklist
+
+| Canonical source | Forward target |
+| --- | --- |
+| `app.js:87–107` product card | `src/components/product-card.tsx` |
+| `app.js:109–139` filter hierarchy | `FilterSidebar` in `src/app/shop/page.tsx` |
+| `app.js:141–160` announcement/header/nav/utilities/spine | `site-header.tsx`, `header-nav.tsx`, `wordmark.tsx`, `cart-count.tsx` |
+| `app.js:162–176` footer | `site-footer.tsx` |
+| `app.js:193–200` mobile menu | `mobile-menu.tsx` |
+| `app.js:212–250` `homePage()` | `src/app/page.tsx` |
+| `app.js:252–263` `shopPage()` | `src/app/shop/page.tsx` |
+| `app.js:265–273` `activityPage()` | `src/app/shop/[collectionHandle]/page.tsx` |
+| `app.js:275–291` `productPage()` | `src/app/products/[productHandle]/{page,product-detail}.tsx`, `add-to-cart-form.tsx` |
+| `app.js:293–300` `searchPage()` | `src/app/search/page.tsx` |
+| `app.js:302–309` `cartPage()` | `src/components/cart-view.tsx` |
+| `app.js:311–313` `signInPage()` | `src/app/account/login/page.tsx` |
+| `app.js:315–317` `accountPage()` | `account-shell.tsx`, `/account`, `/account/orders`, `/account/addresses` |
+| `app.js:319–321` `orderDetailPage()` | `src/app/account/orders/[orderId]/page.tsx` |
+| `app.js:323–325` `policyPage()` | `src/app/policies/[policyHandle]/page.tsx` |
+| `app.js:327–329` `journalPage()` | `src/app/journal/page.tsx` |
+| `app.js:331–333` `articlePage()` | `src/app/journal/[articleHandle]/page.tsx` |
+| `app.js:335–337` `aboutPage()` | `src/app/pages/[pageHandle]/page.tsx` |
+| `app.js:339–341` `notFoundPage()` | `src/app/not-found.tsx` |
+| `styles.css:1–948` | `src/app/canonical-source.css` |
+| `index.html:11` font contract | `next/font/google` in `src/app/layout.tsx` |
+| `app.js:202–210` prototype switcher | excluded |
+
+### Cascade correction
+
+The first pass merged the base breakpoints (source 473–578) into the Advanced breakpoints
+(source 840–943). That inverted the effective cascade: base rules such as
+`.not-found { grid-template-columns: 1fr }` began beating the Advanced
+`.not-found { grid-template-columns: .65fr 1.35fr }` at every viewport, and the 390px 404
+rendered as a stacked column instead of the canonical split. `canonical-source.css` is now
+emitted in true source order — base, base breakpoints, Advanced, Forward additions, Advanced
+breakpoints, reduced motion — and the 390px 404 measures `1372` against the canonical `1371`.
+
+### Intentional normalized-data adaptations
+
+- Three real products against the canonical four; no fourth product was invented. The runway
+  and PLP nth-child geometry is unchanged.
+- Forward product photography, collections (`field-gear`, `high-route`, `camp-craft`),
+  journal entries, orders, and addresses replace the POC's fictional data. Home roles resolve
+  by stable handle, never by array index.
+- The canonical cart button opens a prototype drawer; Forward's cart is a real route, so the
+  drawer and overlay CSS are excluded. Search is a primary navigation destination in Forward's
+  normalized navigation rather than a separate header link.
+- The canonical mobile filter drawer is JavaScript-only; Forward uses a no-JavaScript
+  `<details>` disclosure revealed at the same 820px breakpoint that hides the sidebar.
+- Sign-in keeps Forward's honest disabled state — no prefilled credentials, no fake success.
+- Checkout stays disabled with an honest notice instead of the canonical fake toast.
+- `HomeEquipmentPlate` was folded into the single canonical `ProductCard`, matching the source's
+  one shared card function. Its behaviour is retained: native radios, 44×44 targets, a visible
+  selected ring and colorway name, pointer and keyboard selection, image swap, and
+  `?colorway=` deep links. Its non-canonical stacked second frame was dropped.
+- `loading.tsx` and `error.tsx` use canonical tokens and system-state geometry; the POC has no
+  loading or error render function.
+
+### Defects found and fixed during verification
+
+- Cascade inversion described above.
+- The selected-swatch ring never rendered: the accessible name span sits between the input and
+  the ring, so `input:checked + .swatch-ring` never matched. Changed to the general sibling
+  combinator; the ring now measures `rgba(17, 19, 15, 1)` when checked.
+
+### Verification
+
+- `bun install --frozen-lockfile`, `bun run check` (typecheck, lint, format:check, 56/56 tests,
+  33 generated pages, 19 route patterns + 4 redirects) — green.
+- `bun run smoke:routes` — 30/30 HTTP checks. `bun audit --production` — no vulnerabilities.
+  `bunx biome check .` — 0 errors, 4 `noDescendingSpecificity` warnings inherent to the ported
+  source order. `git diff --check` — clean.
+- Fixture imports under `src/app` and `src/components`: 0. No change under `src/lib/**`,
+  `tests/**`, `scripts/**`, `public/**`, or any package/lock/config file.
+- Visual gate: every route captured against the pinned canonical POC at 1440×900, 768×1024 and
+  390×844, plus the 2560×1440 Home exact-width gate. 50% overlays and pixel-difference heatmaps
+  for all 52 pairs. Geometry parity is close where the data matches — Home `7421` vs `7562`
+  at 2560, activity `3706` vs `3704`, PDP `3302` vs `3274`, search `1572` vs `1571`,
+  404 `1442` vs `1441`. Remaining height deltas are the explicit data differences above.
+  Zero horizontal overflow at every viewport.
+- Browser QA: 0 broken images, 0 overflow failures, 0 severe console errors other than the
+  expected 404 statuses for unknown handles. Verified colorway swap and deep-link retarget,
+  44×44 swatch targets, visible selected ring and name, keyboard selection, four-frame gallery
+  with `aria-pressed`, PDP colorway deep link driving the gallery, size and quantity, add to
+  cart, header cart count, cart quantity update and remove, sort/filter query contract,
+  three repeated navigation cycles with back/forward, mobile menu destinations, focus trap,
+  Escape, focus restore, and body scroll lock.
+- Evidence: `/Users/hta218/Documents/work/artifacts/forward-full-canonical-source-port-2026-08-06/`
+  (`captures/`, `overlays/`, `browser-qa.json`).
+
+Leo's visual approval is still outstanding. No deployment, PR, Shopify/Weaverse runtime, or
+credential change was introduced.

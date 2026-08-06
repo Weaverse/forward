@@ -11,14 +11,18 @@ interface MobileMenuProps {
 }
 
 /**
- * Mobile disclosure menu: full destination list (primary + utility) on a
- * carbon overlay. Focus is trapped while open, Escape closes, and focus
- * returns to the trigger on close so keyboard users never lose their place.
+ * Canonical mobile menu surface. Source `app.js:156` (`.menu-button`) and
+ * `app.js:193–200` (`.mobile-menu`).
+ *
+ * The canonical prototype toggles a persistently mounted panel with a global
+ * click delegate. Forward keeps its own behavior — conditional mount, focus
+ * trap, Escape, focus restore, and scroll lock — because the static POC was
+ * only illustrative there.
  */
 export function MobileMenu({ primary, utility }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
   const destinations = [...primary, ...utility];
 
   useEffect(() => {
@@ -60,10 +64,10 @@ export function MobileMenu({ primary, utility }: MobileMenuProps) {
     }
 
     document.addEventListener("keydown", handleKeyDown);
-    document.body.style.overflow = "hidden";
+    document.body.classList.add("locked");
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
+      document.body.classList.remove("locked");
     };
   }, [open]);
 
@@ -73,62 +77,55 @@ export function MobileMenu({ primary, utility }: MobileMenuProps) {
   }
 
   return (
-    <div className="lg:hidden">
+    <>
       <button
         ref={triggerRef}
         type="button"
+        className="icon-button menu-button"
         aria-expanded={open}
-        aria-controls="mobile-menu-panel"
+        aria-controls="mobile-menu"
         onClick={() => setOpen((current) => !current)}
-        className="field-label inline-flex min-h-11 items-center px-3 text-carbon"
       >
         Menu
       </button>
       {open ? (
-        <div
+        <aside
           ref={panelRef}
-          id="mobile-menu-panel"
+          className="mobile-menu"
+          id="mobile-menu"
           role="dialog"
           aria-modal="true"
           aria-label="Site menu"
-          data-surface="dark"
-          className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-carbon text-cream"
         >
-          <div className="flex items-center justify-between border-b border-cream/15 px-5 py-4">
-            <p className="field-label text-cream/70">Forward</p>
+          <div className="mobile-menu-head">
+            <span className="brand">FORWARD</span>
             <button
               type="button"
+              className="icon-button"
               onClick={close}
-              className="field-label inline-flex min-h-11 items-center px-3 text-cream"
+              aria-label="Close menu"
             >
               Close
             </button>
           </div>
-          <nav aria-label="Menu" className="flex-1 px-5 py-4">
-            <ul>
-              {destinations.map((item, index) => (
-                <li key={item.href} className="border-b border-cream/15">
-                  <Link
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className="flex min-h-14 items-baseline justify-between gap-4 py-3"
-                  >
-                    <span className="font-display text-2xl leading-none">
-                      {item.label}
-                    </span>
-                    <span aria-hidden="true" className="field-label text-acid">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          <nav className="mobile-menu-nav" aria-label="Mobile navigation">
+            {destinations.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
           </nav>
-          <p className="field-label border-t border-cream/15 px-5 py-5 text-cream/50">
-            Designed for weather, miles, and repeat use
+          <p className="mobile-menu-meta">
+            Designed for weather, miles, and repeat use.
+            <br />
+            Static demonstration storefront · FORWARD
           </p>
-        </div>
+        </aside>
       ) : null}
-    </div>
+    </>
   );
 }

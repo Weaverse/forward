@@ -9,12 +9,18 @@ export const metadata: Metadata = {
   description: "Search the Forward catalog.",
 };
 
-const COMMON_SEARCHES = ["shell", "pack", "trail", "charcoal", "alpine"];
-
 interface SearchPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
+/**
+ * Search — port of the canonical `searchPage()` (source `app.js:293–300`):
+ * oversized search heading and input, the start state, the results head plus
+ * canonical grid, and the no-match state.
+ *
+ * The query stays a plain GET so search works without JavaScript, and results
+ * come from the normalized server-side search.
+ */
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
   const rawQuery = typeof params.q === "string" ? params.q : "";
@@ -24,111 +30,68 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const hasQuery = query.length > 0;
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-5 py-12 sm:px-8">
-      <header>
-        <p className="field-label text-clay">Search the field catalog</p>
-        <h1 className="display-huge mt-6 text-carbon">
-          What are you looking for?
-        </h1>
-      </header>
-
-      {/* GET form: search works without JavaScript. */}
-      <form method="get" action="/search" className="mt-10">
-        <label htmlFor="search-input" className="sr-only">
-          Search the store
+    <div className="shell search-wrap">
+      <p className="eyebrow">Search the field catalog</p>
+      <h1 className="h1">What are you looking for?</h1>
+      <form className="search-form" method="get" action="/search">
+        <label className="sr-only" htmlFor="search-input">
+          Search products
         </label>
-        <div className="flex items-end gap-6 border-b-2 border-carbon pb-3">
-          <input
-            id="search-input"
-            type="search"
-            name="q"
-            defaultValue={rawQuery}
-            placeholder="trail"
-            className="display-large w-full min-w-0 bg-transparent text-carbon placeholder:text-carbon/30"
-          />
-          <button
-            type="submit"
-            className="field-label inline-flex min-h-11 shrink-0 items-center gap-2 text-carbon transition-colors hover:text-pine"
-          >
-            Search →
-          </button>
-        </div>
+        <input
+          id="search-input"
+          name="q"
+          type="search"
+          defaultValue={rawQuery}
+          placeholder="Try “trail”, “shell”, or “camp”"
+        />
+        <button type="submit">Search →</button>
       </form>
 
-      <div className="mt-12">
-        {!hasQuery ? (
-          <div>
-            <p className="field-label text-slate">Common searches</p>
-            <ul className="mt-4 flex flex-wrap gap-3">
-              {COMMON_SEARCHES.map((term) => (
-                <li key={term}>
-                  <Link
-                    href={`/search?q=${term}`}
-                    className="field-label inline-flex min-h-11 items-center border border-carbon/40 px-5 text-carbon transition-colors hover:bg-carbon hover:text-cream"
-                  >
-                    {term}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : results.length > 0 ? (
-          <>
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <h2 className="display-large text-carbon">
-                Results for “{query}”
-              </h2>
-              <p className="field-label text-slate" aria-live="polite">
-                {results.length} found
-              </p>
-            </div>
-            <div className="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-              {results.map((product, index) => (
-                <ProductCard
-                  key={product.handle}
-                  product={product}
-                  plate={product.plate}
-                  priority={index < 3}
-                />
-              ))}
-            </div>
-          </>
-        ) : (
-          <div className="max-w-2xl">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <h2 className="display-large text-carbon">
-                Nothing for “{query}”
-              </h2>
-              <p className="field-label text-slate" aria-live="polite">
-                0 found
-              </p>
-            </div>
-            <p className="mt-4 max-w-md text-base leading-relaxed text-slate">
-              The catalog is three products deep, so search is unforgiving. Try
-              a broader term or one of the common searches — or browse
-              everything at once.
+      {!hasQuery ? (
+        <section className="empty-state">
+          <div className="empty-state-inner">
+            <p className="eyebrow">Start here</p>
+            <h2 className="h3">Search by product, activity, or material.</h2>
+            <p className="muted">
+              Try trail, alpine, shell, pack, camp, or charcoal.
             </p>
-            <ul className="mt-6 flex flex-wrap gap-3">
-              {COMMON_SEARCHES.map((term) => (
-                <li key={term}>
-                  <Link
-                    href={`/search?q=${term}`}
-                    className="field-label inline-flex min-h-11 items-center border border-carbon/40 px-5 text-carbon transition-colors hover:bg-carbon hover:text-cream"
-                  >
-                    {term}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/shop"
-              className="field-label mt-8 inline-flex min-h-11 items-center bg-carbon px-6 text-cream transition-colors hover:bg-acid hover:text-carbon"
-            >
-              Browse the catalog
+            <Link className="button button-primary" href="/shop">
+              Browse all gear
             </Link>
           </div>
-        )}
-      </div>
+        </section>
+      ) : results.length > 0 ? (
+        <section aria-label="Search results">
+          <div className="search-results-head">
+            <h2 className="h3">Results for “{query}”</h2>
+            <span className="meta" aria-live="polite">
+              {results.length} found
+            </span>
+          </div>
+          <div className="product-grid">
+            {results.map((product, index) => (
+              <ProductCard
+                key={product.handle}
+                product={product}
+                priority={index < 2}
+              />
+            ))}
+          </div>
+        </section>
+      ) : (
+        <section className="empty-state">
+          <div className="empty-state-inner">
+            <p className="eyebrow">No exact match</p>
+            <h2 className="h3">Nothing turned up for “{query}”.</h2>
+            <p className="muted" aria-live="polite">
+              0 found. Try a broader term, or explore the full field system.
+            </p>
+            <Link className="button button-primary" href="/shop">
+              View all gear
+            </Link>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
