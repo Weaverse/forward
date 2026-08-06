@@ -1,46 +1,30 @@
 import Link from "next/link";
 
-import { cn } from "@/lib/cn";
-
 interface WordmarkProps {
-  size?: "header" | "footer" | "stacked";
+  /** `header` renders the canonical `.brand` cell; `footer` the stacked mark. */
+  variant?: "header" | "footer";
 }
 
-export function Wordmark({ size = "header" }: WordmarkProps) {
-  if (size === "stacked") {
-    // Oversized stacked footer wordmark: two hard-broken display lines.
+/**
+ * Canonical FOR/WARD mark. Source `app.js:145` (header `.brand`) and
+ * `app.js:167` (`.footer-brand`).
+ */
+export function Wordmark({ variant = "header" }: WordmarkProps) {
+  if (variant === "footer") {
     return (
-      <Link
-        href="/"
-        aria-label="Forward — home"
-        className="inline-block font-display font-semibold uppercase leading-[0.84] tracking-[-0.015em] text-[clamp(4.5rem,8vw,8rem)]"
-      >
-        <span className="block">For</span>
-        <span className="block">Ward</span>
+      <Link className="footer-brand" href="/" aria-label="Forward — home">
+        FOR
+        <br />
+        WARD
       </Link>
     );
   }
 
   return (
-    <Link
-      href="/"
-      aria-label="Forward — home"
-      className={cn(
-        "inline-flex items-baseline gap-1 font-display font-semibold uppercase leading-none tracking-wordmark",
-        size === "header" ? "text-xl" : "text-lg",
-      )}
-    >
-      <span>For</span>
-      <span
-        aria-hidden="true"
-        className={cn(
-          "translate-y-[-0.08em]",
-          size === "footer" ? "text-acid" : "text-clay",
-        )}
-      >
-        /
-      </span>
-      <span>Ward</span>
+    <Link className="brand" href="/" aria-label="Forward — home">
+      <span>FOR</span>
+      <span>WARD</span>
+      <small>OUTDOOR / 01</small>
     </Link>
   );
 }
