@@ -1,0 +1,15 @@
+.env
+.env.*
+.vscode
+.vscode/
+.vercel/
+.next/
+node_modules/
+.DS_Store
+*.log
+*.tsbuildinfo
+coverage/
+test-results/
+playwright-report/
+tests
+tests/
