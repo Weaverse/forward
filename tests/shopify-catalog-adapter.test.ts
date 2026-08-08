@@ -22,6 +22,8 @@ import {
   ShopifyCatalogDataSource,
 } from "../src/lib/storefront/shopify/data-source.ts";
 import {
+  DEFAULT_MAIN_MENU_HANDLE,
+  MAIN_MENU_HANDLE_ENV_KEY,
   PRIVATE_STOREFRONT_TOKEN_ENV_KEY,
   readShopifyCatalogConfig,
   STORE_DOMAIN_ENV_KEY,
@@ -57,6 +59,7 @@ function shopifySource(
     execute: async () => response,
     executeNavigation: async () => navigationResponse(),
     storeDomain: SYNTHETIC_STORE_DOMAIN,
+    mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
   });
 }
 
@@ -93,6 +96,12 @@ async function assertRejectsCatalog(
 describe("catalog mode selection", () => {
   it("defaults to the static adapter with no Shopify configuration", () => {
     assert.equal(readShopifyCatalogConfig({}), null);
+    assert.equal(
+      readShopifyCatalogConfig({
+        [MAIN_MENU_HANDLE_ENV_KEY]: "forward-main-menu",
+      }),
+      null,
+    );
     assert.ok(
       createStorefrontDataSource({}) instanceof StaticStorefrontDataSource,
     );
@@ -108,9 +117,36 @@ describe("catalog mode selection", () => {
   it("selects Shopify mode for a complete configuration", () => {
     const config = readShopifyCatalogConfig(COMPLETE_ENV);
     assert.equal(config?.storeDomain, SYNTHETIC_STORE_DOMAIN);
+    assert.equal(config?.mainMenuHandle, DEFAULT_MAIN_MENU_HANDLE);
     assert.ok(
       createStorefrontDataSource(COMPLETE_ENV) instanceof
         ShopifyCatalogDataSource,
+    );
+  });
+
+  it("accepts an explicit Shopify primary-menu handle override", () => {
+    assert.equal(
+      readShopifyCatalogConfig({
+        ...COMPLETE_ENV,
+        [MAIN_MENU_HANDLE_ENV_KEY]: "forward-main-menu",
+      })?.mainMenuHandle,
+      "forward-main-menu",
+    );
+  });
+
+  it("rejects a malformed primary-menu handle without leaking its value", () => {
+    const malformed = "Not A Shopify Handle";
+    assert.throws(
+      () =>
+        readShopifyCatalogConfig({
+          ...COMPLETE_ENV,
+          [MAIN_MENU_HANDLE_ENV_KEY]: malformed,
+        }),
+      (error: unknown) => {
+        assert.ok(error instanceof ShopifyConfigurationError);
+        assert.ok(!error.message.includes(malformed));
+        return true;
+      },
     );
   });
 
@@ -176,6 +212,7 @@ describe("Hydrogen catalog client seam", () => {
       const execute = createCatalogQueryExecutor(
         {
           storeDomain: SYNTHETIC_STORE_DOMAIN,
+          mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
           privateStorefrontToken: SYNTHETIC_PRIVATE_TOKEN,
         },
         { useNextCache: false },
@@ -217,6 +254,7 @@ describe("Hydrogen catalog client seam", () => {
       const execute = createCatalogQueryExecutor(
         {
           storeDomain: SYNTHETIC_STORE_DOMAIN,
+          mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
           privateStorefrontToken: SYNTHETIC_PRIVATE_TOKEN,
         },
         { useNextCache: false },
@@ -248,6 +286,7 @@ describe("Hydrogen catalog client seam", () => {
       const execute = createCatalogQueryExecutor(
         {
           storeDomain: SYNTHETIC_STORE_DOMAIN,
+          mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
           privateStorefrontToken: SYNTHETIC_PRIVATE_TOKEN,
         },
         { useNextCache: false },
@@ -278,6 +317,7 @@ describe("Hydrogen catalog client seam", () => {
       const execute = createCatalogQueryExecutor(
         {
           storeDomain: SYNTHETIC_STORE_DOMAIN,
+          mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
           privateStorefrontToken: SYNTHETIC_PRIVATE_TOKEN,
         },
         { useNextCache: false },
@@ -967,6 +1007,7 @@ describe("ShopifyCatalogDataSource", () => {
       },
       executeNavigation: async () => navigationResponse(),
       storeDomain: SYNTHETIC_STORE_DOMAIN,
+      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
     });
     await assert.rejects(() => failing.listProducts(), ShopifyCatalogError);
     await assert.rejects(
@@ -1000,6 +1041,7 @@ describe("catalog revalidation window", () => {
       },
       executeNavigation: async () => navigationResponse(),
       storeDomain: SYNTHETIC_STORE_DOMAIN,
+      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
       ttlMs: CATALOG_REVALIDATE_SECONDS * 1000,
       now: () => clock,
     });
@@ -1028,6 +1070,7 @@ describe("catalog revalidation window", () => {
       },
       executeNavigation: async () => navigationResponse(),
       storeDomain: SYNTHETIC_STORE_DOMAIN,
+      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
     });
     await Promise.all([
       source.listProducts(),
@@ -1047,6 +1090,7 @@ describe("catalog revalidation window", () => {
       },
       executeNavigation: async () => navigationResponse(),
       storeDomain: SYNTHETIC_STORE_DOMAIN,
+      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
       useProcessCache: false,
     });
     await source.listProducts();

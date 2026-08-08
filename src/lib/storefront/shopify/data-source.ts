@@ -46,6 +46,8 @@ export interface ShopifyCatalogDataSourceOptions {
   executeNavigation: NavigationQueryExecutor;
   /** Configured store origin used to reject cross-store menu URLs. */
   storeDomain: string;
+  /** Selected Shopify primary-menu handle. */
+  mainMenuHandle: string;
   /** Injectable sanitized observer for navigation fallback events. */
   onNavigationFallback?: (error: ShopifyCatalogError) => void;
   /** Injectable sanitized observer for collection-structure fallback events. */
@@ -71,6 +73,7 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   readonly #execute: CatalogQueryExecutor;
   readonly #executeNavigation: NavigationQueryExecutor;
   readonly #storeDomain: string;
+  readonly #mainMenuHandle: string;
   readonly #onNavigationFallback: (error: ShopifyCatalogError) => void;
   readonly #onCollectionFallback: (error: ShopifyCatalogError) => void;
   readonly #useProcessCache: boolean;
@@ -87,6 +90,7 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     this.#execute = options.execute;
     this.#executeNavigation = options.executeNavigation;
     this.#storeDomain = options.storeDomain;
+    this.#mainMenuHandle = options.mainMenuHandle;
     this.#onCollectionFallback =
       options.onCollectionFallback ??
       ((error) => {
@@ -204,6 +208,7 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
       primary = mapMainMenuResult(
         await this.#executeNavigation(),
         this.#storeDomain,
+        this.#mainMenuHandle,
       );
     } catch (error) {
       if (!(error instanceof ShopifyCatalogError)) {

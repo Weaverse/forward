@@ -2,7 +2,6 @@
 
 import { gql } from "@shopify/hydrogen";
 
-export const MAIN_MENU_HANDLE = "forward-main-menu";
 export const NAVIGATION_COLLECTION_LIMIT = 10;
 export const NAVIGATION_COLLECTION_PRODUCT_LIMIT = 10;
 

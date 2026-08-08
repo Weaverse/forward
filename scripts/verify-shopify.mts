@@ -24,6 +24,7 @@ import {
 import { createStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
 import { CANONICAL_PRODUCT_HANDLES } from "../src/lib/storefront/catalog-presentation.ts";
 import { isShopifyProductImageUrl } from "../src/lib/storefront/image-source.ts";
+import { readShopifyCatalogConfig } from "../src/lib/storefront/shopify/env.ts";
 import { safeErrorLabel } from "../src/lib/storefront/shopify/errors.ts";
 import { SHOP_IDENTITY_QUERY } from "../src/lib/storefront/shopify/queries.ts";
 
@@ -153,6 +154,10 @@ try {
   // transport/mapping seam while leaving the production default Data Cache on.
   let collectionFallbackUsed = false;
   let navigationFallbackUsed = false;
+  const config = readShopifyCatalogConfig(process.env);
+  if (config === null) {
+    throw new Error("Shopify catalog mode is not configured.");
+  }
   const storefront = createStorefrontDataSource(process.env, {
     useNextCache: false,
     onCollectionFallback: () => {
@@ -165,7 +170,7 @@ try {
   const navigation = await storefront.getNavigation();
   const shop = navigation.primary.find((item) => item.href === "/shop");
   check(
-    "live forward-main-menu has the canonical two-level tree",
+    `live ${config.mainMenuHandle} has the canonical two-level tree`,
     !navigationFallbackUsed &&
       navigation.primary.map((item) => item.href).join(",") ===
         "/shop,/journal,/pages/about-forward,/search" &&

@@ -26,7 +26,6 @@ import { safeErrorLabel, ShopifyCatalogError } from "./errors";
 import { mapCatalogResult } from "./mapper";
 
 import {
-  MAIN_MENU_HANDLE,
   NAVIGATION_COLLECTION_LIMIT,
   NAVIGATION_COLLECTION_PRODUCT_LIMIT,
   NAVIGATION_QUERY,
@@ -155,7 +154,7 @@ export function createNavigationQueryExecutor(
     try {
       const { data, errors } = await client.graphql(NAVIGATION_QUERY, {
         variables: {
-          menuHandle: MAIN_MENU_HANDLE,
+          menuHandle: config.mainMenuHandle,
           collectionFirst: NAVIGATION_COLLECTION_LIMIT,
           collectionProductFirst: NAVIGATION_COLLECTION_PRODUCT_LIMIT,
         },
@@ -186,7 +185,9 @@ export function createNavigationQueryExecutor(
     return execute;
   }
 
-  return unstable_cache(execute, [NAVIGATION_CACHE_KEY, config.storeDomain], {
-    revalidate: CATALOG_REVALIDATE_SECONDS,
-  });
+  return unstable_cache(
+    execute,
+    [NAVIGATION_CACHE_KEY, config.storeDomain, config.mainMenuHandle],
+    { revalidate: CATALOG_REVALIDATE_SECONDS },
+  );
 }

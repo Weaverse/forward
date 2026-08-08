@@ -34,7 +34,7 @@ export function navigationResponse(): NavigationResponse {
   return {
     data: {
       menu: {
-        handle: "forward-main-menu",
+        handle: "main-menu",
         items: [
           {
             id: "gid://shopify/MenuItem/shop",

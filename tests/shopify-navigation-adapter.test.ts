@@ -10,6 +10,7 @@ import { StaticStorefrontDataSource } from "../src/lib/storefront/data-source.ts
 import { createNavigationQueryExecutor } from "../src/lib/storefront/shopify/client.ts";
 import { ShopifyCatalogDataSource } from "../src/lib/storefront/shopify/data-source.ts";
 import { ShopifyCatalogError } from "../src/lib/storefront/shopify/errors.ts";
+import { DEFAULT_MAIN_MENU_HANDLE } from "../src/lib/storefront/shopify/env.ts";
 import { mapNavigationResult } from "../src/lib/storefront/shopify/navigation-mapper.ts";
 import {
   navigationResponse,
@@ -34,7 +35,11 @@ const expectedPrimary = [
 ] as const;
 
 function mapped(response = navigationResponse()) {
-  return mapNavigationResult(response, SYNTHETIC_STORE_DOMAIN);
+  return mapNavigationResult(
+    response,
+    SYNTHETIC_STORE_DOMAIN,
+    DEFAULT_MAIN_MENU_HANDLE,
+  );
 }
 
 function shopifySource(response = navigationResponse()) {
@@ -43,6 +48,7 @@ function shopifySource(response = navigationResponse()) {
     execute: async () => catalogResponse(),
     executeNavigation: async () => response,
     storeDomain: SYNTHETIC_STORE_DOMAIN,
+    mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
   });
 }
 
@@ -64,12 +70,16 @@ describe("Hydrogen navigation client seam", () => {
         {
           storeDomain: "forward-test-shop.myshopify.com",
           privateStorefrontToken: "synthetic-private-storefront-value",
+          mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
         },
         { useNextCache: false },
       );
       assert.equal(
-        mapNavigationResult(await execute(), SYNTHETIC_STORE_DOMAIN).primary
-          .length,
+        mapNavigationResult(
+          await execute(),
+          SYNTHETIC_STORE_DOMAIN,
+          DEFAULT_MAIN_MENU_HANDLE,
+        ).primary.length,
         3,
       );
       assert.equal(new URL(requestUrl).pathname, "/api/2026-04/graphql.json");
@@ -86,7 +96,7 @@ describe("Hydrogen navigation client seam", () => {
         collectionProductFirst: 10,
         country: "US",
         language: "EN",
-        menuHandle: "forward-main-menu",
+        menuHandle: "main-menu",
       });
     } finally {
       globalThis.fetch = originalFetch;
@@ -251,6 +261,7 @@ describe("Shopify navigation data source", () => {
         execute: async () => catalogResponse(),
         executeNavigation: async () => response,
         storeDomain: SYNTHETIC_STORE_DOMAIN,
+        mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
         onNavigationFallback: (error) => observed.push(error),
       });
       assert.deepEqual(await source.getNavigation(), base);
@@ -274,6 +285,7 @@ describe("Shopify navigation data source", () => {
       execute: async () => catalogResponse(),
       executeNavigation: async () => response,
       storeDomain: SYNTHETIC_STORE_DOMAIN,
+      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
       onCollectionFallback: (error) => collectionObserved.push(error),
       onNavigationFallback: (error) => navigationObserved.push(error),
     });
@@ -310,6 +322,7 @@ describe("Shopify navigation data source", () => {
       },
       onCollectionFallback: (error) => observed.push(error),
       storeDomain: SYNTHETIC_STORE_DOMAIN,
+      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
     });
 
     assert.deepEqual(
@@ -338,6 +351,7 @@ describe("Shopify navigation data source", () => {
       onCollectionFallback: (error) => collectionObserved.push(error),
       onNavigationFallback: (error) => navigationObserved.push(error),
       storeDomain: SYNTHETIC_STORE_DOMAIN,
+      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
     });
     const base = await new StaticStorefrontDataSource().getNavigation();
     assert.deepEqual(await source.getNavigation(), base);

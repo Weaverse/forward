@@ -5,7 +5,6 @@ import {
 import type { Collection, NavItem } from "../types";
 import type { NavigationQueryResult } from "./client";
 import { ShopifyCatalogError } from "./errors";
-import { MAIN_MENU_HANDLE } from "./navigation-query";
 
 interface ExpectedMenuItem {
   label: string;
@@ -144,19 +143,21 @@ function mapMenuItem(
     : { href: expected.href, label, children };
 }
 
-function mapMenu(value: unknown, storeDomain: string): readonly NavItem[] {
+function mapMenu(
+  value: unknown,
+  storeDomain: string,
+  menuHandle: string,
+): readonly NavItem[] {
   if (value === null || value === undefined) {
-    fail(`Shopify menu "${MAIN_MENU_HANDLE}" is missing.`);
+    fail(`Shopify menu "${menuHandle}" is missing.`);
   }
-  const menu = asRecord(value, `Shopify menu "${MAIN_MENU_HANDLE}"`);
-  if (menu.handle !== MAIN_MENU_HANDLE) {
+  const menu = asRecord(value, `Shopify menu "${menuHandle}"`);
+  if (menu.handle !== menuHandle) {
     fail(`Shopify returned the wrong menu handle.`);
   }
-  const items = asArray(menu.items, `Shopify menu "${MAIN_MENU_HANDLE}" items`);
+  const items = asArray(menu.items, `Shopify menu "${menuHandle}" items`);
   if (items.length !== EXPECTED_MENU.length) {
-    fail(
-      `Shopify menu "${MAIN_MENU_HANDLE}" must contain exactly three items.`,
-    );
+    fail(`Shopify menu "${menuHandle}" must contain exactly three items.`);
   }
   return EXPECTED_MENU.map((expected, index) =>
     mapMenuItem(
@@ -259,8 +260,9 @@ function readRoot(result: NavigationQueryResult): Record<string, unknown> {
 export function mapMainMenuResult(
   result: NavigationQueryResult,
   storeDomain: string,
+  menuHandle: string,
 ): readonly NavItem[] {
-  return mapMenu(readRoot(result).menu, storeDomain);
+  return mapMenu(readRoot(result).menu, storeDomain, menuHandle);
 }
 
 export function mapCollectionsResult(
@@ -272,9 +274,10 @@ export function mapCollectionsResult(
 export function mapNavigationResult(
   result: NavigationQueryResult,
   storeDomain: string,
+  menuHandle: string,
 ): NavigationSnapshot {
   return {
-    primary: mapMainMenuResult(result, storeDomain),
+    primary: mapMainMenuResult(result, storeDomain, menuHandle),
     collections: mapCollectionsResult(result),
   };
 }

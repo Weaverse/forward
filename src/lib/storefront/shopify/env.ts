@@ -19,6 +19,8 @@ import { ShopifyConfigurationError } from "./errors";
 
 export const STORE_DOMAIN_ENV_KEY = "PUBLIC_STORE_DOMAIN";
 export const PRIVATE_STOREFRONT_TOKEN_ENV_KEY = "PRIVATE_STOREFRONT_API_TOKEN";
+export const MAIN_MENU_HANDLE_ENV_KEY = "PUBLIC_MAIN_MENU_HANDLE";
+export const DEFAULT_MAIN_MENU_HANDLE = "main-menu";
 
 /** Every environment key that participates in catalog-mode selection. */
 export const SHOPIFY_CATALOG_ENV_KEYS = [
@@ -31,9 +33,11 @@ export type EnvSource = Readonly<Record<string, string | undefined>>;
 export interface ShopifyCatalogConfig {
   storeDomain: string;
   privateStorefrontToken: string;
+  mainMenuHandle: string;
 }
 
 const STORE_DOMAIN_PATTERN = /^[a-z0-9][a-z0-9-]*\.myshopify\.com$/;
+const MENU_HANDLE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function readKey(source: EnvSource, key: string): string | undefined {
   const raw = source[key];
@@ -99,5 +103,13 @@ export function readShopifyCatalogConfig(
     );
   }
 
-  return { storeDomain, privateStorefrontToken };
+  const mainMenuHandle =
+    readKey(source, MAIN_MENU_HANDLE_ENV_KEY) ?? DEFAULT_MAIN_MENU_HANDLE;
+  if (!MENU_HANDLE_PATTERN.test(mainMenuHandle)) {
+    throw new ShopifyConfigurationError(
+      `${MAIN_MENU_HANDLE_ENV_KEY} must be a lowercase Shopify resource handle.`,
+    );
+  }
+
+  return { storeDomain, privateStorefrontToken, mainMenuHandle };
 }

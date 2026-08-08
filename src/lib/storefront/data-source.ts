@@ -207,6 +207,7 @@ export function createStorefrontDataSource(
     execute: createCatalogQueryExecutor(config, options),
     executeNavigation: createNavigationQueryExecutor(config, options),
     storeDomain: config.storeDomain,
+    mainMenuHandle: config.mainMenuHandle,
     onCollectionFallback: options.onCollectionFallback,
     onNavigationFallback: options.onNavigationFallback,
     useProcessCache: !useNextCache,
