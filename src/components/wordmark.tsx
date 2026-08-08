@@ -1,30 +1,41 @@
+import Image from "next/image";
 import Link from "next/link";
 
 interface WordmarkProps {
-  /** `header` renders the canonical `.brand` cell; `footer` the stacked mark. */
-  variant?: "header" | "footer";
+  variant?: "header" | "footer" | "mobile";
 }
 
-/**
- * Canonical FOR/WARD mark. Source `app.js:145` (header `.brand`) and
- * `app.js:167` (`.footer-brand`).
- */
+const WORDMARKS = {
+  header: {
+    className: "brand",
+    imageClassName: "brand-image",
+    src: "/images/brand/forward-wordmark-horizontal-moss.svg",
+  },
+  footer: {
+    className: "footer-brand",
+    imageClassName: "footer-brand-image",
+    src: "/images/brand/forward-wordmark-horizontal-reversed.svg",
+  },
+  mobile: {
+    className: "mobile-brand",
+    imageClassName: "mobile-brand-image",
+    src: "/images/brand/forward-wordmark-horizontal-reversed.svg",
+  },
+} as const;
+
+/** Approved FOR / WARD horizontal lockup for light and dark site surfaces. */
 export function Wordmark({ variant = "header" }: WordmarkProps) {
-  if (variant === "footer") {
-    return (
-      <Link className="footer-brand" href="/" aria-label="Forward — home">
-        FOR
-        <br />
-        WARD
-      </Link>
-    );
-  }
+  const wordmark = WORDMARKS[variant];
 
   return (
-    <Link className="brand" href="/" aria-label="Forward — home">
-      <span>FOR</span>
-      <span>WARD</span>
-      <small>OUTDOOR / 01</small>
+    <Link className={wordmark.className} href="/" aria-label="Forward — home">
+      <Image
+        className={wordmark.imageClassName}
+        src={wordmark.src}
+        alt=""
+        width={480}
+        height={96}
+      />
     </Link>
   );
 }

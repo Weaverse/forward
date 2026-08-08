@@ -193,10 +193,16 @@ button {
   background: rgba(251, 249, 244, 0.97);
 }
 .brand {
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  line-height: 1;
+  width: 155px;
+  display: block;
+  line-height: 0;
+}
+.brand-image,
+.footer-brand-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: transparent;
 }
 .desktop-nav {
   justify-self: center;
@@ -1450,9 +1456,9 @@ p {
   gap: 50px;
 }
 .footer-brand {
-  font-size: clamp(30px, 4vw, 56px);
-  font-weight: 800;
-  letter-spacing: 0.15em;
+  width: clamp(260px, 30vw, 480px);
+  display: block;
+  line-height: 0;
 }
 .footer-intro {
   max-width: 380px;
@@ -1688,8 +1694,7 @@ p {
     min-width: 0;
   }
   .brand {
-    font-size: 16px;
-    letter-spacing: 0.14em;
+    width: 132px;
   }
   .header-link {
     display: none;
@@ -1975,25 +1980,7 @@ body {
   border-bottom-color: var(--ink);
 }
 .brand {
-  display: grid;
-  grid-template-columns: auto auto;
   width: 155px;
-  column-gap: 4px;
-  font-size: 16px;
-  letter-spacing: -0.03em;
-}
-.brand > span:last-of-type {
-  font-family: var(--display);
-  font-style: normal;
-  font-weight: 500;
-}
-.brand small {
-  grid-column: 1 / -1;
-  margin-top: 4px;
-  font-family: var(--mono);
-  font-size: 7px;
-  font-weight: 400;
-  letter-spacing: 0.27em;
 }
 .desktop-nav {
   justify-self: stretch;
@@ -2968,11 +2955,7 @@ body {
   grid-template-columns: 1.8fr repeat(3, 0.45fr);
 }
 .footer-brand {
-  font-family: var(--display);
-  font-size: clamp(64px, 8vw, 122px);
-  font-weight: 500;
-  letter-spacing: -0.055em;
-  line-height: 0.78;
+  width: clamp(280px, 31vw, 480px);
 }
 .footer-brand-wrap > p {
   margin-top: 30px;
