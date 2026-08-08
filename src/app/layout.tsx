@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 
 import "./globals.css";
 import "./canonical-source.css";
+import "./site-header.css";
 
 /*
  * Canonical font contract, ported from the Advanced POC document head
