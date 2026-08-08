@@ -8,14 +8,16 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { CartCount } from "@/components/cart-count";
 import { Wordmark } from "@/components/wordmark";
 import {
+  createHeaderNavigationHref,
   createFieldIndexCollections,
   type FieldIndexCollection,
 } from "@/lib/header-navigation";
 import type { NavItem } from "@/lib/storefront/types";
 
-interface FieldIndexHeaderProps {
+export interface FieldIndexHeaderProps {
   announcement: string;
   primary: readonly NavItem[];
+  queryString?: string;
   utility: readonly NavItem[];
 }
 
@@ -26,6 +28,7 @@ interface FieldIndexPanelProps {
   onClose: () => void;
   onSelect: (index: number) => void;
   pathname: string;
+  queryString: string;
 }
 
 function isActive(pathname: string, href: string): boolean {
@@ -52,6 +55,7 @@ function FieldIndexPanel({
   onClose,
   onSelect,
   pathname,
+  queryString,
 }: FieldIndexPanelProps) {
   const active = collections[activeIndex] ?? collections[0];
   if (active === undefined) {
@@ -73,7 +77,7 @@ function FieldIndexPanel({
           {collections.map((collection, index) => (
             <Link
               key={collection.id}
-              href={collection.href}
+              href={createHeaderNavigationHref(collection.href, queryString)}
               aria-current={
                 isActive(pathname, collection.href) ? "page" : undefined
               }
@@ -115,12 +119,14 @@ interface MobileFieldIndexProps {
   collections: readonly FieldIndexCollection[];
   onNavigate: () => void;
   pathname: string;
+  queryString: string;
 }
 
 function MobileFieldIndex({
   collections,
   onNavigate,
   pathname,
+  queryString,
 }: MobileFieldIndexProps) {
   return (
     <div className="field-mobile-index">
@@ -132,7 +138,7 @@ function MobileFieldIndex({
         {collections.map((collection) => (
           <Link
             key={collection.id}
-            href={collection.href}
+            href={createHeaderNavigationHref(collection.href, queryString)}
             aria-current={
               isActive(pathname, collection.href) ? "page" : undefined
             }
@@ -154,6 +160,7 @@ function MobileFieldIndex({
 export function FieldIndexHeader({
   announcement,
   primary,
+  queryString = "",
   utility,
 }: FieldIndexHeaderProps) {
   const pathname = usePathname();
@@ -325,7 +332,7 @@ export function FieldIndexHeader({
         <span>54.4609° N / 3.0886° W</span>
       </aside>
       <header className="site-header field-header">
-        <Wordmark />
+        <Wordmark href={createHeaderNavigationHref("/", queryString)} />
         <nav className="field-header-primary" aria-label="Primary navigation">
           <button
             ref={desktopTriggerRef}
@@ -347,7 +354,7 @@ export function FieldIndexHeader({
           {primaryLinks.map((item, index) => (
             <Link
               key={item.href}
-              href={item.href}
+              href={createHeaderNavigationHref(item.href, queryString)}
               className={isActive(pathname, item.href) ? "active" : undefined}
               aria-current={isActive(pathname, item.href) ? "page" : undefined}
               onClick={() => setDesktopOpen(false)}
@@ -361,7 +368,7 @@ export function FieldIndexHeader({
           {searchItem ? (
             <Link
               className="header-link field-header-search"
-              href={searchItem.href}
+              href={createHeaderNavigationHref(searchItem.href, queryString)}
               aria-current={
                 isActive(pathname, searchItem.href) ? "page" : undefined
               }
@@ -373,7 +380,7 @@ export function FieldIndexHeader({
             <Link
               key={item.href}
               className="header-link account-hide"
-              href={item.href}
+              href={createHeaderNavigationHref(item.href, queryString)}
               aria-current={isActive(pathname, item.href) ? "page" : undefined}
             >
               {item.label}
@@ -381,7 +388,7 @@ export function FieldIndexHeader({
           ))}
           <Link
             className="icon-button cart-button"
-            href="/cart"
+            href={createHeaderNavigationHref("/cart", queryString)}
             aria-current={isActive(pathname, "/cart") ? "page" : undefined}
           >
             <span className="cart-label">Cart</span>
@@ -406,6 +413,7 @@ export function FieldIndexHeader({
             onClose={() => setDesktopOpen(false)}
             onSelect={setActiveIndex}
             pathname={pathname}
+            queryString={queryString}
           />
         ) : null}
       </header>
@@ -425,7 +433,10 @@ export function FieldIndexHeader({
           aria-label="Site menu"
         >
           <div className="mobile-menu-head field-mobile-head">
-            <Wordmark variant="mobile" />
+            <Wordmark
+              href={createHeaderNavigationHref("/", queryString)}
+              variant="mobile"
+            />
             <button
               ref={closeButtonRef}
               type="button"
@@ -440,6 +451,7 @@ export function FieldIndexHeader({
             collections={collections}
             onNavigate={closeMobile}
             pathname={pathname}
+            queryString={queryString}
           />
           <nav
             className="field-mobile-secondary"
@@ -448,7 +460,7 @@ export function FieldIndexHeader({
             {mobileLinks.map((item, index) => (
               <Link
                 key={item.href}
-                href={item.href}
+                href={createHeaderNavigationHref(item.href, queryString)}
                 aria-current={
                   isActive(pathname, item.href) ? "page" : undefined
                 }
@@ -460,7 +472,7 @@ export function FieldIndexHeader({
               </Link>
             ))}
             <Link
-              href="/cart"
+              href={createHeaderNavigationHref("/cart", queryString)}
               aria-current={isActive(pathname, "/cart") ? "page" : undefined}
               onClick={closeMobile}
             >

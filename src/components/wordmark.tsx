@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface WordmarkProps {
+  href?: string;
   variant?: "header" | "footer" | "mobile";
 }
 
@@ -24,11 +25,15 @@ const WORDMARKS = {
 } as const;
 
 /** Approved FOR / WARD horizontal lockup for light and dark site surfaces. */
-export function Wordmark({ variant = "header" }: WordmarkProps) {
+export function Wordmark({ href = "/", variant = "header" }: WordmarkProps) {
   const wordmark = WORDMARKS[variant];
 
   return (
-    <Link className={wordmark.className} href="/" aria-label="Forward — home">
+    <Link
+      className={wordmark.className}
+      href={href}
+      aria-label="Forward — home"
+    >
       <Image
         className={wordmark.imageClassName}
         src={wordmark.src}

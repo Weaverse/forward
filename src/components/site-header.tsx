@@ -1,9 +1,13 @@
+import { Suspense } from "react";
+
 import { FieldIndexHeader } from "@/components/field-index-header";
+import { QueryPreservingFieldIndexHeader } from "@/components/query-preserving-field-index-header";
 import { storefront } from "@/lib/storefront/data-source";
 
 /**
- * Canonical static Field Index header. Navigation remains behind the normalized
- * storefront boundary while Shopify menu wiring is intentionally deferred.
+ * Canonical Field Index header. Navigation remains behind the normalized
+ * storefront boundary; the full server-rendered header is also the query
+ * reader's Suspense fallback so static pages never bail out to client rendering.
  */
 export async function SiteHeader() {
   const [navigation, themeContent] = await Promise.all([
@@ -12,10 +16,20 @@ export async function SiteHeader() {
   ]);
 
   return (
-    <FieldIndexHeader
-      announcement={themeContent.announcement}
-      primary={navigation.primary}
-      utility={navigation.utility}
-    />
+    <Suspense
+      fallback={
+        <FieldIndexHeader
+          announcement={themeContent.announcement}
+          primary={navigation.primary}
+          utility={navigation.utility}
+        />
+      }
+    >
+      <QueryPreservingFieldIndexHeader
+        announcement={themeContent.announcement}
+        primary={navigation.primary}
+        utility={navigation.utility}
+      />
+    </Suspense>
   );
 }

@@ -15,6 +15,20 @@ export interface FieldIndexCollection {
   image: StorefrontImage;
 }
 
+/** Carries the current route query through header navigation unchanged. */
+export function createHeaderNavigationHref(
+  href: string,
+  queryString: string,
+): string {
+  if (queryString.length === 0) {
+    return href;
+  }
+  const hashIndex = href.indexOf("#");
+  const base = hashIndex >= 0 ? href.slice(0, hashIndex) : href;
+  const hash = hashIndex >= 0 ? href.slice(hashIndex) : "";
+  return `${base}${base.includes("?") ? "&" : "?"}${queryString}${hash}`;
+}
+
 interface FieldIndexPresentation {
   id: FieldIndexCollection["id"];
   index: FieldIndexCollection["index"];

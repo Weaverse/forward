@@ -3,6 +3,7 @@ import { access, readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
 import {
+  createHeaderNavigationHref,
   createFieldIndexCollections,
   FIELD_INDEX_PRESENTATION,
 } from "../src/lib/header-navigation.ts";
@@ -26,6 +27,24 @@ function openingTagContaining(
 }
 
 describe("canonical header presentation", () => {
+  it("preserves the current query across header destinations", () => {
+    assert.equal(createHeaderNavigationHref("/shop", ""), "/shop");
+    assert.equal(
+      createHeaderNavigationHref(
+        "/shop/outerwear",
+        "q=trail&sort=price-desc&filter.v.availability=1",
+      ),
+      "/shop/outerwear?q=trail&sort=price-desc&filter.v.availability=1",
+    );
+    assert.equal(
+      createHeaderNavigationHref(
+        "/search?view=compact#results",
+        "q=trail&colorway=claystone",
+      ),
+      "/search?view=compact&q=trail&colorway=claystone#results",
+    );
+  });
+
   it("maps the nested Shop fixture into three approved local-image systems", () => {
     const shop = NAVIGATION_FIXTURE.primary.find(
       (item) => item.href === "/shop",
@@ -97,22 +116,25 @@ describe("canonical Field Index header", () => {
     );
   });
 
-  it("contains one static header without review variants or query rewriting", async () => {
-    const [component, data, styles, shell, layout] = await Promise.all([
-      readSource("src/components/field-index-header.tsx"),
-      readSource("src/lib/header-navigation.ts"),
-      readSource("src/app/site-header.css"),
-      readSource("src/components/site-header.tsx"),
-      readSource("src/app/layout.tsx"),
-    ]);
-    const source = [component, data, styles, shell, layout].join("\n");
+  it("contains one static header with query-preserving navigation", async () => {
+    const [component, queryReader, data, styles, shell, layout] =
+      await Promise.all([
+        readSource("src/components/field-index-header.tsx"),
+        readSource("src/components/query-preserving-field-index-header.tsx"),
+        readSource("src/lib/header-navigation.ts"),
+        readSource("src/app/site-header.css"),
+        readSource("src/components/site-header.tsx"),
+        readSource("src/app/layout.tsx"),
+      ]);
+    const source = [component, queryReader, data, styles, shell, layout].join(
+      "\n",
+    );
     for (const forbidden of [
       "HEADER_VARIANTS",
       "HeaderVariant",
       "resolveHeaderVariant",
       "withHeaderVariant",
       "HEADER_PRODUCT_PREVIEWS",
-      "useSearchParams",
       "useRouter",
       "MutationObserver",
       "data-header-variant",
@@ -127,7 +149,11 @@ describe("canonical Field Index header", () => {
         `stale exploration code: ${forbidden}`,
       );
     }
+    assert.ok(queryReader.includes("useSearchParams"));
+    assert.ok(component.includes("createHeaderNavigationHref"));
     assert.ok(shell.includes("<FieldIndexHeader"));
+    assert.ok(shell.includes("<Suspense"));
+    assert.ok(shell.includes("<QueryPreservingFieldIndexHeader"));
     assert.ok(layout.includes('import "./site-header.css"'));
     await Promise.all(
       ["src/components/header-nav.tsx", "src/components/mobile-menu.tsx"].map(
@@ -143,7 +169,7 @@ describe("canonical Field Index header", () => {
       ['className="header-link field-header-search"', false],
       ['className="header-link account-hide"', false],
       ['className="icon-button cart-button"', false],
-      ['href="/cart"', true],
+      ['createHeaderNavigationHref("/cart", queryString)', true],
     ] as const) {
       assert.ok(
         openingTagContaining(source, marker, fromEnd).includes("aria-current="),
