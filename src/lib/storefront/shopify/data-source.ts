@@ -1,14 +1,13 @@
 /**
- * Shopify-backed catalog data source.
+ * Shopify-backed catalog and navigation data source.
  *
- * Overrides exactly the four catalog reads Shopify owns in Slice 1:
- * `listProducts`, `getProduct`, `searchProducts`, and `getCollectionProducts`.
- * Every other domain — canonical route collection presentation, content,
- * navigation, theme text, demo cart seed, demo account records — delegates to
- * the injected static base and stays unchanged.
+ * Products plus canonical collections/main navigation are live. Content, theme
+ * text, footer/utility presentation, cart, and account records remain delegated
+ * to the injected static base until their own bounded slices.
  *
- * Fail-closed: once Shopify mode is selected there is no fixture fallback.
- * Network, GraphQL, validation, and mapping failures propagate.
+ * Product failures remain fail-closed. Main-navigation and canonical collection
+ * structure use the exact static contract when malformed remote data would
+ * otherwise take down routes.
  */
 
 import {
@@ -31,27 +30,26 @@ import type {
   ThemeContent,
 } from "../types";
 import { CATALOG_REVALIDATE_SECONDS } from "./cache-policy";
-import type { CatalogQueryExecutor } from "./client";
-import { ShopifyCatalogError } from "./errors";
+import type { CatalogQueryExecutor, NavigationQueryExecutor } from "./client";
+import { safeErrorLabel, ShopifyCatalogError } from "./errors";
 import { mapCatalogResult } from "./mapper";
+import { mapCollectionsResult, mapMainMenuResult } from "./navigation-mapper";
 
-/**
- * Bounded catalog freshness window.
- *
- * Catalog routes stay statically renderable; this is the in-process reuse
- * window so one ISR regeneration pass makes a single Storefront round trip
- * instead of one per page and per product. The same number is the route
- * segment `revalidate` value on the static catalog routes, which is what
- * actually bounds published staleness.
- */
 export { CATALOG_REVALIDATE_SECONDS } from "./cache-policy";
 
 const MILLISECONDS_PER_SECOND = 1000;
 
 export interface ShopifyCatalogDataSourceOptions {
-  /** Static implementation backing every non-catalog domain. */
+  /** Static implementation backing every not-yet-live domain. */
   base: StorefrontDataSource;
   execute: CatalogQueryExecutor;
+  executeNavigation: NavigationQueryExecutor;
+  /** Configured store origin used to reject cross-store menu URLs. */
+  storeDomain: string;
+  /** Injectable sanitized observer for navigation fallback events. */
+  onNavigationFallback?: (error: ShopifyCatalogError) => void;
+  /** Injectable sanitized observer for collection-structure fallback events. */
+  onCollectionFallback?: (error: ShopifyCatalogError) => void;
   /**
    * Standalone verifier/test fallback only. Production routes leave this false
    * so every read reaches the Next Data Cache and registers its dependency.
@@ -71,16 +69,38 @@ interface CatalogCacheEntry {
 export class ShopifyCatalogDataSource implements StorefrontDataSource {
   readonly #base: StorefrontDataSource;
   readonly #execute: CatalogQueryExecutor;
+  readonly #executeNavigation: NavigationQueryExecutor;
+  readonly #storeDomain: string;
+  readonly #onNavigationFallback: (error: ShopifyCatalogError) => void;
+  readonly #onCollectionFallback: (error: ShopifyCatalogError) => void;
   readonly #useProcessCache: boolean;
   readonly #ttlMs: number;
   readonly #now: () => number;
 
   #cached: CatalogCacheEntry | null = null;
   #inFlight: Promise<readonly Product[]> | null = null;
+  #navigationFallbackReported = false;
+  #collectionFallbackReported = false;
 
   constructor(options: ShopifyCatalogDataSourceOptions) {
     this.#base = options.base;
     this.#execute = options.execute;
+    this.#executeNavigation = options.executeNavigation;
+    this.#storeDomain = options.storeDomain;
+    this.#onCollectionFallback =
+      options.onCollectionFallback ??
+      ((error) => {
+        console.warn(
+          `[storefront] using static collection-structure fallback (${safeErrorLabel(error)}).`,
+        );
+      });
+    this.#onNavigationFallback =
+      options.onNavigationFallback ??
+      ((error) => {
+        console.warn(
+          `[storefront] using static main-navigation fallback (${safeErrorLabel(error)}).`,
+        );
+      });
     this.#useProcessCache = options.useProcessCache ?? true;
     this.#ttlMs =
       options.ttlMs ?? CATALOG_REVALIDATE_SECONDS * MILLISECONDS_PER_SECOND;
@@ -113,6 +133,21 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     return request;
   }
 
+  async #loadCollections(): Promise<readonly Collection[]> {
+    try {
+      return mapCollectionsResult(await this.#executeNavigation());
+    } catch (error) {
+      if (!(error instanceof ShopifyCatalogError)) {
+        throw error;
+      }
+      if (!this.#collectionFallbackReported) {
+        this.#onCollectionFallback(error);
+        this.#collectionFallbackReported = true;
+      }
+      return this.#base.listCollections();
+    }
+  }
+
   /* ---- Shopify-owned catalog reads ------------------------------------- */
 
   async listProducts(
@@ -131,14 +166,22 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     return searchNormalizedProducts(await this.#loadCatalog(), query);
   }
 
-  /**
-   * Canonical route collections stay presentation-owned; only their product
-   * handles resolve through the live catalog.
-   */
+  async listCollections(): Promise<readonly Collection[]> {
+    return this.#loadCollections();
+  }
+
+  async getCollection(handle: string): Promise<Collection | null> {
+    return (
+      (await this.#loadCollections()).find(
+        (collection) => collection.handle === handle,
+      ) ?? null
+    );
+  }
+
   async getCollectionProducts(
     handle: string,
   ): Promise<readonly Product[] | null> {
-    const collection = await this.#base.getCollection(handle);
+    const collection = await this.getCollection(handle);
     if (collection === null) {
       return null;
     }
@@ -154,15 +197,38 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     });
   }
 
-  /* ---- Domains deferred to a later slice -------------------------------- */
-
-  async listCollections(): Promise<readonly Collection[]> {
-    return this.#base.listCollections();
+  async getNavigation(): Promise<SiteNavigation> {
+    const base = await this.#base.getNavigation();
+    let primary: SiteNavigation["primary"];
+    try {
+      primary = mapMainMenuResult(
+        await this.#executeNavigation(),
+        this.#storeDomain,
+      );
+    } catch (error) {
+      if (!(error instanceof ShopifyCatalogError)) {
+        throw error;
+      }
+      if (!this.#navigationFallbackReported) {
+        this.#onNavigationFallback(error);
+        this.#navigationFallbackReported = true;
+      }
+      return base;
+    }
+    const search = base.primary.filter((item) => item.href === "/search");
+    if (search.length !== 1) {
+      throw new ShopifyCatalogError(
+        "Theme navigation must define exactly one Search destination.",
+      );
+    }
+    return {
+      primary: [...primary, ...search],
+      utility: base.utility,
+      footerColumns: base.footerColumns,
+    };
   }
 
-  async getCollection(handle: string): Promise<Collection | null> {
-    return this.#base.getCollection(handle);
-  }
+  /* ---- Domains deferred to later slices -------------------------------- */
 
   async listArticles(): Promise<readonly JournalArticle[]> {
     return this.#base.listArticles();
@@ -186,10 +252,6 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
 
   async getPolicy(handle: string): Promise<Policy | null> {
     return this.#base.getPolicy(handle);
-  }
-
-  async getNavigation(): Promise<SiteNavigation> {
-    return this.#base.getNavigation();
   }
 
   async getThemeContent(): Promise<ThemeContent> {

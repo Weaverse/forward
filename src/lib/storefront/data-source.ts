@@ -11,8 +11,8 @@
  * - no Shopify environment -> `StaticStorefrontDataSource` (the deterministic
  *   default used by tests and any environment without credentials);
  * - complete Shopify environment -> `ShopifyCatalogDataSource`, which owns
- *   products, search, and canonical-collection product resolution, and
- *   delegates every other domain to the static implementation;
+ *   products, canonical collections, search, and main navigation, and
+ *   delegates every later domain to the static implementation;
  * - partial Shopify environment -> sanitized `ShopifyConfigurationError`.
  *
  * Unknown handles resolve to `null`; routes translate that into `notFound()`
@@ -40,9 +40,11 @@ import { PRODUCT_FIXTURES } from "./fixtures/products";
 import {
   type CatalogQueryExecutorOptions,
   createCatalogQueryExecutor,
+  createNavigationQueryExecutor,
 } from "./shopify/client";
 import { ShopifyCatalogDataSource } from "./shopify/data-source";
 import { type EnvSource, readShopifyCatalogConfig } from "./shopify/env";
+import type { ShopifyCatalogError } from "./shopify/errors";
 import type {
   Collection,
   DemoAddress,
@@ -80,6 +82,12 @@ export interface StorefrontDataSource {
   getDemoOrder(id: string): Promise<DemoOrder | null>;
   listDemoAddresses(): Promise<readonly DemoAddress[]>;
   getDemoCartSeed(): Promise<readonly DemoCartSeedLine[]>;
+}
+
+export interface StorefrontDataSourceOptions
+  extends CatalogQueryExecutorOptions {
+  onNavigationFallback?: (error: ShopifyCatalogError) => void;
+  onCollectionFallback?: (error: ShopifyCatalogError) => void;
 }
 
 /** Fixture-backed implementation; the no-credential default. */
@@ -186,17 +194,21 @@ export class StaticStorefrontDataSource implements StorefrontDataSource {
  */
 export function createStorefrontDataSource(
   env: EnvSource = process.env,
-  catalogQueryOptions: CatalogQueryExecutorOptions = {},
+  options: StorefrontDataSourceOptions = {},
 ): StorefrontDataSource {
   const base = new StaticStorefrontDataSource();
   const config = readShopifyCatalogConfig(env);
   if (config === null) {
     return base;
   }
-  const useNextCache = catalogQueryOptions.useNextCache ?? true;
+  const useNextCache = options.useNextCache ?? true;
   return new ShopifyCatalogDataSource({
     base,
-    execute: createCatalogQueryExecutor(config, catalogQueryOptions),
+    execute: createCatalogQueryExecutor(config, options),
+    executeNavigation: createNavigationQueryExecutor(config, options),
+    storeDomain: config.storeDomain,
+    onCollectionFallback: options.onCollectionFallback,
+    onNavigationFallback: options.onNavigationFallback,
     useProcessCache: !useNextCache,
   });
 }

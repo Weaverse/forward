@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
-import { FIELD_INDEX_COLLECTIONS } from "../src/lib/header-navigation.ts";
+import {
+  createFieldIndexCollections,
+  FIELD_INDEX_PRESENTATION,
+} from "../src/lib/header-navigation.ts";
+import { NAVIGATION_FIXTURE } from "../src/lib/storefront/fixtures/navigation.ts";
 
 const readSource = (path: string) => readFile(path, "utf8");
 
@@ -21,21 +25,27 @@ function openingTagContaining(
   return source.slice(tagStart, tagEnd + 1);
 }
 
-describe("canonical static header data", () => {
-  it("defines the three approved numbered field systems with local imagery", () => {
+describe("canonical header presentation", () => {
+  it("maps the nested Shop fixture into three approved local-image systems", () => {
+    const shop = NAVIGATION_FIXTURE.primary.find(
+      (item) => item.href === "/shop",
+    );
+    assert.ok(shop !== undefined);
+    const collections = createFieldIndexCollections(shop);
     assert.deepEqual(
-      FIELD_INDEX_COLLECTIONS.map(({ id, index, href }) => ({
+      collections.map(({ id, index, href }) => ({
         id,
         index,
         href,
       })),
       [
-        { id: "field-gear", index: "01", href: "/shop/field-gear" },
-        { id: "high-route", index: "02", href: "/shop/high-route" },
-        { id: "camp-craft", index: "03", href: "/shop/camp-craft" },
+        { id: "outerwear", index: "01", href: "/shop/outerwear" },
+        { id: "packs", index: "02", href: "/shop/packs" },
+        { id: "footwear", index: "03", href: "/shop/footwear" },
       ],
     );
-    for (const collection of FIELD_INDEX_COLLECTIONS) {
+    assert.equal(FIELD_INDEX_PRESENTATION.length, 3);
+    for (const collection of collections) {
       assert.match(collection.image.src, /^\/images\/editorial\/.+\.webp$/);
       assert.ok(collection.description.length >= 30);
       assert.ok(collection.fieldNote.length >= 30);

@@ -3,7 +3,7 @@
  *
  * This module is the single owner of the route topology defined in
  * `.weaverse/specs/2026-08-05--fresh-next-theme-foundation/README.md`
- * (Shared Contract 0.5-draft). Build validation (`bun run check:routes`),
+ * (Shared Contract 0.6-draft). Build validation (`bun run check:routes`),
  * production smoke (`bun run smoke:routes`), unit tests, and shell UI all
  * read from here instead of duplicating path strings.
  */
@@ -56,7 +56,7 @@ export const SMOKE_FIXTURES = {
     "ridge-30-field-pack",
     "talus-trail-shoe",
   ],
-  collectionHandle: "field-gear",
+  collectionHandle: "outerwear",
   articleHandle: "walking-the-long-light",
   pageHandle: "about-forward",
   policyHandle: "shipping-policy",

@@ -3,11 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { CartCount } from "@/components/cart-count";
 import { Wordmark } from "@/components/wordmark";
-import { FIELD_INDEX_COLLECTIONS } from "@/lib/header-navigation";
+import {
+  createFieldIndexCollections,
+  type FieldIndexCollection,
+} from "@/lib/header-navigation";
 import type { NavItem } from "@/lib/storefront/types";
 
 interface FieldIndexHeaderProps {
@@ -18,6 +21,7 @@ interface FieldIndexHeaderProps {
 
 interface FieldIndexPanelProps {
   activeIndex: number;
+  collections: readonly FieldIndexCollection[];
   id: string;
   onClose: () => void;
   onSelect: (index: number) => void;
@@ -31,8 +35,11 @@ function isActive(pathname: string, href: string): boolean {
   return href === "/shop" && pathname.startsWith("/products");
 }
 
-function activeCollectionIndex(pathname: string): number {
-  const index = FIELD_INDEX_COLLECTIONS.findIndex((collection) =>
+function activeCollectionIndex(
+  pathname: string,
+  collections: readonly FieldIndexCollection[],
+): number {
+  const index = collections.findIndex((collection) =>
     isActive(pathname, collection.href),
   );
   return index >= 0 ? index : 0;
@@ -40,13 +47,16 @@ function activeCollectionIndex(pathname: string): number {
 
 function FieldIndexPanel({
   activeIndex,
+  collections,
   id,
   onClose,
   onSelect,
   pathname,
 }: FieldIndexPanelProps) {
-  const active =
-    FIELD_INDEX_COLLECTIONS[activeIndex] ?? FIELD_INDEX_COLLECTIONS[0];
+  const active = collections[activeIndex] ?? collections[0];
+  if (active === undefined) {
+    throw new Error("Header 01 requires at least one Shop collection.");
+  }
 
   return (
     <section
@@ -56,11 +66,11 @@ function FieldIndexPanel({
     >
       <div className="field-index-kicker">
         <span>Shop / Field index</span>
-        <span>03 systems</span>
+        <span>{String(collections.length).padStart(2, "0")} systems</span>
       </div>
       <div className="field-index-grid">
         <nav className="field-index-list" aria-label="Shop collections">
-          {FIELD_INDEX_COLLECTIONS.map((collection, index) => (
+          {collections.map((collection, index) => (
             <Link
               key={collection.id}
               href={collection.href}
@@ -102,19 +112,24 @@ function FieldIndexPanel({
 }
 
 interface MobileFieldIndexProps {
+  collections: readonly FieldIndexCollection[];
   onNavigate: () => void;
   pathname: string;
 }
 
-function MobileFieldIndex({ onNavigate, pathname }: MobileFieldIndexProps) {
+function MobileFieldIndex({
+  collections,
+  onNavigate,
+  pathname,
+}: MobileFieldIndexProps) {
   return (
     <div className="field-mobile-index">
       <div className="field-mobile-section-label">
         <span>Shop / Field index</span>
-        <span>03 systems</span>
+        <span>{String(collections.length).padStart(2, "0")} systems</span>
       </div>
       <nav aria-label="Mobile shop collections">
-        {FIELD_INDEX_COLLECTIONS.map((collection) => (
+        {collections.map((collection) => (
           <Link
             key={collection.id}
             href={collection.href}
@@ -142,10 +157,18 @@ export function FieldIndexHeader({
   utility,
 }: FieldIndexHeaderProps) {
   const pathname = usePathname();
+  const shopItem = primary.find((item) => item.href === "/shop");
+  if (shopItem === undefined) {
+    throw new Error("Header 01 requires a Shop navigation item.");
+  }
+  const collections = useMemo(
+    () => createFieldIndexCollections(shopItem),
+    [shopItem],
+  );
   const [desktopOpen, setDesktopOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(() =>
-    activeCollectionIndex(pathname),
+    activeCollectionIndex(pathname, collections),
   );
   const rootRef = useRef<HTMLDivElement>(null);
   const desktopTriggerRef = useRef<HTMLButtonElement>(null);
@@ -157,10 +180,6 @@ export function FieldIndexHeader({
   const desktopPanelId = useId();
   const mobilePanelId = useId();
 
-  const shopItem = primary.find((item) => item.href === "/shop") ?? {
-    href: "/shop",
-    label: "Shop",
-  };
   const searchItem = primary.find((item) => item.href === "/search");
   const primaryLinks = primary.filter(
     (item) => item.href !== "/shop" && item.href !== "/search",
@@ -178,8 +197,8 @@ export function FieldIndexHeader({
     mobileOpenRef.current = false;
     setDesktopOpen(false);
     setMobileOpen(false);
-    setActiveIndex(activeCollectionIndex(pathname));
-  }, [pathname]);
+    setActiveIndex(activeCollectionIndex(pathname, collections));
+  }, [pathname, collections]);
 
   useEffect(() => {
     if (!desktopOpen) {
@@ -382,6 +401,7 @@ export function FieldIndexHeader({
         {desktopOpen ? (
           <FieldIndexPanel
             activeIndex={activeIndex}
+            collections={collections}
             id={desktopPanelId}
             onClose={() => setDesktopOpen(false)}
             onSelect={setActiveIndex}
@@ -416,7 +436,11 @@ export function FieldIndexHeader({
               Close
             </button>
           </div>
-          <MobileFieldIndex onNavigate={closeMobile} pathname={pathname} />
+          <MobileFieldIndex
+            collections={collections}
+            onNavigate={closeMobile}
+            pathname={pathname}
+          />
           <nav
             className="field-mobile-secondary"
             aria-label="Mobile primary navigation"
@@ -448,7 +472,7 @@ export function FieldIndexHeader({
           <p className="mobile-menu-meta">
             FOR / WARD · Field index
             <br />
-            Static navigation data · Shopify wiring deferred
+            Shopify menu structure · Forward field system
           </p>
         </aside>
       ) : null}

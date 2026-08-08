@@ -3,12 +3,12 @@
  *
  * Requires the existing Shopify environment. It performs no mutation and no
  * Admin API call: two `shop { name }` reads prove credential validity for the
- * public and private clients, then the real catalog adapter is exercised end to
- * end through the normalized contract.
+ * public and private clients, then the real catalog/navigation adapter is
+ * exercised end to end through the normalized contract.
  *
  * Output discipline — this script prints only:
- * counts, product/collection handles, option and colorway names, currency
- * codes, media/metafield shape, and PASS/FAIL.
+ * counts, menu labels, product/collection handles, option and colorway names,
+ * currency codes, media/metafield shape, and PASS/FAIL.
  *
  * It never prints tokens, environment values, request URLs, signed CDN
  * parameters, response headers, raw response bodies, or prices.
@@ -34,9 +34,16 @@ const REQUIRED_ENV_KEYS = [
 ] as const;
 
 const CANONICAL_COLLECTION_HANDLES = [
-  "field-gear",
-  "high-route",
-  "camp-craft",
+  "forward",
+  "outerwear",
+  "packs",
+  "footwear",
+] as const;
+
+const CANONICAL_SHOP_LINKS = [
+  "/shop/outerwear",
+  "/shop/packs",
+  "/shop/footwear",
 ] as const;
 
 const MEDIA_ROLES = ["primary", "alternate", "detail", "context"] as const;
@@ -110,7 +117,7 @@ async function probeShopIdentity(
   }
 }
 
-console.log("Forward — live read-only Shopify catalog verification\n");
+console.log("Forward — live read-only Shopify storefront verification\n");
 
 const storeDomain = requiredEnv("PUBLIC_STORE_DOMAIN");
 
@@ -144,9 +151,31 @@ await probeShopIdentity(
 try {
   // This CLI runs outside the Next runtime. Exercise the exact Hydrogen
   // transport/mapping seam while leaving the production default Data Cache on.
+  let collectionFallbackUsed = false;
+  let navigationFallbackUsed = false;
   const storefront = createStorefrontDataSource(process.env, {
     useNextCache: false,
+    onCollectionFallback: () => {
+      collectionFallbackUsed = true;
+    },
+    onNavigationFallback: () => {
+      navigationFallbackUsed = true;
+    },
   });
+  const navigation = await storefront.getNavigation();
+  const shop = navigation.primary.find((item) => item.href === "/shop");
+  check(
+    "live forward-main-menu has the canonical two-level tree",
+    !navigationFallbackUsed &&
+      navigation.primary.map((item) => item.href).join(",") ===
+        "/shop,/journal,/pages/about-forward,/search" &&
+      shop?.children?.map((item) => item.href).join(",") ===
+        CANONICAL_SHOP_LINKS.join(","),
+    navigationFallbackUsed
+      ? "static safeguard active"
+      : `${shop?.children?.length ?? 0} live Shop children`,
+  );
+
   const products = await storefront.listProducts();
 
   check(
@@ -214,15 +243,12 @@ try {
   }
 
   const collections = await storefront.listCollections();
-  check(
-    "canonical route collections unchanged",
+  const canonicalCollectionsInOrder =
     collections.length === CANONICAL_COLLECTION_HANDLES.length &&
-      collections.every(
-        (collection, index) =>
-          collection.handle === CANONICAL_COLLECTION_HANDLES[index],
-      ),
-    collections.map((collection) => collection.handle).join(", "),
-  );
+    collections.every(
+      (collection, index) =>
+        collection.handle === CANONICAL_COLLECTION_HANDLES[index],
+    );
 
   for (const handle of CANONICAL_COLLECTION_HANDLES) {
     const collectionProducts = await storefront.getCollectionProducts(handle);
@@ -240,6 +266,14 @@ try {
     "no invented catalog records",
   );
 
+  check(
+    "canonical collection reads stayed live and in contract order",
+    !collectionFallbackUsed && canonicalCollectionsInOrder,
+    collectionFallbackUsed
+      ? "static safeguard active"
+      : collections.map((collection) => collection.handle).join(", "),
+  );
+
   const emptySearch = await storefront.searchProducts("   ");
   const trailSearch = await storefront.searchProducts("trail");
   check(
@@ -248,7 +282,7 @@ try {
     `"trail" -> ${trailSearch.map((product) => product.handle).join(", ")}`,
   );
 } catch (error) {
-  check("live catalog adapter", false, safeErrorLabel(error));
+  check("live storefront adapter", false, safeErrorLabel(error));
 }
 
 console.log("");
@@ -256,4 +290,4 @@ if (failures.length > 0) {
   console.error(`FAIL — ${failures.length} check(s) failed.`);
   process.exit(1);
 }
-console.log("PASS — live read-only catalog verification succeeded.");
+console.log("PASS — live read-only storefront verification succeeded.");

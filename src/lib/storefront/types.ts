@@ -128,6 +128,7 @@ export interface Policy {
 export interface NavItem {
   href: string;
   label: string;
+  children?: readonly NavItem[];
 }
 
 export interface FooterColumn {

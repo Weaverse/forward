@@ -1,73 +1,98 @@
-interface HeaderImage {
-  src: string;
-  alt: string;
-  width: number;
-  height: number;
-}
+import {
+  COLLECTION_PRESENTATION_PROFILES,
+  type CanonicalCollectionHandle,
+} from "@/lib/storefront/collection-presentation";
+import type { NavItem, StorefrontImage } from "@/lib/storefront/types";
 
 export interface FieldIndexCollection {
-  id: "field-gear" | "high-route" | "camp-craft";
+  id: Exclude<CanonicalCollectionHandle, "forward">;
   index: "01" | "02" | "03";
   label: string;
   href: string;
   coordinate: string;
   description: string;
   fieldNote: string;
-  image: HeaderImage;
+  image: StorefrontImage;
 }
 
-/**
- * Static presentation boundary for the canonical Field Index header.
- * Shopify Navigation can replace the destination hierarchy later without
- * changing the header's visual or interaction contract.
- */
-export const FIELD_INDEX_COLLECTIONS = [
+interface FieldIndexPresentation {
+  id: FieldIndexCollection["id"];
+  index: FieldIndexCollection["index"];
+  href: string;
+  coordinate: string;
+  description: string;
+  fieldNote: string;
+  image: StorefrontImage;
+}
+
+function collectionImage(handle: FieldIndexCollection["id"]): StorefrontImage {
+  const profile = COLLECTION_PRESENTATION_PROFILES.find(
+    (entry) => entry.handle === handle,
+  );
+  if (profile === undefined) {
+    throw new Error(`Missing collection presentation for ${handle}.`);
+  }
+  return profile.heroImage;
+}
+
+/** Static visual metadata; Shopify owns labels, order, hierarchy, and URLs. */
+export const FIELD_INDEX_PRESENTATION = [
   {
-    id: "field-gear",
+    id: "outerwear",
     index: "01",
-    label: "Field Gear",
-    href: "/shop/field-gear",
+    href: "/shop/outerwear",
     coordinate: "54.4609° N",
     description:
-      "Weather protection and modular carry systems for exposed ground.",
-    fieldNote: "Built for changing forecasts and repeat repair.",
-    image: {
-      src: "/images/editorial/alpine-traverse.webp",
-      alt: "Hiker traversing an alpine ridgeline above the clouds",
-      width: 1800,
-      height: 1201,
-    },
+      "Weatherproof layers built for exposed ground and changing forecasts.",
+    fieldNote: "Protection designed for movement, repair, and repeat use.",
+    image: collectionImage("outerwear"),
   },
   {
-    id: "high-route",
+    id: "packs",
     index: "02",
-    label: "High Route",
-    href: "/shop/high-route",
+    href: "/shop/packs",
     coordinate: "03.0886° W",
     description:
-      "Low-bulk equipment composed for long miles above the tree line.",
-    fieldNote: "A lighter system for distance, exposure, and movement.",
-    image: {
-      src: "/images/editorial/trail-movement.webp",
-      alt: "Runner moving along a high dirt trail at golden hour",
-      width: 2000,
-      height: 1333,
-    },
+      "Low-bulk carry systems composed for long miles above the tree line.",
+    fieldNote: "Stable load transfer for distance, exposure, and movement.",
+    image: collectionImage("packs"),
   },
   {
-    id: "camp-craft",
+    id: "footwear",
     index: "03",
-    label: "Camp Craft",
-    href: "/shop/camp-craft",
+    href: "/shop/footwear",
     coordinate: "ALT. 978 M",
     description:
-      "Quiet tools and dependable layers for deliberate nights outside.",
-    fieldNote: "Camp essentials selected for utility, not excess.",
-    image: {
-      src: "/images/editorial/camp-tent.webp",
-      alt: "Tent pitched at dusk beneath a mountain skyline",
-      width: 2000,
-      height: 1334,
-    },
+      "Dependable trail footwear tuned for grip, feedback, and long days out.",
+    fieldNote: "Ground contact selected for utility, not excess.",
+    image: collectionImage("footwear"),
   },
-] as const satisfies readonly FieldIndexCollection[];
+] as const satisfies readonly FieldIndexPresentation[];
+
+/** Maps the exact Shopify `Shop` children into Header 01 presentation cards. */
+export function createFieldIndexCollections(
+  shopItem: NavItem,
+): readonly FieldIndexCollection[] {
+  const children = shopItem.children ?? [];
+  if (children.length !== FIELD_INDEX_PRESENTATION.length) {
+    throw new Error("Header 01 requires Shop to have exactly three children.");
+  }
+  return FIELD_INDEX_PRESENTATION.map((presentation, index) => {
+    const item = children[index];
+    if (item === undefined || item.href !== presentation.href) {
+      throw new Error(
+        `Header 01 Shop child ${index + 1} must target ${presentation.href}.`,
+      );
+    }
+    if (item.children !== undefined && item.children.length > 0) {
+      throw new Error(
+        "Header 01 collection links cannot contain grandchildren.",
+      );
+    }
+    return {
+      ...presentation,
+      label: item.label,
+      href: item.href,
+    };
+  });
+}

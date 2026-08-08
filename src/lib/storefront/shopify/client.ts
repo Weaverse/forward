@@ -17,9 +17,20 @@ import {
 } from "@shopify/hydrogen";
 import { unstable_cache } from "next/cache";
 
-import { CATALOG_CACHE_KEY, CATALOG_REVALIDATE_SECONDS } from "./cache-policy";
+import {
+  CATALOG_CACHE_KEY,
+  CATALOG_REVALIDATE_SECONDS,
+  NAVIGATION_CACHE_KEY,
+} from "./cache-policy";
 import { safeErrorLabel, ShopifyCatalogError } from "./errors";
 import { mapCatalogResult } from "./mapper";
+
+import {
+  MAIN_MENU_HANDLE,
+  NAVIGATION_COLLECTION_LIMIT,
+  NAVIGATION_COLLECTION_PRODUCT_LIMIT,
+  NAVIGATION_QUERY,
+} from "./navigation-query";
 import type { ShopifyCatalogConfig } from "./env";
 import {
   CATALOG_MEDIA_LIMIT,
@@ -40,6 +51,13 @@ export interface CatalogQueryResult {
 
 export type CatalogQueryExecutor = () => Promise<CatalogQueryResult>;
 
+export interface NavigationQueryResult {
+  data?: unknown;
+  errors?: unknown;
+}
+
+export type NavigationQueryExecutor = () => Promise<NavigationQueryResult>;
+
 export interface CatalogQueryExecutorOptions {
   /** Disable only the Next Data Cache wrapper for isolated transport tests. */
   useNextCache?: boolean;
@@ -47,7 +65,7 @@ export interface CatalogQueryExecutorOptions {
 
 const CATALOG_I18N = { country: "US", language: "EN" } as const;
 
-function createCatalogClient(config: ShopifyCatalogConfig) {
+function createStorefrontReadClient(config: ShopifyCatalogConfig) {
   const requestContext = createShopifyRequestContext({
     request: { headers: new Headers() },
     i18n: CATALOG_I18N,
@@ -75,7 +93,7 @@ export function createCatalogQueryExecutor(
   config: ShopifyCatalogConfig,
   options: CatalogQueryExecutorOptions = {},
 ): CatalogQueryExecutor {
-  const client = createCatalogClient(config);
+  const client = createStorefrontReadClient(config);
 
   const execute = async () => {
     try {
@@ -122,6 +140,53 @@ export function createCatalogQueryExecutor(
   }
 
   return unstable_cache(execute, [CATALOG_CACHE_KEY, config.storeDomain], {
+    revalidate: CATALOG_REVALIDATE_SECONDS,
+  });
+}
+
+/** Builds the bounded main-menu and collection query executor. */
+export function createNavigationQueryExecutor(
+  config: ShopifyCatalogConfig,
+  options: CatalogQueryExecutorOptions = {},
+): NavigationQueryExecutor {
+  const client = createStorefrontReadClient(config);
+
+  const execute = async () => {
+    try {
+      const { data, errors } = await client.graphql(NAVIGATION_QUERY, {
+        variables: {
+          menuHandle: MAIN_MENU_HANDLE,
+          collectionFirst: NAVIGATION_COLLECTION_LIMIT,
+          collectionProductFirst: NAVIGATION_COLLECTION_PRODUCT_LIMIT,
+        },
+      });
+      if (errors !== undefined && errors.length > 0) {
+        throw new ShopifyCatalogError(
+          `Storefront API navigation response contained ${errors.length} error(s).`,
+        );
+      }
+      if (data == null) {
+        throw new ShopifyCatalogError(
+          "Storefront API navigation response did not contain data.",
+        );
+      }
+      const result = { data };
+      return result;
+    } catch (error) {
+      if (error instanceof ShopifyCatalogError) {
+        throw error;
+      }
+      throw new ShopifyCatalogError(
+        `Storefront API navigation request failed (${safeErrorLabel(error)}).`,
+      );
+    }
+  };
+
+  if (options.useNextCache === false) {
+    return execute;
+  }
+
+  return unstable_cache(execute, [NAVIGATION_CACHE_KEY, config.storeDomain], {
     revalidate: CATALOG_REVALIDATE_SECONDS,
   });
 }

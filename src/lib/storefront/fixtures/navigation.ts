@@ -8,9 +8,17 @@ import { EDITORIAL_IMAGES } from "./editorial-images";
 
 export const NAVIGATION_FIXTURE: SiteNavigation = {
   primary: [
-    { href: "/shop", label: "Shop" },
-    { href: "/journal", label: "Journal" },
-    { href: "/pages/about-forward", label: "Field Standard" },
+    {
+      href: "/shop",
+      label: "Shop",
+      children: [
+        { href: "/shop/outerwear", label: "Outerwear" },
+        { href: "/shop/packs", label: "Packs" },
+        { href: "/shop/footwear", label: "Footwear" },
+      ],
+    },
+    { href: "/journal", label: "Field Notes" },
+    { href: "/pages/about-forward", label: "About" },
     { href: "/search", label: "Search" },
   ],
   utility: [
@@ -22,9 +30,9 @@ export const NAVIGATION_FIXTURE: SiteNavigation = {
       heading: "Shop",
       links: [
         { href: "/shop", label: "All products" },
-        { href: "/shop/field-gear", label: "Field gear" },
-        { href: "/shop/high-route", label: "High route" },
-        { href: "/shop/camp-craft", label: "Camp craft" },
+        { href: "/shop/outerwear", label: "Outerwear" },
+        { href: "/shop/packs", label: "Packs" },
+        { href: "/shop/footwear", label: "Footwear" },
       ],
     },
     {

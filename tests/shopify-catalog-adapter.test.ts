@@ -39,6 +39,7 @@ import {
   catalogResponseWith,
   syntheticMediaIds,
 } from "./fixtures/shopify-catalog-response.ts";
+import { navigationResponse } from "./fixtures/shopify-navigation-response.ts";
 
 const SYNTHETIC_STORE_DOMAIN = "forward-test-shop.myshopify.com";
 const SYNTHETIC_PRIVATE_TOKEN = "synthetic-private-storefront-value";
@@ -54,6 +55,8 @@ function shopifySource(
   return new ShopifyCatalogDataSource({
     base: new StaticStorefrontDataSource(),
     execute: async () => response,
+    executeNavigation: async () => navigationResponse(),
+    storeDomain: SYNTHETIC_STORE_DOMAIN,
   });
 }
 
@@ -826,12 +829,12 @@ describe("ShopifyCatalogDataSource", () => {
     );
   });
 
-  it("keeps canonical route collections presentation-owned", async () => {
+  it("maps canonical Shopify collections with local presentation", async () => {
     const source = shopifySource();
     const collections = await source.listCollections();
     assert.deepEqual(
       collections.map((collection) => collection.handle),
-      ["field-gear", "high-route", "camp-craft"],
+      ["forward", "outerwear", "packs", "footwear"],
     );
     for (const collection of collections) {
       assert.ok(collection.heroImage.src.startsWith("/images/"));
@@ -842,7 +845,7 @@ describe("ShopifyCatalogDataSource", () => {
       );
     }
     assert.equal(await source.getCollectionProducts("frontpage"), null);
-    assert.equal(await source.getCollection("forward"), null);
+    assert.equal((await source.getCollection("forward"))?.title, "Forward");
   });
 
   it("preserves normalized search semantics over live products", async () => {
@@ -937,10 +940,10 @@ describe("ShopifyCatalogDataSource", () => {
     }
   });
 
-  it("delegates non-catalog domains to the static implementation", async () => {
+  it("delegates deferred content domains to the static implementation", async () => {
     const source = shopifySource();
     const base: StorefrontDataSource = new StaticStorefrontDataSource();
-    assert.deepEqual(await source.getNavigation(), await base.getNavigation());
+
     assert.deepEqual(
       await source.getThemeContent(),
       await base.getThemeContent(),
@@ -962,6 +965,8 @@ describe("ShopifyCatalogDataSource", () => {
       execute: async () => {
         throw new ShopifyCatalogError("Storefront API catalog request failed.");
       },
+      executeNavigation: async () => navigationResponse(),
+      storeDomain: SYNTHETIC_STORE_DOMAIN,
     });
     await assert.rejects(() => failing.listProducts(), ShopifyCatalogError);
     await assert.rejects(
@@ -973,7 +978,7 @@ describe("ShopifyCatalogDataSource", () => {
       ShopifyCatalogError,
     );
     await assert.rejects(
-      () => failing.getCollectionProducts("field-gear"),
+      () => failing.getCollectionProducts("outerwear"),
       ShopifyCatalogError,
     );
   });
@@ -993,6 +998,8 @@ describe("catalog revalidation window", () => {
         calls += 1;
         return catalogResponse();
       },
+      executeNavigation: async () => navigationResponse(),
+      storeDomain: SYNTHETIC_STORE_DOMAIN,
       ttlMs: CATALOG_REVALIDATE_SECONDS * 1000,
       now: () => clock,
     });
@@ -1019,11 +1026,13 @@ describe("catalog revalidation window", () => {
         calls += 1;
         return catalogResponse();
       },
+      executeNavigation: async () => navigationResponse(),
+      storeDomain: SYNTHETIC_STORE_DOMAIN,
     });
     await Promise.all([
       source.listProducts(),
       source.getProduct("talus-trail-shoe"),
-      source.getCollectionProducts("field-gear"),
+      source.getCollectionProducts("outerwear"),
     ]);
     assert.equal(calls, 1);
   });
@@ -1036,6 +1045,8 @@ describe("catalog revalidation window", () => {
         calls += 1;
         return catalogResponse();
       },
+      executeNavigation: async () => navigationResponse(),
+      storeDomain: SYNTHETIC_STORE_DOMAIN,
       useProcessCache: false,
     });
     await source.listProducts();

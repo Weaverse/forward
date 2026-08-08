@@ -14,11 +14,11 @@ import type { Collection, Product } from "@/lib/storefront/types";
  * array index and never from fixtures directly:
  *
  *   IMG.climbing -> themeContent.homeHeroImage
- *   IMG.hike     -> collection `high-route` hero
- *   IMG.tent     -> collection `camp-craft` hero
+ *   IMG.hike     -> collection `outerwear` hero
+ *   IMG.tent     -> collection `packs` hero
  *   IMG.ridge    -> themeContent.standardBandImage
  *   runway       -> ridge-30-field-pack, weatherline-shell, talus-trail-shoe
- *   tiles        -> field-gear, high-route, camp-craft
+ *   tiles        -> outerwear, packs, footwear
  *   dispatch     -> first normalized journal article
  *
  * The canonical runway carries four fictional products; Forward has three real
@@ -31,7 +31,7 @@ const RUNWAY_HANDLES = [
   "talus-trail-shoe",
 ] as const;
 
-const TILE_HANDLES = ["field-gear", "high-route", "camp-craft"] as const;
+const TILE_HANDLES = ["outerwear", "packs", "footwear"] as const;
 
 /* Bounded catalog freshness — see the note on `/products/[productHandle]`. */
 export const revalidate = 3600;
@@ -77,8 +77,8 @@ export default async function HomePage() {
     collectionsByHandle.get(handle),
   ).filter((collection): collection is Collection => collection !== undefined);
 
-  const traverseImage = collectionsByHandle.get("high-route")?.heroImage;
-  const campImage = collectionsByHandle.get("camp-craft")?.heroImage;
+  const traverseImage = collectionsByHandle.get("outerwear")?.heroImage;
+  const campImage = collectionsByHandle.get("packs")?.heroImage;
   const dispatch = articles[0];
   const dispatchTitle =
     dispatch !== undefined ? splitTitle(dispatch.title) : undefined;
