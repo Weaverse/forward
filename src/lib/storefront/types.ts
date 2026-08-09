@@ -114,13 +114,20 @@ export interface StorePage {
 
 export interface PolicySection {
   heading: string;
-  paragraphs: readonly string[];
+  paragraphs: readonly RichTextParagraph[];
 }
+
+export interface RichTextRun {
+  text: string;
+  href?: string;
+}
+
+export type RichTextParagraph = readonly RichTextRun[];
 
 export interface Policy {
   handle: string;
   title: string;
-  updatedAt: string;
+  updatedAt?: string;
   summary: string;
   sections: readonly PolicySection[];
 }

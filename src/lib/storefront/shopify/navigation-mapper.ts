@@ -121,7 +121,7 @@ const EXPECTED_FOOTER_MENU = [
       },
       {
         label: "Returns",
-        href: "/policies/return-policy",
+        href: "/policies/refund-policy",
         sourcePaths: ["/policies/return-policy", "/policies/refund-policy"],
       },
       {

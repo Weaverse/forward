@@ -59,7 +59,7 @@ const expectedFooterColumns = [
     links: [
       { href: "/account", label: "Account" },
       { href: "/policies/shipping-policy", label: "Shipping" },
-      { href: "/policies/return-policy", label: "Returns" },
+      { href: "/policies/refund-policy", label: "Returns" },
       { href: "/policies/privacy-policy", label: "Privacy" },
       { href: "/policies/terms-of-service", label: "Terms" },
     ],

@@ -5,16 +5,14 @@
 Forward is a fresh Next.js App Router storefront theme using
 `@shopify/hydrogen@preview`, powered by Weaverse.
 
-The current milestone is the incremental **Shopify storefront adapter**
-(`.weaverse/specs/2026-08-06--shopify-catalog-adapter/README.md`): products,
-normalized search/filter/sort, and canonical-route collection product
-resolution are read from the live Storefront API when Shopify credentials are
-present. Canonical collection structure plus validated Header `main-menu` and
-the complete Footer tree from the single Shopify handle `footer` are also live
-with independently scoped static safeguards. Footer Shop must not derive from
-`main-menu`, `forward-footer` must not be queried, and Support navigation must
-not remain theme-owned in Shopify mode. Page/article/policy bodies, theme copy, demo cart, and demo account
-remain static, and no credentials still selects the deterministic static mode.
+The current milestone is the ordered **Shopify Content, Cart, and Customer
+Account productionization**
+(`.weaverse/specs/2026-08-09--shopify-content-cart-account/README.md`). Products,
+normalized search/filter/sort, collection resolution, Header `main-menu`, and
+the complete Footer tree from the single Shopify handle `footer` are already
+live when Shopify credentials are present. Implement and release the remaining
+slices independently in this order: Content → Cart/checkout handoff → Customer
+Account API. No credentials still selects the deterministic static mode.
 
 ## Architecture constraints
 
@@ -41,8 +39,9 @@ remain static, and no credentials still selects the deterministic static mode.
   in `src/lib/storefront/shopify/env.ts`.
 - Unknown dynamic handles resolve to `null` from the data source and routes
   must translate that into `notFound()` — never invent content.
-- The demo cart (`src/lib/demo-cart/`) is browser-local prototype state only:
-  no checkout, no network writes, honest "demo" labeling in the UI.
+- The demo cart (`src/lib/demo-cart/`) remains browser-local prototype state in
+  static mode only. Shopify mode must replace it with the server-owned Cart API
+  integration and an honestly validated checkout handoff.
 - The Shopify adapter continues to replace the data source one domain at a
   time without rewriting page composition.
 - Run `bun run check:graphql` (`hydrogen gql check`) after adding or changing
@@ -60,10 +59,11 @@ remain static, and no credentials still selects the deterministic static mode.
   `.agents/skills/` guidance for Hydrogen wiring in this Next.js app.
 - Use Server Components by default; add Client Components only for real interactivity.
 - Keep route definitions and route-check fixtures centralized rather than duplicating path strings.
-- Storefront API catalog credentials are approved for Slice 1 only. Customer
-  Account, Weaverse, public-token, and analytics credentials remain unapproved:
-  keep explicit static/demo states for those surfaces until that work is
-  approved. Never add a `.env` file to a repository or worktree.
+- Storefront Content/Cart credentials and Customer Account setup are approved
+  for the current ordered slices under the spec's guarded Store-operation
+  protocol. Weaverse, public-token browser use, analytics, payment activation,
+  and uncontrolled customer/order data remain outside that approval. Never add
+  a `.env` file to a repository or worktree.
 
 ## Required verification
 

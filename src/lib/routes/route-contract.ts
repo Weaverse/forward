@@ -63,6 +63,12 @@ export const SMOKE_FIXTURES = {
   orderId: "1001",
 } as const;
 
+export const LIVE_CONTENT_SMOKE_FIXTURES = {
+  articleHandle: "layering-for-moving-weather",
+  pageHandle: "about-forward",
+  policyHandle: "shipping-policy",
+} as const;
+
 const PRIMARY_PRODUCT_FIXTURE = SMOKE_FIXTURES.productHandles[0];
 
 export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [

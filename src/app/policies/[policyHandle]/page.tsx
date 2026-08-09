@@ -72,22 +72,43 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
                 </p>
               ))}
             </nav>
-            <p className="meta">Updated {formatDate(policy.updatedAt)}</p>
+            {policy.updatedAt ? (
+              <p className="meta">Updated {formatDate(policy.updatedAt)}</p>
+            ) : null}
           </aside>
           <div className="article-content">
             <p className="lede">{policy.summary}</p>
             {policy.sections.map((section) => (
               <section key={section.heading}>
                 <h2>{section.heading}</h2>
-                {section.paragraphs.map((paragraph) => (
-                  <p key={paragraph.slice(0, 32)}>{paragraph}</p>
-                ))}
+                {section.paragraphs.map((paragraph) => {
+                  const paragraphKey = paragraph
+                    .map((run) => `${run.href ?? "text"}:${run.text}`)
+                    .join("|");
+                  return (
+                    <p key={`${section.heading}:${paragraphKey}`}>
+                      {paragraph.map((run) => {
+                        const runKey = `${run.href ?? "text"}:${run.text}`;
+                        return run.href?.startsWith("/") ? (
+                          <Link href={run.href} key={runKey}>
+                            {run.text}
+                          </Link>
+                        ) : run.href ? (
+                          <a href={run.href} key={runKey}>
+                            {run.text}
+                          </a>
+                        ) : (
+                          run.text
+                        );
+                      })}
+                    </p>
+                  );
+                })}
               </section>
             ))}
             <p className="muted">
-              Questions about this policy reach the field office at
-              support@forward.example — a placeholder address for this static
-              demonstration.
+              Questions about this policy? Visit the{" "}
+              <Link href="/pages/contact">contact page</Link>.
             </p>
             <Link className="button button-primary" href="/account">
               Open the field account

@@ -5,7 +5,7 @@
 
 import type { Policy } from "../types";
 
-export const POLICY_FIXTURES: readonly Policy[] = [
+const POLICY_FIXTURE_COPY = [
   {
     handle: "shipping-policy",
     title: "Shipping Policy",
@@ -41,7 +41,7 @@ export const POLICY_FIXTURES: readonly Policy[] = [
     ],
   },
   {
-    handle: "return-policy",
+    handle: "refund-policy",
     title: "Return Policy",
     updatedAt: "2026-07-01",
     summary:
@@ -123,3 +123,13 @@ export const POLICY_FIXTURES: readonly Policy[] = [
     ],
   },
 ] as const;
+
+export const POLICY_FIXTURES: readonly Policy[] = POLICY_FIXTURE_COPY.map(
+  (policy) => ({
+    ...policy,
+    sections: policy.sections.map((section) => ({
+      ...section,
+      paragraphs: section.paragraphs.map((text) => [{ text }]),
+    })),
+  }),
+);

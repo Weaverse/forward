@@ -42,6 +42,7 @@ import {
   createCatalogQueryExecutor,
   createNavigationQueryExecutor,
 } from "./shopify/client";
+import { createContentQueryExecutor } from "./shopify/content-client";
 import { ShopifyCatalogDataSource } from "./shopify/data-source";
 import { type EnvSource, readShopifyCatalogConfig } from "./shopify/env";
 import type { ShopifyCatalogError } from "./shopify/errors";
@@ -206,6 +207,7 @@ export function createStorefrontDataSource(
   return new ShopifyCatalogDataSource({
     base,
     execute: createCatalogQueryExecutor(config, options),
+    executeContent: createContentQueryExecutor(config, options),
     executeNavigation: createNavigationQueryExecutor(config, options),
     storeDomain: config.storeDomain,
     mainMenuHandle: config.mainMenuHandle,

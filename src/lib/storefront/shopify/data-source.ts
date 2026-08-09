@@ -31,6 +31,8 @@ import type {
 } from "../types";
 import { CATALOG_REVALIDATE_SECONDS } from "./cache-policy";
 import type { CatalogQueryExecutor, NavigationQueryExecutor } from "./client";
+import type { ContentQueryExecutor } from "./content-client";
+import type { MappedContentResult } from "./content-mapper";
 import { safeErrorLabel, ShopifyCatalogError } from "./errors";
 import { mapCatalogResult } from "./mapper";
 import {
@@ -47,6 +49,7 @@ export interface ShopifyCatalogDataSourceOptions {
   /** Static implementation backing every not-yet-live domain. */
   base: StorefrontDataSource;
   execute: CatalogQueryExecutor;
+  executeContent?: ContentQueryExecutor;
   executeNavigation: NavigationQueryExecutor;
   /** Configured store origin used to reject cross-store menu URLs. */
   storeDomain: string;
@@ -74,9 +77,15 @@ interface CatalogCacheEntry {
   loadedAt: number;
 }
 
+interface ContentCacheEntry {
+  result: MappedContentResult;
+  loadedAt: number;
+}
+
 export class ShopifyCatalogDataSource implements StorefrontDataSource {
   readonly #base: StorefrontDataSource;
   readonly #execute: CatalogQueryExecutor;
+  readonly #executeContent: ContentQueryExecutor | null;
   readonly #executeNavigation: NavigationQueryExecutor;
   readonly #storeDomain: string;
   readonly #mainMenuHandle: string;
@@ -89,6 +98,8 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
 
   #cached: CatalogCacheEntry | null = null;
   #inFlight: Promise<readonly Product[]> | null = null;
+  #contentCached: ContentCacheEntry | null = null;
+  #contentInFlight: Promise<MappedContentResult> | null = null;
   #navigationFallbackReported = false;
   #footerFallbackReported = false;
   #collectionFallbackReported = false;
@@ -96,6 +107,7 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   constructor(options: ShopifyCatalogDataSourceOptions) {
     this.#base = options.base;
     this.#execute = options.execute;
+    this.#executeContent = options.executeContent ?? null;
     this.#executeNavigation = options.executeNavigation;
     this.#storeDomain = options.storeDomain;
     this.#mainMenuHandle = options.mainMenuHandle;
@@ -179,6 +191,34 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
       }
       return this.#base.listCollections();
     }
+  }
+
+  async #loadContent(): Promise<MappedContentResult | null> {
+    if (this.#executeContent === null) {
+      return null;
+    }
+    if (!this.#useProcessCache) {
+      return this.#executeContent();
+    }
+    const cached = this.#contentCached;
+    if (cached !== null && this.#now() - cached.loadedAt < this.#ttlMs) {
+      return cached.result;
+    }
+    if (this.#contentInFlight !== null) {
+      return this.#contentInFlight;
+    }
+
+    const request = this.#executeContent()
+      .then((result) => {
+        this.#contentCached = { result, loadedAt: this.#now() };
+        return result;
+      })
+      .finally(() => {
+        this.#contentInFlight = null;
+      });
+
+    this.#contentInFlight = request;
+    return request;
   }
 
   /* ---- Shopify-owned catalog reads ------------------------------------- */
@@ -284,38 +324,60 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     };
   }
 
-  /* ---- Domains deferred to later slices -------------------------------- */
+  /* ---- Shopify-owned content reads ------------------------------------- */
 
   async listArticles(): Promise<readonly JournalArticle[]> {
-    return this.#base.listArticles();
+    const content = await this.#loadContent();
+    return content === null ? this.#base.listArticles() : content.articles;
   }
 
   async getArticle(handle: string): Promise<JournalArticle | null> {
-    return this.#base.getArticle(handle);
+    const content = await this.#loadContent();
+    return (
+      (content === null
+        ? null
+        : content.articles.find((article) => article.handle === handle)) ??
+      (content === null ? this.#base.getArticle(handle) : null)
+    );
   }
 
   async listPages(): Promise<readonly StorePage[]> {
-    return this.#base.listPages();
+    const content = await this.#loadContent();
+    return content === null ? this.#base.listPages() : content.pages;
   }
 
   async getPage(handle: string): Promise<StorePage | null> {
-    return this.#base.getPage(handle);
+    const content = await this.#loadContent();
+    return (
+      (content === null
+        ? null
+        : content.pages.find((page) => page.handle === handle)) ??
+      (content === null ? this.#base.getPage(handle) : null)
+    );
   }
 
   async listPolicies(): Promise<readonly Policy[]> {
-    return this.#base.listPolicies();
+    const content = await this.#loadContent();
+    return content === null ? this.#base.listPolicies() : content.policies;
   }
 
   async getPolicy(handle: string): Promise<Policy | null> {
-    return this.#base.getPolicy(handle);
+    const content = await this.#loadContent();
+    return (
+      (content === null
+        ? null
+        : content.policies.find((policy) => policy.handle === handle)) ??
+      (content === null ? this.#base.getPolicy(handle) : null)
+    );
   }
 
   async getThemeContent(): Promise<ThemeContent> {
     return {
       ...(await this.#base.getThemeContent()),
       demoNotice:
-        "Forward uses a live Shopify catalog and navigation. Cart and account remain local demonstrations: checkout and customer account writes are not connected.",
-      footerStatus: "Live Shopify catalog · Demo cart and account",
+        "Forward uses live Shopify catalog and navigation, plus live content. Cart and account remain local demonstrations: checkout and customer account writes are not connected.",
+      footerStatus:
+        "Live Shopify catalog, navigation, and content · Demo cart and account",
     };
   }
 
