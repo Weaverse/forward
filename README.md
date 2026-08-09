@@ -4,15 +4,16 @@ Forward is a fresh Next.js App Router storefront theme for Shopify, powered by W
 
 ## Status
 
-Static demo slice implemented: the complete storefront — home, shop (with
-filtering/sorting), collections, product pages (colorways, galleries,
-deep links), search, an interactive browser-local demo cart, journal, store
-pages, policies, and prototype account surfaces — renders from local fixture
-data through a replaceable data-source seam. The app keeps
-`@shopify/hydrogen@preview` installed but **no Shopify store is connected**:
-no Storefront API calls, credentials, checkout, or Customer Account OAuth
-exist yet. Live data, Weaverse Studio integration, locale/market routing, and
-deployment are intentionally deferred to later slices.
+The storefront now has a hybrid production data source. With the approved
+server-only Shopify environment, products, canonical collection structure,
+Header `main-menu`, and the complete three-column `footer` navigation tree are
+read from the Storefront API. Footer navigation has one Store-owned source: it
+is not derived from `main-menu`, `forward-footer`, or theme-owned Support links.
+Without that environment it remains a deterministic, network-independent
+static storefront. Journal/page/policy bodies, theme copy, the browser-local
+demo cart, and prototype account surfaces still use fixtures; checkout,
+Customer Account OAuth, Weaverse Studio composition, and locale/market routing
+remain deferred.
 
 ## Setup
 
@@ -36,8 +37,9 @@ npx @shopify/hydrogen@preview setup
 ```
 
 That deterministic command installs the preview package and copies Shopify's
-Hydrogen implementation skills into `.agents/skills/`. Storefront client,
-request-handler, cart, and account wiring remain explicit future work.
+Hydrogen implementation skills into `.agents/skills/`. The server-owned
+Storefront read client is wired; cart mutations, request-specific buyer
+context, checkout, and Customer Account remain explicit future work.
 
 ## Commands
 
@@ -55,13 +57,13 @@ request-handler, cart, and account wiring remain explicit future work.
 | `bun run smoke:routes` | Start the production server, verify every contract path and redirect over HTTP, then stop the server. Requires a prior `bun run build`. |
 | `bun run check` | Composed static gates: typecheck → lint → format:check → test → build → check:routes. Leaves no server running. |
 
-## Static data architecture
+## Storefront data architecture
 
 Storefront data flows through a single replaceable seam:
 
 ```text
-static fixture records (src/lib/storefront/fixtures/)
-  -> StaticStorefrontDataSource (src/lib/storefront/data-source.ts)
+static fixtures or server-only Shopify Storefront API reads
+  -> StaticStorefrontDataSource or ShopifyCatalogDataSource
   -> normalized storefront view models (src/lib/storefront/types.ts)
   -> route loaders / page composition (src/app/**)
   -> visual components (src/components/**)
@@ -69,7 +71,7 @@ static fixture records (src/lib/storefront/fixtures/)
 
 Pages and components never import fixture objects directly — everything goes
 through the exported `storefront` instance. Unknown dynamic handles resolve to
-`null` and routes answer with real `notFound()` 404s. A later Shopify adapter
+`null` and routes answer with real `notFound()` 404s. The Shopify adapter
 implements the same `StorefrontDataSource` interface one domain at a time
 without touching page composition.
 
@@ -133,9 +135,16 @@ Shopify's `shopify hydrogen check routes` inspects the file-based routes of Shop
 
 ## Static vs. live boundaries (deferred by design)
 
-- No live Shopify Storefront/Admin API credentials, `.env` values, or data clients — all storefront data is local fixtures behind `StaticStorefrontDataSource`.
+- Products, canonical collection structure, Header `main-menu`, and Footer
+  `footer` navigation are live in Shopify mode. Without the complete approved
+  server-only environment, the same normalized seam selects deterministic
+  static fixtures without network access.
+- Shopify-mode product reads fail closed. Header, Footer, and collection
+  structure have separate deterministic safeguards; one structure failure does
+  not change the others or turn a live product failure into fixture success.
 - No real cart mutations or checkout — the cart is browser-local demo state with an explicitly disabled checkout.
 - No Customer Account OAuth — account surfaces are labeled prototype states.
 - No Weaverse Studio bridge.
 - No locale/market routing (markets are TBD in the shared contract).
-- No deployment or hosting configuration.
+- Vercel Production deployment is configured separately from repository data
+  adapters; credentials remain outside Git and browser bundles.

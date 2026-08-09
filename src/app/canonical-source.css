@@ -3251,6 +3251,9 @@ a.check-row[aria-current] .check-dot {
   .manifesto-copy {
     grid-column: 2;
   }
+  .footer-col:last-child {
+    display: block;
+  }
 }
 
 @media (max-width: 820px) {
@@ -3427,6 +3430,12 @@ a.check-row[aria-current] .check-dot {
   .not-found {
     margin: 12px;
   }
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .footer-brand-wrap {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 560px) {
@@ -3590,6 +3599,12 @@ a.check-row[aria-current] .check-dot {
   .value-block:nth-child(n) {
     grid-column: auto;
     transform: none;
+  }
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+  .footer-brand-wrap {
+    grid-column: auto;
   }
   .footer-brand {
     font-size: 70px;

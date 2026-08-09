@@ -38,6 +38,46 @@ export const PAGE_FIXTURES: readonly StorePage[] = [
     ],
   },
   {
+    handle: "field-repair",
+    title: "Field Repair",
+    eyebrow: "Forward field service",
+    intro: "Small damage should not end a trip or a product’s useful life.",
+    heroImage: EDITORIAL_IMAGES.alpineTraverse,
+    sections: [
+      {
+        heading: "Stabilize, then repair",
+        paragraphs: [
+          "Clean and dry the affected area, stabilize tears with a compatible repair patch, and contact Forward when a permanent repair or replacement component is needed.",
+        ],
+      },
+    ],
+  },
+  {
+    handle: "shipping-returns",
+    title: "Shipping & Returns",
+    eyebrow: "Forward service",
+    intro:
+      "Orders are prepared within two business days. Delivery estimates appear at checkout.",
+    heroImage: EDITORIAL_IMAGES.campTent,
+    sections: [
+      {
+        heading: "Returns",
+        paragraphs: [
+          "Unused items may be returned within 30 days in original condition. Contact support before returning worn footwear or equipment with field damage.",
+        ],
+      },
+    ],
+  },
+  {
+    handle: "contact",
+    title: "Contact",
+    eyebrow: "Forward support",
+    intro:
+      "Questions about fit, equipment, repairs, or an order can be sent through the contact form. Include your order number when applicable.",
+    heroImage: EDITORIAL_IMAGES.trailMovement,
+    sections: [],
+  },
+  {
     handle: "repairs",
     title: "Repairs",
     eyebrow: "Forward program",

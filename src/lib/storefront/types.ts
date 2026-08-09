@@ -146,6 +146,7 @@ export interface ThemeContent {
   announcement: string;
   footerTagline: string;
   demoNotice: string;
+  footerStatus: string;
   homeHeroImage: StorefrontImage;
   standardBandImage: StorefrontImage;
 }

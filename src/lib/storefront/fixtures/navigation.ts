@@ -38,9 +38,10 @@ export const NAVIGATION_FIXTURE: SiteNavigation = {
     {
       heading: "Company",
       links: [
-        { href: "/journal", label: "Journal" },
-        { href: "/pages/about-forward", label: "The field standard" },
-        { href: "/pages/repairs", label: "Repairs" },
+        { href: "/pages/about-forward", label: "About Forward" },
+        { href: "/pages/field-repair", label: "Field Repair" },
+        { href: "/pages/shipping-returns", label: "Shipping & Returns" },
+        { href: "/pages/contact", label: "Contact" },
       ],
     },
     {
@@ -62,6 +63,7 @@ export const THEME_CONTENT_FIXTURE: ThemeContent = {
     "Gear for moving through weather, not around it. A short catalog, built slowly and repaired indefinitely.",
   demoNotice:
     "Forward is running as a static demonstration storefront. Catalog, cart, and account data are local fixtures — no live store is connected and nothing you do here is sent anywhere.",
+  footerStatus: "Static demonstration storefront · Not a live store",
   homeHeroImage: EDITORIAL_IMAGES.heroOpenSky,
   standardBandImage: EDITORIAL_IMAGES.mountainRidges,
 } as const;

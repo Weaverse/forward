@@ -5,14 +5,16 @@
 Forward is a fresh Next.js App Router storefront theme using
 `@shopify/hydrogen@preview`, powered by Weaverse.
 
-The current milestone is **Shopify catalog adapter — Slice 1**
+The current milestone is the incremental **Shopify storefront adapter**
 (`.weaverse/specs/2026-08-06--shopify-catalog-adapter/README.md`): products,
 normalized search/filter/sort, and canonical-route collection product
 resolution are read from the live Storefront API when Shopify credentials are
-present. Every other domain — canonical route collection presentation records,
-content, navigation, demo cart, demo account — is still static fixture data,
-and static mode remains the deterministic default when no Shopify credential is
-configured.
+present. Canonical collection structure plus validated Header `main-menu` and
+the complete Footer tree from the single Shopify handle `footer` are also live
+with independently scoped static safeguards. Footer Shop must not derive from
+`main-menu`, `forward-footer` must not be queried, and Support navigation must
+not remain theme-owned in Shopify mode. Page/article/policy bodies, theme copy, demo cart, and demo account
+remain static, and no credentials still selects the deterministic static mode.
 
 ## Architecture constraints
 
@@ -29,9 +31,10 @@ configured.
   Never import fixture objects from `src/lib/storefront/fixtures/`, Shopify
   queries, or raw Shopify shapes directly in pages or components.
 - Mode selection is explicit and fails closed: no Shopify environment selects
-  the static adapter, a complete environment selects the Shopify catalog
-  adapter, and a partial environment throws a sanitized configuration error.
-  Once Shopify mode is selected there is no runtime fallback to fixtures.
+  the static adapter, a complete environment selects the Shopify adapter, and
+  a partial environment throws a sanitized configuration error. Product data
+  never falls back in Shopify mode. Only validated navigation and canonical
+  collection structure may use their explicit deterministic safeguards.
 - Server catalog reads use `PRIVATE_STOREFRONT_API_TOKEN` with the Hydrogen
   `private_no_buyer_context` client. The private token must never reach browser
   code, props, logs, errors, tests, fixtures, or Git. Environment access stays

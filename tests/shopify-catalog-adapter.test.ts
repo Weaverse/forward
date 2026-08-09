@@ -300,6 +300,29 @@ describe("Hydrogen catalog client seam", () => {
     }
   });
 
+  it("fails closed on a malformed GraphQL errors container", async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async () =>
+      Response.json({
+        data: catalogResponse().data,
+        errors: { message: "synthetic malformed errors container" },
+      });
+
+    try {
+      const execute = createCatalogQueryExecutor(
+        {
+          storeDomain: SYNTHETIC_STORE_DOMAIN,
+          mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
+          privateStorefrontToken: SYNTHETIC_PRIVATE_TOKEN,
+        },
+        { useNextCache: false },
+      );
+      await assert.rejects(execute, ShopifyCatalogError);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   it("validates normalization before a response becomes cacheable", async () => {
     const originalFetch = globalThis.fetch;
     let calls = 0;
@@ -980,14 +1003,29 @@ describe("ShopifyCatalogDataSource", () => {
     }
   });
 
-  it("delegates deferred content domains to the static implementation", async () => {
+  it("keeps theme presentation static while reporting honest Shopify mode status", async () => {
     const source = shopifySource();
     const base: StorefrontDataSource = new StaticStorefrontDataSource();
 
+    const liveTheme = await source.getThemeContent();
+    const staticTheme = await base.getThemeContent();
     assert.deepEqual(
-      await source.getThemeContent(),
-      await base.getThemeContent(),
+      {
+        announcement: liveTheme.announcement,
+        footerTagline: liveTheme.footerTagline,
+        homeHeroImage: liveTheme.homeHeroImage,
+        standardBandImage: liveTheme.standardBandImage,
+      },
+      {
+        announcement: staticTheme.announcement,
+        footerTagline: staticTheme.footerTagline,
+        homeHeroImage: staticTheme.homeHeroImage,
+        standardBandImage: staticTheme.standardBandImage,
+      },
     );
+    assert.match(liveTheme.demoNotice, /live Shopify catalog and navigation/i);
+    assert.match(liveTheme.footerStatus, /Live Shopify catalog/i);
+    assert.match(staticTheme.footerStatus, /Not a live store/i);
     assert.deepEqual(await source.listArticles(), await base.listArticles());
     assert.deepEqual(await source.listPages(), await base.listPages());
     assert.deepEqual(await source.listPolicies(), await base.listPolicies());

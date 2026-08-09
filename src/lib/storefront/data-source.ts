@@ -11,7 +11,7 @@
  * - no Shopify environment -> `StaticStorefrontDataSource` (the deterministic
  *   default used by tests and any environment without credentials);
  * - complete Shopify environment -> `ShopifyCatalogDataSource`, which owns
- *   products, canonical collections, search, and main navigation, and
+ *   products, canonical collections, search, and main/Footer navigation, and
  *   delegates every later domain to the static implementation;
  * - partial Shopify environment -> sanitized `ShopifyConfigurationError`.
  *
@@ -87,6 +87,7 @@ export interface StorefrontDataSource {
 export interface StorefrontDataSourceOptions
   extends CatalogQueryExecutorOptions {
   onNavigationFallback?: (error: ShopifyCatalogError) => void;
+  onFooterFallback?: (error: ShopifyCatalogError) => void;
   onCollectionFallback?: (error: ShopifyCatalogError) => void;
 }
 
@@ -209,6 +210,7 @@ export function createStorefrontDataSource(
     storeDomain: config.storeDomain,
     mainMenuHandle: config.mainMenuHandle,
     onCollectionFallback: options.onCollectionFallback,
+    onFooterFallback: options.onFooterFallback,
     onNavigationFallback: options.onNavigationFallback,
     useProcessCache: !useNextCache,
   });

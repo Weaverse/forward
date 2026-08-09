@@ -1,13 +1,13 @@
 /**
  * Shopify-backed catalog and navigation data source.
  *
- * Products plus canonical collections/main navigation are live. Content, theme
- * text, footer/utility presentation, cart, and account records remain delegated
- * to the injected static base until their own bounded slices.
+ * Products plus canonical collections and main/Footer navigation are live.
+ * Content, theme text, utility presentation, cart, and account records remain
+ * delegated to the injected static base until their own bounded slices.
  *
- * Product failures remain fail-closed. Main-navigation and canonical collection
- * structure use the exact static contract when malformed remote data would
- * otherwise take down routes.
+ * Product failures remain fail-closed. Main navigation, the whole Footer tree,
+ * and canonical collection structure use independently scoped exact static
+ * contracts when malformed remote data would otherwise take down routes.
  */
 
 import {
@@ -33,7 +33,11 @@ import { CATALOG_REVALIDATE_SECONDS } from "./cache-policy";
 import type { CatalogQueryExecutor, NavigationQueryExecutor } from "./client";
 import { safeErrorLabel, ShopifyCatalogError } from "./errors";
 import { mapCatalogResult } from "./mapper";
-import { mapCollectionsResult, mapMainMenuResult } from "./navigation-mapper";
+import {
+  mapCollectionsResult,
+  mapFooterMenuResult,
+  mapMainMenuResult,
+} from "./navigation-mapper";
 
 export { CATALOG_REVALIDATE_SECONDS } from "./cache-policy";
 
@@ -50,6 +54,8 @@ export interface ShopifyCatalogDataSourceOptions {
   mainMenuHandle: string;
   /** Injectable sanitized observer for navigation fallback events. */
   onNavigationFallback?: (error: ShopifyCatalogError) => void;
+  /** Injectable sanitized observer for Footer-menu fallback events. */
+  onFooterFallback?: (error: ShopifyCatalogError) => void;
   /** Injectable sanitized observer for collection-structure fallback events. */
   onCollectionFallback?: (error: ShopifyCatalogError) => void;
   /**
@@ -75,6 +81,7 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   readonly #storeDomain: string;
   readonly #mainMenuHandle: string;
   readonly #onNavigationFallback: (error: ShopifyCatalogError) => void;
+  readonly #onFooterFallback: (error: ShopifyCatalogError) => void;
   readonly #onCollectionFallback: (error: ShopifyCatalogError) => void;
   readonly #useProcessCache: boolean;
   readonly #ttlMs: number;
@@ -83,6 +90,7 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   #cached: CatalogCacheEntry | null = null;
   #inFlight: Promise<readonly Product[]> | null = null;
   #navigationFallbackReported = false;
+  #footerFallbackReported = false;
   #collectionFallbackReported = false;
 
   constructor(options: ShopifyCatalogDataSourceOptions) {
@@ -105,10 +113,31 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
           `[storefront] using static main-navigation fallback (${safeErrorLabel(error)}).`,
         );
       });
+    this.#onFooterFallback =
+      options.onFooterFallback ??
+      ((error) => {
+        console.warn(
+          `[storefront] using static footer-navigation fallback (${safeErrorLabel(error)}).`,
+        );
+      });
     this.#useProcessCache = options.useProcessCache ?? true;
     this.#ttlMs =
       options.ttlMs ?? CATALOG_REVALIDATE_SECONDS * MILLISECONDS_PER_SECOND;
     this.#now = options.now ?? Date.now;
+  }
+
+  #reportNavigationFallback(error: ShopifyCatalogError): void {
+    if (!this.#navigationFallbackReported) {
+      this.#onNavigationFallback(error);
+      this.#navigationFallbackReported = true;
+    }
+  }
+
+  #reportFooterFallback(error: ShopifyCatalogError): void {
+    if (!this.#footerFallbackReported) {
+      this.#onFooterFallback(error);
+      this.#footerFallbackReported = true;
+    }
   }
 
   async #loadCatalog(): Promise<readonly Product[]> {
@@ -203,33 +232,55 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
 
   async getNavigation(): Promise<SiteNavigation> {
     const base = await this.#base.getNavigation();
-    let primary: SiteNavigation["primary"];
+    let result: Awaited<ReturnType<NavigationQueryExecutor>>;
     try {
-      primary = mapMainMenuResult(
-        await this.#executeNavigation(),
-        this.#storeDomain,
-        this.#mainMenuHandle,
-      );
+      result = await this.#executeNavigation();
     } catch (error) {
       if (!(error instanceof ShopifyCatalogError)) {
         throw error;
       }
-      if (!this.#navigationFallbackReported) {
-        this.#onNavigationFallback(error);
-        this.#navigationFallbackReported = true;
-      }
+      this.#reportNavigationFallback(error);
+      this.#reportFooterFallback(error);
       return base;
     }
-    const search = base.primary.filter((item) => item.href === "/search");
-    if (search.length !== 1) {
-      throw new ShopifyCatalogError(
-        "Theme navigation must define exactly one Search destination.",
+
+    let primary: SiteNavigation["primary"];
+    try {
+      const mappedPrimary = mapMainMenuResult(
+        result,
+        this.#storeDomain,
+        this.#mainMenuHandle,
       );
+      const search = base.primary.filter((item) => item.href === "/search");
+      if (search.length !== 1) {
+        throw new ShopifyCatalogError(
+          "Theme navigation must define exactly one Search destination.",
+        );
+      }
+      primary = [...mappedPrimary, ...search];
+    } catch (error) {
+      if (!(error instanceof ShopifyCatalogError)) {
+        throw error;
+      }
+      this.#reportNavigationFallback(error);
+      primary = base.primary;
     }
+
+    let footerColumns: SiteNavigation["footerColumns"];
+    try {
+      footerColumns = mapFooterMenuResult(result, this.#storeDomain);
+    } catch (error) {
+      if (!(error instanceof ShopifyCatalogError)) {
+        throw error;
+      }
+      this.#reportFooterFallback(error);
+      footerColumns = base.footerColumns;
+    }
+
     return {
-      primary: [...primary, ...search],
+      primary,
       utility: base.utility,
-      footerColumns: base.footerColumns,
+      footerColumns,
     };
   }
 
@@ -260,7 +311,12 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   }
 
   async getThemeContent(): Promise<ThemeContent> {
-    return this.#base.getThemeContent();
+    return {
+      ...(await this.#base.getThemeContent()),
+      demoNotice:
+        "Forward uses a live Shopify catalog and navigation. Cart and account remain local demonstrations: checkout and customer account writes are not connected.",
+      footerStatus: "Live Shopify catalog · Demo cart and account",
+    };
   }
 
   async listDemoOrders(): Promise<readonly DemoOrder[]> {

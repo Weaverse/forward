@@ -37,7 +37,7 @@ export async function SiteFooter() {
         ))}
       </div>
       <div className="footer-bottom">
-        <span>Static demonstration storefront · Not a live store</span>
+        <span>{themeContent.footerStatus}</span>
         <span>FORWARD · Field office 54.4609° N / 3.0886° W</span>
       </div>
     </footer>

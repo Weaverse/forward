@@ -26,6 +26,7 @@ import { safeErrorLabel, ShopifyCatalogError } from "./errors";
 import { mapCatalogResult } from "./mapper";
 
 import {
+  FOOTER_MENU_HANDLE,
   NAVIGATION_COLLECTION_LIMIT,
   NAVIGATION_COLLECTION_PRODUCT_LIMIT,
   NAVIGATION_QUERY,
@@ -57,12 +58,56 @@ export interface NavigationQueryResult {
 
 export type NavigationQueryExecutor = () => Promise<NavigationQueryResult>;
 
+/**
+ * Carries a partial navigation response through `unstable_cache` as a rejected
+ * execution, so transient GraphQL errors are never persisted. The public
+ * executor recovers the envelope immediately for independently scoped field
+ * mapping; the error message never contains raw Storefront data.
+ */
+class ShopifyNavigationPartialError extends ShopifyCatalogError {
+  readonly result: NavigationQueryResult;
+
+  constructor(result: NavigationQueryResult) {
+    super("Storefront API navigation response contained partial errors.");
+    this.name = "ShopifyNavigationPartialError";
+    this.result = result;
+  }
+}
+
+async function recoverPartialNavigationResult(
+  execute: () => Promise<NavigationQueryResult>,
+): Promise<NavigationQueryResult> {
+  try {
+    return await execute();
+  } catch (error) {
+    if (error instanceof ShopifyNavigationPartialError) {
+      return error.result;
+    }
+    throw error;
+  }
+}
+
 export interface CatalogQueryExecutorOptions {
   /** Disable only the Next Data Cache wrapper for isolated transport tests. */
   useNextCache?: boolean;
 }
 
 const CATALOG_I18N = { country: "US", language: "EN" } as const;
+
+function readGraphQLErrors(
+  errors: unknown,
+  operation: "catalog" | "navigation",
+): readonly unknown[] {
+  if (errors === undefined) {
+    return [];
+  }
+  if (!Array.isArray(errors)) {
+    throw new ShopifyCatalogError(
+      `Storefront API ${operation} response contained a malformed errors container.`,
+    );
+  }
+  return errors;
+}
 
 function createStorefrontReadClient(config: ShopifyCatalogConfig) {
   const requestContext = createShopifyRequestContext({
@@ -104,13 +149,14 @@ export function createCatalogQueryExecutor(
           query: CATALOG_PRODUCT_FILTER,
         },
       });
+      const graphQLErrors = readGraphQLErrors(errors, "catalog");
       // Reject failures inside the cached callback. `unstable_cache` does not
       // persist thrown executions, but it would cache a successful
       // `{data, errors}` return and turn a transient Storefront error into a
       // one-hour outage.
-      if (errors !== undefined && errors.length > 0) {
+      if (graphQLErrors.length > 0) {
         throw new ShopifyCatalogError(
-          `Storefront API catalog response contained ${errors.length} error(s).`,
+          `Storefront API catalog response contained ${graphQLErrors.length} error(s).`,
         );
       }
       if (data == null) {
@@ -155,19 +201,22 @@ export function createNavigationQueryExecutor(
       const { data, errors } = await client.graphql(NAVIGATION_QUERY, {
         variables: {
           menuHandle: config.mainMenuHandle,
+          footerMenuHandle: FOOTER_MENU_HANDLE,
           collectionFirst: NAVIGATION_COLLECTION_LIMIT,
           collectionProductFirst: NAVIGATION_COLLECTION_PRODUCT_LIMIT,
         },
       });
-      if (errors !== undefined && errors.length > 0) {
-        throw new ShopifyCatalogError(
-          `Storefront API navigation response contained ${errors.length} error(s).`,
-        );
-      }
+      const graphQLErrors = readGraphQLErrors(errors, "navigation");
       if (data == null) {
         throw new ShopifyCatalogError(
           "Storefront API navigation response did not contain data.",
         );
+      }
+      if (graphQLErrors.length > 0) {
+        throw new ShopifyNavigationPartialError({
+          data,
+          errors: graphQLErrors,
+        });
       }
       const result = { data };
       return result;
@@ -182,12 +231,18 @@ export function createNavigationQueryExecutor(
   };
 
   if (options.useNextCache === false) {
-    return execute;
+    return () => recoverPartialNavigationResult(execute);
   }
 
-  return unstable_cache(
+  const cachedExecute = unstable_cache(
     execute,
-    [NAVIGATION_CACHE_KEY, config.storeDomain, config.mainMenuHandle],
+    [
+      NAVIGATION_CACHE_KEY,
+      config.storeDomain,
+      config.mainMenuHandle,
+      FOOTER_MENU_HANDLE,
+    ],
     { revalidate: CATALOG_REVALIDATE_SECONDS },
   );
+  return () => recoverPartialNavigationResult(cachedExecute);
 }

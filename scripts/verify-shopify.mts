@@ -47,6 +47,37 @@ const CANONICAL_SHOP_LINKS = [
   "/shop/footwear",
 ] as const;
 
+const CANONICAL_FOOTER_COLUMNS = [
+  {
+    heading: "Shop",
+    links: [
+      { href: "/shop", label: "All products" },
+      { href: "/shop/outerwear", label: "Outerwear" },
+      { href: "/shop/packs", label: "Packs" },
+      { href: "/shop/footwear", label: "Footwear" },
+    ],
+  },
+  {
+    heading: "Company",
+    links: [
+      { href: "/pages/about-forward", label: "About Forward" },
+      { href: "/pages/field-repair", label: "Field Repair" },
+      { href: "/pages/shipping-returns", label: "Shipping & Returns" },
+      { href: "/pages/contact", label: "Contact" },
+    ],
+  },
+  {
+    heading: "Support",
+    links: [
+      { href: "/account", label: "Account" },
+      { href: "/policies/shipping-policy", label: "Shipping" },
+      { href: "/policies/return-policy", label: "Returns" },
+      { href: "/policies/privacy-policy", label: "Privacy" },
+      { href: "/policies/terms-of-service", label: "Terms" },
+    ],
+  },
+] as const;
+
 const MEDIA_ROLES = ["primary", "alternate", "detail", "context"] as const;
 
 const failures: string[] = [];
@@ -153,6 +184,7 @@ try {
   // This CLI runs outside the Next runtime. Exercise the exact Hydrogen
   // transport/mapping seam while leaving the production default Data Cache on.
   let collectionFallbackUsed = false;
+  let footerFallbackUsed = false;
   let navigationFallbackUsed = false;
   const config = readShopifyCatalogConfig(process.env);
   if (config === null) {
@@ -162,6 +194,9 @@ try {
     useNextCache: false,
     onCollectionFallback: () => {
       collectionFallbackUsed = true;
+    },
+    onFooterFallback: () => {
+      footerFallbackUsed = true;
     },
     onNavigationFallback: () => {
       navigationFallbackUsed = true;
@@ -179,6 +214,27 @@ try {
     navigationFallbackUsed
       ? "static safeguard active"
       : `${shop?.children?.length ?? 0} live Shop children`,
+  );
+  check(
+    "live footer has the canonical three-column tree",
+    !footerFallbackUsed &&
+      navigation.footerColumns.length === CANONICAL_FOOTER_COLUMNS.length &&
+      navigation.footerColumns.every(
+        (column, columnIndex) =>
+          column.heading === CANONICAL_FOOTER_COLUMNS[columnIndex]?.heading &&
+          column.links.length ===
+            CANONICAL_FOOTER_COLUMNS[columnIndex]?.links.length &&
+          column.links.every(
+            (link, linkIndex) =>
+              link.href ===
+                CANONICAL_FOOTER_COLUMNS[columnIndex]?.links[linkIndex]?.href &&
+              link.label ===
+                CANONICAL_FOOTER_COLUMNS[columnIndex]?.links[linkIndex]?.label,
+          ),
+      ),
+    footerFallbackUsed
+      ? "static safeguard active"
+      : `${navigation.footerColumns.length} live Footer columns`,
   );
 
   const products = await storefront.listProducts();

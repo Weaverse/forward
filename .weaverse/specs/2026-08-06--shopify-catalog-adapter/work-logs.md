@@ -472,3 +472,213 @@ final browser QA on exact live build:
 The four Biome descending-specificity warnings are unchanged canonical CSS
 warnings and do not fail lint. No production deployment or Shopify mutation was
 performed.
+
+## 2026-08-08 — Shopify footer navigation and content-destination slice
+
+### Contract
+
+- The authoritative footer menu handle remains `forward-footer` with no env
+  override.
+- Shopify owns the accepted flat Company menu in this exact order:
+  `About Forward`, `Field Repair`, `Shipping & Returns`, `Contact`.
+- Shop is derived from the already validated live `main-menu`; Support,
+  wordmark/tagline, coordinates, and presentation remain theme-owned.
+- Main and footer structures fall back independently to deterministic fixtures;
+  product/catalog reads remain fail-closed in Shopify mode.
+- Footer menu reads use the shared server-only `StorefrontDataSource` query and
+  cache seam. Components do not call Shopify directly.
+
+### RED evidence
+
+1. The bounded footer query/mapper/data-source tests failed before the footer
+   implementation existed.
+2. Destination coverage failed first on `/pages/field-repair`; the three missing
+   accepted handles were then added as deterministic fixtures so no Company
+   destination returns 404.
+3. The URL validation test failed for an exact-host URL with embedded
+   credentials; the shared internal-origin validator now rejects username and
+   password components.
+4. Exact 390 x 844 browser QA found the advanced desktop footer grid overriding
+   the earlier mobile rules: Company and Support were clipped off-screen. A
+   focused source-order regression test failed before the advanced 820/560
+   overrides were restored.
+
+### Implementation and verification
+
+- `ThemeContent.footerStatus` now owns the bottom rail. Static mode keeps
+  `Static demonstration storefront · Not a live store`; Shopify mode reports
+  `Live Shopify catalog · Demo cart and account` and no longer mislabels the
+  live catalog/menu as fully static.
+- Live verifier confirms `main-menu`, `forward-footer`, all catalog products,
+  collections, media, prices, and normalized search without structure
+  fallback.
+- Final static and live gates:
+
+```text
+bun install --frozen-lockfile        pass
+focused footer/catalog tests         78/78 pass
+full tests (static and live)          142/142 pass
+TypeScript / Biome / GraphQL          pass
+clean build                           37 pages
+route contract                        19 patterns, 4 redirects
+route smoke (static and live)         30/30 pass
+live Shopify verifier                 pass
+```
+
+- Exact live-build browser QA:
+
+```text
+desktop footer columns               3 visible, overflow 0
+mobile viewport                      390 x 844
+mobile footer columns                left 22px, width 346px, stacked
+mobile horizontal overflow           0
+broken images / console errors        0 / 0
+Company destination HTTP             4/4 return 200
+mode-aware bottom rail                pass
+```
+
+The four pre-existing Biome descending-specificity warnings remain unchanged.
+No commit, push, deployment, credential change, or Shopify mutation was
+performed in this implementation/verification phase.
+
+### Independent review remediation
+
+The exact frozen candidate `32d98837726338b2f1ebabcb714803fa077c2773`
+received `VERDICT: CHANGES_REQUIRED` for two medium release blockers:
+
+1. the base 1100px rule still hid the Support column from 821–1100px;
+2. a GraphQL error scoped to `footerMenu` caused the shared navigation executor
+   to reject the whole response and activate main, footer, and collection
+   fallbacks together.
+
+Both findings were reproduced with failing regression tests before fixes:
+
+- the advanced 1100px block now explicitly restores the Support column;
+- partial navigation responses are rejected inside `unstable_cache` so they are
+  never persisted, then recovered outside the cache for field-scoped mapping;
+- `errors[].path` roots `menu`, `footerMenu`, and `collections` now affect only
+  their matching mapper; absent, malformed, or unknown roots fail safely for
+  every structure.
+
+Post-fix verification:
+
+```text
+focused footer/navigation + catalog tests  81/81 pass
+full tests (static and live)                145/145 pass
+TypeScript / Biome / GraphQL                pass
+clean build                                 37 pages
+route contract                              19 patterns, 4 redirects
+route smoke (static and live)               30/30 pass, exit 0
+live Shopify verifier                       pass
+1024 x 768 browser probe                    3 columns visible, overflow 0
+1024 broken images                          0
+```
+
+The four pre-existing Biome descending-specificity warnings remain unchanged.
+No commit, push, deployment, credential change, or Shopify mutation was
+performed during review remediation.
+
+## 2026-08-09 — D-021 single `footer` menu correction
+
+Leo rejected the split-source Footer contract. The accepted contract now uses
+one Shopify menu handle, `footer`, for every Footer group, heading, ordered
+link, and destination. The Theme must not derive Footer Shop from `main-menu`,
+query `forward-footer`, or retain theme-owned Support navigation in Shopify
+mode.
+
+### Live read-only discovery
+
+The existing default menu was positively identified without printing
+credentials:
+
+```text
+shop=forward-xbirmxxt.myshopify.com
+handle=footer
+id=gid://shopify/Menu/308140671276
+title=Footer menu
+current roots=Search, Your Privacy Choices
+```
+
+All required collection/page/policy resources exist and every policy has an
+Admin GID. No Store mutation was performed during discovery.
+
+### Fresh RED/PASS evidence
+
+Focused tests first failed in six places, proving the old handle, flat
+Company-only mapper, primary-navigation dependency, and theme Support ownership
+were still active. The corrected implementation now:
+
+- queries handle `footer` with a complete two-level response shape;
+- strictly maps the exact Shop/Company/Support roots and all ordered children;
+- maps Shopify refund policy to canonical `/policies/return-policy`;
+- returns all Footer columns directly from `mapFooterMenuResult`;
+- preserves independent Header/Footer/collection fallback and partial GraphQL
+  field-error scoping;
+- rejects missing, malformed, deeper, contaminated, cross-store, insecure,
+  query-bearing, and fragment-bearing trees;
+- keeps static fallback deterministic and product reads fail-closed;
+- makes the live verifier require the complete three-column tree with no
+  Footer fallback.
+
+```text
+focused Footer test before implementation  24 pass / 6 fail (expected RED)
+focused Footer test after implementation   31/31 pass
+Footer + catalog focused suite              82/82 pass
+full static and live suites                  146/146 pass
+TypeScript / Biome / GraphQL                pass
+clean static and live builds                37 pages each
+route contract                              19 patterns, 4 redirects
+static and live route smoke                 30/30 pass each
+live verifier before Store adoption         expected RED: Footer safeguard only
+Shopify guarded apply                       COMPLETED, 1 menuUpdate, zero deletes
+Admin readback                              exact depth-2 tree; non-target menus unchanged
+same-hash reconciliation rerun              COMPLETED, mutationPerformed=false
+live verifier after Store adoption          PASS, 3 live Footer columns
+browser QA                                  desktop, 1024x768, 390x844 PASS
+horizontal overflow / broken images         0 / 0 at every exact probe
+commit / push / deployment                  not yet performed
+```
+
+Shared Contract `0.9-draft`, D-021, both track notes, Status, repository README,
+AGENTS guidance, and this handoff now record the single-menu contract. The
+existing Shopify menu `footer` (`gid://shopify/Menu/308140671276`) now owns the
+exact Shop/Company/Support tree. Apply report:
+`output/footer-menu-update-report-20260809-084054.json`; approved plan hash:
+`86d84ffca58eee49f4f5f28853bb89d10e059d689d681261562ce27be69aa6a8`.
+
+### Exact-tree review remediation
+
+Independent review of frozen tree `cc8d139e7d2bbee7b1379ccca0de1c5364deb58a`
+returned `CHANGES_REQUIRED` for two release blockers:
+
+1. malformed non-array GraphQL `errors` containers could be discarded inside
+   the cached client callbacks;
+2. bare `?` and `#` URL delimiters parsed as empty state and bypassed strict
+   Footer URL rejection.
+
+Both were reproduced through the real Hydrogen fetch seam and Footer mapper
+before production changes:
+
+```text
+focused review regressions before fixes  81 pass / 3 fail (expected RED)
+```
+
+The cached catalog/navigation callbacks now require `errors` to be absent or an
+array. A malformed container throws a sanitized `ShopifyCatalogError`; only a
+valid non-empty navigation error array enters partial-field recovery. URL
+validation now rejects literal `?`/`#` delimiters before WHATWG normalization.
+Post-fix focused verification:
+
+```text
+Footer + catalog focused suite          84/84 pass
+full static and live suites             148/148 pass
+TypeScript / Biome / GraphQL            pass
+clean static and live builds            37 pages each
+route contract                          19 patterns, 4 redirects
+static and live route smoke             30/30 pass each
+live Shopify verifier                   PASS, 3 live Footer columns
+```
+
+The rejected frozen tree is superseded and must not be committed. The review
+fixes do not alter the valid live navigation output or Footer CSS/markup; the
+previous exact desktop/1024/390 visual probes therefore remain applicable.

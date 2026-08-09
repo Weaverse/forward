@@ -21,6 +21,10 @@ export interface NavigationResponse {
       handle: string;
       items: ShopifyMenuItemFixture[];
     } | null;
+    footerMenu: {
+      handle: string;
+      items: ShopifyMenuItemFixture[];
+    } | null;
     collections: {
       pageInfo: { hasNextPage: boolean };
       nodes: ShopifyCollectionFixture[];
@@ -72,6 +76,110 @@ export function navigationResponse(): NavigationResponse {
             title: "About",
             url: `${SHOP_ORIGIN}/pages/about-forward`,
             items: [],
+          },
+        ],
+      },
+      footerMenu: {
+        handle: "footer",
+        items: [
+          {
+            id: "gid://shopify/MenuItem/footer-shop",
+            title: "Shop",
+            url: `${SHOP_ORIGIN}/collections/forward`,
+            items: [
+              {
+                id: "gid://shopify/MenuItem/footer-all-products",
+                title: "All products",
+                url: `${SHOP_ORIGIN}/collections/forward`,
+                items: [],
+              },
+              {
+                id: "gid://shopify/MenuItem/footer-outerwear",
+                title: "Outerwear",
+                url: `${SHOP_ORIGIN}/collections/outerwear`,
+                items: [],
+              },
+              {
+                id: "gid://shopify/MenuItem/footer-packs",
+                title: "Packs",
+                url: `${SHOP_ORIGIN}/collections/packs`,
+                items: [],
+              },
+              {
+                id: "gid://shopify/MenuItem/footer-footwear",
+                title: "Footwear",
+                url: `${SHOP_ORIGIN}/collections/footwear`,
+                items: [],
+              },
+            ],
+          },
+          {
+            id: "gid://shopify/MenuItem/footer-company",
+            title: "Company",
+            url: `${SHOP_ORIGIN}/pages/about-forward`,
+            items: [
+              {
+                id: "gid://shopify/MenuItem/about-forward",
+                title: "About Forward",
+                url: `${SHOP_ORIGIN}/pages/about-forward`,
+                items: [],
+              },
+              {
+                id: "gid://shopify/MenuItem/field-repair",
+                title: "Field Repair",
+                url: `${SHOP_ORIGIN}/pages/field-repair`,
+                items: [],
+              },
+              {
+                id: "gid://shopify/MenuItem/shipping-returns",
+                title: "Shipping & Returns",
+                url: `${SHOP_ORIGIN}/pages/shipping-returns`,
+                items: [],
+              },
+              {
+                id: "gid://shopify/MenuItem/contact",
+                title: "Contact",
+                url: `${SHOP_ORIGIN}/pages/contact`,
+                items: [],
+              },
+            ],
+          },
+          {
+            id: "gid://shopify/MenuItem/footer-support",
+            title: "Support",
+            url: `${SHOP_ORIGIN}/account`,
+            items: [
+              {
+                id: "gid://shopify/MenuItem/account",
+                title: "Account",
+                url: `${SHOP_ORIGIN}/account`,
+                items: [],
+              },
+              {
+                id: "gid://shopify/MenuItem/shipping-policy",
+                title: "Shipping",
+                url: `${SHOP_ORIGIN}/policies/shipping-policy`,
+                items: [],
+              },
+              {
+                id: "gid://shopify/MenuItem/refund-policy",
+                title: "Returns",
+                url: `${SHOP_ORIGIN}/policies/refund-policy`,
+                items: [],
+              },
+              {
+                id: "gid://shopify/MenuItem/privacy-policy",
+                title: "Privacy",
+                url: `${SHOP_ORIGIN}/policies/privacy-policy`,
+                items: [],
+              },
+              {
+                id: "gid://shopify/MenuItem/terms-of-service",
+                title: "Terms",
+                url: `${SHOP_ORIGIN}/policies/terms-of-service`,
+                items: [],
+              },
+            ],
           },
         ],
       },
