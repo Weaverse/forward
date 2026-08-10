@@ -1,5 +1,11 @@
 "use client";
 
+import type {
+  CartLine,
+  MoneyV2,
+  ProductInput,
+  ProductVariantInput,
+} from "@shopify/hydrogen";
 import {
   createCartComponents,
   createProductComponents,
@@ -10,37 +16,19 @@ import type { Product } from "@/lib/storefront/types";
 
 type CartHandlers = typeof import("./shopify-cart").shopifyCartHandlers;
 
+export type ShopifyCartLineData = CartLine;
+export type ShopifyMoney = MoneyV2;
+
 export const {
   CartProvider: ShopifyCartProvider,
   useCart: useShopifyCart,
-  useOptionalCart: useOptionalShopifyCart,
   useCartForm: useShopifyCartForm,
 } = createCartComponents<CartHandlers>();
-
-interface HydrogenProductVariant {
-  id: string;
-  title: string;
-  availableForSale: boolean;
-  selectedOptions: Array<{ name: string; value: string }>;
-  price: { amount: string; currencyCode: string };
-}
-
-interface HydrogenProductInput {
-  id: string;
-  handle: string;
-  title: string;
-  options: Array<{
-    name: string;
-    optionValues: Array<{ name: string }>;
-  }>;
-  selectedOrFirstAvailableVariant: HydrogenProductVariant | null;
-  adjacentVariants: HydrogenProductVariant[];
-}
 
 export const {
   ProductProvider: ShopifyProductProvider,
   useProductForm: useShopifyProductForm,
-} = createProductComponents<HydrogenProductInput>();
+} = createProductComponents<ProductInput>();
 
 const ShopifyCartModeContext = createContext(false);
 
@@ -51,13 +39,7 @@ export function ShopifyCartRuntime({
   enabled: boolean;
   children: ReactNode;
 }) {
-  if (!enabled) {
-    return (
-      <ShopifyCartModeContext.Provider value={false}>
-        {children}
-      </ShopifyCartModeContext.Provider>
-    );
-  }
+  if (!enabled) return children;
   return (
     <ShopifyCartModeContext.Provider value>
       <ShopifyCartProvider>{children}</ShopifyCartProvider>
@@ -72,12 +54,12 @@ export function useShopifyCartMode(): boolean {
 export function toHydrogenProductInput(
   product: Product,
   colorwayId: string,
-): HydrogenProductInput {
+): ProductInput {
   const colorway = product.colorways.find(({ id }) => id === colorwayId);
   if (colorway === undefined) {
     throw new Error("Product colorway is unavailable.");
   }
-  const variants = product.variants
+  const variants: ProductVariantInput[] = product.variants
     .filter((variant) => variant.colorwayId === colorwayId)
     .map((variant) => ({
       id: variant.id,

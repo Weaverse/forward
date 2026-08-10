@@ -4,6 +4,8 @@ import { useId, useState } from "react";
 
 import { cn } from "@/lib/cn";
 import {
+  ShopifyProductProvider,
+  toHydrogenProductInput,
   useShopifyCartMode,
   useShopifyProductForm,
 } from "@/lib/cart/shopify-cart-react";
@@ -234,7 +236,11 @@ function ShopifyAddToCartForm({ product }: AddToCartFormProps) {
 
 export function AddToCartForm(props: AddToCartFormProps) {
   return useShopifyCartMode() ? (
-    <ShopifyAddToCartForm {...props} />
+    <ShopifyProductProvider
+      product={toHydrogenProductInput(props.product, props.colorway.id)}
+    >
+      <ShopifyAddToCartForm {...props} />
+    </ShopifyProductProvider>
   ) : (
     <DemoAddToCartForm {...props} />
   );
