@@ -1,13 +1,9 @@
-import { handleShopifyCartRequest } from "@/lib/cart/shopify-cart";
-
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 export const runtime = "nodejs";
 
-export async function GET(request: Request): Promise<Response> {
-  return handleShopifyCartRequest(request);
-}
+import { handleShopifyCartRequest } from "@/lib/cart/shopify-cart";
 
-export async function POST(request: Request): Promise<Response> {
-  return handleShopifyCartRequest(request);
-}
+const handleCart = (request: Request) => handleShopifyCartRequest(request);
+
+export { handleCart as GET, handleCart as POST };

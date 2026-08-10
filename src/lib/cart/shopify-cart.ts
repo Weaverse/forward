@@ -7,7 +7,6 @@ import {
 import {
   type EnvSource,
   readShopifyCatalogConfig,
-  type ShopifyCatalogConfig,
 } from "@/lib/storefront/shopify/env";
 
 import {
@@ -24,13 +23,6 @@ export type ShopifyCartData = Awaited<
   ReturnType<typeof shopifyCartHandlers.get>
 >["data"];
 
-interface CartRequestContext {
-  config: ShopifyCatalogConfig;
-  environment: RuntimeEnvironment;
-  requestContext: ReturnType<typeof createShopifyRequestContext>;
-  storefrontClient: ReturnType<typeof createStorefrontClient>;
-}
-
 export function runtimeEnvironment(
   value: string | undefined,
 ): RuntimeEnvironment {
@@ -38,10 +30,7 @@ export function runtimeEnvironment(
   return "development";
 }
 
-function createCartRequestContext(
-  request: Request,
-  source: EnvSource,
-): CartRequestContext {
+function createCartRequestContext(request: Request, source: EnvSource) {
   const config = readShopifyCatalogConfig(source);
   if (config === null) {
     throw new Error("Shopify cart is unavailable in static storefront mode.");
@@ -65,13 +54,14 @@ function createCartRequestContext(
   return { config, environment, requestContext, storefrontClient };
 }
 
+type CartRequestContext = ReturnType<typeof createCartRequestContext>;
+
 function jsonResponse(
   data: unknown,
   status: number,
   headers: Headers,
 ): Response {
-  headers.set("content-type", "application/json; charset=utf-8");
-  return new Response(JSON.stringify(data), { status, headers });
+  return Response.json(data, { status, headers });
 }
 
 function cartResultResponse(
