@@ -6,7 +6,14 @@
  * `public/images/products/` (see `public/images/products/manifest.json`).
  */
 
-import type { Product, ProductColorway, StorefrontImage } from "../types";
+import type {
+  Money,
+  Product,
+  ProductColorway,
+  ProductOption,
+  ProductVariant,
+  StorefrontImage,
+} from "../types";
 
 const PRODUCT_IMAGE_WIDTH = 1600;
 const PRODUCT_IMAGE_HEIGHT = 2000;
@@ -50,6 +57,32 @@ function colorway(
       ),
     },
   };
+}
+
+function productVariants(
+  handle: string,
+  colorwayIds: readonly string[],
+  options: readonly ProductOption[],
+  price: Money,
+): readonly ProductVariant[] {
+  const optionSelections =
+    options.length === 0
+      ? [[]]
+      : (options[0]?.values.map((value) => [
+          { name: options[0]?.name ?? "Option", value },
+        ]) ?? [[]]);
+
+  return colorwayIds.flatMap((colorwayId) =>
+    optionSelections.map((selectedOptions) => ({
+      id: `demo:${handle}:${colorwayId}:${
+        selectedOptions.map((option) => option.value).join(":") || "default"
+      }`,
+      colorwayId,
+      selectedOptions,
+      price,
+      availableForSale: true,
+    })),
+  );
 }
 
 export const PRODUCT_FIXTURES: readonly Product[] = [
@@ -100,6 +133,12 @@ export const PRODUCT_FIXTURES: readonly Product[] = [
       ),
     ],
     options: [{ name: "Size", values: ["XS", "S", "M", "L", "XL"] }],
+    variants: productVariants(
+      "weatherline-shell",
+      ["charcoal", "claystone"],
+      [{ name: "Size", values: ["XS", "S", "M", "L", "XL"] }],
+      { amount: 248, currencyCode: "USD" },
+    ),
     relatedHandles: ["ridge-30-field-pack", "talus-trail-shoe"],
   },
   {
@@ -143,6 +182,10 @@ export const PRODUCT_FIXTURES: readonly Product[] = [
       colorway("dune", "Dune", "#c4ad83", "ridge-dune", "Ridge 30 Field Pack"),
     ],
     options: [],
+    variants: productVariants("ridge-30-field-pack", ["charcoal", "dune"], [], {
+      amount: 168,
+      currencyCode: "USD",
+    }),
     relatedHandles: ["weatherline-shell", "talus-trail-shoe"],
   },
   {
@@ -197,6 +240,17 @@ export const PRODUCT_FIXTURES: readonly Product[] = [
         values: ["39", "40", "41", "42", "43", "44", "45", "46"],
       },
     ],
+    variants: productVariants(
+      "talus-trail-shoe",
+      ["charcoal", "limestone"],
+      [
+        {
+          name: "Size (EU)",
+          values: ["39", "40", "41", "42", "43", "44", "45", "46"],
+        },
+      ],
+      { amount: 142, currencyCode: "USD" },
+    ),
     relatedHandles: ["ridge-30-field-pack", "weatherline-shell"],
   },
 ] as const;

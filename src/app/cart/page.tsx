@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
 import { CartView } from "@/components/cart-view";
+import { ShopifyCartView } from "@/components/shopify-cart-view";
+import { readShopifyCart, type ShopifyCartData } from "@/lib/cart/shopify-cart";
+import { ShopifyCartProvider } from "@/lib/cart/shopify-cart-react";
 import type { DemoCartLine } from "@/lib/demo-cart/cart-logic";
 import { lineKey } from "@/lib/demo-cart/cart-logic";
-import { storefront } from "@/lib/storefront/data-source";
+import {
+  storefront,
+  storefrontRuntimeMode,
+} from "@/lib/storefront/data-source";
 import {
   productColorwayHref,
   resolveColorway,
@@ -11,12 +18,11 @@ import {
 
 export const metadata: Metadata = {
   title: "Cart",
-  description: "Your Forward demo cart.",
+  description: "Your Forward cart.",
 };
 
-// Next requires a literal route-segment value. Keep this equal to
-// CATALOG_REVALIDATE_SECONDS in the adapter contract test.
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
 /** Resolves the demo seed lines against the catalog on the server. */
 async function buildSeedLines(): Promise<readonly DemoCartLine[]> {
@@ -45,6 +51,20 @@ async function buildSeedLines(): Promise<readonly DemoCartLine[]> {
 }
 
 export default async function CartPage() {
+  if (storefrontRuntimeMode === "shopify") {
+    const requestHeaders = await headers();
+    const data: ShopifyCartData = await readShopifyCart(
+      new Request("https://forward.local/api/cart", {
+        headers: requestHeaders,
+      }),
+    );
+    return (
+      <ShopifyCartProvider initialData={data}>
+        <ShopifyCartView />
+      </ShopifyCartProvider>
+    );
+  }
+
   const seedLines = await buildSeedLines();
 
   /* CartView owns the canonical `.cart-page` shell so the live item count can

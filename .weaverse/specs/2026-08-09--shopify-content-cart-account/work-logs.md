@@ -230,9 +230,103 @@ routes absent. The owned server was stopped and port `3334` was confirmed
 closed. The browser sandbox was fixed at 1280px, so this pass records desktop
 visual QA only rather than claiming tablet/mobile screenshots.
 
+### Slice 1 release
+
+Slice 1 was committed as `73d724e94055df87e94395a23a301749a195290b`
+(`feat: source storefront content from Shopify`), pushed to `origin/main`, and
+released by Git-triggered Vercel Production deployment
+`dpl_CTJDaMZnASrzPRnoWZyPwYYEb3Ew`. Hosted smoke passed 30/30 checks and
+hosted browser QA passed for the canonical article and privacy policy.
+
+### Slice 2 — Cart and checkout implementation
+
+The Cart slice now uses the pinned Hydrogen preview Cart contract end to end:
+
+- normalized products retain every exact Shopify ProductVariant GID, selected
+  option, availability and USD price; PDP selection never reconstructs a
+  merchandise identity from labels or handles;
+- the request-scoped private Storefront client forwards only the first valid
+  Vercel `x-forwarded-for` IP and fails closed on missing/malformed Production
+  buyer context;
+- `/api/cart` uses Hydrogen server handlers and a hardened `HttpOnly`,
+  `SameSite=Lax`, Production `Secure`, path-scoped cart cookie;
+- response JSON redacts keyed cart identity while preserving line IDs needed by
+  line mutations;
+- checkout URLs require HTTPS, default port, no credentials and the configured
+  store or an explicit Shopify-owned hostname;
+- Shopify mode uses one client cart store across the shell, exact ProductForm
+  variant selection, server-seeded dynamic/no-store `/cart`, and standard
+  increase/decrease/remove forms;
+- static mode retains the deterministic browser-local demo cart and does not
+  render the Shopify Standard Actions script;
+- cart presentation keeps the canonical Forward layout and reports live Cart
+  with Account still honestly marked as demo.
+
+Browser QA found and fixed a color-only product edge case: normalized Color is
+owned by `colorwayId`, so the Hydrogen-only input now injects the current fixed
+Color option for variant resolution without rendering a duplicate Color picker.
+A regression test covers the Ridge 30 Field Pack case.
+
+### Slice 2 verification before independent review
+
+```text
+bun install --frozen-lockfile = PASS, no changes
+focused cart/catalog/data-source tests = 75/75 PASS
+bun run check = PASS
+full tests = 177/177 PASS
+GraphQL check = PASS
+live read-only Shopify verifier = PASS
+live build = 35 pages PASS
+route contract = 19 patterns + 4 redirects PASS
+live production HTTP smoke = 30/30 PASS
+explicit-empty-env static build = 36 pages PASS
+static production HTTP smoke = 30/30 PASS
+final live rebuild = 35 pages PASS
+final live production HTTP smoke = 30/30 PASS
+```
+
+Live local browser QA completed two mutation cycles without opening checkout:
+
+1. Talus Trail Shoe selected `US 9`, added quantity 2, persisted through the
+   `HttpOnly` cookie, increased to 3, then removed to empty.
+2. Ridge 30 Field Pack (no non-Color options) added successfully, rendered the
+   populated cart without overlap/clipping, exposed a validated Shopify checkout
+   handoff, then was removed and persisted empty.
+
+The browser could not read the cart cookie and no Cart GID appeared in rendered
+HTML. Checkout stayed on the exact Shopify-owned origin returned by Storefront;
+it was not opened. These tests created and mutated only ephemeral Storefront Cart
+state. No Shopify Admin mutation, checkout navigation, customer/order creation,
+payment, commit, push, deployment, issue, PR, or external message occurred for
+Slice 2 before the independent review gate.
+
+### Slice 2 independent review
+
+The standard autoreview wrapper reached Copilot but hit its known NDJSON
+`Extra data` parser failure. The frozen 65,266-byte staged diff was therefore
+reviewed directly, with tools disabled, by Copilot CLI using
+`claude-sonnet-4.6`. It made no source changes and returned:
+
+```text
+VERDICT: APPROVE
+BLOCKERS: None
+```
+
+Five non-blocking notes were adjudicated without source changes:
+
+1. `noreferrer` is optional because the browser Referer is the Forward `/cart`
+   URL, not the Shopify-returned checkout URL or cart identity.
+2. Cookie names are case-sensitive and pinned `createCartCookie({name: "cart"})`
+   fixes the only authoritative cart cookie name to lowercase.
+3. Preselecting the first sellable variant is intentional and visible in the
+   live ProductForm state; all mutations still carry that exact variant GID.
+4. The combined `set-cookie` fallback is unreachable on the route's declared
+   Node.js runtime, where `getSetCookie()` is present.
+5. The private-token header is package-owned; successful live add/update/remove
+   browser QA exercised that seam without printing the token.
+
 ### Current state
 
-Slice 1 is implementation-complete and independently approved, pending
-commit/push, Git-triggered Production deployment and hosted QA. No Store
-mutation, QA customer/order, payment, commit, push, deployment, issue, PR, or
-external message has occurred in this milestone yet.
+Slice 1 is released. Slice 2 is implementation-, verification- and
+independent-review-complete, pending commit/push, Git-triggered Production
+deployment and hosted Cart QA. Slice 3 Customer Account remains pending.

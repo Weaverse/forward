@@ -219,4 +219,6 @@ export function createStorefrontDataSource(
 }
 
 /** The storefront data source used by all routes. */
+export const storefrontRuntimeMode =
+  readShopifyCatalogConfig(process.env) === null ? "static" : "shopify";
 export const storefront: StorefrontDataSource = createStorefrontDataSource();

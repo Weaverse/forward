@@ -7,6 +7,11 @@ import { type ReactNode, useState } from "react";
 
 import { AddToCartForm } from "@/components/add-to-cart-form";
 import { cn } from "@/lib/cn";
+import {
+  ShopifyProductProvider,
+  toHydrogenProductInput,
+  useShopifyCartMode,
+} from "@/lib/cart/shopify-cart-react";
 import { formatMoney } from "@/lib/storefront/format";
 import {
   COLORWAY_PARAM,
@@ -107,6 +112,25 @@ interface ProductDetailViewProps extends ProductDetailProps {
   colorway: ProductColorway;
 }
 
+function ProductCartBoundary({
+  product,
+  colorway,
+  children,
+}: {
+  product: Product;
+  colorway: ProductColorway;
+  children: ReactNode;
+}) {
+  if (!useShopifyCartMode()) return children;
+  return (
+    <ShopifyProductProvider
+      product={toHydrogenProductInput(product, colorway.id)}
+    >
+      {children}
+    </ShopifyProductProvider>
+  );
+}
+
 /**
  * Canonical `.pdp` grid and sticky `.product-panel` (source `app.js:279–288`).
  */
@@ -118,66 +142,72 @@ function ProductDetailView({
   const specBadge = product.specs[0]?.value ?? product.category;
 
   return (
-    <div className="pdp">
-      <ProductGallery key={colorway.id} product={product} colorway={colorway} />
-      <section className="product-panel" aria-label="Purchase panel">
-        <div className="product-panel-inner">
-          <p className="breadcrumbs">
-            <Link href="/shop">Shop</Link> /{" "}
-            <Link href={`/shop?category=${product.category}`}>
-              {product.category}
-            </Link>
-          </p>
-          <div className="product-kicker">
-            <span className="eyebrow">Plate {product.plate}</span>
-            <span className="meta">{specBadge}</span>
-          </div>
-          <h1 className="product-title">{product.title}</h1>
-          <strong>{formatMoney(product.price)}</strong>
-          <p className="product-intro">{product.description}</p>
-
-          {/* Colorway selection stays a set of canonical deep links. */}
-          <div className="option-group">
-            <div className="option-label">
-              <span>Color</span>
-              <span>{colorway.name}</span>
+    <ProductCartBoundary product={product} colorway={colorway}>
+      <div className="pdp">
+        <ProductGallery
+          key={colorway.id}
+          product={product}
+          colorway={colorway}
+        />
+        <section className="product-panel" aria-label="Purchase panel">
+          <div className="product-panel-inner">
+            <p className="breadcrumbs">
+              <Link href="/shop">Shop</Link> /{" "}
+              <Link href={`/shop?category=${product.category}`}>
+                {product.category}
+              </Link>
+            </p>
+            <div className="product-kicker">
+              <span className="eyebrow">Plate {product.plate}</span>
+              <span className="meta">{specBadge}</span>
             </div>
-            {/* Each link carries its own colorway name and selected state. */}
-            <div className="option-row">
-              {product.colorways.map((entry) => {
-                const selected = entry.id === colorway.id;
-                return (
-                  <Link
-                    key={entry.id}
-                    className={cn("option-chip", selected && "selected")}
-                    href={productColorwayHref(product, entry.id)}
-                    scroll={false}
-                    aria-current={selected ? "true" : undefined}
-                    aria-label={`${entry.name} colorway${
-                      selected ? " (selected)" : ""
-                    }`}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="swatch"
-                      style={{ backgroundColor: entry.swatchColor }}
-                    />
-                    {entry.name}
-                  </Link>
-                );
-              })}
+            <h1 className="product-title">{product.title}</h1>
+            <strong>{formatMoney(product.price)}</strong>
+            <p className="product-intro">{product.description}</p>
+
+            {/* Colorway selection stays a set of canonical deep links. */}
+            <div className="option-group">
+              <div className="option-label">
+                <span>Color</span>
+                <span>{colorway.name}</span>
+              </div>
+              {/* Each link carries its own colorway name and selected state. */}
+              <div className="option-row">
+                {product.colorways.map((entry) => {
+                  const selected = entry.id === colorway.id;
+                  return (
+                    <Link
+                      key={entry.id}
+                      className={cn("option-chip", selected && "selected")}
+                      href={productColorwayHref(product, entry.id)}
+                      scroll={false}
+                      aria-current={selected ? "true" : undefined}
+                      aria-label={`${entry.name} colorway${
+                        selected ? " (selected)" : ""
+                      }`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="swatch"
+                        style={{ backgroundColor: entry.swatchColor }}
+                      />
+                      {entry.name}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
+
+            <AddToCartForm
+              key={colorway.id}
+              product={product}
+              colorway={colorway}
+            />
+
+            {fieldRecord}
           </div>
-
-          <AddToCartForm
-            key={colorway.id}
-            product={product}
-            colorway={colorway}
-          />
-
-          {fieldRecord}
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
+    </ProductCartBoundary>
   );
 }

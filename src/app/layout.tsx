@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { ShopifyCartRuntime } from "@/lib/cart/shopify-cart-react";
+import { storefrontRuntimeMode } from "@/lib/storefront/data-source";
 
 import "./globals.css";
 import "./canonical-source.css";
@@ -61,18 +63,31 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const shopifyCartEnabled = storefrontRuntimeMode === "shopify";
   return (
     <html
       lang="en"
       className={`${literata.variable} ${manrope.variable} ${plexMono.variable}`}
     >
+      <head>
+        {shopifyCartEnabled ? (
+          <script
+            crossOrigin="anonymous"
+            id="shopify-standard-actions"
+            src="https://cdn.shopify.com/storefront/standard-actions.js"
+            type="module"
+          />
+        ) : null}
+      </head>
       <body>
-        <a className="skip-link" href="#main-content">
-          Skip to content
-        </a>
-        <SiteHeader />
-        <main id="main-content">{children}</main>
-        <SiteFooter />
+        <ShopifyCartRuntime enabled={shopifyCartEnabled}>
+          <a className="skip-link" href="#main-content">
+            Skip to content
+          </a>
+          <SiteHeader />
+          <main id="main-content">{children}</main>
+          <SiteFooter />
+        </ShopifyCartRuntime>
       </body>
     </html>
   );

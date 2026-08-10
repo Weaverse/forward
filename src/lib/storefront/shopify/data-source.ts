@@ -375,9 +375,9 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     return {
       ...(await this.#base.getThemeContent()),
       demoNotice:
-        "Forward uses live Shopify catalog and navigation, plus live content. Cart and account remain local demonstrations: checkout and customer account writes are not connected.",
+        "Forward uses live Shopify catalog, navigation, content, and a secure Shopify cart. Checkout is handed off to Shopify; customer account remains a local demonstration.",
       footerStatus:
-        "Live Shopify catalog, navigation, and content · Demo cart and account",
+        "Live Shopify catalog, navigation, content, and cart · Demo account",
     };
   }
 

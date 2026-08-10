@@ -811,6 +811,44 @@ describe("catalog mapping failures", () => {
     assert.equal(products[0]?.price.amount, 199.5);
   });
 
+  it("maps exact Shopify merchandise identities beneath each product", () => {
+    const products = mapped();
+    const weatherline = products[0];
+    assert.equal(weatherline?.variants.length, 10);
+    assert.deepEqual(weatherline?.variants[0], {
+      id: "gid://shopify/ProductVariant/1000",
+      colorwayId: "charcoal",
+      selectedOptions: [{ name: "Size", value: "XS" }],
+      price: { amount: 248, currencyCode: "USD" },
+      availableForSale: true,
+    });
+    assert.equal(
+      new Set(weatherline?.variants.map((variant) => variant.id)).size,
+      weatherline?.variants.length,
+    );
+  });
+
+  it("keeps deterministic non-Shopify variants in the static source", async () => {
+    const weatherline = await new StaticStorefrontDataSource().getProduct(
+      "weatherline-shell",
+    );
+    assert.equal(weatherline?.variants.length, 10);
+    assert.equal(
+      weatherline?.variants[0]?.id,
+      "demo:weatherline-shell:charcoal:XS",
+    );
+    assert.equal(weatherline?.variants[0]?.availableForSale, true);
+  });
+
+  it("rejects duplicate merchandise IDs", async () => {
+    await assertRejectsCatalog(
+      catalogResponseWith("weatherline-shell", (product) => {
+        product.variants.nodes[1].id = product.variants.nodes[0].id;
+      }),
+      "duplicate merchandise",
+    );
+  });
+
   it("rejects a product missing the forward ownership tag", async () => {
     await assertRejectsCatalog(
       catalogResponseWith("weatherline-shell", (product) => {
@@ -1023,8 +1061,11 @@ describe("ShopifyCatalogDataSource", () => {
         standardBandImage: staticTheme.standardBandImage,
       },
     );
-    assert.match(liveTheme.demoNotice, /live Shopify catalog and navigation/i);
-    assert.match(liveTheme.footerStatus, /Live Shopify catalog/i);
+    assert.match(
+      liveTheme.demoNotice,
+      /live Shopify catalog, navigation, content, and a secure Shopify cart/i,
+    );
+    assert.match(liveTheme.footerStatus, /content, and cart · Demo account/i);
     assert.match(staticTheme.footerStatus, /Not a live store/i);
     assert.deepEqual(await source.listArticles(), await base.listArticles());
     assert.deepEqual(await source.listPages(), await base.listPages());
@@ -1136,10 +1177,9 @@ describe("catalog revalidation window", () => {
     assert.equal(calls, 2);
   });
 
-  it("keeps route segment revalidate values equal to the adapter window", async () => {
+  it("keeps shared route revalidation and personalized cart boundaries explicit", async () => {
     const routes = [
       "src/app/page.tsx",
-      "src/app/cart/page.tsx",
       "src/app/account/orders/[orderId]/page.tsx",
       "src/app/shop/[collectionHandle]/page.tsx",
       "src/app/products/[productHandle]/page.tsx",
@@ -1154,6 +1194,13 @@ describe("catalog revalidation window", () => {
         `${route} revalidate drifted from CATALOG_REVALIDATE_SECONDS`,
       );
     }
+
+    const cartSource = await readFile(
+      path.join(process.cwd(), "src/app/cart/page.tsx"),
+      "utf8",
+    );
+    assert.match(cartSource, /export const dynamic = "force-dynamic";/);
+    assert.match(cartSource, /export const fetchCache = "force-no-store";/);
   });
 });
 

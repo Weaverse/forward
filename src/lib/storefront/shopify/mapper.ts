@@ -24,6 +24,7 @@ import type {
   Product,
   ProductColorway,
   ProductOption,
+  ProductVariant,
   SpecRow,
   StorefrontImage,
 } from "../types";
@@ -571,11 +572,18 @@ function mapCare(raw: string, handle: string): readonly string[] {
 /* Variants                                                                   */
 /* -------------------------------------------------------------------------- */
 
-function mapMinimumPrice(
+interface MappedVariants {
+  price: Money;
+  variants: readonly ProductVariant[];
+}
+
+function mapVariants(
   value: unknown,
   handle: string,
   colorLabels: readonly string[],
-): Money {
+  options: readonly ProductOption[],
+  profile: CatalogPresentationProfile,
+): MappedVariants {
   const connection = asRecord(value, `${handle} variants`);
   const pageInfo = asRecord(connection.pageInfo, `${handle} variants pageInfo`);
   if (pageInfo.hasNextPage === true) {
@@ -587,41 +595,115 @@ function mapMinimumPrice(
     fail(`${handle} has no variants.`);
   }
 
+  const expectedOptionNames = [
+    COLOR_OPTION_NAME,
+    ...options.map(({ name }) => name),
+  ];
+  const merchandiseIds = new Set<string>();
+  const selections = new Set<string>();
+  const variants: ProductVariant[] = [];
   let minimum: Money | undefined;
+
   for (const [index, node] of nodes.entries()) {
     const context = `${handle} variant ${index}`;
     const record = asRecord(node, context);
-    asText(record.id, `${context} id`);
+    const id = asText(record.id, `${context} id`);
+    if (!id.startsWith("gid://shopify/ProductVariant/")) {
+      fail(`${context} id is not a Shopify ProductVariant GID.`);
+    }
+    if (merchandiseIds.has(id)) {
+      fail(`${handle} has a duplicate merchandise id.`);
+    }
+    merchandiseIds.add(id);
+
     if (typeof record.availableForSale !== "boolean") {
       fail(`${context} availability is missing.`);
     }
-    const selectedOptions = asArray(
+
+    const selectedOptionRecords = asArray(
       record.selectedOptions,
       `${context} selectedOptions`,
-    );
-    const color = selectedOptions
-      .map((entry, optionIndex) =>
-        asRecord(entry, `${context} selectedOption ${optionIndex}`),
+    ).map((entry, optionIndex) => {
+      const option = asRecord(
+        entry,
+        `${context} selectedOption ${optionIndex}`,
+      );
+      return {
+        name: asText(
+          option.name,
+          `${context} selectedOption ${optionIndex} name`,
+        ),
+        value: asText(
+          option.value,
+          `${context} selectedOption ${optionIndex} value`,
+        ),
+      };
+    });
+
+    if (
+      selectedOptionRecords.length !== expectedOptionNames.length ||
+      selectedOptionRecords.some(
+        (option, optionIndex) =>
+          option.name !== expectedOptionNames[optionIndex],
       )
-      .find((entry) => entry.name === COLOR_OPTION_NAME);
-    if (color === undefined) {
-      fail(`${context} has no ${COLOR_OPTION_NAME} selection.`);
+    ) {
+      fail(
+        `${context} selectedOptions do not match Shopify product option order.`,
+      );
     }
-    const label = asText(color.value, `${context} ${COLOR_OPTION_NAME} value`);
-    if (!colorLabels.includes(label)) {
+
+    const color = selectedOptionRecords[0];
+    if (
+      color?.name !== COLOR_OPTION_NAME ||
+      !colorLabels.includes(color.value)
+    ) {
       fail(`${context} references an unknown ${COLOR_OPTION_NAME} value.`);
     }
+    const presentationColorway = profile.colorways[color.value];
+    if (presentationColorway === undefined) {
+      fail(`${context} has no approved colorway mapping.`);
+    }
+
+    const selectedOptions = selectedOptionRecords.slice(1);
+    for (const [optionIndex, selected] of selectedOptions.entries()) {
+      const option = options[optionIndex];
+      if (option === undefined || !option.values.includes(selected.value)) {
+        fail(`${context} references an unknown ${selected.name} value.`);
+      }
+    }
+
+    const selectionKey = [
+      presentationColorway.id,
+      ...selectedOptions.map(({ name, value }) => `${name}:${value}`),
+    ].join("\u001f");
+    if (selections.has(selectionKey)) {
+      fail(`${handle} has duplicate variant option selections.`);
+    }
+    selections.add(selectionKey);
 
     const price = mapMoney(record.price, `${context} price`);
     if (minimum === undefined || price.amount < minimum.amount) {
       minimum = price;
     }
+    variants.push({
+      id,
+      colorwayId: presentationColorway.id,
+      selectedOptions,
+      price,
+      availableForSale: record.availableForSale,
+    });
   }
 
   if (minimum === undefined) {
     fail(`${handle} has no usable variant price.`);
   }
-  return minimum;
+  for (const colorway of Object.values(profile.colorways)) {
+    if (!variants.some((variant) => variant.colorwayId === colorway.id)) {
+      fail(`${handle} has no approved colorway mapping for ${colorway.id}.`);
+    }
+  }
+
+  return { price: minimum, variants };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -660,7 +742,13 @@ function mapProduct(node: unknown, index: number): Product {
   }
 
   const { colorLabels, options } = mapOptions(record.options, handle);
-  const price = mapMinimumPrice(record.variants, handle, colorLabels);
+  const { price, variants } = mapVariants(
+    record.variants,
+    handle,
+    colorLabels,
+    options,
+    profile,
+  );
 
   const images = mapMediaImages(record.media, handle);
   const mediaMap = parseColorwayMediaMap(
@@ -723,6 +811,7 @@ function mapProduct(node: unknown, index: number): Product {
     repair: profile.repair,
     colorways,
     options,
+    variants,
     relatedHandles: profile.relatedHandles,
   };
 }

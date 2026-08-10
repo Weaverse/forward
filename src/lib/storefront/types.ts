@@ -41,6 +41,19 @@ export interface ProductOption {
   values: readonly string[];
 }
 
+export interface ProductVariant {
+  /** Exact Shopify merchandise GID in live mode; deterministic demo id in static mode. */
+  id: string;
+  colorwayId: string;
+  /** Every selected option except Color, in Shopify option order. */
+  selectedOptions: readonly {
+    name: string;
+    value: string;
+  }[];
+  price: Money;
+  availableForSale: boolean;
+}
+
 export interface SpecRow {
   label: string;
   value: string;
@@ -64,6 +77,7 @@ export interface Product {
   repair: string;
   colorways: readonly ProductColorway[];
   options: readonly ProductOption[];
+  variants: readonly ProductVariant[];
   relatedHandles: readonly string[];
 }
 
