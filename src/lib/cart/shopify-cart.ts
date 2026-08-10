@@ -54,19 +54,9 @@ function createCartRequestContext(request: Request, source: EnvSource) {
   return { config, environment, requestContext, storefrontClient };
 }
 
-type CartRequestContext = ReturnType<typeof createCartRequestContext>;
-
-function jsonResponse(
-  data: unknown,
-  status: number,
-  headers: Headers,
-): Response {
-  return Response.json(data, { status, headers });
-}
-
 function cartResultResponse(
   result: Awaited<ReturnType<typeof shopifyCartHandlers.post>>,
-  context: CartRequestContext,
+  context: ReturnType<typeof createCartRequestContext>,
 ): Response {
   const sanitized = sanitizeCartHandlerResult(
     result,
@@ -80,16 +70,15 @@ function cartResultResponse(
   );
 
   if (sanitized.type === "json") {
-    return jsonResponse(sanitized.data, 200, headers);
+    return Response.json(sanitized.data, { status: 200, headers });
   }
   if (sanitized.type === "redirect") {
     headers.set("location", sanitized.location);
     return new Response(null, { status: 303, headers });
   }
-  return jsonResponse(
+  return Response.json(
     { error: sanitized.error },
-    sanitized.status ?? 400,
-    headers,
+    { status: sanitized.status ?? 400, headers },
   );
 }
 
@@ -137,18 +126,20 @@ export async function handleShopifyCartRequest(
       },
     });
   } catch {
-    return jsonResponse(
+    return Response.json(
       {
         error: {
           code: "cart_unavailable",
           message: "Cart is temporarily unavailable.",
         },
       },
-      502,
-      hardenCartResponseHeaders(
-        new Headers(),
-        runtimeEnvironment(source.NODE_ENV),
-      ),
+      {
+        status: 502,
+        headers: hardenCartResponseHeaders(
+          new Headers(),
+          runtimeEnvironment(source.NODE_ENV),
+        ),
+      },
     );
   }
 }
