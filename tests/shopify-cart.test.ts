@@ -2,6 +2,13 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  dynamic as cartRouteDynamic,
+  fetchCache as cartRouteFetchCache,
+  GET as cartRouteGet,
+  POST as cartRoutePost,
+  runtime as cartRouteRuntime,
+} from "../src/app/api/cart/route.ts";
+import {
   hardenCartResponseHeaders,
   readTrustedBuyerIp,
   sanitizeCartHandlerResult,
@@ -52,6 +59,37 @@ describe("Shopify cart request boundary", () => {
       ["Color"],
     );
     assert.equal(input.selectedOrFirstAvailableVariant?.id, variant.id);
+  });
+
+  it("keeps Color ahead of Size and preserves adjacent variant identities", () => {
+    const product = PRODUCT_FIXTURES.find(
+      ({ handle }) => handle === "weatherline-shell",
+    );
+    if (product === undefined) throw new Error("missing product fixture");
+    const colorway = product.colorways[0];
+    if (colorway === undefined) throw new Error("missing product colorway");
+
+    const input = toHydrogenProductInput(product, colorway.id);
+    assert.deepEqual(
+      input.options.map(({ name }) => name),
+      ["Color", "Size"],
+    );
+    assert.deepEqual(
+      input.options[0]?.optionValues.map(({ name }) => name),
+      [colorway.name],
+    );
+    for (const variant of input.adjacentVariants ?? []) {
+      assert.equal(
+        variant.selectedOptions.find(({ name }) => name === "Color")?.value,
+        colorway.name,
+      );
+    }
+    assert.deepEqual(
+      input.adjacentVariants?.map(({ id }) => id),
+      product.variants
+        .filter((variant) => variant.colorwayId === colorway.id)
+        .map(({ id }) => id),
+    );
   });
 
   it("accepts only the first valid Vercel forwarded buyer IP", () => {
@@ -105,6 +143,42 @@ describe("Shopify cart request boundary", () => {
     assert.doesNotMatch(cookie, /Secure/i);
   });
 
+  it("fails closed when Hydrogen returns more than one cart identity cookie", () => {
+    const headers = new Headers();
+    headers.append("set-cookie", "cart=first; Path=/");
+    headers.append("set-cookie", "cart=second; Path=/");
+
+    assert.throws(
+      () => hardenCartResponseHeaders(headers, "production"),
+      /more than one cart identity cookie/i,
+    );
+  });
+
+  it("preserves non-cart cookies while hardening the single cart identity", () => {
+    const nonCartCookie = "analytics=synthetic; Path=/metrics; SameSite=Strict";
+    const headers = new Headers();
+    headers.append("set-cookie", nonCartCookie);
+    headers.append(
+      "set-cookie",
+      "cart=synthetic; Path=/legacy; SameSite=None; Secure",
+    );
+
+    const cookies = hardenCartResponseHeaders(
+      headers,
+      "production",
+    ).getSetCookie();
+    assert.equal(cookies.length, 2);
+    assert.ok(cookies.includes(nonCartCookie));
+    const cartCookie = cookies.find((cookie) => cookie.startsWith("cart="));
+    assert.ok(cartCookie !== undefined);
+    assert.match(cartCookie, /Path=\/(?:;|$)/);
+    assert.doesNotMatch(cartCookie, /Path=\/legacy/);
+    assert.match(cartCookie, /SameSite=Lax/i);
+    assert.doesNotMatch(cartCookie, /SameSite=None/i);
+    assert.match(cartCookie, /HttpOnly/i);
+    assert.match(cartCookie, /Secure/i);
+  });
+
   it("redacts the Shopify cart identity while retaining server-owned line data", () => {
     const result = sanitizeCartHandlerResult(cartResult(), STORE_DOMAIN);
     assert.equal(result.type, "json");
@@ -155,6 +229,16 @@ describe("Shopify cart request boundary", () => {
         ),
       /checkout URL/i,
     );
+  });
+});
+
+describe("Next Shopify cart route contract", () => {
+  it("keeps personalized route config and exposes both HTTP method handlers", () => {
+    assert.equal(cartRouteDynamic, "force-dynamic");
+    assert.equal(cartRouteFetchCache, "force-no-store");
+    assert.equal(cartRouteRuntime, "nodejs");
+    assert.equal(typeof cartRouteGet, "function");
+    assert.equal(typeof cartRoutePost, "function");
   });
 });
 

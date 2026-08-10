@@ -78,10 +78,18 @@ export function toHydrogenProductInput(
     }));
   const selectedOrFirstAvailableVariant =
     variants.find((variant) => variant.availableForSale) ?? variants[0] ?? null;
-  const options = product.options.map((option) => ({
-    name: option.name,
-    optionValues: option.values.map((value) => ({ name: value })),
-  }));
+  const options = [
+    {
+      name: "Color",
+      optionValues: [{ name: colorway.name }],
+    },
+    ...product.options
+      .filter(({ name }) => name !== "Color")
+      .map((option) => ({
+        name: option.name,
+        optionValues: option.values.map((value) => ({ name: value })),
+      })),
+  ];
   const optionNames = new Set(options.map(({ name }) => name));
   for (const variant of variants) {
     for (const selectedOption of variant.selectedOptions) {
