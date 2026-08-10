@@ -325,8 +325,31 @@ Five non-blocking notes were adjudicated without source changes:
 5. The private-token header is package-owned; successful live add/update/remove
    browser QA exercised that seam without printing the token.
 
+### Slice 2 release
+
+Slice 2 was committed as `a6abc52b10dcfcf8d5c6280b4f33467bf0160339`
+(`feat: connect Shopify cart and checkout`) and pushed to `origin/main` with local,
+remote and GitHub status bound to the same SHA. Git-triggered Vercel Production
+deployment `dpl_7HDdAaTmtTiaNjiQrmUtT6AFKHp8` reached `READY` and attached the
+canonical `https://forward-sandy.vercel.app` alias. Provider metadata bound the
+deployment to the exact commit, branch and subject; both required Production
+environment key names were present without reading their values.
+
+Hosted verification passed:
+
+```text
+route smoke = 30/30 PASS
+GET /api/cart without cookie = 200 {cart:null}, private/no-store
+malformed POST /api/cart = 400 invalid_cart_request
+```
+
+Hosted browser QA added one Ridge 30 Field Pack, persisted it through the
+`HttpOnly` cookie to the server-seeded cart, confirmed a Shopify-owned HTTPS
+checkout handoff without opening it, proved the Cart GID and cookie were not
+client-readable, then removed the line and reloaded an empty cart. No Shopify
+Admin mutation, checkout navigation, customer/order creation or payment occurred.
+
 ### Current state
 
-Slice 1 is released. Slice 2 is implementation-, verification- and
-independent-review-complete, pending commit/push, Git-triggered Production
-deployment and hosted Cart QA. Slice 3 Customer Account remains pending.
+Slices 1 Content and 2 Cart + checkout are independently released and hosted-QA
+complete. Slice 3 Customer Account remains pending.
