@@ -23,11 +23,7 @@ import {
   filterAndSortProducts,
   searchNormalizedProducts,
 } from "./catalog-query";
-import {
-  DEMO_ADDRESS_FIXTURES,
-  DEMO_CART_SEED,
-  DEMO_ORDER_FIXTURES,
-} from "./fixtures/account";
+import { DEMO_CART_SEED } from "./fixtures/account";
 import { COLLECTION_FIXTURES } from "./fixtures/collections";
 import { JOURNAL_FIXTURES } from "./fixtures/journal";
 import {
@@ -48,9 +44,7 @@ import { type EnvSource, readShopifyCatalogConfig } from "./shopify/env";
 import type { ShopifyCatalogError } from "./shopify/errors";
 import type {
   Collection,
-  DemoAddress,
   DemoCartSeedLine,
-  DemoOrder,
   JournalArticle,
   Policy,
   Product,
@@ -79,9 +73,6 @@ export interface StorefrontDataSource {
   getPolicy(handle: string): Promise<Policy | null>;
   getNavigation(): Promise<SiteNavigation>;
   getThemeContent(): Promise<ThemeContent>;
-  listDemoOrders(): Promise<readonly DemoOrder[]>;
-  getDemoOrder(id: string): Promise<DemoOrder | null>;
-  listDemoAddresses(): Promise<readonly DemoAddress[]>;
   getDemoCartSeed(): Promise<readonly DemoCartSeedLine[]>;
 }
 
@@ -169,18 +160,6 @@ export class StaticStorefrontDataSource implements StorefrontDataSource {
 
   async getThemeContent(): Promise<ThemeContent> {
     return THEME_CONTENT_FIXTURE;
-  }
-
-  async listDemoOrders(): Promise<readonly DemoOrder[]> {
-    return DEMO_ORDER_FIXTURES;
-  }
-
-  async getDemoOrder(id: string): Promise<DemoOrder | null> {
-    return DEMO_ORDER_FIXTURES.find((order) => order.id === id) ?? null;
-  }
-
-  async listDemoAddresses(): Promise<readonly DemoAddress[]> {
-    return DEMO_ADDRESS_FIXTURES;
   }
 
   async getDemoCartSeed(): Promise<readonly DemoCartSeedLine[]> {

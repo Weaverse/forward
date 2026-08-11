@@ -17,9 +17,7 @@ import {
 import type { StorefrontDataSource } from "../data-source";
 import type {
   Collection,
-  DemoAddress,
   DemoCartSeedLine,
-  DemoOrder,
   JournalArticle,
   Policy,
   Product,
@@ -375,22 +373,9 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     return {
       ...(await this.#base.getThemeContent()),
       demoNotice:
-        "Forward uses live Shopify catalog, navigation, content, and a secure Shopify cart. Checkout is handed off to Shopify; customer account remains a local demonstration.",
-      footerStatus:
-        "Live Shopify catalog, navigation, content, and cart · Demo account",
+        "Forward uses live Shopify catalog, navigation, content, and a secure Shopify cart. Checkout is handed off to Shopify.",
+      footerStatus: "Live Shopify catalog, navigation, content, and cart",
     };
-  }
-
-  async listDemoOrders(): Promise<readonly DemoOrder[]> {
-    return this.#base.listDemoOrders();
-  }
-
-  async getDemoOrder(id: string): Promise<DemoOrder | null> {
-    return this.#base.getDemoOrder(id);
-  }
-
-  async listDemoAddresses(): Promise<readonly DemoAddress[]> {
-    return this.#base.listDemoAddresses();
   }
 
   async getDemoCartSeed(): Promise<readonly DemoCartSeedLine[]> {

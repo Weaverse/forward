@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { CUSTOMER_ACCOUNT_LOGOUT_PATH } from "@/lib/account/customer-account";
 import { cn } from "@/lib/cn";
 
 const ACCOUNT_NAV = [
@@ -18,6 +19,8 @@ interface AccountShellProps {
   /** Right-hand column of the page hero. */
   lede?: string;
   heroAside?: ReactNode;
+  /** Renders the sign-out control only for a real, usable session. */
+  signedIn?: boolean;
   children: ReactNode;
 }
 
@@ -25,8 +28,8 @@ interface AccountShellProps {
  * Canonical account frame. Source `app.js:316` and `app.js:320`: the dark
  * `.page-hero`, the 190px mono `.account-nav` rail, and the content column.
  *
- * The canonical prototype fakes a signed-in customer; Forward keeps its honest
- * static notice because customer accounts are not connected.
+ * Sign-out is a same-origin POST form, never a link: the pinned logout handler
+ * requires POST plus an Origin/Referer match against the configured origin.
  */
 export function AccountShell({
   activePath,
@@ -34,6 +37,7 @@ export function AccountShell({
   title,
   lede,
   heroAside,
+  signedIn = false,
   children,
 }: AccountShellProps) {
   return (
@@ -62,15 +66,15 @@ export function AccountShell({
               </Link>
             );
           })}
-          <Link href="/account/login">Sign in</Link>
+          {signedIn ? (
+            <form method="post" action={CUSTOMER_ACCOUNT_LOGOUT_PATH}>
+              <button type="submit" className="text-link">
+                Sign out
+              </button>
+            </form>
+          ) : null}
         </nav>
-        <section>
-          <p className="demo-note">
-            Prototype account · customer accounts are not connected and every
-            record below is local demo data.
-          </p>
-          {children}
-        </section>
+        <section>{children}</section>
       </div>
     </>
   );

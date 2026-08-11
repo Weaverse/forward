@@ -62,7 +62,7 @@ export const THEME_CONTENT_FIXTURE: ThemeContent = {
   footerTagline:
     "Gear for moving through weather, not around it. A short catalog, built slowly and repaired indefinitely.",
   demoNotice:
-    "Forward is running as a static demonstration storefront. Catalog, cart, and account data are local fixtures — no live store is connected and nothing you do here is sent anywhere.",
+    "Forward is running as a static demonstration storefront. Catalog and cart data are local fixtures, customer accounts are unavailable, and nothing you do here is sent anywhere.",
   footerStatus: "Static demonstration storefront · Not a live store",
   homeHeroImage: EDITORIAL_IMAGES.heroOpenSky,
   standardBandImage: EDITORIAL_IMAGES.mountainRidges,

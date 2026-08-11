@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Wordmark } from "@/components/wordmark";
+import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
 import { storefront } from "@/lib/storefront/data-source";
 
 /**
@@ -14,6 +15,14 @@ export async function SiteFooter() {
     storefront.getThemeContent(),
   ]);
 
+  const accountEnabled = getCustomerAccountRuntime() !== null;
+  const footerColumns = accountEnabled
+    ? navigation.footerColumns
+    : navigation.footerColumns.map((column) => ({
+        ...column,
+        links: column.links.filter((link) => link.href !== "/account"),
+      }));
+
   return (
     <footer className="site-footer">
       <div className="footer-grid">
@@ -21,7 +30,7 @@ export async function SiteFooter() {
           <Wordmark variant="footer" />
           <p className="footer-intro">{themeContent.footerTagline}</p>
         </div>
-        {navigation.footerColumns.map((column) => (
+        {footerColumns.map((column) => (
           <nav
             key={column.heading}
             className="footer-col"

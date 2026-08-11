@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
 import { storefront } from "@/lib/storefront/data-source";
 import { formatDate } from "@/lib/storefront/format";
 
@@ -41,6 +42,7 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
   if (policy === null) {
     notFound();
   }
+  const accountEnabled = getCustomerAccountRuntime() !== null;
 
   return (
     <>
@@ -110,9 +112,11 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
               Questions about this policy? Visit the{" "}
               <Link href="/pages/contact">contact page</Link>.
             </p>
-            <Link className="button button-primary" href="/account">
-              Open the field account
-            </Link>
+            {accountEnabled ? (
+              <Link className="button button-primary" href="/account">
+                Open the field account
+              </Link>
+            ) : null}
           </div>
         </div>
       </article>
