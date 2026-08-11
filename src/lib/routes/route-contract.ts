@@ -14,7 +14,6 @@ export type RouteCategory =
   | "editorial"
   | "content"
   | "account"
-  | "account-protocol"
   | "resource";
 
 export interface RouteSmoke {
@@ -147,17 +146,31 @@ export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [
       expectedStatus: 200,
     },
   },
+  /*
+   * Account routes are authenticated Customer Account surfaces. Their smoke
+   * expectation is the disabled-configuration contract, which is the only
+   * state reachable without account credentials: one generic 404 with no
+   * account affordance. Signed-in behavior is covered by hosted QA.
+   */
   {
     pattern: "/account",
     label: "Account overview",
     category: "account",
-    smoke: { path: "/account", expectedStatus: 200 },
+    smoke: {
+      path: "/account",
+      expectedStatus: 404,
+      expectedContentType: "text/html",
+    },
   },
   {
     pattern: "/account/orders",
     label: "Order history",
     category: "account",
-    smoke: { path: "/account/orders", expectedStatus: 200 },
+    smoke: {
+      path: "/account/orders",
+      expectedStatus: 404,
+      expectedContentType: "text/html",
+    },
   },
   {
     pattern: "/account/orders/[orderId]",
@@ -165,50 +178,43 @@ export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [
     category: "account",
     smoke: {
       path: `/account/orders/${SMOKE_FIXTURES.orderId}`,
-      expectedStatus: 200,
+      expectedStatus: 404,
+      expectedContentType: "text/html",
     },
   },
   {
     pattern: "/account/addresses",
     label: "Addresses",
     category: "account",
-    smoke: { path: "/account/addresses", expectedStatus: 200 },
-  },
-  {
-    pattern: "/account/login",
-    label: "Sign in",
-    category: "account",
-    smoke: { path: "/account/login", expectedStatus: 200 },
+    smoke: {
+      path: "/account/addresses",
+      expectedStatus: 404,
+      expectedContentType: "text/html",
+    },
   },
 ] as const;
 
 /**
- * Account protocol surfaces. In the foundation slice these are explicit
- * placeholders that answer 501 Not Implemented — they must not pretend
- * Customer Account authentication exists.
+ * Customer Account protocol paths.
+ *
+ * `proxy.ts` owns these before App Router routing whenever the account tuple
+ * is configured, so no `page.tsx`/`route.ts` may exist at any of them. Without
+ * that configuration they answer the same generic 404 as any unknown path,
+ * which is what the smoke gate asserts.
  */
-export const ACCOUNT_PROTOCOL_ROUTES: readonly RouteContractEntry[] = [
-  {
-    pattern: "/account/authorize",
-    label: "OAuth authorize callback (placeholder)",
-    category: "account-protocol",
-    smoke: {
-      path: "/account/authorize",
-      expectedStatus: 501,
-      expectedContentType: "text/plain",
-    },
-  },
-  {
-    pattern: "/account/logout",
-    label: "Logout endpoint (placeholder)",
-    category: "account-protocol",
-    smoke: {
-      path: "/account/logout",
-      expectedStatus: 501,
-      expectedContentType: "text/plain",
-    },
-  },
+export const ACCOUNT_PROTOCOL_PATHS = [
+  "/account/login",
+  "/account/authorize",
+  "/account/refresh",
+  "/account/logout",
 ] as const;
+
+export const ACCOUNT_PROTOCOL_SMOKES: readonly RouteSmoke[] =
+  ACCOUNT_PROTOCOL_PATHS.map((path) => ({
+    path,
+    expectedStatus: 404,
+    expectedContentType: "text/html",
+  }));
 
 export const RESOURCE_ROUTES: readonly RouteContractEntry[] = [
   {
@@ -235,7 +241,6 @@ export const RESOURCE_ROUTES: readonly RouteContractEntry[] = [
 
 export const ROUTE_CONTRACT: readonly RouteContractEntry[] = [
   ...CANONICAL_ROUTES,
-  ...ACCOUNT_PROTOCOL_ROUTES,
   ...RESOURCE_ROUTES,
 ] as const;
 

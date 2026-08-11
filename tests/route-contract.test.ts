@@ -170,12 +170,18 @@ describe("route contract shape", () => {
     );
   });
 
-  it("keeps account protocol surfaces honest (501, not success)", () => {
-    for (const pattern of ["/account/authorize", "/account/logout"]) {
-      const entry = ROUTE_CONTRACT.find((route) => route.pattern === pattern);
-      assert.ok(entry, `${pattern} missing from contract`);
-      assert.equal(entry.smoke.expectedStatus, 501);
-      assert.equal(entry.smoke.expectedContentType, "text/plain");
+  it("leaves account protocol surfaces exclusively to the root proxy", () => {
+    for (const pattern of [
+      "/account/login",
+      "/account/authorize",
+      "/account/refresh",
+      "/account/logout",
+    ]) {
+      assert.equal(
+        ROUTE_CONTRACT.some((route) => route.pattern === pattern),
+        false,
+        `${pattern} must not regain an App Router placeholder contract`,
+      );
     }
   });
 });
