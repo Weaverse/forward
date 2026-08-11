@@ -352,4 +352,123 @@ Admin mutation, checkout navigation, customer/order creation or payment occurred
 ### Current state
 
 Slices 1 Content and 2 Cart + checkout are independently released and hosted-QA
-complete. Slice 3 Customer Account remains pending.
+complete. Slice 3 Customer Account now has a staged local implementation
+candidate on `feat/customer-account`; offline/runtime verification is green,
+while fresh independent review and live platform configuration/QA remain open.
+
+### 2026-08-11 — Slice 3 read-only Customer Account audit
+
+A fresh Admin API 2026-07 read confirmed the exact shop identity and unchanged
+`NEW_CUSTOMER_ACCOUNTS` state, visible login links, optional checkout login and
+`https://shopify.com/97847574828/account` account URL. The public OpenID
+discovery document confirmed Authorization Code, PKCE `S256`, and the shop-owned
+authorize/token/logout endpoints.
+
+The exact pinned package/runtime exports and Next integration declarations were
+verified. The app still has no `proxy.ts`; `/account/authorize` and
+`/account/logout` remain honest `501` placeholders.
+
+At audit time, key-name-only inspection proved `SHOP_ID`,
+`PUBLIC_CUSTOMER_ACCOUNT_API_CLIENT_ID`, and
+`CUSTOMER_ACCOUNT_SESSION_SECRET` were absent from Forward local and Vercel
+environments. The authoritative Headless client UUID and callback/logout
+registrations remain unknown because Shopify Admin browser inspection was
+blocked by connection verification and the audited Admin GraphQL surface does
+not expose those settings. No credential was copied from Pilot or another
+storefront.
+
+The complete evidence and initial origin target are in
+`customer-account-audit.md`; the corrected authoritative pre-code security
+contract is in `customer-account-contract.md`. No Shopify, Vercel, customer,
+order, credential, callback or environment mutation occurred. Source may
+proceed fail-closed with synthetic security tests; live OAuth remains blocked
+on authoritative Headless client configuration, a new protected session secret
+and a controlled QA mailbox.
+
+### Slice 3 independent pre-code contract review
+
+Claude Code with explicit Opus (`claude-opus-5`) reviewed a frozen no-tools
+bundle and returned `CHANGES_REQUIRED`. The contract now pins the configured
+HTTPS origin instead of request headers, makes the four-key environment tuple
+all-or-none, requires a no-default 32-byte session secret, defines encrypted
+cookie generation/size/fixation/logout behavior, normalizes provider failures,
+and records that any QA order is permanent and approval-gated.
+
+Runtime adjudication against the exact pinned package confirmed that Hydrogen
+already calls `commit()` for login, authorize, refresh, and logout, emits
+`no-store`, removes pending login when tokens are written, and clears the full
+Customer Account session value on logout. `handleShopifyRoutes()` already
+applies request-context personalization headers to matched responses. Forward
+must still implement non-optional commit behavior and prove cookie/cache/header
+semantics locally and hosted.
+
+Two Opus correction passes then adjudicated edge cases against the exact pinned
+runtime: rejected logout 403s do not commit, transient callback failures can
+retain only TTL-bounded pending state, login `return_to` is capped at Forward
+href construction, and encrypted cookie/token budgets are explicit. Final
+explicit Opus (`claude-opus-5`) verdict: `APPROVE`, blockers `none`.
+
+### Slice 3 implementation candidate
+
+The candidate replaces the legacy login page and `501` callback/logout
+placeholders with one root proxy and the pinned Hydrogen Customer Account
+handlers. It adds all-or-none environment validation, fixed-origin callback and
+logout construction, encrypted AES-GCM session cookies, duplicate-cookie
+rejection, bounded return targets and refresh, POST-only same-origin logout,
+dynamic/no-store personalized account pages, customer-scoped exact order lookup,
+and profile/order/address reads. Address create/update/delete/set-default use the
+pinned schema through one CSRF-protected Server Action with a committed writable
+session guard, exact intent/schema validation, fixed errors and no retry after an
+ambiguous failure. No Customer Account token is placed in browser storage, URLs,
+rendered view models, logs, or client props.
+
+The first two independent frozen-diff reviews returned `CHANGES_REQUIRED`.
+Their findings were adjudicated in source: account HTML now receives Hydrogen's
+private/no-store finalizer and CDN-header stripping; disabled mode removes Account
+links from Header, Footer and policy CTA; protocol handlers no longer require
+catalog credentials; order detail uses exact authenticated `orders(query:)`
+lookup; the session secret requires canonical base64url for at least 32 bytes and
+rejects low-diversity placeholders; and the pinned address mutation surface is
+implemented with adversarial offline coverage.
+
+A later final-review run timed out without a verdict, but its transcript exposed
+two more blockers. The protocol bridge now canonicalizes request URLs to the
+configured storefront origin before Hydrogen resolves relative app redirects,
+and every protocol method mismatch returns the exact `Allow` method with
+private/no-store caching. The secret validator also rejects alternate base64url
+spellings with non-zero unused trailing bits. Hostile-origin and wrong-method
+proxy regressions cover those boundaries.
+
+The next frozen-diff review returned one security/runtime `APPROVE` and one
+contract/evidence `CHANGES_REQUIRED`. Its remaining findings are remediated: the
+proxy preserves the package's plain `no-store` cache value on the
+pre-personalization rejected logout 403, and a package-upgrade regression proves
+that pending login without `origin` is rejected before any token exchange. A
+fresh review of the remediated staged artifact remains required.
+
+Local verification on the corrected candidate passed:
+
+```text
+focused Customer Account tests = 102/102 PASS
+full tests = 281/281 PASS
+typecheck/lint/format/GraphQL checks = PASS
+configured Production build = PASS
+route contract = 16 patterns + 4 redirects PASS
+configured Production HTTP smoke = 31/31 PASS
+explicit-empty Customer Account build = PASS
+disabled Production HTTP smoke = 31/31 PASS
+final configured Production build/smoke restore = 31/31 PASS
+```
+
+Secret-safe HTTP probes additionally verified the exact configured Production
+callback, PKCE `S256`, a host-only `HttpOnly; SameSite=Lax; Secure` cookie,
+private/no-store account responses, exact `405 Allow` semantics for every
+protocol method mismatch, and `403` without cookie mutation for missing or
+hostile CSRF origins. Local env is configured and ignored/untracked; credential
+values are not recorded here.
+
+No live authorization-code exchange, customer/address/order mutation, checkout,
+payment, Vercel env mutation, deployment, push, or external message occurred.
+Before live OAuth QA, the exact Shopify callback/logout allowlists and protected
+Vercel environment still require trusted readback/configuration. Fresh
+independent review of the final staged artifact is also still required.

@@ -14,8 +14,10 @@ import { connect, createServer } from "node:net";
 import path from "node:path";
 import process from "node:process";
 import { setTimeout as delay } from "node:timers/promises";
+import nextEnv from "@next/env";
 
 import {
+  ACCOUNT_PROTOCOL_SMOKES,
   DYNAMIC_NOT_FOUND_SMOKES,
   LIVE_CONTENT_SMOKE_FIXTURES,
   NOT_FOUND_SMOKE,
@@ -25,6 +27,7 @@ import {
   type RouteSmoke,
 } from "../src/lib/routes/route-contract.ts";
 
+const { loadEnvConfig } = nextEnv;
 const HOST = "127.0.0.1";
 const PORT = parsePort(process.env.SMOKE_PORT ?? "4973");
 const BASE_URL = `http://${HOST}:${PORT}`;
@@ -38,6 +41,27 @@ const NEXT_BIN = path.join(
   "bin",
   "next",
 );
+
+// Match `next start`: explicit process values win, otherwise load the same
+// repository dotenv files. This keeps normal and explicit-empty smoke modes
+// aligned with the server rather than guessing from the parent shell.
+loadEnvConfig(process.cwd());
+
+const ACCOUNT_ENV_KEYS = [
+  "SHOP_ID",
+  "PUBLIC_CUSTOMER_ACCOUNT_API_CLIENT_ID",
+  "CUSTOMER_ACCOUNT_SESSION_SECRET",
+  "PUBLIC_STOREFRONT_ORIGIN",
+] as const;
+const accountValues = ACCOUNT_ENV_KEYS.map(
+  (key) => process.env[key]?.trim() ?? "",
+);
+if (accountValues.some(Boolean) && !accountValues.every(Boolean)) {
+  throw new Error(
+    "smoke:routes: Customer Account environment is partially configured",
+  );
+}
+const CUSTOMER_ACCOUNT_MODE = accountValues.every(Boolean);
 
 function buildHasLiveContent(): boolean {
   try {
@@ -59,6 +83,13 @@ function buildHasLiveContent(): boolean {
 const LIVE_CONTENT_MODE = buildHasLiveContent();
 
 function modeAwareSmoke(route: (typeof ROUTE_CONTRACT)[number]): RouteSmoke {
+  if (CUSTOMER_ACCOUNT_MODE && route.category === "account") {
+    return {
+      ...route.smoke,
+      expectedStatus: 200,
+      expectedContentType: "text/html",
+    };
+  }
   if (!LIVE_CONTENT_MODE) {
     return route.smoke;
   }
@@ -81,6 +112,30 @@ function modeAwareSmoke(route: (typeof ROUTE_CONTRACT)[number]): RouteSmoke {
     default:
       return route.smoke;
   }
+}
+
+function modeAwareAccountProtocolSmoke(smoke: RouteSmoke): RouteSmoke {
+  if (!CUSTOMER_ACCOUNT_MODE) {
+    return smoke;
+  }
+  if (smoke.path === "/account/logout") {
+    return {
+      ...smoke,
+      expectedStatus: 405,
+      expectedContentType: "text/plain",
+    };
+  }
+  return { path: smoke.path, expectedStatus: 303 };
+}
+
+function modeAwareDynamicNotFoundSmoke(smoke: RouteSmoke): RouteSmoke {
+  if (
+    CUSTOMER_ACCOUNT_MODE &&
+    smoke.path === "/account/orders/__forward-missing__"
+  ) {
+    return { ...smoke, expectedStatus: 200 };
+  }
+  return smoke;
 }
 
 function parsePort(rawPort: string): number {
@@ -222,7 +277,7 @@ async function checkStatus(smoke: RouteSmoke): Promise<void> {
   const response = await fetch(`${BASE_URL}${smoke.path}`, {
     redirect: "manual",
   });
-  await response.arrayBuffer();
+  const body = await response.text();
 
   if (response.status !== smoke.expectedStatus) {
     failures.push({
@@ -241,6 +296,74 @@ async function checkStatus(smoke: RouteSmoke): Promise<void> {
         actual: `content-type ${contentType || "(missing)"}`,
       });
     }
+  }
+
+  if (
+    CUSTOMER_ACCOUNT_MODE &&
+    smoke.path === "/account/logout" &&
+    smoke.expectedStatus === 405 &&
+    response.headers.get("allow")?.toUpperCase() !== "POST"
+  ) {
+    failures.push({
+      path: smoke.path,
+      expected: "Allow: POST",
+      actual: `Allow: ${response.headers.get("allow") ?? "(missing)"}`,
+    });
+  }
+
+  if (
+    CUSTOMER_ACCOUNT_MODE &&
+    smoke.path.startsWith("/account") &&
+    smoke.expectedStatus === 200
+  ) {
+    const cacheControl = response.headers.get("cache-control");
+    if (cacheControl !== "private, no-store, max-age=0, must-revalidate") {
+      failures.push({
+        path: smoke.path,
+        expected: "personalized private/no-store Cache-Control",
+        actual: `Cache-Control: ${cacheControl ?? "(missing)"}`,
+      });
+    }
+    for (const headerName of ["cdn-cache-control", "surrogate-control"]) {
+      const headerValue = response.headers.get(headerName);
+      if (headerValue !== null) {
+        failures.push({
+          path: smoke.path,
+          expected: `no ${headerName}`,
+          actual: `${headerName}: ${headerValue}`,
+        });
+      }
+    }
+  }
+
+  if (CUSTOMER_ACCOUNT_MODE && smoke.path === "/account/login") {
+    const setCookie = response.headers.get("set-cookie") ?? "";
+    for (const attribute of ["HttpOnly", "Secure", "SameSite=Lax"]) {
+      if (!setCookie.toLowerCase().includes(attribute.toLowerCase())) {
+        failures.push({
+          path: smoke.path,
+          expected: `session cookie with ${attribute}`,
+          actual: "required secure cookie attribute missing",
+        });
+      }
+    }
+  }
+
+  const rendersAccountLink = body.includes('href="/account"');
+  if (!CUSTOMER_ACCOUNT_MODE && rendersAccountLink) {
+    failures.push({
+      path: smoke.path,
+      expected: "no disabled Account affordance",
+      actual: "Account affordance rendered",
+    });
+  }
+
+  if (smoke.path === "/" && CUSTOMER_ACCOUNT_MODE && !rendersAccountLink) {
+    failures.push({
+      path: smoke.path,
+      expected: "configured Account navigation",
+      actual: "Account navigation missing",
+    });
   }
 }
 
@@ -286,7 +409,10 @@ try {
   }
   await checkStatus(NOT_FOUND_SMOKE);
   for (const smoke of DYNAMIC_NOT_FOUND_SMOKES) {
-    await checkStatus(smoke);
+    await checkStatus(modeAwareDynamicNotFoundSmoke(smoke));
+  }
+  for (const smoke of ACCOUNT_PROTOCOL_SMOKES) {
+    await checkStatus(modeAwareAccountProtocolSmoke(smoke));
   }
   for (const redirect of REDIRECT_CONTRACT) {
     await checkRedirect(redirect.smoke.path, redirect.smoke.expectedLocation);
