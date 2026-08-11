@@ -33,7 +33,7 @@ import { CATALOG_REVALIDATE_SECONDS } from "./cache-policy";
 import type { CatalogQueryExecutor, NavigationQueryExecutor } from "./client";
 import type { ContentQueryExecutor } from "./content-client";
 import type { MappedContentResult } from "./content-mapper";
-import { safeErrorLabel, ShopifyCatalogError } from "./errors";
+import { ShopifyCatalogError, safeErrorLabel } from "./errors";
 import { mapCatalogResult } from "./mapper";
 import {
   mapCollectionsResult,
