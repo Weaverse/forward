@@ -29,16 +29,12 @@ import {
   CUSTOMER_ACCOUNT_AUTHORIZE_PATH,
   CUSTOMER_ACCOUNT_LOGIN_PATH,
   CUSTOMER_ACCOUNT_LOGOUT_PATH,
-  CUSTOMER_ACCOUNT_PROTOCOL_PATHS,
   CUSTOMER_ACCOUNT_REFRESH_PATH,
   getCustomerAccountRuntime,
 } from "@/lib/account/customer-account";
 import { createCustomerAccountSessionManager } from "@/lib/account/session-manager";
 
 const ACCOUNT_I18N = { country: "US", language: "EN" } as const;
-const CUSTOMER_ACCOUNT_PROTOCOL_PATH_SET = new Set<string>(
-  CUSTOMER_ACCOUNT_PROTOCOL_PATHS,
-);
 const CUSTOMER_ACCOUNT_PROTOCOL_METHODS = new Map<string, string>([
   [CUSTOMER_ACCOUNT_LOGIN_PATH, "GET"],
   [CUSTOMER_ACCOUNT_AUTHORIZE_PATH, "GET"],
@@ -142,14 +138,11 @@ export async function proxy(request: NextRequest): Promise<Response> {
     if (runtime === null) {
       return accountDisabledResponse();
     }
-    if (!CUSTOMER_ACCOUNT_PROTOCOL_PATH_SET.has(request.nextUrl.pathname)) {
-      return personalizedAccountPageResponse(request);
-    }
     const expectedMethod = CUSTOMER_ACCOUNT_PROTOCOL_METHODS.get(
       request.nextUrl.pathname,
     );
     if (expectedMethod === undefined) {
-      return accountUnavailableResponse();
+      return personalizedAccountPageResponse(request);
     }
     if (request.method !== expectedMethod) {
       return accountMethodNotAllowedResponse(expectedMethod);

@@ -46,9 +46,6 @@ function fakeSession(
 
 const PROFILE_DATA = {
   customer: {
-    id: "gid://shopify/Customer/1",
-    firstName: "Rowan",
-    lastName: "Hale",
     displayName: "Rowan Hale",
     emailAddress: { emailAddress: "rowan@example.com" },
     defaultAddress: {
@@ -70,11 +67,9 @@ const PROFILE_DATA = {
     orders: {
       nodes: [
         {
-          id: "gid://shopify/Order/1001",
           name: "#1001",
           number: 1001,
           processedAt: "2026-07-21T09:30:00Z",
-          financialStatus: "PAID",
           fulfillmentStatus: "PARTIALLY_FULFILLED",
           totalPrice: { amount: "390.0", currencyCode: "USD" },
         },
@@ -93,18 +88,14 @@ const ORDER_LOOKUP_DATA = {
 
 const ORDER_DATA = {
   order: {
-    id: "gid://shopify/Order/1001",
     name: "#1001",
-    number: 1001,
     processedAt: "2026-07-21T09:30:00Z",
-    financialStatus: "PAID",
     fulfillmentStatus: "FULFILLED",
     totalPrice: { amount: "390.0", currencyCode: "USD" },
     subtotal: { amount: "390.0", currencyCode: "USD" },
     totalShipping: { amount: "0.0", currencyCode: "USD" },
     totalTax: null,
     shippingAddress: {
-      id: "gid://shopify/CustomerAddress/2",
       formatted: ["Rowan Hale", "14 Fell Road"],
     },
     lineItems: {

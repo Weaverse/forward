@@ -193,22 +193,17 @@ export async function readAccountSession(options: {
   return { status: "signed-out" };
 }
 
-function orderHref(orderNumber: number): string {
-  return `/account/orders/${orderNumber}`;
-}
-
 function mapOrderSummary(order: {
   name: string;
   number: number;
   processedAt: string;
-  financialStatus?: string | null;
   fulfillmentStatus: string;
   totalPrice: AccountMoney;
 }): AccountOrderSummary {
   return {
     number: order.number,
     name: order.name,
-    href: orderHref(order.number),
+    href: `/account/orders/${order.number}`,
     processedAt: order.processedAt,
     status: formatStatusLabel(order.fulfillmentStatus),
     total: formatAccountMoney(order.totalPrice),

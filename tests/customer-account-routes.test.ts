@@ -123,7 +123,7 @@ describe("customer account route ownership", () => {
     assert.equal(source.match(/handleShopifyRoutes\(/g)?.length, 1);
     const matcher = source.slice(source.indexOf("matcher: ["));
     assert.ok(matcher.includes('"/account/:path*"'));
-    assert.ok(source.includes("CUSTOMER_ACCOUNT_PROTOCOL_PATH_SET.has"));
+    assert.ok(source.includes("CUSTOMER_ACCOUNT_PROTOCOL_METHODS.get"));
   });
 });
 

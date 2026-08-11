@@ -21,9 +21,6 @@ export const ORDER_LINE_LIMIT = 50;
 export const ACCOUNT_PROFILE_QUERY = gql(`#graphql
   query ForwardAccountProfile($orderCount: Int!, $addressCount: Int!) {
     customer {
-      id
-      firstName
-      lastName
       displayName
       emailAddress {
         emailAddress
@@ -40,11 +37,9 @@ export const ACCOUNT_PROFILE_QUERY = gql(`#graphql
       }
       orders(first: $orderCount, reverse: true, sortKey: PROCESSED_AT) {
         nodes {
-          id
           name
           number
           processedAt
-          financialStatus
           fulfillmentStatus
           totalPrice {
             amount
@@ -146,11 +141,8 @@ export const ACCOUNT_ORDER_LOOKUP_QUERY = gql(`#graphql
 export const ACCOUNT_ORDER_QUERY = gql(`#graphql
   query ForwardAccountOrder($orderId: ID!, $lineCount: Int!) {
     order(id: $orderId) {
-      id
       name
-      number
       processedAt
-      financialStatus
       fulfillmentStatus
       totalPrice {
         amount
@@ -169,7 +161,6 @@ export const ACCOUNT_ORDER_QUERY = gql(`#graphql
         currencyCode
       }
       shippingAddress {
-        id
         formatted(withName: true)
       }
       lineItems(first: $lineCount) {
