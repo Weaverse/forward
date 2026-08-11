@@ -1,37 +1,8 @@
 import { isIP } from "node:net";
+import type { CartGetResult, CartPostResult } from "@shopify/hydrogen";
 
 export type RuntimeEnvironment = "development" | "production" | "test";
-
-interface JsonCartHandlerResult {
-  type: "json";
-  data: Record<string, unknown>;
-  headers?: HeadersInit;
-}
-
-interface RedirectCartHandlerResult {
-  type: "redirect";
-  location: string;
-  headers?: HeadersInit;
-}
-
-interface ErrorCartHandlerResult {
-  type: "error";
-  error: { code: string; message: string };
-  status?: number;
-  headers?: HeadersInit;
-}
-
-export type CartHandlerResult =
-  | JsonCartHandlerResult
-  | RedirectCartHandlerResult
-  | ErrorCartHandlerResult;
-
-export class ShopifyCartBoundaryError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "ShopifyCartBoundaryError";
-  }
-}
+export type CartHandlerResult = CartGetResult | CartPostResult;
 
 export function readTrustedBuyerIp(
   headers: Headers,
@@ -45,20 +16,9 @@ export function readTrustedBuyerIp(
   if (environment !== "production") {
     return "127.0.0.1";
   }
-  throw new ShopifyCartBoundaryError(
+  throw new Error(
     "A trusted Vercel buyer IP is required for Shopify cart operations.",
   );
-}
-
-function cookieValues(headers: Headers): readonly string[] {
-  const getSetCookie = (
-    headers as Headers & { getSetCookie?: () => readonly string[] }
-  ).getSetCookie;
-  if (typeof getSetCookie === "function") {
-    return getSetCookie.call(headers);
-  }
-  const combined = headers.get("set-cookie");
-  return combined === null ? [] : [combined];
 }
 
 function hardenCartCookie(
@@ -94,7 +54,7 @@ export function hardenCartResponseHeaders(
   environment: RuntimeEnvironment,
 ): Headers {
   const source = new Headers(input);
-  const cookies = cookieValues(source);
+  const cookies = source.getSetCookie();
   source.delete("set-cookie");
   let cartCookieCount = 0;
   for (const cookie of cookies) {
@@ -106,9 +66,7 @@ export function hardenCartResponseHeaders(
     }
   }
   if (cartCookieCount > 1) {
-    throw new ShopifyCartBoundaryError(
-      "Shopify returned more than one cart identity cookie.",
-    );
+    throw new Error("Shopify returned more than one cart identity cookie.");
   }
   source.set("cache-control", "private, no-store, max-age=0");
   source.set("vary", "Cookie");
@@ -123,9 +81,7 @@ export function validateCheckoutUrl(
   try {
     checkout = new URL(value);
   } catch {
-    throw new ShopifyCartBoundaryError(
-      "Shopify returned an invalid checkout URL.",
-    );
+    throw new Error("Shopify returned an invalid checkout URL.");
   }
   const shopifyOwnedHost =
     checkout.hostname === storeDomain ||
@@ -141,9 +97,7 @@ export function validateCheckoutUrl(
     checkout.hash !== "" ||
     !shopifyOwnedHost
   ) {
-    throw new ShopifyCartBoundaryError(
-      "Shopify returned an unsafe checkout URL.",
-    );
+    throw new Error("Shopify returned an unsafe checkout URL.");
   }
   return checkout.toString();
 }
@@ -157,20 +111,16 @@ function sanitizeCartData(
     return structuredClone(data);
   }
   if (typeof cartValue !== "object" || Array.isArray(cartValue)) {
-    throw new ShopifyCartBoundaryError("Shopify returned a malformed cart.");
+    throw new Error("Shopify returned a malformed cart.");
   }
   const cart = structuredClone(cartValue) as Record<string, unknown>;
   if (typeof cart.id !== "string" || cart.id.length === 0) {
-    throw new ShopifyCartBoundaryError(
-      "Shopify returned a cart without an identity.",
-    );
+    throw new Error("Shopify returned a cart without an identity.");
   }
   cart.id = "";
   if (cart.checkoutUrl !== null && cart.checkoutUrl !== undefined) {
     if (typeof cart.checkoutUrl !== "string") {
-      throw new ShopifyCartBoundaryError(
-        "Shopify returned an invalid checkout URL.",
-      );
+      throw new Error("Shopify returned an invalid checkout URL.");
     }
     cart.checkoutUrl = validateCheckoutUrl(cart.checkoutUrl, storeDomain);
   }
@@ -186,6 +136,6 @@ export function sanitizeCartHandlerResult<T extends CartHandlerResult>(
   }
   return {
     ...result,
-    data: sanitizeCartData(result.data, storeDomain),
+    data: sanitizeCartData(result.data as Record<string, unknown>, storeDomain),
   } as T;
 }

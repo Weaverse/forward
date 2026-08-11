@@ -4,17 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 
 import {
+  type ShopifyCartLineData,
+  type ShopifyMoney,
   useShopifyCart,
   useShopifyCartForm,
 } from "@/lib/cart/shopify-cart-react";
 import { formatMoney } from "@/lib/storefront/format";
 
-interface LiveMoney {
-  amount: string;
-  currencyCode: string;
-}
-
-function money(value: LiveMoney | undefined) {
+function money(value: ShopifyMoney | undefined) {
   if (value === undefined || value.currencyCode !== "USD") return "—";
   return formatMoney({
     amount: Number(value.amount),
@@ -26,22 +23,7 @@ function ShopifyCartLine({
   line,
   pending,
 }: {
-  line: {
-    id: string;
-    quantity: number;
-    cost: { totalAmount: LiveMoney };
-    merchandise?: {
-      title?: string;
-      selectedOptions?: Array<{ name: string; value: string }>;
-      product: { title: string; handle?: string };
-      image?: {
-        url: string;
-        altText?: string | null;
-        width?: number | null;
-        height?: number | null;
-      } | null;
-    };
-  };
+  line: ShopifyCartLineData;
   pending: boolean;
 }) {
   const { formProps, register } = useShopifyCartForm();
