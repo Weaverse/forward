@@ -172,39 +172,6 @@ export interface ThemeContent {
   standardBandImage: StorefrontImage;
 }
 
-export type DemoOrderStatus = "delivered" | "in-transit" | "processing";
-
-export interface DemoOrderLine {
-  productHandle: string;
-  title: string;
-  colorwayId: string;
-  colorwayName: string;
-  size?: string;
-  quantity: number;
-  unitPrice: Money;
-  image: StorefrontImage;
-}
-
-export interface DemoOrder {
-  id: string;
-  number: string;
-  placedAt: string;
-  status: DemoOrderStatus;
-  statusDetail: string;
-  lines: readonly DemoOrderLine[];
-  subtotal: Money;
-  shipping: Money;
-  total: Money;
-}
-
-export interface DemoAddress {
-  id: string;
-  label: string;
-  isDefault: boolean;
-  name: string;
-  lines: readonly string[];
-}
-
 /** Seed line for the client-side demo cart (no persistence, no network). */
 export interface DemoCartSeedLine {
   productHandle: string;

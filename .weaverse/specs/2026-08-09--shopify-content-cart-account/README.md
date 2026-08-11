@@ -272,13 +272,20 @@ Canonical server configuration names:
 SHOP_ID
 PUBLIC_CUSTOMER_ACCOUNT_API_CLIENT_ID
 CUSTOMER_ACCOUNT_SESSION_SECRET
+PUBLIC_STOREFRONT_ORIGIN
 ```
 
-No Customer Account client ID or session secret is currently present in the
-local theme env or Vercel Production. Discover/provision the authoritative
-Headless Customer Account client and exact callback/logout origins through the
-supported Shopify surface. Never invent a client ID or derive one from the
+At audit time, no Customer Account client ID, session secret, or canonical account
+origin was present in the local theme env or Vercel Production. Local ignored env
+is now configured for implementation verification. Vercel configuration and the
+authoritative Headless callback/logout allowlists still require trusted
+readback/configuration. Never invent a client ID or derive one from
 publication/catalog/storefront IDs.
+
+The read-only evidence is in `customer-account-audit.md`. The corrected
+authoritative implementation and release contract is
+`customer-account-contract.md`; where it narrows this original epic spec, the
+contract file governs Slice 3.
 
 ## OAuth and session architecture
 
@@ -331,7 +338,8 @@ Production completion remains blocked and must be reported as such.
 ## Slice 3 verification
 
 - Unit tests for config, cookie/session boundaries, return URL sanitization,
-  OAuth routes, refresh loop guard, GraphQL mapping and address mutations.
+  OAuth routes, refresh loop guard, GraphQL mapping and address reads; mutation
+  tests are required if address CRUD is added.
 - Security tests for CSRF, state/nonce/PKCE mismatch, open redirects, token
   leakage, cache headers, cross-customer order access and ambiguous failures.
 - Exact query validation, typecheck, full static/live suite/build/smoke.

@@ -1,127 +1,96 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AccountAccessPanel } from "@/components/account-access";
 import { AccountShell } from "@/components/account-shell";
-import { storefront } from "@/lib/storefront/data-source";
-import { formatDate, formatMoney } from "@/lib/storefront/format";
-import { productColorwayHref } from "@/lib/storefront/product-state";
-import type { DemoOrderLine } from "@/lib/storefront/types";
+import {
+  hasRefreshMarker,
+  readAccountOrder,
+  readAccountSession,
+} from "@/lib/account/account-view";
+import { formatDate } from "@/lib/storefront/format";
+
+/**
+ * An order is an authenticated per-customer resource: never prerendered, never
+ * cached, and never enumerated into build-time route parameters.
+ */
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
+export const metadata: Metadata = {
+  title: "Order · Account",
+  description: "Your Forward order.",
+  robots: { index: false, follow: false },
+};
 
 interface OrderPageProps {
   params: Promise<{ orderId: string }>;
-}
-
-export const dynamicParams = false;
-
-// This static route derives product colorway links from the live catalog.
-// Next requires a literal route-segment value; the contract test pins it to the
-// shared catalog window.
-export const revalidate = 3600;
-
-export async function generateStaticParams() {
-  const orders = await storefront.listDemoOrders();
-  return orders.map((order) => ({ orderId: order.id }));
-}
-
-export async function generateMetadata({
-  params,
-}: OrderPageProps): Promise<Metadata> {
-  const { orderId } = await params;
-  const order = await storefront.getDemoOrder(orderId);
-  if (order === null) {
-    return { title: "Order not found" };
-  }
-  return { title: `Order ${order.number} · Account` };
-}
-
-/** Deep link back to the exact ordered colorway of a line's product. */
-async function orderLineHref(line: DemoOrderLine): Promise<string> {
-  const product = await storefront.getProduct(line.productHandle);
-  if (product === null) {
-    return `/products/${line.productHandle}`;
-  }
-  return productColorwayHref(product, line.colorwayId);
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 /**
- * Order detail — port of the canonical `orderDetailPage()` (source
- * `app.js:320`): status in the page hero, the `.cart-list` line manifest, and
- * the delivery/total `.account-grid` blocks.
+ * Order detail. A malformed order number, an order belonging to another
+ * customer, and an order the API declines all resolve to the same generic 404.
  */
-export default async function OrderPage({ params }: OrderPageProps) {
-  const { orderId } = await params;
-  const [order, addresses] = await Promise.all([
-    storefront.getDemoOrder(orderId),
-    storefront.listDemoAddresses(),
-  ]);
+export default async function OrderPage({
+  params,
+  searchParams,
+}: OrderPageProps) {
+  const [{ orderId }, search] = await Promise.all([params, searchParams]);
+  const path = `/account/orders/${orderId}`;
+  const session = await readAccountSession({
+    path,
+    refreshed: hasRefreshMarker(search),
+  });
+
+  if (session.status !== "authenticated") {
+    return (
+      <AccountShell
+        activePath="/account/orders"
+        eyebrow="Field account / Order"
+        title="Order"
+      >
+        <AccountAccessPanel path={path} session={session} />
+      </AccountShell>
+    );
+  }
+
+  const order = await readAccountOrder(session, orderId);
   if (order === null) {
     notFound();
   }
-  const lines = await Promise.all(
-    order.lines.map(async (line) => ({
-      line,
-      href: await orderLineHref(line),
-    })),
-  );
-  const deliveryAddress =
-    addresses.find((entry) => entry.isDefault) ?? addresses[0];
 
   return (
     <AccountShell
       activePath="/account/orders"
       eyebrow="Field account / Order"
-      title={order.number}
+      title={order.name}
+      signedIn
       heroAside={
         <div>
-          <span className="order-status">{order.statusDetail}</span>
-          <p className="lede">Placed {formatDate(order.placedAt)}</p>
+          <span className="order-status">{order.status}</span>
+          <p className="lede">
+            Placed {formatDate(order.processedAt.slice(0, 10))}
+          </p>
         </div>
       }
     >
       <Link className="text-link" href="/account/orders">
         Back to orders
       </Link>
-      <div className="account-header section-tight">
-        <p className="eyebrow">{order.statusDetail}</p>
-        <h2 className="h2">Ready for the next route.</h2>
-        <p className="lede">
-          Repair coverage remains available for the useful life of each product.
-        </p>
-      </div>
 
-      <div className="cart-list">
-        {lines.map(({ line, href }) => (
-          <article
-            key={`${line.productHandle}-${line.colorwayId}-${line.size ?? ""}`}
-            className="cart-line"
-          >
-            <Link href={href}>
-              <Image
-                src={line.image.src}
-                alt={line.image.alt}
-                width={line.image.width}
-                height={line.image.height}
-                sizes="190px"
-              />
-            </Link>
+      <div className="cart-list section-tight">
+        {order.lines.map((line) => (
+          <article key={line.id} className="cart-line">
             <div>
-              <h2>
-                <Link href={href}>{line.title}</Link>
-              </h2>
+              <h2>{line.title}</h2>
               <p className="muted">
-                {line.colorwayName}
-                {line.size !== undefined ? ` · ${line.size}` : ""} · Qty{" "}
-                {line.quantity}
+                {line.variantTitle === null ? "" : `${line.variantTitle} · `}
+                Qty {line.quantity}
               </p>
             </div>
-            <div className="line-price">
-              {formatMoney({
-                amount: line.unitPrice.amount * line.quantity,
-                currencyCode: "USD",
-              })}
-            </div>
+            <div className="line-price">{line.total}</div>
           </article>
         ))}
       </div>
@@ -129,39 +98,42 @@ export default async function OrderPage({ params }: OrderPageProps) {
       <div className="account-grid section-tight">
         <article className="account-block">
           <p className="eyebrow">Delivery address</p>
-          {deliveryAddress !== undefined ? (
-            <>
-              <h3>{deliveryAddress.name}</h3>
-              <address>
-                {deliveryAddress.lines.map((line) => (
-                  <span key={line}>
-                    {line}
-                    <br />
-                  </span>
-                ))}
-              </address>
-            </>
+          {order.shippingAddress === null ? (
+            <p className="muted">No delivery address on this order.</p>
           ) : (
-            <p className="muted">No address on record.</p>
+            <address>
+              {order.shippingAddress.map((line) => (
+                <span key={line}>
+                  {line}
+                  <br />
+                </span>
+              ))}
+            </address>
           )}
         </article>
         <article className="account-block">
           <p className="eyebrow">Order total</p>
-          <div className="summary-row">
-            <span>Subtotal</span>
-            <span>{formatMoney(order.subtotal)}</span>
-          </div>
-          <div className="summary-row">
-            <span>Delivery</span>
-            <span>
-              {order.shipping.amount === 0
-                ? "Complimentary"
-                : formatMoney(order.shipping)}
-            </span>
-          </div>
+          {order.subtotal === null ? null : (
+            <div className="summary-row">
+              <span>Subtotal</span>
+              <span>{order.subtotal}</span>
+            </div>
+          )}
+          {order.shipping === null ? null : (
+            <div className="summary-row">
+              <span>Delivery</span>
+              <span>{order.shipping}</span>
+            </div>
+          )}
+          {order.tax === null ? null : (
+            <div className="summary-row">
+              <span>Tax</span>
+              <span>{order.tax}</span>
+            </div>
+          )}
           <div className="summary-row summary-total">
             <span>Total</span>
-            <strong>{formatMoney(order.total)}</strong>
+            <strong>{order.total}</strong>
           </div>
         </article>
       </div>

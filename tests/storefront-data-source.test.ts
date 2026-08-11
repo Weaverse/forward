@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { StaticStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
-import { productColorwayHref } from "../src/lib/storefront/product-state.ts";
 
 const storefront = new StaticStorefrontDataSource();
 
@@ -24,10 +23,6 @@ describe("StaticStorefrontDataSource unknown handles", () => {
     assert.equal(await storefront.getArticle("does-not-exist"), null);
     assert.equal(await storefront.getPage("does-not-exist"), null);
     assert.equal(await storefront.getPolicy("does-not-exist"), null);
-  });
-
-  it("resolves unknown demo order ids to null", async () => {
-    assert.equal(await storefront.getDemoOrder("does-not-exist"), null);
   });
 });
 
@@ -53,26 +48,6 @@ describe("StaticStorefrontDataSource known handles", () => {
         assert.ok(collection.productHandles.includes(product.handle));
       }
     }
-  });
-
-  it("keeps every demo order line linked to its exact product colorway", async () => {
-    const hrefs: string[] = [];
-    for (const order of await storefront.listDemoOrders()) {
-      for (const line of order.lines) {
-        const product = await storefront.getProduct(line.productHandle);
-        assert.ok(
-          product !== null,
-          `Unknown order product: ${line.productHandle}`,
-        );
-        assert.ok(
-          product.colorways.some((colorway) => colorway.id === line.colorwayId),
-          `Unknown ${line.productHandle} colorway: ${line.colorwayId}`,
-        );
-        hrefs.push(productColorwayHref(product, line.colorwayId));
-      }
-    }
-    assert.ok(hrefs.includes("/products/talus-trail-shoe?colorway=limestone"));
-    assert.ok(hrefs.includes("/products/ridge-30-field-pack?colorway=dune"));
   });
 });
 

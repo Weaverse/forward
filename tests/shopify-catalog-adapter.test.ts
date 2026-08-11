@@ -1028,17 +1028,6 @@ describe("ShopifyCatalogDataSource", () => {
         );
       }
     }
-
-    for (const order of await source.listDemoOrders()) {
-      for (const line of order.lines) {
-        const product = await source.getProduct(line.productHandle);
-        assert.ok(product !== null, `missing ${line.productHandle}`);
-        assert.ok(
-          product.colorways.some((colorway) => colorway.id === line.colorwayId),
-          `missing ${line.productHandle} colorway ${line.colorwayId}`,
-        );
-      }
-    }
   });
 
   it("keeps theme presentation static while reporting honest Shopify mode status", async () => {
@@ -1065,16 +1054,11 @@ describe("ShopifyCatalogDataSource", () => {
       liveTheme.demoNotice,
       /live Shopify catalog, navigation, content, and a secure Shopify cart/i,
     );
-    assert.match(liveTheme.footerStatus, /content, and cart · Demo account/i);
+    assert.match(liveTheme.footerStatus, /content, and cart$/i);
     assert.match(staticTheme.footerStatus, /Not a live store/i);
     assert.deepEqual(await source.listArticles(), await base.listArticles());
     assert.deepEqual(await source.listPages(), await base.listPages());
     assert.deepEqual(await source.listPolicies(), await base.listPolicies());
-    assert.deepEqual(
-      await source.listDemoAddresses(),
-      await base.listDemoAddresses(),
-    );
-    assert.equal(await source.getDemoOrder("does-not-exist"), null);
     assert.equal(await source.getArticle("does-not-exist"), null);
   });
 
@@ -1180,7 +1164,6 @@ describe("catalog revalidation window", () => {
   it("keeps shared route revalidation and personalized cart boundaries explicit", async () => {
     const routes = [
       "src/app/page.tsx",
-      "src/app/account/orders/[orderId]/page.tsx",
       "src/app/shop/[collectionHandle]/page.tsx",
       "src/app/products/[productHandle]/page.tsx",
     ];
@@ -1195,12 +1178,19 @@ describe("catalog revalidation window", () => {
       );
     }
 
-    const cartSource = await readFile(
-      path.join(process.cwd(), "src/app/cart/page.tsx"),
-      "utf8",
-    );
-    assert.match(cartSource, /export const dynamic = "force-dynamic";/);
-    assert.match(cartSource, /export const fetchCache = "force-no-store";/);
+    // Personalized routes never share the catalog window.
+    for (const route of [
+      "src/app/cart/page.tsx",
+      "src/app/account/orders/[orderId]/page.tsx",
+    ]) {
+      const personalized = await readFile(
+        path.join(process.cwd(), route),
+        "utf8",
+      );
+      assert.match(personalized, /export const dynamic = "force-dynamic";/);
+      assert.match(personalized, /export const fetchCache = "force-no-store";/);
+      assert.doesNotMatch(personalized, /export const revalidate/);
+    }
   });
 });
 

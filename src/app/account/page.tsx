@@ -1,39 +1,73 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { AccountAccessPanel } from "@/components/account-access";
 import { AccountShell } from "@/components/account-shell";
-import { storefront } from "@/lib/storefront/data-source";
-import { formatDate, formatMoney } from "@/lib/storefront/format";
+import {
+  hasRefreshMarker,
+  readAccountProfile,
+  readAccountSession,
+} from "@/lib/account/account-view";
+import { ACCOUNT_RECENT_ORDER_LIMIT } from "@/lib/account/queries";
+import { formatDate } from "@/lib/storefront/format";
+
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
 export const metadata: Metadata = {
   title: "Account",
-  description: "Forward prototype account overview.",
+  description: "Your Forward account overview.",
+  robots: { index: false, follow: false },
 };
 
+const ACCOUNT_PATH = "/account";
+
+interface AccountPageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
 /**
- * Account overview — port of the canonical `accountPage()` (source
- * `app.js:316`): account header, `.order-table` history, and the bordered
- * `.account-grid` blocks. Records come from the normalized demo account data.
+ * Account overview — the canonical account header, `.order-table` history, and
+ * bordered `.account-grid` blocks, filled from the Customer Account API.
  */
-export default async function AccountPage() {
-  const [orders, addresses] = await Promise.all([
-    storefront.listDemoOrders(),
-    storefront.listDemoAddresses(),
-  ]);
-  const recentOrders = [...orders].reverse();
-  const defaultAddress = addresses.find((entry) => entry.isDefault);
+export default async function AccountPage({ searchParams }: AccountPageProps) {
+  const params = await searchParams;
+  const session = await readAccountSession({
+    path: ACCOUNT_PATH,
+    refreshed: hasRefreshMarker(params),
+  });
+
+  if (session.status !== "authenticated") {
+    return (
+      <AccountShell
+        activePath={ACCOUNT_PATH}
+        title="The state of your kit."
+        lede="Recent orders, where they ship, and the standing repairs offer — in one quiet place."
+      >
+        <AccountAccessPanel
+          path={ACCOUNT_PATH}
+          session={session}
+          loginFailed={params.login === "failed"}
+        />
+      </AccountShell>
+    );
+  }
+
+  const profile = await readAccountProfile(session, ACCOUNT_RECENT_ORDER_LIMIT);
+  const defaultAddress = profile.addresses.find((address) => address.isDefault);
 
   return (
     <AccountShell
-      activePath="/account"
+      activePath={ACCOUNT_PATH}
       title="The state of your kit."
       lede="Recent orders, where they ship, and the standing repairs offer — in one quiet place."
+      signedIn
     >
       <div className="account-header">
-        <p className="eyebrow">Order history</p>
+        <p className="eyebrow">{profile.displayName}</p>
         <h2 className="h2">Recent orders</h2>
       </div>
-      {recentOrders.length > 0 ? (
+      {profile.orders.length > 0 ? (
         <table className="order-table">
           <thead>
             <tr>
@@ -44,20 +78,20 @@ export default async function AccountPage() {
             </tr>
           </thead>
           <tbody>
-            {recentOrders.map((order) => (
-              <tr key={order.id}>
+            {profile.orders.map((order) => (
+              <tr key={order.number}>
                 <td data-label="Order">
                   <strong>
-                    <Link href={`/account/orders/${order.id}`}>
-                      {order.number}
-                    </Link>
+                    <Link href={order.href}>{order.name}</Link>
                   </strong>
                 </td>
-                <td data-label="Date">{formatDate(order.placedAt)}</td>
-                <td data-label="Status">
-                  <span className="order-status">{order.statusDetail}</span>
+                <td data-label="Date">
+                  {formatDate(order.processedAt.slice(0, 10))}
                 </td>
-                <td data-label="Total">{formatMoney(order.total)}</td>
+                <td data-label="Status">
+                  <span className="order-status">{order.status}</span>
+                </td>
+                <td data-label="Total">{order.total}</td>
               </tr>
             ))}
           </tbody>
@@ -82,18 +116,15 @@ export default async function AccountPage() {
           <p className="eyebrow">Default trailhead</p>
           {defaultAddress !== undefined ? (
             <>
-              <h3>{defaultAddress.name}</h3>
-              <p>
+              <h3>{profile.displayName}</h3>
+              <address>
                 {defaultAddress.lines.map((line) => (
                   <span key={line}>
                     {line}
                     <br />
                   </span>
                 ))}
-              </p>
-              <Link className="button" href="/account/addresses">
-                Manage addresses
-              </Link>
+              </address>
             </>
           ) : (
             <p className="muted">No addresses saved.</p>

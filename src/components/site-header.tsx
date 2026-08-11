@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { FieldIndexHeader } from "@/components/field-index-header";
 import { QueryPreservingFieldIndexHeader } from "@/components/query-preserving-field-index-header";
+import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
 import { storefront } from "@/lib/storefront/data-source";
 
 /**
@@ -15,20 +16,25 @@ export async function SiteHeader() {
     storefront.getThemeContent(),
   ]);
 
+  const accountEnabled = getCustomerAccountRuntime() !== null;
+  const utility = accountEnabled
+    ? navigation.utility
+    : navigation.utility.filter((item) => item.href !== "/account");
+
   return (
     <Suspense
       fallback={
         <FieldIndexHeader
           announcement={themeContent.announcement}
           primary={navigation.primary}
-          utility={navigation.utility}
+          utility={utility}
         />
       }
     >
       <QueryPreservingFieldIndexHeader
         announcement={themeContent.announcement}
         primary={navigation.primary}
-        utility={navigation.utility}
+        utility={utility}
       />
     </Suspense>
   );
