@@ -323,6 +323,7 @@ describe("account route segment configuration", () => {
       "src/app/account/orders/page.tsx",
       "src/app/account/orders/[orderId]/page.tsx",
       "src/app/account/addresses/page.tsx",
+      "src/app/account/status/route.ts",
     ]) {
       const source = await readFile(path.join(process.cwd(), route), "utf8");
       assert.match(source, /export const dynamic = "force-dynamic";/, route);

@@ -38,6 +38,10 @@ function isActive(pathname: string, href: string): boolean {
   return href === "/shop" && pathname.startsWith("/products");
 }
 
+function accountNavigationLabel(item: NavItem, signedIn: boolean): string {
+  return item.href === "/account" && signedIn ? "Signed in" : item.label;
+}
+
 function activeCollectionIndex(
   pathname: string,
   collections: readonly FieldIndexCollection[],
@@ -174,6 +178,7 @@ export function FieldIndexHeader({
   );
   const [desktopOpen, setDesktopOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [accountSignedIn, setAccountSignedIn] = useState(false);
   const [activeIndex, setActiveIndex] = useState(() =>
     activeCollectionIndex(pathname, collections),
   );
@@ -196,6 +201,27 @@ export function FieldIndexHeader({
     ...primary.filter((item) => item.href !== "/shop"),
     ...utilityLinks,
   ];
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/account/status", {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((status: unknown) => {
+        if (
+          typeof status === "object" &&
+          status !== null &&
+          "signedIn" in status &&
+          typeof status.signedIn === "boolean"
+        ) {
+          setAccountSignedIn(status.signedIn);
+        }
+      })
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     if (mobileOpenRef.current) {
@@ -383,7 +409,7 @@ export function FieldIndexHeader({
               href={createHeaderNavigationHref(item.href, queryString)}
               aria-current={isActive(pathname, item.href) ? "page" : undefined}
             >
-              {item.label}
+              {accountNavigationLabel(item, accountSignedIn)}
             </Link>
           ))}
           <Link
@@ -467,7 +493,7 @@ export function FieldIndexHeader({
                 onClick={closeMobile}
               >
                 <span>{String(index + 4).padStart(2, "0")}</span>
-                {item.label}
+                {accountNavigationLabel(item, accountSignedIn)}
                 <i aria-hidden="true">↗</i>
               </Link>
             ))}

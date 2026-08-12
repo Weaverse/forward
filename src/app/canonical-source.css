@@ -136,9 +136,30 @@ select {
   font: inherit;
   color: inherit;
 }
-button,
-select {
+a[href]:not([aria-disabled="true"]),
+button:not(:disabled),
+select:not(:disabled),
+summary,
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled),
+label:has(> input[type="checkbox"]:not(:disabled)),
+label:has(> input[type="radio"]:not(:disabled)),
+:where(.check-row:has(input[type="checkbox"]:not(:disabled))) label,
+[role="button"]:not([aria-disabled="true"]),
+[role="link"]:not([aria-disabled="true"]) {
   cursor: pointer;
+}
+button:disabled,
+select:disabled,
+a[href][aria-disabled="true"],
+input[type="checkbox"]:disabled,
+input[type="radio"]:disabled,
+label:has(> input[type="checkbox"]:disabled),
+label:has(> input[type="radio"]:disabled),
+:where(.check-row:has(input[type="checkbox"]:disabled)) label,
+[role="button"][aria-disabled="true"],
+[role="link"][aria-disabled="true"] {
+  cursor: not-allowed;
 }
 button {
   border: 0;

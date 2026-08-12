@@ -192,6 +192,16 @@ export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [
       expectedContentType: "text/html",
     },
   },
+  {
+    pattern: "/account/status",
+    label: "Account status",
+    category: "account",
+    smoke: {
+      path: "/account/status",
+      expectedStatus: 404,
+      expectedContentType: "text/html",
+    },
+  },
 ] as const;
 
 /**

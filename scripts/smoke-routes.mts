@@ -84,6 +84,13 @@ const LIVE_CONTENT_MODE = buildHasLiveContent();
 
 function modeAwareSmoke(route: (typeof ROUTE_CONTRACT)[number]): RouteSmoke {
   if (CUSTOMER_ACCOUNT_MODE && route.category === "account") {
+    if (route.pattern === "/account/status") {
+      return {
+        ...route.smoke,
+        expectedStatus: 200,
+        expectedContentType: "application/json",
+      };
+    }
     return {
       ...route.smoke,
       expectedStatus: 200,

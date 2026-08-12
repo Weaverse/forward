@@ -162,6 +162,46 @@ describe("canonical Field Index header", () => {
     );
   });
 
+  it("loads a boolean-only no-store account state for desktop and mobile labels", async () => {
+    const [component, route] = await Promise.all([
+      readSource("src/components/field-index-header.tsx"),
+      readSource("src/app/account/status/route.ts"),
+    ]);
+
+    assert.ok(component.includes('fetch("/account/status"'));
+    assert.ok(component.includes('cache: "no-store"'));
+    assert.ok(component.includes('item.href === "/account"'));
+    assert.ok(
+      component.includes("accountNavigationLabel(item, accountSignedIn)"),
+    );
+    assert.doesNotMatch(route, /displayName|emailAddress|accessToken/);
+    assert.match(route, /signedIn:/);
+    assert.match(route, /private, no-store/);
+  });
+
+  it("uses pointer cursors for every enabled interactive primitive", async () => {
+    const styles = await readSource("src/app/canonical-source.css");
+
+    for (const selector of [
+      'a[href]:not([aria-disabled="true"])',
+      "button:not(:disabled)",
+      "select:not(:disabled)",
+      "summary",
+      'input[type="checkbox"]:not(:disabled)',
+      'input[type="radio"]:not(:disabled)',
+      ':where(.check-row:has(input[type="checkbox"]:not(:disabled))) label',
+      '[role="button"]:not([aria-disabled="true"])',
+      '[role="link"]:not([aria-disabled="true"])',
+    ]) {
+      assert.ok(
+        styles.includes(selector),
+        `missing pointer selector: ${selector}`,
+      );
+    }
+    assert.match(styles, /cursor: pointer;/);
+    assert.match(styles, /button:disabled[\s\S]*?cursor: not-allowed;/);
+  });
+
   it("marks every current desktop and mobile destination", async () => {
     const source = await readSource("src/components/field-index-header.tsx");
 
