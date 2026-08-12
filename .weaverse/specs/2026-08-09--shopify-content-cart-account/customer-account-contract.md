@@ -1,7 +1,7 @@
 # Shopify Customer Account — Locked Implementation Contract
 
 Date: 2026-08-11
-Status: pre-code contract; live OAuth externally blocked
+Status: implemented and Production-verified on 2026-08-12
 Pinned Hydrogen baseline: `0.0.0-preview-116d5d7-20260730141607`
 
 This file is authoritative for Slice 3 where it narrows the epic README.
@@ -58,17 +58,36 @@ Profile, order list, and order detail are read-only Customer Account API queries
 
 Static mode and disabled account mode render no fake account data or functional-looking auth controls. Account order IDs never use `generateStaticParams`.
 
-## QA and release blockers
+## Production closeout
 
-Live OAuth is blocked until all of the following exist and are independently read back:
+The existing Forward Headless client, exact Production callback/logout/origin
+allowlists, protected Vercel environment tuple and team-controlled login flow
+were available for release. Production OAuth login and account rendering were
+manually verified without recording credential values or customer PII.
 
-- authoritative Headless Customer Account client UUID;
-- exact Production and stable-preview HTTPS callback/logout registrations;
-- newly generated protected session secret;
-- controlled team-owned QA mailbox.
+The public storefront obtains only a boolean account affordance from
+`GET /account/status`. That endpoint uses the server-owned encrypted session,
+returns only `{signedIn: boolean}`, is dynamic and private/no-store, and never
+returns email, customer identity, token or session details. Fetch failure fails
+safe to the signed-out `Account` presentation. The public storefront itself
+remains cacheable and is not converted into a personalized response.
 
-Provisioning these values is approval-gated Store/platform mutation. No Pilot or sibling storefront credential may be reused.
+Shopify `zoneCode` is a region code, not a free-form province/city. Live store
+metadata exposes no province-code list for Vietnam. For `territoryCode=VN`, an
+unsupported human-readable zone such as `Ha Noi` is therefore omitted as
+`zoneCode=null`; the city and territory are preserved. Forward does not invent
+`VN-HN` and does not add a remote metadata dependency to the mutation path.
 
-Prefer read-only verification against existing customer/order state. Any customer or address fixture requires an immutable target and cleanup plan. Any order fixture is permanent/non-revertible, must suppress notifications where Shopify permits, must use only the controlled mailbox, and requires explicit approval acknowledging permanence. No payment is run.
+The original OAuth, fixed-origin, encrypted-cookie, cache, CSRF, POST-only
+logout, generic-error and exact order-ownership requirements remain unchanged.
+Preview/config-disabled account mode remains hidden and fail closed.
 
-Slice 3 and the combined release cannot be marked complete while live OAuth, repeated refresh/logout, profile/orders/order-detail, address flows, token/HTML leakage, cookie/cache headers, and desktop/mobile hosted cycles remain blocked.
+Final source/runtime gates passed with 285/285 tests, configured and disabled
+32/32 route smoke, 17 route patterns plus four redirects and a Production build.
+Leo manually accepted the signed-in Header state, global enabled/disabled cursor
+contract and Vietnam address flow on Production.
+
+No payment or test order was created. Any future customer/address fixture still
+requires a controlled identity and cleanup plan. Any order fixture remains
+permanent/non-revertible, approval-gated and must never contact an uncontrolled
+email address.

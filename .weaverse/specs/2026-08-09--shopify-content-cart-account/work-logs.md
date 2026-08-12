@@ -472,3 +472,72 @@ payment, Vercel env mutation, deployment, push, or external message occurred.
 Before live OAuth QA, the exact Shopify callback/logout allowlists and protected
 Vercel environment still require trusted readback/configuration. Fresh
 independent review of the final staged artifact is also still required.
+
+## 2026-08-12 — Slice 3 release and Production QA closeout
+
+The final Customer Account candidate completed review remediation, was split
+into four logical commits, pushed on `feat/customer-account`, and merged through
+PR #56 at merge commit
+`1683ac456d6d6fa6751cc291b34d667d7b5a7186`. Production configuration used the
+existing Forward Headless Customer Account client and the exact registered
+Production callback, JavaScript origin and logout URI. No credential value was
+written to this log, git or generated output.
+
+Release verification proved the fixed-origin Authorization Code + PKCE flow,
+encrypted host-only secure session cookie, POST-only same-origin logout,
+private/no-store account surfaces, exact customer-owned order lookup,
+authenticated profile/order/address reads and guarded address mutations. The
+Preview/config-disabled mode remained hidden and fail closed.
+
+Hosted manual QA found three bounded follow-ups:
+
+1. The public Header had no narrow server-owned signed-in signal.
+2. Interactive cursor affordances were incomplete and disabled controls needed
+   distinct semantics.
+3. A Vietnam form submitted human-readable `Ha Noi` as Shopify `zoneCode`, even
+   though the live country metadata exposes no Vietnam province-code list.
+
+The follow-ups shipped as two logical commits:
+
+```text
+2057f5e2d995181606ab22138b13488ce7f34d3e
+  Reflect signed-in state in storefront navigation
+
+8d13dc68d7ecd7d1c6cdab614c717605e9d22d85
+  Normalize Vietnam customer addresses
+```
+
+`/account/status` now returns only `{signedIn: boolean}` from the server-owned
+session boundary, is dynamic and private/no-store, exposes no PII/token/session
+data and leaves public storefront caching unchanged. Fetch failure presents the
+safe signed-out `Account` label. Enabled interactive controls receive pointer
+affordance; native and ARIA-disabled controls retain disabled semantics and a
+disabled cursor.
+
+Vietnam addresses preserve `territoryCode=VN` and the free-form city while an
+unsupported human-readable zone input is omitted as `zoneCode=null`. The
+implementation deliberately does not invent `VN-HN` or add a runtime country
+metadata dependency to the mutation path.
+
+Final verification after Ponytail cleanup:
+
+```text
+full tests = 285/285 PASS
+focused final tests = 54/54 PASS
+typecheck/lint/format/GraphQL = PASS
+Production build = PASS
+route contract = 17 patterns + 4 redirects PASS
+configured smoke = 32/32 PASS
+disabled/fail-closed smoke = 32/32 PASS
+git diff --check = PASS
+```
+
+Git-triggered Vercel deployment `dpl_GJpBb5xGYjefk3fLrsrtmi1UMsww` is `READY`,
+targets Production and carries exact metadata for
+`8d13dc68d7ecd7d1c6cdab614c717605e9d22d85`. Leo manually accepted all three
+follow-ups on `https://forward-sandy.vercel.app`.
+
+No payment or order was created for QA. The account has no fabricated live
+order fixture; cross-customer ownership remains test-covered. Commerce
+productionization is complete. Weaverse composition and Markets/localization
+remain outside this spec and have not started.

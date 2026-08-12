@@ -2,7 +2,17 @@
 
 ## Status
 
-Approved for implementation by Leo on 2026-08-09 after plan review.
+Production-verified complete on 2026-08-12. Leo approved the plan on
+2026-08-09, and all three slices were independently released before the next
+slice began:
+
+1. Shopify Content Adapter.
+2. Shopify Cart and checkout handoff.
+3. Shopify Customer Account API.
+
+The accepted Production baseline is `main@8d13dc68d7ecd7d1c6cdab614c717605e9d22d85`
+at `https://forward-sandy.vercel.app`. Weaverse composition and
+Markets/localization have not started.
 
 Execute as three independently reviewed and deployed slices in this order:
 
@@ -362,3 +372,35 @@ After all three slices:
   state, navigation cycles, cart cycles and account auth cycles.
 - External Forward coordination notes record Store state, exact commits,
   deployment IDs, verification and any merchant/legal/payment blockers.
+
+## Production closeout — 2026-08-12
+
+- Slice 1 shipped at `73d724e94055df87e94395a23a301749a195290b`.
+- Slice 2 shipped at `a6abc52b10dcfcf8d5c6280b4f33467bf0160339` and
+  was subsequently merged through PR #55.
+- Slice 3 merged through PR #56 at
+  `1683ac456d6d6fa6751cc291b34d667d7b5a7186`. Two bounded Production QA
+  follow-ups then shipped on `main`:
+  - `2057f5e2d995181606ab22138b13488ce7f34d3e` — signed-in navigation state,
+    private account-status boundary and global interactive cursor semantics;
+  - `8d13dc68d7ecd7d1c6cdab614c717605e9d22d85` — narrow Vietnam address
+    normalization.
+- Git-triggered Vercel Production deployment
+  `dpl_GJpBb5xGYjefk3fLrsrtmi1UMsww` is `READY`, targets Production and is
+  aliased to `https://forward-sandy.vercel.app`.
+- Final local gates passed: 285/285 tests, typecheck, lint, format, GraphQL,
+  Production build, 17 route patterns plus four redirects, configured 32/32
+  smoke, disabled/fail-closed 32/32 smoke and `git diff --check`.
+- Tool QA proved `/account/status` returns only a signed-in boolean with
+  private/no-store caching, while the public storefront remains publicly
+  cacheable. Disabled/Preview account mode remains hidden and fail closed.
+- Leo manually verified Production OAuth login and accepted the three hosted
+  follow-ups: signed-in Header affordance, enabled/disabled interaction cursor
+  behavior and Vietnam address creation without a free-form Shopify
+  `zoneCode`.
+- No payment, checkout order, uncontrolled customer fixture or test order was
+  created. Exact order ownership and zero-order behavior remain covered by the
+  automated contract rather than fabricated live order evidence.
+- This closes the commerce productionization gate only. It does not install
+  `@weaverse/next`, create a Weaverse project, connect Studio, or start
+  Markets/localization.
