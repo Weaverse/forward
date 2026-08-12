@@ -224,6 +224,38 @@ describe("address authentication boundary", () => {
 });
 
 describe("address schema validation", () => {
+  it("omits an unsupported Vietnam zone before the mutation", async () => {
+    const { session, calls } = recordingSession(() => ({
+      data: {
+        customerAddressCreate: {
+          customerAddress: { id: ADDRESS_ID },
+          userErrors: [],
+        },
+      },
+    }));
+    const result = await run(
+      session,
+      createForm({
+        firstName: "Tuan",
+        lastName: "Anh",
+        company: "Forward QA",
+        address1: "100 Test Road",
+        city: "Ha Noi",
+        zoneCode: "Ha Noi",
+        zip: "100000",
+        territoryCode: "VN",
+        phoneNumber: "+84900000000",
+      }),
+    );
+
+    assert.deepEqual(result, { status: "success" });
+    assert.equal(calls.length, 1);
+    const variables = calls[0]?.variables as
+      | { address: { zoneCode: string | null } }
+      | undefined;
+    assert.equal(variables?.address.zoneCode, null);
+  });
+
   const rejected: Record<string, FormData> = {
     "missing intent": addressFormData(),
     "unknown intent": createForm({ intent: "upsert" }),
@@ -626,6 +658,14 @@ describe("readAccountAddresses", () => {
 });
 
 describe("address action boundary", () => {
+  it("explains the optional zone-code contract in the form", async () => {
+    const source = await readFile(
+      path.join(process.cwd(), "src/app/account/addresses/page.tsx"),
+      "utf8",
+    );
+    assert.match(source, /Leave blank[\s\S]*Vietnam/);
+  });
+
   it("keeps the writable mutation surface behind one Server Action", async () => {
     const source = await readFile(
       path.join(process.cwd(), "src/lib/account/address-actions.ts"),

@@ -162,7 +162,9 @@ function readAddressInput(values: Map<string, string>): AddressInput | null {
   const address1 = values.get("address1") ?? "";
   const city = values.get("city") ?? "";
   const territoryCode = (values.get("territoryCode") ?? "").toUpperCase();
-  const zoneCode = (values.get("zoneCode") ?? "").toUpperCase();
+  const submittedZoneCode = (values.get("zoneCode") ?? "").toUpperCase();
+  // Shopify's country metadata exposes no province codes for Vietnam.
+  const zoneCode = territoryCode === "VN" ? "" : submittedZoneCode;
   const zip = values.get("zip") ?? "";
   const phoneNumber = values.get("phoneNumber") ?? "";
 

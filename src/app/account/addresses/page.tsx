@@ -129,8 +129,13 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
           name="zoneCode"
           defaultValue={values.zoneCode}
           maxLength={12}
+          placeholder="CA"
           autoComplete="address-level1"
         />
+        <p className="form-note">
+          Use a region code, not a name. Leave blank when the country has no
+          state or province code, such as Vietnam.
+        </p>
       </div>
       <div className="form-field">
         <label htmlFor={field("zip")}>Postal code (optional)</label>
