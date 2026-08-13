@@ -25,9 +25,9 @@
   border-inline-start: 1px solid var(--line);
   background: transparent;
   color: inherit;
-  font-family: var(--mono);
-  font-size: 9px;
-  font-weight: 500;
+  font-family: var(--ui);
+  font-size: 10px;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
@@ -85,7 +85,7 @@
   align-items: center;
   justify-content: space-between;
   color: var(--muted);
-  font-family: var(--mono);
+  font-family: var(--ui);
   font-size: 9px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -98,12 +98,12 @@
 }
 
 .field-index-number {
-  font-family: var(--mono);
+  font-family: var(--ui);
   font-size: 10px;
 }
 
 .field-index-arrow {
-  font-family: var(--mono);
+  font-family: var(--ui);
   font-size: 15px;
 }
 
@@ -203,7 +203,7 @@
 }
 
 .field-index-visual figcaption span {
-  font-family: var(--mono);
+  font-family: var(--ui);
   font-size: 9px;
   letter-spacing: 0.1em;
 }
@@ -263,7 +263,7 @@
 .field-mobile-index nav a > span {
   grid-row: 1 / span 2;
   color: #8fa095;
-  font-family: var(--mono);
+  font-family: var(--ui);
   font-size: 9px;
 }
 
@@ -282,7 +282,7 @@
 .field-mobile-note {
   margin: 22px 0 0;
   color: #8fa095;
-  font-family: var(--mono);
+  font-family: var(--ui);
   font-size: 8px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -308,7 +308,7 @@
 .field-mobile-secondary a > span:first-child,
 .field-mobile-secondary a i {
   color: #8fa095;
-  font-family: var(--mono);
+  font-family: var(--ui);
   font-size: 8px;
   font-style: normal;
 }

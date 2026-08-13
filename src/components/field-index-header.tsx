@@ -276,7 +276,7 @@ export function FieldIndexHeader({
       );
     const backgroundElements = Array.from(
       document.querySelectorAll<HTMLElement>(
-        ".skip-link, .announcement, .field-header, .coordinate-spine, #main-content, footer",
+        ".skip-link, .announcement, .field-header, #main-content, footer",
       ),
     );
     const previousInertStates = backgroundElements.map((element) => ({
@@ -443,12 +443,6 @@ export function FieldIndexHeader({
           />
         ) : null}
       </header>
-      <aside className="coordinate-spine" aria-hidden="true">
-        <span>N 54° 27′</span>
-        <b>FORWARD</b>
-        <span>W 3° 05′</span>
-      </aside>
-
       {mobileOpen ? (
         <aside
           ref={mobilePanelRef}

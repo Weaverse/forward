@@ -129,7 +129,7 @@ function ProductDetailView({
             </Link>
           </p>
           <div className="product-kicker">
-            <span className="eyebrow">Plate {product.plate}</span>
+            <span className="eyebrow">Forward equipment</span>
             <span className="meta">{specBadge}</span>
           </div>
           <h1 className="product-title">{product.title}</h1>

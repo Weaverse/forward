@@ -243,7 +243,6 @@ export default async function HomePage() {
             <ProductCard
               key={product.handle}
               product={product}
-              index={String(index + 1).padStart(2, "0")}
               priority={index === 0}
             />
           ))}

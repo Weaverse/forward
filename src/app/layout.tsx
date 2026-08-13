@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, Literata, Manrope } from "next/font/google";
+import { IBM_Plex_Mono, Manrope, Space_Grotesk } from "next/font/google";
 import type { ReactNode } from "react";
 
 import { SiteFooter } from "@/components/site-footer";
@@ -11,28 +11,13 @@ import "./globals.css";
 import "./canonical-source.css";
 import "./site-header.css";
 
-/*
- * Canonical font contract, ported from the Advanced POC document head
- * (source `index.html:11`): Literata (display), Manrope (UI), IBM Plex Mono
- * (field labels). Served by Next instead of hotlinked from Google Fonts.
- *
- * The source requests `Literata:opsz,wght@7..72,400;7..72,500;7..72,600` — the
- * variable font including its optical-size axis. Declaring discrete weights
- * here would download static instances cut at the default `opsz` of 14, the
- * text optical size, so the oversized display headlines would render in a
- * body-text cut: blunter serifs, lower stroke contrast, looser spacing.
- * Requesting the `opsz` axis instead lets the browser's default
- * `font-optical-sizing: auto` pick the display cut at hero sizes, and the
- * variable `wght` axis still covers every weight the stylesheet asks for.
- *
- * Manrope and IBM Plex Mono stay on discrete weights because the source
- * requests them the same way (`wght@400;500;600;700` and `wght@400;500`).
- */
-const literata = Literata({
+/* Premium type contract: Space Grotesk for display, Manrope for body/UI, and
+ * IBM Plex Mono only for compact field metadata. Next serves all three. */
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  axes: ["opsz"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
-  variable: "--font-literata",
+  variable: "--font-space-grotesk",
 });
 
 const manrope = Manrope({
@@ -67,7 +52,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${literata.variable} ${manrope.variable} ${plexMono.variable}`}
+      className={`${spaceGrotesk.variable} ${manrope.variable} ${plexMono.variable}`}
     >
       <head>
         {shopifyCartEnabled ? (

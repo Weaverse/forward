@@ -13,8 +13,6 @@ import type { Product } from "@/lib/storefront/types";
 
 interface ProductCardProps {
   product: Product;
-  /** Overrides the oversized `.product-number` (defaults to the plate). */
-  index?: string;
   priority?: boolean;
 }
 
@@ -28,14 +26,13 @@ interface ProductCardProps {
  * real controls: native radios in 44×44 targets, a visible selected ring and
  * name, and a deep link that retargets to the selected colorway.
  */
-export function ProductCard({ product, index, priority }: ProductCardProps) {
+export function ProductCard({ product, priority }: ProductCardProps) {
   const [activeColorwayId, setActiveColorwayId] = useState(
     product.colorways[0]?.id ?? "",
   );
   const swatchGroupName = useId();
   const activeColorway = resolveColorway(product, activeColorwayId);
   const href = productColorwayHref(product, activeColorway.id);
-  const cardIndex = index ?? product.plate;
   const badge = product.activities[0];
 
   return (
@@ -53,9 +50,6 @@ export function ProductCard({ product, index, priority }: ProductCardProps) {
           sizes="(min-width: 1100px) 34vw, (min-width: 560px) 45vw, 90vw"
           priority={priority}
         />
-        <span className="product-number" aria-hidden="true">
-          {cardIndex}
-        </span>
         {badge !== undefined ? (
           <span className="product-badge">{badge}</span>
         ) : null}
