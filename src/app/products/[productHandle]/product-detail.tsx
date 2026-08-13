@@ -2,17 +2,20 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { type ReactNode, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { AddToCartForm } from "@/components/add-to-cart-form";
 import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/storefront/format";
 import {
   COLORWAY_PARAM,
+  findExactVariant,
   galleryImages,
-  productColorwayHref,
-  resolveColorway,
+  optionParamKey,
+  productSelectionHref,
+  resolveProductSelection,
+  type ProductSelection,
 } from "@/lib/storefront/product-state";
 import type { Product, ProductColorway } from "@/lib/storefront/types";
 
@@ -21,29 +24,51 @@ interface ProductDetailProps {
   fieldRecord: ReactNode;
 }
 
-/**
- * Query-driven half of the PDP. Colorway selection lives in the browser via
- * `useSearchParams` so the route stays fully static (unknown handles become
- * real production 404s) while `?colorway=` deep links, swatch navigation, and
- * browser history keep working.
- */
+function requestedOptions(
+  product: Product,
+  params: URLSearchParams,
+): Readonly<Record<string, string | undefined>> {
+  return Object.fromEntries(
+    product.options.map((option) => [
+      option.name,
+      params.get(optionParamKey(option.name)) ?? undefined,
+    ]),
+  );
+}
+
 export function ProductDetail({ product, fieldRecord }: ProductDetailProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const requestedColorway = searchParams.get(COLORWAY_PARAM) ?? undefined;
+  const selection = resolveProductSelection(
+    product,
+    searchParams.get(COLORWAY_PARAM) ?? undefined,
+    requestedOptions(product, searchParams),
+  );
+  const canonicalHref = productSelectionHref(
+    product,
+    selection.colorway.id,
+    selection.selectedOptions,
+    searchParams,
+  );
+
+  useEffect(() => {
+    const query = searchParams.toString();
+    const current = `${pathname}${query === "" ? "" : `?${query}`}`;
+    if (current !== canonicalHref)
+      router.replace(canonicalHref, { scroll: false });
+  }, [canonicalHref, pathname, router, searchParams]);
+
   return (
     <ProductDetailView
       product={product}
-      colorway={resolveColorway(product, requestedColorway)}
+      selection={selection}
+      currentParams={searchParams}
       fieldRecord={fieldRecord}
     />
   );
 }
 
-/**
- * Suspense fallback for the static prerender: identical markup in the
- * canonical default-colorway state, so the served HTML is complete before
- * hydration resolves the query string.
- */
 export function ProductDetailFallback({
   product,
   fieldRecord,
@@ -51,19 +76,141 @@ export function ProductDetailFallback({
   return (
     <ProductDetailView
       product={product}
-      colorway={resolveColorway(product, undefined)}
+      selection={resolveProductSelection(product, undefined)}
+      currentParams={new URLSearchParams()}
       fieldRecord={fieldRecord}
     />
   );
 }
 
-/**
- * Canonical `.gallery` (source `app.js:281`): a lead frame spanning the tall
- * column plus selectable tiles, with the selected view marked by the
- * `.gallery-button.active` treatment. Images are the active colorway's four
- * approved frames. Keyed by colorway at the call site so selection resets on
- * colorway change.
- */
+function GalleryModal({
+  product,
+  colorway,
+  initialIndex,
+  onClose,
+}: {
+  product: Product;
+  colorway: ProductColorway;
+  initialIndex: number;
+  onClose(): void;
+}) {
+  const images = galleryImages(colorway);
+  const [index, setIndex] = useState(initialIndex);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (dialog === null) return;
+    const previousOverflow = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    dialog.showModal();
+    return () => {
+      document.documentElement.style.overflow = previousOverflow;
+    };
+  }, []);
+
+  useEffect(() => {
+    function handleKey(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key === "ArrowRight") {
+        setIndex((current) => (current + 1) % images.length);
+      }
+      if (event.key === "ArrowLeft") {
+        setIndex((current) => (current - 1 + images.length) % images.length);
+      }
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [images.length, onClose]);
+
+  const image = images[index];
+  if (image === undefined) return null;
+
+  return (
+    <dialog
+      ref={dialogRef}
+      className="gallery-modal"
+      aria-label={`${product.title} image gallery`}
+      onClose={onClose}
+      onCancel={(event) => {
+        event.preventDefault();
+        dialogRef.current?.close();
+      }}
+    >
+      <div className="gallery-modal-bar">
+        <span>
+          {product.title} / {colorway.name}
+        </span>
+        <span>
+          {String(index + 1).padStart(2, "0")} /{" "}
+          {String(images.length).padStart(2, "0")}
+        </span>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close image gallery"
+        >
+          Close ×
+        </button>
+      </div>
+      <div className="gallery-modal-stage">
+        <Image
+          key={image.src}
+          src={image.src}
+          alt={image.alt}
+          width={image.width}
+          height={image.height}
+          sizes="100vw"
+          priority
+        />
+        <button
+          className="gallery-modal-arrow gallery-modal-prev"
+          type="button"
+          onClick={() =>
+            setIndex((current) => (current - 1 + images.length) % images.length)
+          }
+          aria-label="Previous image"
+        >
+          ←
+        </button>
+        <button
+          className="gallery-modal-arrow gallery-modal-next"
+          type="button"
+          onClick={() => setIndex((current) => (current + 1) % images.length)}
+          aria-label="Next image"
+        >
+          →
+        </button>
+      </div>
+      <fieldset className="gallery-modal-thumbs">
+        <legend className="sr-only">Choose gallery image</legend>
+        {images.map((entry, entryIndex) => (
+          <button
+            key={entry.src}
+            type="button"
+            className={cn(entryIndex === index && "active")}
+            aria-label={`View image ${entryIndex + 1}: ${entry.alt}`}
+            aria-pressed={entryIndex === index}
+            onClick={() => setIndex(entryIndex)}
+          >
+            <Image
+              src={entry.src}
+              alt=""
+              width={entry.width}
+              height={entry.height}
+              sizes="96px"
+            />
+          </button>
+        ))}
+      </fieldset>
+    </dialog>
+  );
+}
+
 function ProductGallery({
   product,
   colorway,
@@ -72,49 +219,68 @@ function ProductGallery({
   colorway: ProductColorway;
 }) {
   const gallery = galleryImages(colorway);
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [modalIndex, setModalIndex] = useState<number | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+
+  function closeModal() {
+    document.documentElement.style.overflow = "";
+    setModalIndex(null);
+    requestAnimationFrame(() => triggerRef.current?.focus());
+  }
 
   return (
-    <section className="gallery" aria-label={`${product.title} gallery`}>
-      {gallery.map((image, index) => {
-        const active = index === selectedIndex;
-        return (
+    <>
+      <section className="gallery" aria-label={`${product.title} gallery`}>
+        {gallery.map((image, index) => (
           <button
             key={image.src}
             type="button"
-            className={cn("gallery-button", active && "active")}
-            aria-label={`Select view ${index + 1}: ${image.alt}`}
-            aria-pressed={active}
-            onClick={() => setSelectedIndex(index)}
+            className="gallery-button"
+            aria-label={`Zoom image ${index + 1}: ${image.alt}`}
+            onClick={(event) => {
+              triggerRef.current = event.currentTarget;
+              setModalIndex(index);
+            }}
           >
             <Image
               src={image.src}
-              alt={`${product.title} view ${index + 1}`}
+              alt={image.alt}
               width={image.width}
               height={image.height}
-              sizes={index === 0 ? "(min-width: 820px) 55vw, 100vw" : "30vw"}
+              sizes={index === 0 ? "(min-width: 820px) 55vw, 100vw" : "40vw"}
               priority={index === 0}
               loading={index === 0 ? undefined : "lazy"}
             />
+            <span className="gallery-zoom-label" aria-hidden="true">
+              Zoom +
+            </span>
           </button>
-        );
-      })}
-    </section>
+        ))}
+      </section>
+      {modalIndex !== null ? (
+        <GalleryModal
+          product={product}
+          colorway={colorway}
+          initialIndex={modalIndex}
+          onClose={closeModal}
+        />
+      ) : null}
+    </>
   );
 }
 
 interface ProductDetailViewProps extends ProductDetailProps {
-  colorway: ProductColorway;
+  selection: ProductSelection;
+  currentParams: URLSearchParams;
 }
 
-/**
- * Canonical `.pdp` grid and sticky `.product-panel` (source `app.js:279–288`).
- */
 function ProductDetailView({
   product,
-  colorway,
+  selection,
+  currentParams,
   fieldRecord,
 }: ProductDetailViewProps) {
+  const { colorway } = selection;
   const specBadge = product.specs[0]?.value ?? product.category;
 
   return (
@@ -133,29 +299,35 @@ function ProductDetailView({
             <span className="meta">{specBadge}</span>
           </div>
           <h1 className="product-title">{product.title}</h1>
-          <strong>{formatMoney(product.price)}</strong>
+          <strong>{formatMoney(selection.variant.price)}</strong>
           <p className="product-intro">{product.description}</p>
 
-          {/* Colorway selection stays a set of canonical deep links. */}
           <div className="option-group">
             <div className="option-label">
               <span>Color</span>
               <span>{colorway.name}</span>
             </div>
-            {/* Each link carries its own colorway name and selected state. */}
             <div className="option-row">
               {product.colorways.map((entry) => {
+                const next = resolveProductSelection(
+                  product,
+                  entry.id,
+                  selection.selectedOptions,
+                );
                 const selected = entry.id === colorway.id;
                 return (
                   <Link
                     key={entry.id}
                     className={cn("option-chip", selected && "selected")}
-                    href={productColorwayHref(product, entry.id)}
+                    href={productSelectionHref(
+                      product,
+                      next.colorway.id,
+                      next.selectedOptions,
+                      currentParams,
+                    )}
                     scroll={false}
+                    aria-label={`${entry.name} colorway${selected ? " (selected)" : ""}`}
                     aria-current={selected ? "true" : undefined}
-                    aria-label={`${entry.name} colorway${
-                      selected ? " (selected)" : ""
-                    }`}
                   >
                     <span
                       aria-hidden="true"
@@ -169,12 +341,68 @@ function ProductDetailView({
             </div>
           </div>
 
-          <AddToCartForm
-            key={colorway.id}
-            product={product}
-            colorway={colorway}
-          />
+          {product.options.map((option) => (
+            <div className="option-group" key={option.name}>
+              <div className="option-label">
+                <span>{option.name}</span>
+                <span>{selection.selectedOptions[option.name]}</span>
+              </div>
+              <div className="option-row">
+                {option.values.map((value) => {
+                  const nextOptions = {
+                    ...selection.selectedOptions,
+                    [option.name]: value,
+                  };
+                  const exact = findExactVariant(
+                    product,
+                    colorway.id,
+                    nextOptions,
+                  );
+                  const selected =
+                    selection.selectedOptions[option.name] === value;
+                  if (exact === undefined || !exact.availableForSale) {
+                    return (
+                      <span
+                        key={value}
+                        className={cn(
+                          "option-chip unavailable",
+                          selected && "selected",
+                        )}
+                        aria-disabled="true"
+                        aria-current={selected ? "true" : undefined}
+                        title={`${value} is unavailable`}
+                      >
+                        {value}
+                        <span className="sr-only"> (sold out)</span>
+                      </span>
+                    );
+                  }
+                  return (
+                    <Link
+                      key={value}
+                      className={cn("option-chip", selected && "selected")}
+                      href={productSelectionHref(
+                        product,
+                        colorway.id,
+                        nextOptions,
+                        currentParams,
+                      )}
+                      scroll={false}
+                      aria-current={selected ? "true" : undefined}
+                    >
+                      {value}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
 
+          <AddToCartForm
+            key={selection.variant.id}
+            product={product}
+            selection={selection}
+          />
           {fieldRecord}
         </div>
       </section>

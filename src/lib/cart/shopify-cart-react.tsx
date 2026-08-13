@@ -54,6 +54,7 @@ export function useShopifyCartMode(): boolean {
 export function toHydrogenProductInput(
   product: Product,
   colorwayId: string,
+  selectedVariantId?: string,
 ): ProductInput {
   const colorway = product.colorways.find(({ id }) => id === colorwayId);
   if (colorway === undefined) {
@@ -77,7 +78,10 @@ export function toHydrogenProductInput(
       },
     }));
   const selectedOrFirstAvailableVariant =
-    variants.find((variant) => variant.availableForSale) ?? variants[0] ?? null;
+    variants.find((variant) => variant.id === selectedVariantId) ??
+    variants.find((variant) => variant.availableForSale) ??
+    variants[0] ??
+    null;
   const options = [
     {
       name: "Color",

@@ -5,8 +5,11 @@ import {
   COLORWAY_PARAM,
   galleryImages,
   isKnownColorway,
+  optionParamKey,
   productColorwayHref,
+  productSelectionHref,
   resolveColorway,
+  resolveProductSelection,
 } from "../src/lib/storefront/product-state.ts";
 import type { Product } from "../src/lib/storefront/types.ts";
 
@@ -93,6 +96,76 @@ describe("productColorwayHref", () => {
     assert.equal(
       productColorwayHref(product, "a b/c"),
       `/products/${product.handle}?${COLORWAY_PARAM}=a%20b%2Fc`,
+    );
+  });
+});
+
+describe("resolveProductSelection", () => {
+  it("selects the first available complete variant by default", () => {
+    const product = firstProduct();
+    const selection = resolveProductSelection(product, undefined);
+    assert.equal(selection.colorway, product.colorways[0]);
+    assert.equal(selection.variant.availableForSale, true);
+    assert.deepEqual(selection.selectedOptions, { Size: "XS" });
+  });
+
+  it("restores an exact colorway and option selection", () => {
+    const product = firstProduct();
+    const second = product.colorways[1];
+    assert.ok(second !== undefined);
+    const selection = resolveProductSelection(product, second.id, {
+      Size: "L",
+    });
+    assert.equal(selection.colorway.id, second.id);
+    assert.equal(selection.selectedOptions.Size, "L");
+    assert.equal(selection.variant.colorwayId, second.id);
+  });
+
+  it("falls back to a valid complete variant for stale option values", () => {
+    const product = firstProduct();
+    const selection = resolveProductSelection(product, undefined, {
+      Size: "__missing__",
+    });
+    assert.equal(selection.selectedOptions.Size, "XS");
+  });
+
+  it("preserves an exact sold-out deep link instead of swapping variants", () => {
+    const product = firstProduct();
+    const soldOut = product.variants[1];
+    assert.ok(soldOut);
+    const unavailableProduct = {
+      ...product,
+      variants: product.variants.map((variant) =>
+        variant.id === soldOut.id
+          ? { ...variant, availableForSale: false }
+          : variant,
+      ),
+    };
+    const selectedOptions = Object.fromEntries(
+      soldOut.selectedOptions.map(({ name, value }) => [name, value]),
+    );
+    const selection = resolveProductSelection(
+      unavailableProduct,
+      soldOut.colorwayId,
+      selectedOptions,
+    );
+    assert.equal(selection.variant.id, soldOut.id);
+    assert.equal(selection.variant.availableForSale, false);
+  });
+});
+
+describe("productSelectionHref", () => {
+  it("serializes every selected option and retains unrelated params", () => {
+    const product = firstProduct();
+    assert.equal(optionParamKey("Waist Size"), "waist-size");
+    assert.equal(
+      productSelectionHref(
+        product,
+        "claystone",
+        { Size: "M" },
+        new URLSearchParams("utm_source=field"),
+      ),
+      `/products/${product.handle}?utm_source=field&colorway=claystone&size=M`,
     );
   });
 });

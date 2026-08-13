@@ -15,13 +15,15 @@ export const MAX_LINE_QUANTITY = 9;
 const HANDLE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export interface DemoCartLine {
-  /** Stable identity for a product + colorway + size combination. */
+  /** Stable identity for one exact catalog variant. */
   key: string;
+  variantId: string;
   productHandle: string;
   title: string;
   colorwayId: string;
   colorwayName: string;
   size?: string;
+  selectedOptions: Readonly<Record<string, string>>;
   quantity: number;
   unitPrice: Money;
   image: StorefrontImage;
@@ -29,12 +31,8 @@ export interface DemoCartLine {
   href: string;
 }
 
-export function lineKey(
-  productHandle: string,
-  colorwayId: string,
-  size?: string,
-): string {
-  return [productHandle, colorwayId, size ?? ""].join("::");
+export function lineKey(productHandle: string, variantId: string): string {
+  return [productHandle, variantId].join("::");
 }
 
 function clampQuantity(quantity: number): number {
@@ -127,11 +125,40 @@ function isCanonicalProductHref(
   productHandle: string,
   colorwayId: string,
 ): boolean {
-  const base = `/products/${productHandle}`;
-  return (
-    href === base ||
-    href === `${base}?colorway=${encodeURIComponent(colorwayId)}`
-  );
+  try {
+    const url = new URL(href, "https://forward.local");
+    return (
+      url.origin === "https://forward.local" &&
+      url.pathname === `/products/${productHandle}` &&
+      (url.searchParams.get("colorway") === null ||
+        url.searchParams.get("colorway") === colorwayId)
+    );
+  } catch {
+    return false;
+  }
+}
+
+function sanitizeSelectedOptions(
+  value: unknown,
+): Readonly<Record<string, string>> | null {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return null;
+  }
+  const entries = Object.entries(value);
+  if (
+    entries.length > 8 ||
+    entries.some(
+      ([name, option]) =>
+        name.trim().length === 0 ||
+        name.length > 80 ||
+        typeof option !== "string" ||
+        option.trim().length === 0 ||
+        option.length > 120,
+    )
+  ) {
+    return null;
+  }
+  return Object.fromEntries(entries) as Readonly<Record<string, string>>;
 }
 
 /** Validates lines revived from storage; malformed entries are dropped. */
@@ -148,10 +175,13 @@ export function sanitizeLines(value: unknown): readonly DemoCartLine[] {
     const line = entry as Record<string, unknown>;
     if (
       typeof line.key !== "string" ||
+      typeof line.variantId !== "string" ||
+      line.variantId.trim().length === 0 ||
       typeof line.productHandle !== "string" ||
       typeof line.title !== "string" ||
       typeof line.colorwayId !== "string" ||
       typeof line.colorwayName !== "string" ||
+      (line.size !== undefined && typeof line.size !== "string") ||
       typeof line.quantity !== "number" ||
       typeof line.href !== "string" ||
       seen.has(line.key)
@@ -161,6 +191,7 @@ export function sanitizeLines(value: unknown): readonly DemoCartLine[] {
     const unitPrice = line.unitPrice as Record<string, unknown> | undefined;
     const image = line.image as Record<string, unknown> | undefined;
     const size = typeof line.size === "string" ? line.size : undefined;
+    const selectedOptions = sanitizeSelectedOptions(line.selectedOptions);
     if (
       unitPrice === undefined ||
       typeof unitPrice.amount !== "number" ||
@@ -168,6 +199,7 @@ export function sanitizeLines(value: unknown): readonly DemoCartLine[] {
       unitPrice.amount < 0 ||
       unitPrice.currencyCode !== "USD" ||
       image === undefined ||
+      selectedOptions === null ||
       typeof image.src !== "string" ||
       /* Static mode stores local catalog paths; Shopify mode stores owned CDN
          media URLs. Anything else is dropped on revive. */
@@ -180,7 +212,7 @@ export function sanitizeLines(value: unknown): readonly DemoCartLine[] {
       line.colorwayName.trim().length === 0 ||
       !HANDLE_PATTERN.test(line.productHandle) ||
       !HANDLE_PATTERN.test(line.colorwayId) ||
-      line.key !== lineKey(line.productHandle, line.colorwayId, size) ||
+      line.key !== lineKey(line.productHandle, line.variantId) ||
       !isCanonicalProductHref(line.href, line.productHandle, line.colorwayId)
     ) {
       continue;
@@ -188,11 +220,13 @@ export function sanitizeLines(value: unknown): readonly DemoCartLine[] {
     seen.add(line.key);
     lines.push({
       key: line.key,
+      variantId: line.variantId,
       productHandle: line.productHandle,
       title: line.title,
       colorwayId: line.colorwayId,
       colorwayName: line.colorwayName,
       size,
+      selectedOptions,
       quantity: clampQuantity(line.quantity),
       unitPrice: { amount: unitPrice.amount, currencyCode: "USD" },
       image: {
