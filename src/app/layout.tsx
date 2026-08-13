@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, Manrope, Space_Grotesk } from "next/font/google";
+import { Archivo, IBM_Plex_Mono, Manrope } from "next/font/google";
 import type { ReactNode } from "react";
 
 import { SiteFooter } from "@/components/site-footer";
@@ -11,13 +11,13 @@ import "./globals.css";
 import "./canonical-source.css";
 import "./site-header.css";
 
-/* Premium type contract: Space Grotesk for display, Manrope for body/UI, and
+/* Premium type contract: Archivo for display, Manrope for body/UI, and
  * IBM Plex Mono only for compact field metadata. Next serves all three. */
-const spaceGrotesk = Space_Grotesk({
+const archivo = Archivo({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
-  variable: "--font-space-grotesk",
+  variable: "--font-archivo",
 });
 
 const manrope = Manrope({
@@ -52,7 +52,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${manrope.variable} ${plexMono.variable}`}
+      className={`${archivo.variable} ${manrope.variable} ${plexMono.variable}`}
     >
       <head>
         {shopifyCartEnabled ? (

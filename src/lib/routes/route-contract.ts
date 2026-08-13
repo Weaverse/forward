@@ -114,6 +114,24 @@ export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [
     smoke: { path: "/journal", expectedStatus: 200 },
   },
   {
+    pattern: "/about",
+    label: "About Forward custom page",
+    category: "content",
+    smoke: { path: "/about", expectedStatus: 200 },
+  },
+  {
+    pattern: "/materials",
+    label: "Materials custom page",
+    category: "content",
+    smoke: { path: "/materials", expectedStatus: 200 },
+  },
+  {
+    pattern: "/field-testing",
+    label: "Field testing custom page",
+    category: "content",
+    smoke: { path: "/field-testing", expectedStatus: 200 },
+  },
+  {
     pattern: "/journal/[articleHandle]",
     label: "Journal article",
     category: "editorial",

@@ -5,100 +5,82 @@ import { ProductCard } from "@/components/product-card";
 import { storefront } from "@/lib/storefront/data-source";
 import type { Collection, Product } from "@/lib/storefront/types";
 
-/*
- * Home — a one-to-one port of the canonical `homePage()` (source
- * `app.js:212–250`): hero dossier, operating premise, image dossier, equipment
- * runway, dispatch feature, and the movement-system ground index.
- *
- * Roles resolve by stable handle through the normalized data source, never by
- * array index and never from fixtures directly:
- *
- *   IMG.climbing -> themeContent.homeHeroImage
- *   IMG.hike     -> collection `outerwear` hero
- *   IMG.tent     -> collection `packs` hero
- *   IMG.ridge    -> themeContent.standardBandImage
- *   runway       -> ridge-30-field-pack, weatherline-shell, talus-trail-shoe
- *   tiles        -> outerwear, packs, footwear
- *   dispatch     -> first normalized journal article
- *
- * The canonical runway carries four fictional products; Forward has three real
- * ones. That count difference is intentional — no fourth product is invented.
- */
+export const revalidate = 3600;
 
-const RUNWAY_HANDLES = [
-  "ridge-30-field-pack",
+const FEATURED_HANDLES = [
   "weatherline-shell",
+  "traverse-grid-fleece",
+  "ridge-30-field-pack",
   "talus-trail-shoe",
 ] as const;
 
-const TILE_HANDLES = ["outerwear", "packs", "footwear"] as const;
-
-/* Bounded catalog freshness — see the note on `/products/[productHandle]`. */
-export const revalidate = 3600;
-
-/** Splits a title so the canonical two-line headline treatment still works. */
-function splitTitle(title: string): { lead: string; rest: string } {
-  const firstSpace = title.indexOf(" ");
-  if (firstSpace === -1) {
-    return { lead: title, rest: "" };
-  }
-  return {
-    lead: title.slice(0, firstSpace),
-    rest: title.slice(firstSpace + 1),
-  };
-}
-
-/** First sentence of a normalized description, for the compact tile copy. */
-function firstSentence(text: string): string {
-  const end = text.indexOf(". ");
-  return end === -1 ? text : text.slice(0, end + 1);
-}
+const CATEGORY_HANDLES = ["outerwear", "packs", "footwear"] as const;
 
 export default async function HomePage() {
-  const [themeContent, allProducts, allCollections, articles] =
-    await Promise.all([
-      storefront.getThemeContent(),
-      storefront.listProducts(),
-      storefront.listCollections(),
-      storefront.listArticles(),
-    ]);
-
-  const byHandle = new Map<string, Product>(
-    allProducts.map((product) => [product.handle, product]),
+  const [themeContent, products, collections, articles] = await Promise.all([
+    storefront.getThemeContent(),
+    storefront.listProducts(),
+    storefront.listCollections(),
+    storefront.listArticles(),
+  ]);
+  const productsByHandle = new Map<string, Product>(
+    products.map((product) => [product.handle, product]),
   );
   const collectionsByHandle = new Map<string, Collection>(
-    allCollections.map((collection) => [collection.handle, collection]),
+    collections.map((collection) => [collection.handle, collection]),
   );
-
-  const runway = RUNWAY_HANDLES.map((handle) => byHandle.get(handle)).filter(
-    (product): product is Product => product !== undefined,
-  );
-  const tiles = TILE_HANDLES.map((handle) =>
+  const featured = FEATURED_HANDLES.map((handle) =>
+    productsByHandle.get(handle),
+  ).filter((product): product is Product => product !== undefined);
+  const categories = CATEGORY_HANDLES.map((handle) =>
     collectionsByHandle.get(handle),
   ).filter((collection): collection is Collection => collection !== undefined);
-
-  const traverseImage = collectionsByHandle.get("outerwear")?.heroImage;
-  const campImage = collectionsByHandle.get("packs")?.heroImage;
+  const spotlight = productsByHandle.get("drift-insulated-vest") ?? featured[0];
+  const pack = productsByHandle.get("approach-18-day-pack") ?? featured[1];
   const dispatch = articles[0];
-  const dispatchTitle =
-    dispatch !== undefined ? splitTitle(dispatch.title) : undefined;
-  const dispatchQuote = dispatch?.body.find(
-    (block) => block.type === "pullquote",
-  );
-  const dispatchNumber = dispatch?.plate.replace(/\D/g, "") ?? "01";
+  const spotlightImage = spotlight?.colorways[0]?.images.context;
+  const kitProducts = featured.flatMap((product) => {
+    const image = product.colorways[0]?.images.primary;
+    return image === undefined ? [] : [{ product, image }];
+  });
 
   return (
-    <div className="home-advanced">
-      <section className="hero hero-advanced">
-        <div className="hero-field-index" aria-hidden="true">
-          <b>FORWARD / 01</b>
-          <span>SPRING—AUTUMN</span>
-          <span>54° 27′ 39″ N</span>
-          <span>RANGE / WESTERN FELLS</span>
+    <div className="commerce-home">
+      <section className="commerce-hero">
+        <div className="commerce-hero-copy">
+          <p className="eyebrow">Forward / Field equipment 2026</p>
+          <h1 className="display">
+            Equipment for weather that changes the plan.
+          </h1>
+          <p className="lede">
+            Layerable apparel, precise footwear, and low-profile carry systems
+            made to move together.
+          </p>
+          <div className="commerce-hero-actions">
+            <Link className="button button-signal" href="/shop">
+              Shop all equipment
+            </Link>
+            <Link className="text-link" href="/field-testing">
+              How we test
+            </Link>
+          </div>
+          <dl className="commerce-hero-facts">
+            <div>
+              <dt>Systems</dt>
+              <dd>{categories.length}</dd>
+            </div>
+            <div>
+              <dt>Core objects</dt>
+              <dd>{products.length}</dd>
+            </div>
+            <div>
+              <dt>Repair</dt>
+              <dd>For life</dd>
+            </div>
+          </dl>
         </div>
-        <div className="hero-media">
+        <div className="commerce-hero-media">
           <Image
-            className="hero-image"
             src={themeContent.homeHeroImage.src}
             alt={themeContent.homeHeroImage.alt}
             width={themeContent.homeHeroImage.width}
@@ -106,205 +88,57 @@ export default async function HomePage() {
             sizes="(min-width: 820px) 58vw, 100vw"
             priority
           />
-          <span className="hero-media-note">
-            Plate 01 / Open sky, east face
-          </span>
-        </div>
-        <div className="hero-content">
-          <p className="eyebrow">FORWARD / High country system</p>
-          <h1 className="display">
-            <span>Move until</span>
-            <em>
-              the map
-              <br className="mobile-only-break" /> runs out.
-            </em>
-          </h1>
-          <p className="hero-sub">
-            Purposeful layers and field equipment for uncertain weather, useful
-            distance, and the quiet beyond the marked route.
-          </p>
-          <div className="hero-actions">
-            <Link className="button button-signal" href="/shop">
-              Enter the equipment index
+          {featured[0] !== undefined ? (
+            <Link
+              className="commerce-hero-product"
+              href={`/products/${featured[0].handle}`}
+            >
+              <span className="commerce-hero-product-meta">
+                Featured system
+              </span>
+              <strong>{featured[0].title}</strong>
+              <span className="commerce-hero-product-meta">View product →</span>
             </Link>
-            {dispatch !== undefined ? (
-              <Link
-                className="text-link hero-journal-link"
-                href={`/journal/${dispatch.handle}`}
-              >
-                Dispatch {dispatch.plate}
-              </Link>
-            ) : null}
-          </div>
-        </div>
-        <div className="hero-condition">
-          <span>Current field condition</span>
-          <strong>Wind / W 18</strong>
-          <strong>Visibility / Open</strong>
-          <i>Static demonstration data</i>
+          ) : null}
         </div>
       </section>
 
-      <section className="manifesto section shell">
-        <div className="manifesto-number" aria-hidden="true">
-          01
-        </div>
-        <div>
-          <p className="eyebrow">Operating premise</p>
-          <h2 className="h2">
-            Carry less.
-            <br />
-            <i>Notice more.</i>
-          </h2>
-        </div>
-        <div className="manifesto-copy">
-          <p className="lede">
-            We build adaptable outdoor goods around a strict premise: every
-            piece must earn its weight, survive a change of plan, and become
-            quieter with use.
-          </p>
-          <div className="manifesto-ledger">
-            <span>
-              <b>{String(allProducts.length).padStart(2, "0")}</b> core objects
-            </span>
-            <span>
-              <b>{String(allCollections.length).padStart(2, "0")}</b> movement
-              systems
-            </span>
-            <span>
-              <b>01</b> lifetime repair desk
-            </span>
-          </div>
-          <Link className="text-link" href="/pages/about-forward">
-            Read the field standard
-          </Link>
-        </div>
-      </section>
-
-      <section className="image-dossier shell" aria-label="Field image dossier">
-        {traverseImage !== undefined ? (
-          <figure className="dossier-main">
-            <Image
-              src={traverseImage.src}
-              alt={traverseImage.alt}
-              width={traverseImage.width}
-              height={traverseImage.height}
-              sizes="(min-width: 560px) 63vw, 86vw"
-            />
-            <figcaption>Traverse study / 04</figcaption>
-          </figure>
-        ) : null}
-        {campImage !== undefined ? (
-          <figure className="dossier-inset">
-            <Image
-              src={campImage.src}
-              alt={campImage.alt}
-              width={campImage.width}
-              height={campImage.height}
-              sizes="(min-width: 560px) 34vw, 52vw"
-            />
-            <figcaption>Camp / 19:48</figcaption>
-          </figure>
-        ) : null}
-        <div className="dossier-stamp" aria-hidden="true">
-          <span>Tested beyond</span>
-          <b>3,000 FT</b>
-          <span>FORWARD / CUMBRIA</span>
-        </div>
-        <p className="dossier-caption">
-          A clothing system should disappear while moving and become exactly
-          enough when the weather turns.
-        </p>
-      </section>
-
-      <section className="equipment-runway section shell">
-        <div className="section-head runway-head">
+      <section className="home-shop-section section shell">
+        <header className="home-commerce-head">
           <div>
-            <p className="eyebrow">
-              Equipment index / 01—{String(runway.length).padStart(2, "0")}
-            </p>
-            <h2 className="h2">
-              Objects for
-              <br />
-              <i>going farther.</i>
-            </h2>
+            <p className="eyebrow">New field rotation</p>
+            <h2 className="h2">Start with the core four.</h2>
           </div>
-          <p className="runway-note">
-            Three pieces. One field system.
-            <br />
-            Built to layer, carry, and repair.
+          <p>
+            A weather layer, breathable midlayer, close-body carry, and trail
+            shoe form the shortest route to a complete Forward system.
           </p>
           <Link className="text-link" href="/shop">
-            Complete index
+            Shop all {products.length}
           </Link>
-        </div>
-        <div className="product-grid product-runway">
-          {runway.map((product, index) => (
+        </header>
+        <div className="product-grid home-featured-grid">
+          {featured.map((product, index) => (
             <ProductCard
               key={product.handle}
               product={product}
-              priority={index === 0}
+              priority={index < 2}
             />
           ))}
         </div>
       </section>
 
-      {dispatch !== undefined && dispatchTitle !== undefined ? (
-        <section className="field-notes dispatch-feature">
-          <div className="dispatch-image">
-            <Image
-              src={themeContent.standardBandImage.src}
-              alt={themeContent.standardBandImage.alt}
-              width={themeContent.standardBandImage.width}
-              height={themeContent.standardBandImage.height}
-              sizes="(min-width: 820px) 62vw, 100vw"
-            />
-            <span>
-              {dispatch.location} / {dispatch.readingMinutes} min read /{" "}
-              {dispatch.coordinates}
-            </span>
-          </div>
-          <div className="field-copy">
-            <p className="eyebrow">
-              Dispatch {dispatch.plate} / {dispatch.location}
-            </p>
-            <h2 className="h2">
-              {dispatchTitle.lead}
-              <br />
-              <i>{dispatchTitle.rest}</i>
-            </h2>
-            {dispatchQuote !== undefined ? (
-              <blockquote>“{dispatchQuote.text}”</blockquote>
-            ) : null}
-            <p>{dispatch.excerpt}</p>
+      <section className="home-system-section">
+        <header className="home-system-intro shell">
+          <p className="eyebrow">Shop by system</p>
+          <h2 className="h2">Built separately. Better together.</h2>
+        </header>
+        <div className="home-system-grid">
+          {categories.map((collection) => (
             <Link
-              className="button button-light"
-              href={`/journal/${dispatch.handle}`}
-            >
-              Open dispatch {dispatch.plate}
-            </Link>
-          </div>
-          <span className="dispatch-issue" aria-hidden="true">
-            {dispatchNumber}
-          </span>
-        </section>
-      ) : null}
-
-      <section className="ground-index section shell">
-        <div className="section-head">
-          <div>
-            <p className="eyebrow">
-              Movement systems / 01—{String(tiles.length).padStart(2, "0")}
-            </p>
-            <h2 className="h2">Choose your ground.</h2>
-          </div>
-        </div>
-        <div className="activity-strip">
-          {tiles.map((collection, index) => (
-            <Link
-              key={collection.handle}
-              className="activity-tile"
+              className="home-system-card"
               href={`/shop/${collection.handle}`}
+              key={collection.handle}
             >
               <Image
                 src={collection.heroImage.src}
@@ -313,17 +147,134 @@ export default async function HomePage() {
                 height={collection.heroImage.height}
                 sizes="(min-width: 820px) 34vw, 100vw"
               />
-              <span className="tile-index">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <div className="activity-tile-content">
-                <p className="eyebrow">{collection.fieldCode}</p>
-                <h3 className="h3">{collection.title}</h3>
-                <p>{firstSentence(collection.description)}</p>
+              <div>
+                <span className="eyebrow">{collection.fieldCode}</span>
+                <h3>{collection.title}</h3>
+                <p>{collection.description}</p>
+                <span>Shop system →</span>
               </div>
             </Link>
           ))}
         </div>
+      </section>
+
+      {spotlight !== undefined && spotlightImage !== undefined ? (
+        <section className="home-spotlight shell section">
+          <div className="home-spotlight-media">
+            <Image
+              src={spotlightImage.src}
+              alt={spotlightImage.alt}
+              width={spotlightImage.width}
+              height={spotlightImage.height}
+              sizes="(min-width: 820px) 60vw, 100vw"
+            />
+          </div>
+          <div className="home-spotlight-copy">
+            <p className="eyebrow">Layer focus / {spotlight.category}</p>
+            <h2 className="h2">{spotlight.title}</h2>
+            <p className="lede">{spotlight.description}</p>
+            <ul>
+              {spotlight.specs.slice(0, 3).map((spec) => (
+                <li key={spec.label}>
+                  <span>{spec.label}</span>
+                  <strong>{spec.value}</strong>
+                </li>
+              ))}
+            </ul>
+            <Link
+              className="button button-primary"
+              href={`/products/${spotlight.handle}`}
+            >
+              Explore the layer
+            </Link>
+          </div>
+        </section>
+      ) : null}
+
+      <section className="home-proof-band">
+        <div className="home-proof-copy">
+          <p className="eyebrow">Material standard</p>
+          <h2 className="h2">Fewer materials. Better understood.</h2>
+          <p>
+            Every fabric, foam, buckle, and compound is selected around useful
+            life, field repair, and performance you can actually feel.
+          </p>
+          <div className="home-proof-links">
+            <Link className="button button-light" href="/materials">
+              Explore materials
+            </Link>
+            <Link className="text-link" href="/about">
+              About Forward
+            </Link>
+          </div>
+        </div>
+        <Image
+          src={themeContent.standardBandImage.src}
+          alt={themeContent.standardBandImage.alt}
+          width={themeContent.standardBandImage.width}
+          height={themeContent.standardBandImage.height}
+          sizes="(min-width: 820px) 55vw, 100vw"
+        />
+      </section>
+
+      {pack !== undefined ? (
+        <section className="home-kit shell section">
+          <div className="home-kit-copy">
+            <p className="eyebrow">One-day kit</p>
+            <h2 className="h2">Carry the day, not the doubt.</h2>
+            <p>{pack.description}</p>
+            <Link className="text-link" href={`/products/${pack.handle}`}>
+              View {pack.title}
+            </Link>
+          </div>
+          <div className="home-kit-products">
+            {kitProducts.slice(0, 3).map(({ product, image }) => (
+              <Link href={`/products/${product.handle}`} key={product.handle}>
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  width={image.width}
+                  height={image.height}
+                  sizes="(min-width: 820px) 20vw, 45vw"
+                />
+                <span className="home-kit-product-name">{product.title}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section className="home-service-grid shell section">
+        <article>
+          <p className="eyebrow">Repair, not replace</p>
+          <h2>Keep equipment in motion.</h2>
+          <p>
+            Product defects are repaired free. Wear, accidents, and hard-earned
+            damage are assessed honestly before work begins.
+          </p>
+          <Link className="text-link" href="/pages/field-repair">
+            Visit the repair desk
+          </Link>
+        </article>
+        {dispatch !== undefined ? (
+          <article className="home-dispatch-card">
+            <Image
+              src={dispatch.heroImage.src}
+              alt={dispatch.heroImage.alt}
+              width={dispatch.heroImage.width}
+              height={dispatch.heroImage.height}
+              sizes="(min-width: 820px) 45vw, 100vw"
+            />
+            <div>
+              <p className="eyebrow">Latest field note</p>
+              <h2>{dispatch.title}</h2>
+              <p>{dispatch.excerpt}</p>
+              <Link className="text-link" href={`/journal/${dispatch.handle}`}>
+                Read the dispatch
+              </Link>
+            </div>
+          </article>
+        ) : null}
       </section>
     </div>
   );

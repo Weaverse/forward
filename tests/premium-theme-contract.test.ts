@@ -11,13 +11,10 @@ describe("premium theme contract", () => {
       readSource("src/app/canonical-source.css"),
     ]);
 
-    assert.match(layout, /IBM_Plex_Mono, Manrope, Space_Grotesk/);
-    assert.match(layout, /variable: "--font-space-grotesk"/);
+    assert.match(layout, /Archivo, IBM_Plex_Mono, Manrope/);
+    assert.match(layout, /variable: "--font-archivo"/);
     assert.doesNotMatch(layout, /Literata|font-literata/);
-    assert.match(
-      styles,
-      /--display: var\(--font-space-grotesk\), "Helvetica Neue", sans-serif;/,
-    );
+    assert.match(styles, /--display: var\(--font-archivo\), sans-serif;/);
     assert.match(
       styles,
       /--ui: var\(--font-manrope\), "Helvetica Neue", sans-serif;/,
@@ -76,7 +73,10 @@ describe("premium theme contract", () => {
   });
 
   it("places desktop PDP details left and gallery right while keeping mobile linear", async () => {
-    const styles = await readSource("src/app/canonical-source.css");
+    const [styles, detail] = await Promise.all([
+      readSource("src/app/canonical-source.css"),
+      readSource("src/app/products/[productHandle]/product-detail.tsx"),
+    ]);
 
     assert.match(
       styles,
@@ -92,6 +92,13 @@ describe("premium theme contract", () => {
       styles,
       /@media \(max-width: 820px\)[\s\S]*?\.gallery \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\);/,
     );
+    assert.match(styles, /\.gallery-button:nth-child\(n \+ 4\)/);
+    assert.match(detail, /dialog\.showModal\(\)/);
+    assert.match(
+      detail,
+      /document\.documentElement\.style\.overflow = "hidden"/,
+    );
+    assert.match(detail, /triggerRef\.current\?\.focus\(\)/);
   });
 
   it("overrides desktop hero geometry at the mobile cascade winner", async () => {
@@ -125,5 +132,18 @@ describe("premium theme contract", () => {
     assert.match(shop, /<h2 className="sr-only">Products<\/h2>/);
     assert.match(shop, /full catalog is nine/);
     assert.doesNotMatch(shop, /No matching plates|full catalog is three/);
+  });
+
+  it("keeps custom compositions separate from Shopify regular pages", async () => {
+    const [about, materials, testing, regularPage] = await Promise.all([
+      readSource("src/app/about/page.tsx"),
+      readSource("src/app/materials/page.tsx"),
+      readSource("src/app/field-testing/page.tsx"),
+      readSource("src/app/pages/[pageHandle]/page.tsx"),
+    ]);
+    assert.match(about, /custom-story-page/);
+    assert.match(materials, /material-page/);
+    assert.match(testing, /testing-page/);
+    assert.match(regularPage, /storefront\.getPage/);
   });
 });
