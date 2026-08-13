@@ -56,16 +56,10 @@ export const SMOKE_FIXTURES = {
     "talus-trail-shoe",
   ],
   collectionHandle: "outerwear",
-  articleHandle: "walking-the-long-light",
-  pageHandle: "about-forward",
-  policyHandle: "shipping-policy",
-  orderId: "1001",
-} as const;
-
-export const LIVE_CONTENT_SMOKE_FIXTURES = {
   articleHandle: "layering-for-moving-weather",
   pageHandle: "about-forward",
   policyHandle: "shipping-policy",
+  orderId: "1001",
 } as const;
 
 const PRIMARY_PRODUCT_FIXTURE = SMOKE_FIXTURES.productHandles[0];

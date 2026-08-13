@@ -11,6 +11,7 @@ import {
   ROUTE_CONTRACT,
   SMOKE_FIXTURES,
 } from "../src/lib/routes/route-contract.ts";
+import { JOURNAL_FIXTURES } from "../src/lib/storefront/fixtures/journal.ts";
 import {
   formatRouteSegment,
   safeDecodeRouteSegment,
@@ -167,6 +168,11 @@ describe("route contract shape", () => {
     const handle = productSmoke.smoke.path.replace("/products/", "");
     assert.ok(
       (SMOKE_FIXTURES.productHandles as readonly string[]).includes(handle),
+    );
+    assert.ok(
+      JOURNAL_FIXTURES.some(
+        (article) => article.handle === SMOKE_FIXTURES.articleHandle,
+      ),
     );
   });
 
