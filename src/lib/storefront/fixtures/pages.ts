@@ -1,7 +1,4 @@
-/**
- * Static store-page fixture records. Only the data source may import this
- * file. `about-forward` is the approved route-smoke page handle.
- */
+/** Representative static pages for credential-free development. Shopify owns live copy. */
 
 import type { StorePage } from "../types";
 import { EDITORIAL_IMAGES } from "./editorial-images";
@@ -9,30 +6,23 @@ import { EDITORIAL_IMAGES } from "./editorial-images";
 export const PAGE_FIXTURES: readonly StorePage[] = [
   {
     handle: "about-forward",
-    title: "The Field Standard",
+    title: "About Forward",
     eyebrow: "About Forward",
     intro:
-      "Forward makes a short list of gear for moving through weather, not around it. Three products, built slowly, repaired indefinitely.",
+      "Forward makes a short list of equipment for moving through weather, not around it.",
     heroImage: EDITORIAL_IMAGES.mountainRidges,
     sections: [
       {
-        heading: "Why the list is short",
-        paragraphs: [
-          "Most gear companies solve problems by adding products. We solve them by revising the ones we already make. The catalog is three items long because that is how many things we currently believe we make better than anyone needs us to: a shell, a pack, and a trail shoe.",
-          "Each one is expected to hold a place in your kit for years. When a material or pattern improves, the product quietly improves with it — same name, same job, better execution.",
-        ],
-      },
-      {
         heading: "The standard",
         paragraphs: [
-          "Every Forward product is tested against the same three questions. Does it work when the weather turns? Does it carry its weight? Can we repair it when you finally wear it out?",
-          "If the answer to any of the three is no, it does not ship. This is also why we publish real specifications — weights, membranes, hydrostatic head — instead of adjectives.",
+          "Every object must carry well, work with the rest of the system, and remain useful after visible wear.",
+          "We revise existing patterns before adding new ones and design repair access into the construction from the start.",
         ],
       },
       {
-        heading: "Made to be repaired",
+        heading: "A short catalog",
         paragraphs: [
-          "A garment that cannot be repaired is a disposable with a long fuse. Buckles, straps, zips, laces, and insoles are stocked standard parts. Delaminations, tears, and blown seams route through the repairs program — see the Repairs page for how it works.",
+          "Nine products cover weather protection, insulation, carry, technical movement, and recovery without turning choice into noise.",
         ],
       },
     ],
@@ -40,14 +30,15 @@ export const PAGE_FIXTURES: readonly StorePage[] = [
   {
     handle: "field-repair",
     title: "Field Repair",
-    eyebrow: "Forward field service",
+    eyebrow: "Field Repair",
     intro: "Small damage should not end a trip or a product’s useful life.",
     heroImage: EDITORIAL_IMAGES.alpineTraverse,
     sections: [
       {
-        heading: "Stabilize, then repair",
+        heading: "A repairable standard",
         paragraphs: [
-          "Clean and dry the affected area, stabilize tears with a compatible repair patch, and contact Forward when a permanent repair or replacement component is needed.",
+          "Clean and dry the affected area before applying a compatible field patch. Record the damage and contact the repair desk when the trip is over.",
+          "Replaceable hardware, accessible seams, and honest material choices keep routine damage from becoming disposal.",
         ],
       },
     ],
@@ -55,15 +46,15 @@ export const PAGE_FIXTURES: readonly StorePage[] = [
   {
     handle: "shipping-returns",
     title: "Shipping & Returns",
-    eyebrow: "Forward service",
+    eyebrow: "Shipping & Returns",
     intro:
-      "Orders are prepared within two business days. Delivery estimates appear at checkout.",
+      "Delivery estimates appear at checkout and returns begin with a support request.",
     heroImage: EDITORIAL_IMAGES.campTent,
     sections: [
       {
-        heading: "Returns",
+        heading: "Before you send it back",
         paragraphs: [
-          "Unused items may be returned within 30 days in original condition. Contact support before returning worn footwear or equipment with field damage.",
+          "Keep packaging until fit and function are confirmed. Contact support before returning worn equipment so repair, exchange, and return routes stay clear.",
         ],
       },
     ],
@@ -71,39 +62,76 @@ export const PAGE_FIXTURES: readonly StorePage[] = [
   {
     handle: "contact",
     title: "Contact",
-    eyebrow: "Forward support",
+    eyebrow: "Contact",
     intro:
-      "Questions about fit, equipment, repairs, or an order can be sent through the contact form. Include your order number when applicable.",
+      "Use the store support path for product, fit, repair, shipping, return, and order questions.",
     heroImage: EDITORIAL_IMAGES.trailMovement,
     sections: [],
   },
   {
-    handle: "repairs",
-    title: "Repairs",
-    eyebrow: "Forward program",
+    handle: "materials-and-care",
+    title: "Materials & Care",
+    eyebrow: "Materials & Care",
     intro:
-      "Wearing something out is the point. When you do, we would rather fix it than replace it — for the life of the product, at honest cost.",
+      "Specific construction choices need equally specific care to keep working.",
+    heroImage: EDITORIAL_IMAGES.campfire,
     sections: [
       {
-        heading: "What we repair",
+        heading: "Face fabrics and membranes",
         paragraphs: [
-          "Shells: re-taping, delamination, zip and cord replacement, tears and burns. Packs: buckles, straps, stays, panel tears, seam failures. Footwear: outsole re-bonding within reason, plus standard replaceable parts like laces and insoles.",
-          "Crash damage, misadventure, and honest neglect are all repairable categories. We have seen worse than whatever you did.",
+          "Recycled nylon face fabrics balance abrasion resistance with packability. Waterproof products add a breathable membrane and taped seams.",
         ],
       },
       {
-        heading: "How it works",
+        heading: "Washing and reproofing",
         paragraphs: [
-          "Start a repair from your account or the address on the policy page, describe the damage, and ship the cleaned item to the workshop. Straightforward repairs turn around in about two weeks; structural work can take four.",
-          "Repairs that stem from a defect in materials or workmanship are always free. Everything else is quoted before we start, and the quote is the price.",
-        ],
-      },
-      {
-        heading: "Field kit",
-        paragraphs: [
-          "Every order ships with a small patch kit. Tenacious tape solves most trailside problems; press it on clean, dry fabric and it will outlast your opinion of it. Save the workshop for what the tape cannot hold.",
+          "Wash technical fabrics with dedicated cleaner, avoid softener, and use low heat only where the garment instructions allow it.",
         ],
       },
     ],
   },
-] as const;
+  {
+    handle: "fit-and-sizing",
+    title: "Fit & Sizing",
+    eyebrow: "Fit & Sizing",
+    intro:
+      "Choose size around the layers, load, and terrain the product is designed to handle.",
+    heroImage: EDITORIAL_IMAGES.trailMovement,
+    sections: [
+      {
+        heading: "Apparel fit",
+        paragraphs: [
+          "Shells clear a working midlayer while fleece and insulation stay closer to the body for efficient movement.",
+        ],
+      },
+      {
+        heading: "Footwear sizing",
+        paragraphs: [
+          "Forward footwear uses US sizing from 7 through 13. Confirm toe room with the socks used on the trail.",
+        ],
+      },
+    ],
+  },
+  {
+    handle: "field-testing",
+    title: "Field Testing",
+    eyebrow: "Field Testing",
+    intro:
+      "A product earns its place only after wet, loaded, cold, and repeat-use testing.",
+    heroImage: EDITORIAL_IMAGES.alpineTraverse,
+    sections: [
+      {
+        heading: "What we test",
+        paragraphs: [
+          "Movement, access, weather resistance, drying, repair access, and comfort are tested together rather than as isolated specifications.",
+        ],
+      },
+      {
+        heading: "What ends a test",
+        paragraphs: [
+          "A failure that cannot be repaired or explained sends the pattern back for revision instead of into the catalog.",
+        ],
+      },
+    ],
+  },
+];

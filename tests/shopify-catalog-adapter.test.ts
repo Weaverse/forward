@@ -218,7 +218,7 @@ describe("Hydrogen catalog client seam", () => {
         { useNextCache: false },
       );
       const result = await execute();
-      assert.equal(mapCatalogResult(result).length, 3);
+      assert.equal(mapCatalogResult(result).length, 9);
       assert.equal(new URL(requestUrl).pathname, "/api/2026-04/graphql.json");
       assert.equal(
         requestHeaders.get("shopify-storefront-private-token"),
@@ -294,7 +294,7 @@ describe("Hydrogen catalog client seam", () => {
       await assert.rejects(execute, ShopifyCatalogError);
       const recovered = await execute();
       assert.equal(calls, 2);
-      assert.equal(mapCatalogResult(recovered).length, 3);
+      assert.equal(mapCatalogResult(recovered).length, 9);
     } finally {
       globalThis.fetch = originalFetch;
     }
@@ -346,7 +346,7 @@ describe("Hydrogen catalog client seam", () => {
         { useNextCache: false },
       );
       await assert.rejects(execute, ShopifyCatalogError);
-      assert.equal(mapCatalogResult(await execute()).length, 3);
+      assert.equal(mapCatalogResult(await execute()).length, 9);
       assert.equal(calls, 2);
     } finally {
       globalThis.fetch = originalFetch;
@@ -359,9 +359,9 @@ describe("Hydrogen catalog client seam", () => {
 /* -------------------------------------------------------------------------- */
 
 describe("catalog mapping", () => {
-  it("maps the three-product fixture to the normalized contract", () => {
+  it("maps the nine-product fixture to the normalized contract", () => {
     const products = mapped();
-    assert.equal(products.length, 3);
+    assert.equal(products.length, 9);
 
     const shell = products[0];
     assert.ok(shell !== undefined);
@@ -373,7 +373,7 @@ describe("catalog mapping", () => {
     assert.deepEqual([...shell.activities], ["alpine", "trail", "camp"]);
     assert.deepEqual(
       [...shell.relatedHandles],
-      ["ridge-30-field-pack", "talus-trail-shoe"],
+      ["traverse-grid-fleece", "ridge-30-field-pack"],
     );
     assert.ok(shell.subtitle.length > 0);
     assert.ok(shell.repair.length > 0);
@@ -469,8 +469,14 @@ describe("catalog mapping", () => {
       products.map((product) => product.colorways.map((entry) => entry.id)),
       [
         ["charcoal", "claystone"],
+        ["moss-charcoal", "claystone-bone"],
+        ["charcoal-signal", "dune-moss"],
         ["charcoal", "dune"],
+        ["moss-charcoal", "claystone-dune"],
+        ["charcoal-signal", "dune-moss"],
         ["charcoal", "limestone"],
+        ["charcoal-gum", "limestone-moss"],
+        ["charcoal-moss", "dune-claystone"],
       ],
     );
     assert.deepEqual(
@@ -484,13 +490,21 @@ describe("catalog mapping", () => {
     assert.deepEqual(products[0]?.options, [
       { name: "Size", values: ["XS", "S", "M", "L", "XL"] },
     ]);
-    assert.deepEqual(products[1]?.options, []);
-    assert.deepEqual(products[2]?.options, [
+    assert.deepEqual(products[1]?.options, [
+      { name: "Size", values: ["XS", "S", "M", "L", "XL"] },
+    ]);
+    assert.deepEqual(products[2]?.options, products[1]?.options);
+    assert.deepEqual(products[3]?.options, []);
+    assert.deepEqual(products[4]?.options, []);
+    assert.deepEqual(products[5]?.options, []);
+    assert.deepEqual(products[6]?.options, [
       {
         name: "Size",
         values: ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12", "US 13"],
       },
     ]);
+    assert.deepEqual(products[7]?.options, products[6]?.options);
+    assert.deepEqual(products[8]?.options, products[6]?.options);
   });
 
   it("resolves the four media roles from the metafield id order", () => {
@@ -966,13 +980,19 @@ describe("ShopifyCatalogDataSource", () => {
     const byColorway = await source.searchProducts("limestone");
     assert.deepEqual(
       byColorway.map((product) => product.handle),
-      ["talus-trail-shoe"],
+      ["talus-trail-shoe", "scree-approach-shoe"],
     );
 
     const byActivity = await source.searchProducts("camp");
     assert.deepEqual(
       byActivity.map((product) => product.handle),
-      ["weatherline-shell", "talus-trail-shoe"],
+      [
+        "weatherline-shell",
+        "drift-insulated-vest",
+        "waypoint-sling-6",
+        "talus-trail-shoe",
+        "camp-recovery-clog",
+      ],
     );
   });
 
@@ -982,29 +1002,46 @@ describe("ShopifyCatalogDataSource", () => {
       (await source.listProducts({ category: "packs" })).map(
         (product) => product.handle,
       ),
-      ["ridge-30-field-pack"],
+      ["ridge-30-field-pack", "approach-18-day-pack", "waypoint-sling-6"],
     );
     assert.deepEqual(
       (await source.listProducts({ activity: "alpine" })).map(
         (product) => product.handle,
       ),
-      ["weatherline-shell", "ridge-30-field-pack"],
+      [
+        "weatherline-shell",
+        "traverse-grid-fleece",
+        "drift-insulated-vest",
+        "ridge-30-field-pack",
+        "approach-18-day-pack",
+        "scree-approach-shoe",
+      ],
     );
     assert.deepEqual(
       (await source.listProducts({}, "price-asc")).map(
         (product) => product.price.amount,
       ),
-      [168, 198, 248],
+      [98, 118, 148, 148, 158, 168, 188, 198, 248],
     );
     assert.deepEqual(
       (await source.listProducts({}, "price-desc")).map(
         (product) => product.price.amount,
       ),
-      [248, 198, 168],
+      [248, 198, 188, 168, 158, 148, 148, 118, 98],
     );
     assert.deepEqual(
       (await source.listProducts({}, "name")).map((product) => product.title),
-      ["Ridge 30 Field Pack", "Talus Trail Shoe", "Weatherline Shell"],
+      [
+        "Approach 18 Day Pack",
+        "Camp Recovery Clog",
+        "Drift Insulated Vest",
+        "Ridge 30 Field Pack",
+        "Scree Approach Shoe",
+        "Talus Trail Shoe",
+        "Traverse Grid Fleece",
+        "Waypoint Sling 6",
+        "Weatherline Shell",
+      ],
     );
     assert.deepEqual(
       (await source.listProducts()).map((product) => product.handle),

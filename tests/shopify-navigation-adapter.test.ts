@@ -212,13 +212,40 @@ describe("Shopify navigation mapping", () => {
           handle: "forward",
           productHandles: [
             "weatherline-shell",
+            "traverse-grid-fleece",
+            "drift-insulated-vest",
             "ridge-30-field-pack",
+            "approach-18-day-pack",
+            "waypoint-sling-6",
             "talus-trail-shoe",
+            "scree-approach-shoe",
+            "camp-recovery-clog",
           ],
         },
-        { handle: "outerwear", productHandles: ["weatherline-shell"] },
-        { handle: "packs", productHandles: ["ridge-30-field-pack"] },
-        { handle: "footwear", productHandles: ["talus-trail-shoe"] },
+        {
+          handle: "outerwear",
+          productHandles: [
+            "weatherline-shell",
+            "traverse-grid-fleece",
+            "drift-insulated-vest",
+          ],
+        },
+        {
+          handle: "packs",
+          productHandles: [
+            "ridge-30-field-pack",
+            "approach-18-day-pack",
+            "waypoint-sling-6",
+          ],
+        },
+        {
+          handle: "footwear",
+          productHandles: [
+            "talus-trail-shoe",
+            "scree-approach-shoe",
+            "camp-recovery-clog",
+          ],
+        },
       ],
     );
   });
@@ -429,7 +456,7 @@ describe("Shopify navigation data source", () => {
       (await source.getCollectionProducts("packs"))?.map(
         (product) => product.handle,
       ),
-      ["ridge-30-field-pack"],
+      ["ridge-30-field-pack", "approach-18-day-pack", "waypoint-sling-6"],
     );
   });
 
@@ -649,7 +676,7 @@ describe("Shopify navigation data source", () => {
       (await source.getCollectionProducts("outerwear"))?.map(
         (product) => product.handle,
       ),
-      ["weatherline-shell"],
+      ["weatherline-shell", "traverse-grid-fleece", "drift-insulated-vest"],
     );
     assert.equal(observed.length, 1);
   });

@@ -2,10 +2,11 @@
  * Synthetic Storefront API catalog responses for adapter tests.
  *
  * These are hand-built GraphQL-shaped objects that mirror the live catalog's
- * *shape* — three approved products, `Color` plus `Size` options, four media
- * roles per colorway, and the five `forward` metafields. They are not captured
- * live responses: media IDs, CDN paths, and copy are synthetic, and there are
- * no headers, signed CDN parameters, or credentials anywhere in this file.
+ * *shape* — the exact nine approved products, `Color` plus `Size` options, four
+ * media roles per colorway, and the five `forward` metafields. They are not
+ * captured live responses: media IDs, CDN paths, and copy are synthetic, and
+ * there are no headers, signed CDN parameters, or credentials anywhere in this
+ * file.
  *
  * Media nodes are deliberately emitted in reverse of the metafield order so
  * tests prove that role resolution comes from `forward.colorway_media_map`
@@ -66,6 +67,60 @@ const PRODUCT_SPECS: readonly ProductSpec[] = [
     mediaIdBase: 1000,
   },
   {
+    handle: "traverse-grid-fleece",
+    title: "Traverse Grid Fleece",
+    productType: "Outerwear",
+    description:
+      "A breathable grid-fleece midlayer built for high-output movement and fast temperature changes.\nThe Traverse Grid Fleece vents under load, dries quickly, and layers cleanly beneath a shell.",
+    price: "148.0",
+    colorways: [
+      { label: "Moss / Charcoal", filePrefix: "traverse-moss" },
+      { label: "Claystone / Bone", filePrefix: "traverse-claystone" },
+    ],
+    sizes: ["XS", "S", "M", "L", "XL"],
+    highlights: [
+      "Breathable grid-fleece structure",
+      "Fast-drying high-output midlayer",
+      "Layers cleanly under a shell",
+    ],
+    materials:
+      "Recycled grid-fleece knit with a brushed interior face and low-bulk bonded cuffs.",
+    fieldSpecs: {
+      weight_g: 320,
+      fit: "trim active",
+      recommended_use: ["hiking", "fastpacking", "cold-weather layering"],
+    },
+    care: "Machine wash cold on a gentle cycle without fabric softener. Tumble dry low or air dry.",
+    mediaIdBase: 2000,
+  },
+  {
+    handle: "drift-insulated-vest",
+    title: "Drift Insulated Vest",
+    productType: "Outerwear",
+    description:
+      "A packable synthetic-insulation layer for exposed starts, stops, and cold transitions.\nThe Drift Insulated Vest adds core warmth without limiting arm movement, then compresses into a pack lid.",
+    price: "188.0",
+    colorways: [
+      { label: "Charcoal / Signal", filePrefix: "drift-charcoal" },
+      { label: "Dune / Moss", filePrefix: "drift-dune" },
+    ],
+    sizes: ["XS", "S", "M", "L", "XL"],
+    highlights: [
+      "Packable synthetic core warmth",
+      "Wind-resistant recycled shell fabric",
+      "Compresses into its own pocket",
+    ],
+    materials:
+      "Recycled ripstop shell with a water-repellent finish and mapped synthetic insulation.",
+    fieldSpecs: {
+      insulation_g: 60,
+      fit: "layering regular",
+      recommended_use: ["alpine starts", "camp warmth", "cold transitions"],
+    },
+    care: "Machine wash cold with a technical cleaner. Tumble dry low to restore loft.",
+    mediaIdBase: 3000,
+  },
+  {
     handle: "ridge-30-field-pack",
     title: "Ridge 30 Field Pack",
     productType: "Packs",
@@ -89,7 +144,59 @@ const PRODUCT_SPECS: readonly ProductSpec[] = [
       recommended_use: ["day hiking", "field work", "light overnights"],
     },
     care: "Hand wash with mild soap and cool water. Air dry completely away from direct heat.",
-    mediaIdBase: 2000,
+    mediaIdBase: 4000,
+  },
+  {
+    handle: "approach-18-day-pack",
+    title: "Approach 18 Day Pack",
+    productType: "Packs",
+    description:
+      "A close-body 18-liter pack for short technical days and fast access.\nThe Approach 18 stays stable on scrambling terrain and opens without coming off your back.",
+    price: "148.0",
+    colorways: [
+      { label: "Moss / Charcoal", filePrefix: "approach-moss" },
+      { label: "Claystone / Dune", filePrefix: "approach-claystone" },
+    ],
+    highlights: [
+      "18-liter close-body carry",
+      "Stable on technical ground",
+      "Fast side and top access",
+    ],
+    materials:
+      "High-tenacity recycled nylon body with a reinforced base and weather-resistant zippers.",
+    fieldSpecs: {
+      volume_liters: 18,
+      carry: "close-body panel",
+      recommended_use: ["approaches", "short technical days", "travel"],
+    },
+    care: "Hand wash with mild soap and cool water. Air dry away from direct heat.",
+    mediaIdBase: 5000,
+  },
+  {
+    handle: "waypoint-sling-6",
+    title: "Waypoint Sling 6",
+    productType: "Packs",
+    description:
+      "A compact 6-liter carry for travel, daily field essentials, and quick organization.\nThe Waypoint Sling 6 keeps documents, tools, and a light layer within reach of one hand.",
+    price: "98.0",
+    colorways: [
+      { label: "Charcoal / Signal", filePrefix: "waypoint-charcoal" },
+      { label: "Dune / Moss", filePrefix: "waypoint-dune" },
+    ],
+    highlights: [
+      "6-liter everyday carry",
+      "Quick cross-body access",
+      "Organized document and tool pockets",
+    ],
+    materials:
+      "Recycled nylon body with a padded back panel and a weather-resistant main zipper.",
+    fieldSpecs: {
+      volume_liters: 6,
+      carry: "cross-body sling",
+      recommended_use: ["travel", "daily carry", "field organization"],
+    },
+    care: "Spot clean with mild soap and cool water. Air dry completely.",
+    mediaIdBase: 6000,
   },
   {
     handle: "talus-trail-shoe",
@@ -116,7 +223,61 @@ const PRODUCT_SPECS: readonly ProductSpec[] = [
       recommended_use: ["trail running", "fast hiking"],
     },
     care: "Brush off dry dirt, hand wash with cool water, and air dry. Do not machine wash or expose to direct heat.",
-    mediaIdBase: 3000,
+    mediaIdBase: 7000,
+  },
+  {
+    handle: "scree-approach-shoe",
+    title: "Scree Approach Shoe",
+    productType: "Footwear",
+    description:
+      "A precise low-profile approach shoe for rock, mixed trail, and technical transitions.\nThe Scree edges confidently, protects the forefoot, and keeps ground feel close underfoot.",
+    price: "158.0",
+    colorways: [
+      { label: "Charcoal / Gum", filePrefix: "scree-charcoal" },
+      { label: "Limestone / Moss", filePrefix: "scree-limestone" },
+    ],
+    sizes: ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12", "US 13"],
+    highlights: [
+      "Low-profile edging platform",
+      "Sticky rubber approach outsole",
+      "Protective abrasion-resistant upper",
+    ],
+    materials:
+      "Abrasion-resistant woven upper, protective toe cap, firm midsole, and sticky rubber outsole.",
+    fieldSpecs: {
+      drop_mm: 8,
+      terrain: ["rock", "mixed trail", "scree"],
+      recommended_use: ["approaches", "scrambling"],
+    },
+    care: "Brush off dry dirt and hand wash with cool water. Air dry away from direct heat.",
+    mediaIdBase: 8000,
+  },
+  {
+    handle: "camp-recovery-clog",
+    title: "Camp Recovery Clog",
+    productType: "Footwear",
+    description:
+      "Easy-on recovery and camp footwear with durable traction and weather-tolerant materials.\nThe Camp Recovery Clog stays warm underfoot and handles wet ground without complaint.",
+    price: "118.0",
+    colorways: [
+      { label: "Charcoal / Moss", filePrefix: "camp-charcoal" },
+      { label: "Dune / Claystone", filePrefix: "camp-dune" },
+    ],
+    sizes: ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12", "US 13"],
+    highlights: [
+      "Easy-on recovery fit",
+      "Weather-tolerant durable materials",
+      "Grippy camp and transition outsole",
+    ],
+    materials:
+      "Molded foam midsole, water-tolerant upper, and a durable rubber outsole.",
+    fieldSpecs: {
+      weight_g: 240,
+      closure: "easy-on heel strap",
+      recommended_use: ["camp", "travel", "recovery"],
+    },
+    care: "Rinse with cool water and air dry. Do not machine wash or apply direct heat.",
+    mediaIdBase: 9000,
   },
 ];
 

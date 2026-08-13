@@ -41,6 +41,27 @@ export const ARTICLE_PRESENTATION_PROFILES = {
     coordinates: "57.0776° N, 3.6710° W",
     heroImage: EDITORIAL_IMAGES.campTent,
   },
+  "how-we-test-a-shell-before-calling-it-weatherproof": {
+    plate: "No. 04",
+    readingMinutes: 8,
+    location: "Lake District, England",
+    coordinates: "54.4609° N, 3.0886° W",
+    heroImage: EDITORIAL_IMAGES.campfire,
+  },
+  "a-two-day-kit-built-around-nine-kilograms": {
+    plate: "No. 05",
+    readingMinutes: 9,
+    location: "Snowdonia, Wales",
+    coordinates: "53.0685° N, 4.0763° W",
+    heroImage: EDITORIAL_IMAGES.trailMovement,
+  },
+  "repair-notes-what-five-years-of-use-should-look-like": {
+    plate: "No. 06",
+    readingMinutes: 8,
+    location: "Forward Repair Desk",
+    coordinates: "54.4609° N, 3.0886° W",
+    heroImage: EDITORIAL_IMAGES.alpineTraverse,
+  },
 } as const satisfies Record<string, ArticlePresentationProfile>;
 
 export const PAGE_PRESENTATION_PROFILES = {
@@ -63,6 +84,21 @@ export const PAGE_PRESENTATION_PROFILES = {
     eyebrow: "Contact",
     heroImage: EDITORIAL_IMAGES.trailMovement,
     sectionHeadings: [],
+  },
+  "materials-and-care": {
+    eyebrow: "Materials & Care",
+    heroImage: EDITORIAL_IMAGES.campfire,
+    sectionHeadings: ["Face fabrics and membranes", "Washing and reproofing"],
+  },
+  "fit-and-sizing": {
+    eyebrow: "Fit & Sizing",
+    heroImage: EDITORIAL_IMAGES.trailMovement,
+    sectionHeadings: ["Apparel fit", "Footwear sizing"],
+  },
+  "field-testing": {
+    eyebrow: "Field Testing",
+    heroImage: EDITORIAL_IMAGES.alpineTraverse,
+    sectionHeadings: ["What we test", "What ends a test"],
   },
 } as const satisfies Record<string, PagePresentationProfile>;
 

@@ -1,139 +1,155 @@
-/**
- * Static journal fixture records. Only the data source may import this file.
- * `walking-the-long-light` is the approved route-smoke article handle.
- */
+/** Representative static Field Notes. Shopify owns the published long-form copy. */
 
 import type { JournalArticle } from "../types";
 import { EDITORIAL_IMAGES } from "./editorial-images";
 
 export const JOURNAL_FIXTURES: readonly JournalArticle[] = [
   {
-    handle: "walking-the-long-light",
-    title: "Walking the Long Light",
+    handle: "layering-for-moving-weather",
+    title: "Layering for Moving Weather",
     excerpt:
-      "Field notes from a week of low sun, long shadows, and unhurried miles.",
+      "How to layer for long climbs, fast descents, and uncertain forecasts.",
     plate: "No. 01",
-    publishedAt: "2026-07-18",
-    readingMinutes: 6,
-    location: "Cairngorms, Scotland",
-    coordinates: "57.0776° N, 3.6710° W",
+    publishedAt: "2026-07-24",
+    readingMinutes: 7,
+    location: "Pacific Crest Trail, California",
+    coordinates: "36.5785° N, 118.2923° W",
+    heroImage: EDITORIAL_IMAGES.mountainRidges,
+    body: [
+      {
+        type: "paragraph",
+        text: "Begin the climb slightly cool so the first hour does not soak the layers meant to protect the next six.",
+      },
+      { type: "heading", text: "Build around output" },
+      {
+        type: "paragraph",
+        text: "A breathable base, venting midlayer, and accessible shell create more range than one heavy garment.",
+      },
+      {
+        type: "pullquote",
+        text: "The best layer is the one adjusted before discomfort becomes a problem.",
+      },
+    ],
+  },
+  {
+    handle: "packing-thirty-liters-for-a-long-day",
+    title: "Packing Thirty Liters for a Long Day",
+    excerpt: "The honest pack list for a full mountain day.",
+    plate: "No. 02",
+    publishedAt: "2026-06-10",
+    readingMinutes: 5,
+    location: "North Cascades, Washington",
+    coordinates: "48.7718° N, 121.2985° W",
     heroImage: EDITORIAL_IMAGES.alpineTraverse,
     body: [
       {
         type: "paragraph",
-        text: "There is a month in the northern year when the sun never quite commits. It rises late, tracks low along the ridgeline, and spends the whole day looking like late afternoon. Photographers call it endless golden hour. Walkers call it a problem of arithmetic: eight hours of usable light, twenty miles of intention.",
+        text: "Thirty liters leaves margin for weather, food, water, repair, and the layer removed halfway up the first climb.",
       },
+      { type: "heading", text: "Pack the margin first" },
       {
         type: "paragraph",
-        text: "We planned the week around that arithmetic. Short approaches, long ridges, camps set before the color drained out of the west. The plan survived exactly one day, which is about average, and the week was better for it.",
-      },
-      { type: "heading", text: "The case for slow miles" },
-      {
-        type: "paragraph",
-        text: "Low light rearranges priorities. You stop optimizing for distance and start optimizing for attention — the frost pattern on a fence post, the way a burn cuts silver through black peat, the exact moment the shadow of one hill climbs the flank of the next. None of it counts as progress. All of it counts.",
-      },
-      {
-        type: "pullquote",
-        text: "You stop optimizing for distance and start optimizing for attention.",
-      },
-      {
-        type: "image",
-        image: EDITORIAL_IMAGES.campTent,
-        caption:
-          "Camp set early, for once. The rule of the week: stakes in before the color goes.",
-      },
-      { type: "heading", text: "What worked" },
-      {
-        type: "paragraph",
-        text: "Layers that vent without stopping. A pack that lets shoulders roll. Footwear that treats wet as a state of mind rather than an emergency. The kit list at the bottom of this note is short because the days demanded it — everything had to earn its place twice: once on the back, once in use.",
-      },
-      {
-        type: "note",
-        label: "Field note",
-        text: "Sunset at 15:41. Headlamps are not optional equipment in the long-light season; they are the second half of the day.",
-      },
-      {
-        type: "paragraph",
-        text: "By the last morning the arithmetic had inverted. We were no longer spending light to buy miles; we were spending miles to stay inside the light. That is the whole trick of the season, and probably of the sport.",
+        text: "Shelter, insulation, navigation, and repair tools establish the load before convenience items compete for space.",
       },
     ],
   },
   {
-    handle: "the-thirty-liter-rule",
-    title: "The Thirty-Liter Rule",
-    excerpt:
-      "Why the honest day pack is bigger than you think, and smaller than you fear.",
-    plate: "No. 02",
-    publishedAt: "2026-06-02",
-    readingMinutes: 4,
-    location: "Dolomites, Italy",
-    coordinates: "46.4102° N, 11.8440° E",
-    heroImage: EDITORIAL_IMAGES.trailMovement,
+    handle: "reading-the-trail-underfoot",
+    title: "Reading the Trail Underfoot",
+    excerpt: "Foot placement, pace, and terrain cues for moving efficiently.",
+    plate: "No. 03",
+    publishedAt: "2026-05-08",
+    readingMinutes: 6,
+    location: "Cairngorms, Scotland",
+    coordinates: "57.0776° N, 3.6710° W",
+    heroImage: EDITORIAL_IMAGES.campTent,
     body: [
       {
         type: "paragraph",
-        text: "Every gear closet contains the same argument, fought in liters. The twenty-liter pack that looks fast and carries nothing. The forty-five that swallows a weekend and rides like furniture. Somewhere between them is the honest number for a full mountain day, and after years of getting it wrong in both directions we keep arriving at thirty.",
+        text: "Texture changes before traction does. Loose stone, dark roots, and polished rock all announce themselves early.",
       },
-      { type: "heading", text: "The audit" },
+      { type: "heading", text: "Pace follows information" },
       {
         type: "paragraph",
-        text: "Run the audit on any long day: shell, insulation, two liters of water, food you actually want to eat, first aid, headlamp, and the margin — the space for a stripped layer, a wet fly, a friend's overflow. The margin is the part the twenty-liter pack pretends you will not need. The mountain disagrees, reliably, sometime after two in the afternoon.",
-      },
-      {
-        type: "pullquote",
-        text: "The margin is the part the small pack pretends you will not need.",
-      },
-      {
-        type: "paragraph",
-        text: "Thirty liters half-full carries better than twenty liters compressed to bursting. Fabric is lighter than regret. That is the whole rule, and it fits on an index card.",
-      },
-      {
-        type: "note",
-        label: "Field note",
-        text: "A pack that compresses well makes the rule work both ways — thirty liters cinched down is a day pack; opened up, it is shelter for everything the day produced.",
+        text: "Shorter steps preserve options when the ground becomes uncertain and reduce the corrections that consume energy.",
       },
     ],
   },
   {
-    handle: "a-defense-of-heavy-weather",
-    title: "A Defense of Heavy Weather",
+    handle: "how-we-test-a-shell-before-calling-it-weatherproof",
+    title: "How We Test a Shell Before Calling It Weatherproof",
     excerpt:
-      "The best days outside rarely happen under a blue sky. An argument for going anyway.",
-    plate: "No. 03",
-    publishedAt: "2026-04-14",
-    readingMinutes: 5,
-    location: "Lofoten, Norway",
-    coordinates: "68.1102° N, 13.6213° E",
+      "Hose tests, hill days, and the point where a seam decides everything.",
+    plate: "No. 04",
+    publishedAt: "2026-04-22",
+    readingMinutes: 8,
+    location: "Lake District, England",
+    coordinates: "54.4609° N, 3.0886° W",
     heroImage: EDITORIAL_IMAGES.campfire,
     body: [
       {
         type: "paragraph",
-        text: "The forecast said stay home. It usually does, in the places worth going. Forty knots on the tops, rain arriving sideways by noon, cloud down to the shoulder of the fjord. We went anyway — not out of bravado, but because the alternative was watching weather through glass, and weather through glass is just television.",
+        text: "A lab number starts the test; repeated wet hill days decide whether the pattern deserves the claim.",
       },
-      { type: "heading", text: "What the brochure leaves out" },
+      { type: "heading", text: "Start at the openings" },
       {
         type: "paragraph",
-        text: "Heavy weather edits a landscape honestly. It empties the trailheads, silences the drone pilots, and reduces the day to essentials: navigation you trust, layers that work, and the specific, unphotographable pleasure of being warm inside your hood while the world tears past outside it.",
-      },
-      {
-        type: "pullquote",
-        text: "Weather through glass is just television.",
-      },
-      {
-        type: "image",
-        image: EDITORIAL_IMAGES.campfire,
-        caption:
-          "The reward structure of heavy weather: fire, shelter, and the story already improving.",
-      },
-      {
-        type: "paragraph",
-        text: "There are rules. You do not defend heavy weather on exposed ridges, over water that can take you, or with people who did not sign up for it. The defense is of discomfort, not of danger — the two get confused only by people who have not spent enough time in either.",
+        text: "Cuffs, hood adjustment, pocket access, and seam intersections reveal practical weather resistance before the main fabric does.",
       },
       {
         type: "note",
         label: "Field note",
-        text: "Test days for gear are heavy days. A shell that works in April in Lofoten has told you everything it will ever need to say.",
+        text: "Testing continues after washing because a finish that works only when new is not a system.",
       },
     ],
   },
-] as const;
+  {
+    handle: "a-two-day-kit-built-around-nine-kilograms",
+    title: "A Two-Day Kit Built Around Nine Kilograms",
+    excerpt: "An overnight list with enough margin left for uncertain weather.",
+    plate: "No. 05",
+    publishedAt: "2026-03-19",
+    readingMinutes: 9,
+    location: "Snowdonia, Wales",
+    coordinates: "53.0685° N, 4.0763° W",
+    heroImage: EDITORIAL_IMAGES.trailMovement,
+    body: [
+      {
+        type: "paragraph",
+        text: "Nine kilograms is light enough to keep moving naturally and heavy enough to remain honest about shelter and weather.",
+      },
+      { type: "heading", text: "Count systems, not objects" },
+      {
+        type: "paragraph",
+        text: "Sleep, shelter, food, water, clothing, navigation, and repair each need a complete answer before individual items are optimized.",
+      },
+    ],
+  },
+  {
+    handle: "repair-notes-what-five-years-of-use-should-look-like",
+    title: "Repair Notes: What Five Years of Use Should Look Like",
+    excerpt:
+      "Wear patterns, honest failures, and repairs that keep gear in service.",
+    plate: "No. 06",
+    publishedAt: "2026-02-11",
+    readingMinutes: 8,
+    location: "Forward Repair Desk",
+    coordinates: "54.4609° N, 3.0886° W",
+    heroImage: EDITORIAL_IMAGES.alpineTraverse,
+    body: [
+      {
+        type: "paragraph",
+        text: "Five years of use leaves abrasion, softened edges, and local repairs. Those marks are evidence, not defects.",
+      },
+      { type: "heading", text: "Read the pattern of wear" },
+      {
+        type: "paragraph",
+        text: "Repeated stress at one seam may need reinforcement; even wear across a contact surface usually means the product is working as intended.",
+      },
+      {
+        type: "pullquote",
+        text: "Useful age is visible, specific, and repairable.",
+      },
+    ],
+  },
+];

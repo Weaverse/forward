@@ -1,11 +1,9 @@
-/**
- * Static product fixture records for the Forward demo catalog.
- *
- * Only `src/lib/storefront/data-source.ts` may import this file. Images come
- * exclusively from the approved branded catalog mirrored in
- * `public/images/products/` (see `public/images/products/manifest.json`).
- */
+/** Static deterministic catalog used only when Shopify is not configured. */
 
+import {
+  CATALOG_PRESENTATION_PROFILES,
+  type CatalogPresentationProfile,
+} from "../catalog-presentation";
 import type {
   Money,
   Product,
@@ -27,12 +25,12 @@ function productImage(file: string, alt: string): StorefrontImage {
   };
 }
 
-function colorway(
+function fixtureColorway(
   id: string,
   name: string,
   swatchColor: string,
   filePrefix: string,
-  productTitle: string,
+  title: string,
 ): ProductColorway {
   return {
     id,
@@ -41,19 +39,19 @@ function colorway(
     images: {
       primary: productImage(
         `${filePrefix}-primary.webp`,
-        `${productTitle} in ${name} — studio view`,
+        `${title} in ${name} — primary view`,
       ),
       alternate: productImage(
         `${filePrefix}-alternate.webp`,
-        `${productTitle} in ${name} — alternate angle`,
+        `${title} in ${name} — alternate view`,
       ),
       detail: productImage(
         `${filePrefix}-detail.webp`,
-        `${productTitle} in ${name} — material detail`,
+        `${title} in ${name} — detail view`,
       ),
       context: productImage(
         `${filePrefix}-context.webp`,
-        `${productTitle} in ${name} — in the field`,
+        `${title} in ${name} — context view`,
       ),
     },
   };
@@ -65,192 +63,259 @@ function productVariants(
   options: readonly ProductOption[],
   price: Money,
 ): readonly ProductVariant[] {
-  const optionSelections =
-    options.length === 0
-      ? [[]]
-      : (options[0]?.values.map((value) => [
-          { name: options[0]?.name ?? "Option", value },
-        ]) ?? [[]]);
-
+  const values = options[0]?.values ?? [undefined];
   return colorwayIds.flatMap((colorwayId) =>
-    optionSelections.map((selectedOptions) => ({
-      id: `demo:${handle}:${colorwayId}:${
-        selectedOptions.map((option) => option.value).join(":") || "default"
-      }`,
-      colorwayId,
-      selectedOptions,
-      price,
-      availableForSale: true,
-    })),
+    values.map((value) => {
+      const selectedOptions =
+        value === undefined
+          ? []
+          : [{ name: options[0]?.name ?? "Option", value }];
+      return {
+        id: `demo:${handle}:${colorwayId}:${value ?? "default"}`,
+        colorwayId,
+        selectedOptions,
+        price,
+        availableForSale: true,
+      };
+    }),
   );
 }
 
-export const PRODUCT_FIXTURES: readonly Product[] = [
-  {
-    handle: "weatherline-shell",
+interface StaticProductDefinition {
+  title: string;
+  price: number;
+  description: string;
+  materials: string;
+  specs: readonly { label: string; value: string }[];
+  care: readonly string[];
+  optionValues?: readonly string[];
+  imagePrefixes: readonly string[];
+}
+
+const APPAREL_SIZES = ["XS", "S", "M", "L", "XL"] as const;
+const FOOTWEAR_SIZES = [
+  "US 7",
+  "US 8",
+  "US 9",
+  "US 10",
+  "US 11",
+  "US 12",
+  "US 13",
+] as const;
+
+const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
+  "weatherline-shell": {
     title: "Weatherline Shell",
-    subtitle: "Three-layer waterproof shell for shifting coastal weather.",
-    plate: "01",
-    category: "shells",
-    activities: ["alpine", "trail", "camp"],
-    price: { amount: 248, currencyCode: "USD" },
+    price: 248,
     description:
-      "A three-layer hardshell cut for movement, not bulk. The Weatherline holds its own through sideways rain and ridge-top wind, then packs down small enough to forget until the sky turns.",
-    detailParagraphs: [
-      "The face fabric is a tightly woven 40-denier ripstop bonded to a breathable waterproof membrane and a soft tricot backer. Seams are fully taped; the main zip is water-resistant with an internal storm guard.",
-      "A single-pull helmet-compatible hood, two harness-clear hand pockets, and pit zips cover the essentials without adding trim you will never use. The hem drops slightly in back and cinches one-handed.",
-      "Cut for a mid layer underneath. If you are between sizes and ride the warm side, size down.",
-    ],
+      "A three-layer hardshell cut for movement, not bulk. Weather protection, useful venting, and a quiet articulated fit make it dependable through long days and fast changes.",
+    materials:
+      "A recycled 40-denier ripstop face, waterproof breathable membrane, soft tricot backer, fully taped seams, and a PFAS-free water-repellent finish.",
     specs: [
       { label: "Weight", value: "312 g (size M)" },
-      { label: "Fabric", value: "40D 3L ripstop, PFAS-free DWR" },
-      { label: "Waterproofing", value: "20,000 mm hydrostatic head" },
-      { label: "Breathability", value: "20,000 g/m²/24h" },
-      { label: "Packed size", value: "Stows into its own chest pocket" },
+      { label: "Waterproofing", value: "20,000 mm" },
       { label: "Fit", value: "Regular, mid-layer compatible" },
     ],
     care: [
-      "Machine wash cold on gentle with technical wash, zips closed.",
-      "Tumble dry low to reactivate the DWR finish.",
-      "Never use fabric softener or dry cleaning.",
+      "Machine wash cold with technical cleaner and zips closed.",
+      "Tumble dry low to reactivate the water-repellent finish.",
     ],
-    repair:
-      "Field-repair small punctures with tenacious tape; our repairs program handles delaminations, zip replacements, and re-taping for the life of the garment.",
-    colorways: [
-      colorway(
-        "charcoal",
-        "Charcoal",
-        "#3b403f",
-        "weatherline-charcoal",
-        "Weatherline Shell",
-      ),
-      colorway(
-        "claystone",
-        "Claystone",
-        "#a9705a",
-        "weatherline-claystone",
-        "Weatherline Shell",
-      ),
-    ],
-    options: [{ name: "Size", values: ["XS", "S", "M", "L", "XL"] }],
-    variants: productVariants(
-      "weatherline-shell",
-      ["charcoal", "claystone"],
-      [{ name: "Size", values: ["XS", "S", "M", "L", "XL"] }],
-      { amount: 248, currencyCode: "USD" },
-    ),
-    relatedHandles: ["ridge-30-field-pack", "talus-trail-shoe"],
+    optionValues: APPAREL_SIZES,
+    imagePrefixes: ["weatherline-charcoal", "weatherline-claystone"],
   },
-  {
-    handle: "ridge-30-field-pack",
-    title: "Ridge 30 Field Pack",
-    subtitle: "A 30-liter pack built for long days above the treeline.",
-    plate: "02",
-    category: "packs",
-    activities: ["alpine", "trail"],
-    price: { amount: 168, currencyCode: "USD" },
+  "traverse-grid-fleece": {
+    title: "Traverse Grid Fleece",
+    price: 148,
     description:
-      "Thirty liters is the honest size for a full day out: shell, food, water, a warm layer, and room left over for whatever the day produces. The Ridge carries close and quiet, with nothing swinging off the back.",
-    detailParagraphs: [
-      "The body is a 210-denier recycled nylon with a burlier 420-denier boot. A single top-loading chamber with an internal zip pocket keeps packing simple; a stretch front pocket swallows a wet shell without opening the bag.",
-      "The back panel uses a framesheet with a light aluminum stay — enough structure to transfer weight to the hipbelt without turning the pack into furniture. Side compression doubles as pole or axe carry.",
-      "Hipbelt pockets fit a phone or a day of snacks. The whole harness fits close enough to scramble in.",
+      "A breathable grid-fleece midlayer for high-output movement and quick temperature changes. It vents under load, dries quickly, and layers cleanly under a shell.",
+    materials:
+      "Recycled grid-fleece knit with a brushed interior, low-bulk cuffs, and reinforced pocket openings.",
+    specs: [
+      { label: "Weight", value: "320 g (size M)" },
+      { label: "Fit", value: "Trim active fit" },
+      { label: "Use", value: "Fast hiking and cold-weather layering" },
     ],
+    care: [
+      "Machine wash cold without fabric softener.",
+      "Tumble dry low or air dry.",
+    ],
+    optionValues: APPAREL_SIZES,
+    imagePrefixes: ["weatherline-charcoal", "weatherline-claystone"],
+  },
+  "drift-insulated-vest": {
+    title: "Drift Insulated Vest",
+    price: 188,
+    description:
+      "A packable synthetic-insulation layer for exposed starts, stops, and cold transitions. It adds core warmth without restricting movement.",
+    materials:
+      "Recycled ripstop shell with a water-repellent finish and mapped synthetic insulation.",
+    specs: [
+      { label: "Insulation", value: "60 g synthetic fill" },
+      { label: "Fit", value: "Regular layering fit" },
+      { label: "Packed size", value: "Stows into pocket" },
+    ],
+    care: [
+      "Machine wash cold with technical cleaner.",
+      "Tumble dry low to restore loft.",
+    ],
+    optionValues: APPAREL_SIZES,
+    imagePrefixes: ["weatherline-charcoal", "weatherline-claystone"],
+  },
+  "ridge-30-field-pack": {
+    title: "Ridge 30 Field Pack",
+    price: 198,
+    description:
+      "A stable 30-liter field pack for moving light without sacrificing access or durability. The close carry stays composed on rough ground.",
+    materials:
+      "High-tenacity recycled nylon body, reinforced base, aluminum stay, and weather-resistant hardware.",
     specs: [
       { label: "Volume", value: "30 L" },
       { label: "Weight", value: "980 g" },
-      { label: "Fabric", value: "210D recycled nylon, 420D boot" },
-      { label: "Back length", value: "One size, 43–53 cm torso" },
       { label: "Load range", value: "Comfortable to 12 kg" },
-      { label: "Hydration", value: "Internal sleeve, dual hose ports" },
     ],
     care: [
-      "Hose down and air-dry after gritty or salty trips.",
-      "Spot-clean with mild soap; never machine wash.",
-      "Store loosely packed, out of direct sun.",
+      "Hand wash with mild soap and cool water.",
+      "Air dry away from direct heat.",
     ],
-    repair:
-      "Buckles, straps, and stays are standard parts we stock for replacement. Torn panels and blown seams go through the repairs program rather than the landfill.",
-    colorways: [
-      colorway(
-        "charcoal",
-        "Charcoal",
-        "#3b403f",
-        "ridge-charcoal",
-        "Ridge 30 Field Pack",
-      ),
-      colorway("dune", "Dune", "#c4ad83", "ridge-dune", "Ridge 30 Field Pack"),
-    ],
-    options: [],
-    variants: productVariants("ridge-30-field-pack", ["charcoal", "dune"], [], {
-      amount: 168,
-      currencyCode: "USD",
-    }),
-    relatedHandles: ["weatherline-shell", "talus-trail-shoe"],
+    imagePrefixes: ["ridge-charcoal", "ridge-dune"],
   },
-  {
-    handle: "talus-trail-shoe",
-    title: "Talus Trail Shoe",
-    subtitle: "Grippy, stable footwear for scree, roots, and river rock.",
-    plate: "03",
-    category: "footwear",
-    activities: ["trail", "camp"],
-    price: { amount: 142, currencyCode: "USD" },
+  "approach-18-day-pack": {
+    title: "Approach 18 Day Pack",
+    price: 148,
     description:
-      "The Talus is built for the ground most trails are actually made of: loose rock, wet roots, and off-camber dirt. Sticky rubber and a stable midsole platform, without the dead weight of a boot.",
-    detailParagraphs: [
-      "The outsole uses 4.5 mm multidirectional lugs in a sticky compound that holds on wet rock and sheds mud instead of carrying it. A forefoot rock plate takes the sting out of sharp talus.",
-      "The midsole is firm enough to edge on but cushioned for full days under load. A wide-ish toe box lets feet spread on descents without swimming in the shoe.",
-      "The engineered mesh upper drains fast and dries on the move. No waterproof liner by design — wet feet that dry beat wet feet that stay wet.",
-    ],
+      "A close-body 18-liter pack for short technical days and fast access. It remains stable on scrambling terrain without excess structure.",
+    materials:
+      "High-tenacity recycled nylon, reinforced base, close-body harness, and weather-resistant zippers.",
     specs: [
-      { label: "Weight", value: "298 g (per shoe, EU 42)" },
+      { label: "Volume", value: "18 L" },
+      { label: "Carry", value: "Close-body panel" },
+      { label: "Use", value: "Approaches and short technical days" },
+    ],
+    care: ["Hand wash with mild soap.", "Air dry completely before storage."],
+    imagePrefixes: ["ridge-charcoal", "ridge-dune"],
+  },
+  "waypoint-sling-6": {
+    title: "Waypoint Sling 6",
+    price: 98,
+    description:
+      "A compact six-liter carry for travel, daily field essentials, and quick organization. The main compartment opens with one hand.",
+    materials:
+      "Recycled nylon body, padded back panel, adjustable strap, and weather-resistant main zipper.",
+    specs: [
+      { label: "Volume", value: "6 L" },
+      { label: "Carry", value: "Cross-body sling" },
+      { label: "Use", value: "Travel and daily field carry" },
+    ],
+    care: ["Spot clean with mild soap and cool water.", "Air dry completely."],
+    imagePrefixes: ["ridge-charcoal", "ridge-dune"],
+  },
+  "talus-trail-shoe": {
+    title: "Talus Trail Shoe",
+    price: 168,
+    description:
+      "A precise trail shoe tuned for mixed rock, loose dirt, and technical descents. It balances protection, confident edge control, and sustained-mileage cushioning.",
+    materials:
+      "Abrasion-resistant woven upper, protective overlays, responsive foam, and a high-traction rubber outsole.",
+    specs: [
+      { label: "Weight", value: "298 g (per shoe, US 9)" },
       { label: "Drop", value: "6 mm" },
-      { label: "Stack", value: "28 mm heel / 22 mm forefoot" },
-      { label: "Lugs", value: "4.5 mm multidirectional, sticky compound" },
-      { label: "Protection", value: "Forefoot rock plate, welded toe cap" },
-      { label: "Upper", value: "Quick-drain engineered mesh" },
+      { label: "Lugs", value: "4.5 mm multidirectional" },
     ],
     care: [
-      "Knock off dry mud and rinse with fresh water.",
-      "Air-dry with insoles out; never on a radiator.",
-      "Re-lace loosely for storage so the upper keeps its shape.",
+      "Brush off dirt and hand wash with cool water.",
+      "Air dry away from direct heat.",
     ],
-    repair:
-      "Delaminated outsoles within reason are re-bonded through the repairs program. Worn laces and insoles are standard replaceable parts.",
-    colorways: [
-      colorway(
-        "charcoal",
-        "Charcoal",
-        "#3b403f",
-        "talus-charcoal",
-        "Talus Trail Shoe",
-      ),
-      colorway(
-        "limestone",
-        "Limestone",
-        "#cfc8b8",
-        "talus-limestone",
-        "Talus Trail Shoe",
-      ),
-    ],
-    options: [
-      {
-        name: "Size (EU)",
-        values: ["39", "40", "41", "42", "43", "44", "45", "46"],
-      },
-    ],
-    variants: productVariants(
-      "talus-trail-shoe",
-      ["charcoal", "limestone"],
-      [
-        {
-          name: "Size (EU)",
-          values: ["39", "40", "41", "42", "43", "44", "45", "46"],
-        },
-      ],
-      { amount: 142, currencyCode: "USD" },
-    ),
-    relatedHandles: ["ridge-30-field-pack", "weatherline-shell"],
+    optionValues: FOOTWEAR_SIZES,
+    imagePrefixes: ["talus-charcoal", "talus-limestone"],
   },
-] as const;
+  "scree-approach-shoe": {
+    title: "Scree Approach Shoe",
+    price: 158,
+    description:
+      "A precise low-profile approach shoe for rock, mixed trail, and technical transitions. Sticky rubber and a protected forefoot keep footing deliberate.",
+    materials:
+      "Abrasion-resistant woven upper, protective toe cap, firm midsole, and sticky rubber outsole.",
+    specs: [
+      { label: "Drop", value: "8 mm" },
+      { label: "Platform", value: "Low-profile edging platform" },
+      { label: "Use", value: "Approaches and scrambling" },
+    ],
+    care: [
+      "Brush off dry dirt and hand wash.",
+      "Air dry away from direct heat.",
+    ],
+    optionValues: FOOTWEAR_SIZES,
+    imagePrefixes: ["talus-charcoal", "talus-limestone"],
+  },
+  "camp-recovery-clog": {
+    title: "Camp Recovery Clog",
+    price: 118,
+    description:
+      "Easy-on recovery and camp footwear with durable traction and weather-tolerant materials. It stays comfortable after long days and composed on wet ground.",
+    materials:
+      "Water-tolerant upper, molded foam midsole, adjustable heel strap, and durable rubber outsole.",
+    specs: [
+      { label: "Weight", value: "240 g (per shoe, US 9)" },
+      { label: "Closure", value: "Easy-on heel strap" },
+      { label: "Use", value: "Camp, travel, and recovery" },
+    ],
+    care: ["Rinse with cool water.", "Air dry; do not apply direct heat."],
+    optionValues: FOOTWEAR_SIZES,
+    imagePrefixes: ["talus-charcoal", "talus-limestone"],
+  },
+};
+
+function buildProduct(profile: CatalogPresentationProfile): Product {
+  const definition = DEFINITIONS[profile.handle];
+  if (definition === undefined) {
+    throw new Error(`Missing static product definition for ${profile.handle}.`);
+  }
+  const colorEntries = Object.entries(profile.colorways);
+  if (colorEntries.length !== definition.imagePrefixes.length) {
+    throw new Error(`Static colorway images do not match ${profile.handle}.`);
+  }
+  const colorways = colorEntries.map(([name, presentation], index) => {
+    const prefix = definition.imagePrefixes[index];
+    if (prefix === undefined) {
+      throw new Error(`Missing static image prefix for ${profile.handle}.`);
+    }
+    return fixtureColorway(
+      presentation.id,
+      name,
+      presentation.swatchColor,
+      prefix,
+      definition.title,
+    );
+  });
+  const options: readonly ProductOption[] =
+    definition.optionValues === undefined
+      ? []
+      : [{ name: "Size", values: definition.optionValues }];
+  const price: Money = { amount: definition.price, currencyCode: "USD" };
+  return {
+    handle: profile.handle,
+    title: definition.title,
+    subtitle: profile.subtitle,
+    plate: profile.plate,
+    category: profile.category,
+    activities: profile.activities,
+    price,
+    description: definition.description,
+    detailParagraphs: [definition.description, definition.materials],
+    specs: definition.specs,
+    care: definition.care,
+    repair: profile.repair,
+    colorways,
+    options,
+    variants: productVariants(
+      profile.handle,
+      colorways.map((entry) => entry.id),
+      options,
+      price,
+    ),
+    relatedHandles: profile.relatedHandles,
+  };
+}
+
+export const PRODUCT_FIXTURES: readonly Product[] =
+  CATALOG_PRESENTATION_PROFILES.map(buildProduct);

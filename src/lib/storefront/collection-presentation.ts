@@ -30,8 +30,14 @@ export const COLLECTION_PRESENTATION_PROFILES = [
     },
     productHandles: [
       "weatherline-shell",
+      "traverse-grid-fleece",
+      "drift-insulated-vest",
       "ridge-30-field-pack",
+      "approach-18-day-pack",
+      "waypoint-sling-6",
       "talus-trail-shoe",
+      "scree-approach-shoe",
+      "camp-recovery-clog",
     ],
   },
   {
@@ -46,7 +52,11 @@ export const COLLECTION_PRESENTATION_PROFILES = [
       width: 1800,
       height: 1201,
     },
-    productHandles: ["weatherline-shell"],
+    productHandles: [
+      "weatherline-shell",
+      "traverse-grid-fleece",
+      "drift-insulated-vest",
+    ],
   },
   {
     handle: "packs",
@@ -60,7 +70,11 @@ export const COLLECTION_PRESENTATION_PROFILES = [
       width: 2000,
       height: 1334,
     },
-    productHandles: ["ridge-30-field-pack"],
+    productHandles: [
+      "ridge-30-field-pack",
+      "approach-18-day-pack",
+      "waypoint-sling-6",
+    ],
   },
   {
     handle: "footwear",
@@ -74,7 +88,11 @@ export const COLLECTION_PRESENTATION_PROFILES = [
       width: 2000,
       height: 1333,
     },
-    productHandles: ["talus-trail-shoe"],
+    productHandles: [
+      "talus-trail-shoe",
+      "scree-approach-shoe",
+      "camp-recovery-clog",
+    ],
   },
 ] as const satisfies readonly CollectionPresentationProfile[];
 

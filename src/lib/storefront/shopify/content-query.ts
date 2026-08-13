@@ -5,6 +5,9 @@ export const CONTENT_PAGE_HANDLES = [
   "field-repair",
   "shipping-returns",
   "contact",
+  "materials-and-care",
+  "fit-and-sizing",
+  "field-testing",
 ] as const;
 
 export const CONTENT_BLOG_HANDLE = "field-notes" as const;
@@ -13,6 +16,9 @@ export const CONTENT_ARTICLE_HANDLES = [
   "layering-for-moving-weather",
   "packing-thirty-liters-for-a-long-day",
   "reading-the-trail-underfoot",
+  "how-we-test-a-shell-before-calling-it-weatherproof",
+  "a-two-day-kit-built-around-nine-kilograms",
+  "repair-notes-what-five-years-of-use-should-look-like",
 ] as const;
 
 export const CONTENT_POLICY_HANDLES = [
@@ -48,6 +54,15 @@ export const CONTENT_QUERY = gql(`
       ${PAGE_FIELDS}
     }
     contact: page(handle: "contact") {
+      ${PAGE_FIELDS}
+    }
+    materialsAndCare: page(handle: "materials-and-care") {
+      ${PAGE_FIELDS}
+    }
+    fitAndSizing: page(handle: "fit-and-sizing") {
+      ${PAGE_FIELDS}
+    }
+    fieldTesting: page(handle: "field-testing") {
       ${PAGE_FIELDS}
     }
     blog(handle: $blogHandle) {
