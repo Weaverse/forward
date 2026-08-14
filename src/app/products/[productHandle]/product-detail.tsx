@@ -223,7 +223,6 @@ function ProductGallery({
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
   function closeModal() {
-    document.documentElement.style.overflow = "";
     setModalIndex(null);
     requestAnimationFrame(() => triggerRef.current?.focus());
   }

@@ -45,7 +45,6 @@ async function buildSeedLines(): Promise<readonly DemoCartLine[]> {
       title: product.title,
       colorwayId: colorway.id,
       colorwayName: colorway.name,
-      size: entry.size,
       selectedOptions: selection.selectedOptions,
       quantity: entry.quantity,
       unitPrice: selection.variant.price,

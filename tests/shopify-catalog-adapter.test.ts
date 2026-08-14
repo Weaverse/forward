@@ -368,7 +368,6 @@ describe("catalog mapping", () => {
     assert.equal(shell.handle, "weatherline-shell");
     assert.equal(shell.title, "Weatherline Shell");
     assert.deepEqual(shell.price, { amount: 248, currencyCode: "USD" });
-    assert.equal(shell.plate, "01");
     assert.equal(shell.category, "shells");
     assert.deepEqual([...shell.activities], ["alpine", "trail", "camp"]);
     assert.deepEqual(
@@ -1266,7 +1265,6 @@ describe("catalog presentation profile", () => {
     for (const profile of CATALOG_PRESENTATION_PROFILES) {
       const product = byHandle.get(profile.handle);
       assert.ok(product !== undefined, `missing ${profile.handle}`);
-      assert.equal(product.plate, profile.plate);
       assert.equal(product.category, profile.category);
       assert.equal(product.subtitle, profile.subtitle);
       assert.equal(product.repair, profile.repair);

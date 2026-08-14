@@ -22,14 +22,10 @@ interface AddToCartFormProps {
   selection: ProductSelection;
 }
 
-function selectedSize(selection: ProductSelection): string | undefined {
-  return selection.selectedOptions.Size;
-}
-
 function DemoAddToCartForm({ product, selection }: AddToCartFormProps) {
   const [quantity, setQuantity] = useState(1);
   const [status, setStatus] = useState("");
-  const size = selectedSize(selection);
+  const size = selection.selectedOptions.Size;
 
   function handleAdd() {
     if (!selection.variant.availableForSale) return;
@@ -40,7 +36,6 @@ function DemoAddToCartForm({ product, selection }: AddToCartFormProps) {
       title: product.title,
       colorwayId: selection.colorway.id,
       colorwayName: selection.colorway.name,
-      size,
       selectedOptions: selection.selectedOptions,
       quantity,
       unitPrice: selection.variant.price,

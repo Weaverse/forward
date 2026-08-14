@@ -62,13 +62,16 @@ describe("premium theme contract", () => {
     assert.match(styles, /\.product-card img \{[\s\S]*?aspect-ratio: 4 \/ 5;/);
     assert.match(
       styles,
-      /\.product-runway \{\s*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/,
+      /\.home-featured-grid \{\s*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
     );
     assert.match(
       styles,
       /\.plp-grid \{\s*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/,
     );
-    assert.doesNotMatch(styles, /\.product-runway \.product-card:nth-child/);
+    assert.doesNotMatch(
+      styles,
+      /\.home-featured-grid \.product-card:nth-child/,
+    );
     assert.doesNotMatch(styles, /\.plp-grid \.product-card:nth-child/);
   });
 
@@ -110,7 +113,7 @@ describe("premium theme contract", () => {
     );
     assert.match(
       styles,
-      /@media \(max-width: 820px\)[\s\S]*?\.hero-advanced \.hero-sub \{[\s\S]*?max-width: 100%;[\s\S]*?overflow-wrap: anywhere;/,
+      /@media \(max-width: 820px\)[\s\S]*?\.commerce-hero,[\s\S]*?grid-template-columns: minmax\(0, 1fr\);[\s\S]*?\.commerce-hero-media \{[\s\S]*?min-height: 68svh;/,
     );
   });
 

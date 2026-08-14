@@ -296,7 +296,6 @@ function buildProduct(profile: CatalogPresentationProfile): Product {
     handle: profile.handle,
     title: definition.title,
     subtitle: profile.subtitle,
-    plate: profile.plate,
     category: profile.category,
     activities: profile.activities,
     price,

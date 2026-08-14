@@ -19,8 +19,9 @@ export default async function FieldTestingCustomPage() {
     (product) => product.handle === "weatherline-shell",
   );
   const shellImage = shell?.colorways[0]?.images.context;
-  const testingArticle = articles.find((article) =>
-    article.handle.includes("test-a-shell"),
+  const testingArticle = articles.find(
+    (article) =>
+      article.handle === "how-we-test-a-shell-before-calling-it-weatherproof",
   );
   return (
     <div className="custom-story-page testing-page">

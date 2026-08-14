@@ -9,7 +9,6 @@ export interface PresentationColorway {
 
 export interface CatalogPresentationProfile {
   handle: string;
-  plate: string;
   category: ProductCategory;
   activities: readonly string[];
   subtitle: string;
@@ -40,7 +39,6 @@ export const CATALOG_PRESENTATION_PROFILES: readonly CatalogPresentationProfile[
   [
     {
       handle: "weatherline-shell",
-      plate: "01",
       category: "shells",
       activities: ["alpine", "trail", "camp"],
       subtitle: "Three-layer waterproof shell for shifting coastal weather.",
@@ -54,7 +52,6 @@ export const CATALOG_PRESENTATION_PROFILES: readonly CatalogPresentationProfile[
     },
     {
       handle: "traverse-grid-fleece",
-      plate: "02",
       category: "shells",
       activities: ["trail", "alpine", "travel"],
       subtitle: "Breathable grid fleece for fast temperature changes.",
@@ -68,7 +65,6 @@ export const CATALOG_PRESENTATION_PROFILES: readonly CatalogPresentationProfile[
     },
     {
       handle: "drift-insulated-vest",
-      plate: "03",
       category: "shells",
       activities: ["alpine", "camp", "travel"],
       subtitle: "Packable synthetic warmth for exposed starts and stops.",
@@ -82,7 +78,6 @@ export const CATALOG_PRESENTATION_PROFILES: readonly CatalogPresentationProfile[
     },
     {
       handle: "ridge-30-field-pack",
-      plate: "04",
       category: "packs",
       activities: ["alpine", "trail"],
       subtitle: "A 30-liter pack built for long days above the treeline.",
@@ -96,7 +91,6 @@ export const CATALOG_PRESENTATION_PROFILES: readonly CatalogPresentationProfile[
     },
     {
       handle: "approach-18-day-pack",
-      plate: "05",
       category: "packs",
       activities: ["alpine", "trail", "travel"],
       subtitle: "Close-body 18-liter carry for short technical days.",
@@ -110,7 +104,6 @@ export const CATALOG_PRESENTATION_PROFILES: readonly CatalogPresentationProfile[
     },
     {
       handle: "waypoint-sling-6",
-      plate: "06",
       category: "packs",
       activities: ["travel", "camp"],
       subtitle: "Compact six-liter carry with fast, one-handed access.",
@@ -124,7 +117,6 @@ export const CATALOG_PRESENTATION_PROFILES: readonly CatalogPresentationProfile[
     },
     {
       handle: "talus-trail-shoe",
-      plate: "07",
       category: "footwear",
       activities: ["trail", "camp"],
       subtitle: "Grippy, stable footwear for scree, roots, and river rock.",
@@ -138,7 +130,6 @@ export const CATALOG_PRESENTATION_PROFILES: readonly CatalogPresentationProfile[
     },
     {
       handle: "scree-approach-shoe",
-      plate: "08",
       category: "footwear",
       activities: ["alpine", "trail"],
       subtitle: "Precise low-profile footwear for rock and mixed approaches.",
@@ -152,7 +143,6 @@ export const CATALOG_PRESENTATION_PROFILES: readonly CatalogPresentationProfile[
     },
     {
       handle: "camp-recovery-clog",
-      plate: "09",
       category: "footwear",
       activities: ["camp", "travel"],
       subtitle: "Easy-on recovery footwear with durable wet-ground traction.",

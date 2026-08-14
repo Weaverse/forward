@@ -18,9 +18,8 @@ interface ProductCardProps {
 
 /**
  * Canonical product card. Source `app.js:87–107` — one card hierarchy shared
- * by the Home runway, PLP, collection, search, and related-product grids. Grid
- * span, image ratio, and stagger come entirely from the `.product-runway` /
- * `.plp-grid` nth-child rules in `canonical-source.css`.
+ * by Home, PLP, collection, search, and related-product grids. Parent surfaces
+ * own grid geometry while the card keeps one consistent 4:5 image treatment.
  *
  * The canonical `.swatches` row is inert decoration. Forward's swatches are
  * real controls: native radios in 44×44 targets, a visible selected ring and

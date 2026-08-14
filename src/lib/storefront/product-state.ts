@@ -88,9 +88,9 @@ export function resolveProductSelection(
   const requestIsComplete = product.options.every(
     (option) => requestedOptions[option.name] !== undefined,
   );
-  const exact = requestIsComplete
-    ? variants.find(matchesRequested)
-    : candidates.find(matchesRequested);
+  const exact = (requestIsComplete ? variants : candidates).find(
+    matchesRequested,
+  );
   const variant = exact ?? fallback;
   return {
     colorway,

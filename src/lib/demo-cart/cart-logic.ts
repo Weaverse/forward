@@ -22,7 +22,6 @@ export interface DemoCartLine {
   title: string;
   colorwayId: string;
   colorwayName: string;
-  size?: string;
   selectedOptions: Readonly<Record<string, string>>;
   quantity: number;
   unitPrice: Money;
@@ -181,7 +180,6 @@ export function sanitizeLines(value: unknown): readonly DemoCartLine[] {
       typeof line.title !== "string" ||
       typeof line.colorwayId !== "string" ||
       typeof line.colorwayName !== "string" ||
-      (line.size !== undefined && typeof line.size !== "string") ||
       typeof line.quantity !== "number" ||
       typeof line.href !== "string" ||
       seen.has(line.key)
@@ -190,7 +188,6 @@ export function sanitizeLines(value: unknown): readonly DemoCartLine[] {
     }
     const unitPrice = line.unitPrice as Record<string, unknown> | undefined;
     const image = line.image as Record<string, unknown> | undefined;
-    const size = typeof line.size === "string" ? line.size : undefined;
     const selectedOptions = sanitizeSelectedOptions(line.selectedOptions);
     if (
       unitPrice === undefined ||
@@ -225,7 +222,6 @@ export function sanitizeLines(value: unknown): readonly DemoCartLine[] {
       title: line.title,
       colorwayId: line.colorwayId,
       colorwayName: line.colorwayName,
-      size,
       selectedOptions,
       quantity: clampQuantity(line.quantity),
       unitPrice: { amount: unitPrice.amount, currencyCode: "USD" },

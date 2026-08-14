@@ -39,7 +39,7 @@ export default async function HomePage() {
   const pack = productsByHandle.get("approach-18-day-pack") ?? featured[1];
   const dispatch = articles[0];
   const spotlightImage = spotlight?.colorways[0]?.images.context;
-  const kitProducts = featured.flatMap((product) => {
+  const kitProducts = featured.slice(0, 3).flatMap((product) => {
     const image = product.colorways[0]?.images.primary;
     return image === undefined ? [] : [{ product, image }];
   });
@@ -228,7 +228,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="home-kit-products">
-            {kitProducts.slice(0, 3).map(({ product, image }) => (
+            {kitProducts.map(({ product, image }) => (
               <Link href={`/products/${product.handle}`} key={product.handle}>
                 <Image
                   src={image.src}

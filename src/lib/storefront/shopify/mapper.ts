@@ -800,7 +800,6 @@ function mapProduct(node: unknown, index: number): Product {
     handle,
     title,
     subtitle: profile.subtitle,
-    plate: profile.plate,
     category: profile.category,
     activities: profile.activities,
     price,

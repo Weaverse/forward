@@ -24,7 +24,6 @@ function makeLine(overrides: Partial<DemoCartLine> = {}): DemoCartLine {
     title: "Weatherline Shell",
     colorwayId: "charcoal",
     colorwayName: "Charcoal",
-    size: "M",
     selectedOptions: { Size: "M" },
     quantity: 1,
     unitPrice: { amount: 100, currencyCode: "USD" },
@@ -77,7 +76,6 @@ describe("addLine", () => {
       makeLine({
         key: lineKey("weatherline-shell", "variant-l"),
         variantId: "variant-l",
-        size: "L",
         selectedOptions: { Size: "L" },
       }),
     );
@@ -192,10 +190,11 @@ describe("sanitizeLines", () => {
     assert.equal(lines[0]?.quantity, MAX_LINE_QUANTITY);
   });
 
-  it("drops lines whose revived size no longer matches their key", () => {
+  it("keeps selected options as the only persisted option state", () => {
     const valid = makeLine();
-    const lines = sanitizeLines([{ ...valid, size: 42 }]);
-    assert.deepEqual(lines, []);
+    const lines = sanitizeLines([{ ...valid, size: "stale" }]);
+    assert.deepEqual(lines, [valid]);
+    assert.equal("size" in (lines[0] ?? {}), false);
   });
 
   it("keeps persisted cart lines backed by owned Shopify media", () => {
@@ -230,6 +229,7 @@ describe("sanitizeLines", () => {
         },
       },
       { ...valid, image: { ...valid.image, width: -1 } },
+      { ...valid, selectedOptions: { Size: 42 } },
     ];
     assert.deepEqual(sanitizeLines(invalid), []);
   });
