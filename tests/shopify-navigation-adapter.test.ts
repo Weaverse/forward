@@ -35,7 +35,18 @@ const expectedPrimary = [
     ],
   },
   { href: "/journal", label: "Field Notes" },
-  { href: "/pages/about-forward", label: "About" },
+  {
+    href: "/pages/about-forward",
+    label: "About",
+    children: [
+      { href: "/pages/materials-and-care", label: "Materials & Care" },
+      { href: "/pages/fit-and-sizing", label: "Fit & Sizing" },
+      { href: "/pages/field-testing", label: "Field Testing" },
+      { href: "/pages/field-repair", label: "Field Repair" },
+      { href: "/pages/shipping-returns", label: "Shipping & Returns" },
+      { href: "/pages/contact", label: "Contact" },
+    ],
+  },
 ] as const;
 
 const expectedCompanyLinks = [
@@ -709,6 +720,8 @@ describe("Shopify navigation data source", () => {
   });
 
   it("scopes partial GraphQL field errors to only the affected structure", async () => {
+    const staticNavigation =
+      await new StaticStorefrontDataSource().getNavigation();
     for (const [rootField, expected] of [
       ["footerMenu", { main: 0, footer: 1, collections: 0 }],
       ["menu", { main: 1, footer: 0, collections: 0 }],
@@ -742,8 +755,18 @@ describe("Shopify navigation data source", () => {
 
       const navigation = await source.getNavigation();
       const collection = await source.getCollection("outerwear");
-      assert.deepEqual(navigation.primary.slice(0, 3), expectedPrimary);
-      assert.deepEqual(navigation.footerColumns, expectedFooterColumns);
+      assert.deepEqual(
+        navigation.primary.slice(0, 3),
+        expected.main === 1
+          ? staticNavigation.primary.slice(0, 3)
+          : expectedPrimary,
+      );
+      assert.deepEqual(
+        navigation.footerColumns,
+        expected.footer === 1
+          ? staticNavigation.footerColumns
+          : expectedFooterColumns,
+      );
       assert.equal(collection?.handle, "outerwear");
       assert.deepEqual(observed, expected, rootField);
     }

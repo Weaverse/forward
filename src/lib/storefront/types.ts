@@ -90,9 +90,9 @@ export interface Collection {
 }
 
 export type ArticleBlock =
-  | { type: "paragraph"; text: string }
-  | { type: "heading"; text: string }
-  | { type: "pullquote"; text: string }
+  | { type: "paragraph"; text: string; runs: RichTextParagraph }
+  | { type: "heading"; text: string; runs: RichTextParagraph }
+  | { type: "pullquote"; text: string; runs: RichTextParagraph }
   | { type: "note"; label: string; text: string }
   | { type: "image"; image: StorefrontImage; caption: string };
 
@@ -112,7 +112,7 @@ export interface JournalArticle {
 
 export interface PageSection {
   heading: string;
-  paragraphs: readonly string[];
+  paragraphs: readonly RichTextParagraph[];
 }
 
 export interface StorePage {

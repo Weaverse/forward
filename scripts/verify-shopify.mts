@@ -22,7 +22,10 @@ import {
 } from "@shopify/hydrogen";
 
 import { createStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
-import { CANONICAL_PRODUCT_HANDLES } from "../src/lib/storefront/catalog-presentation.ts";
+import {
+  CANONICAL_PRODUCT_HANDLES,
+  getCatalogPresentationProfile,
+} from "../src/lib/storefront/catalog-presentation.ts";
 import { isShopifyProductImageUrl } from "../src/lib/storefront/image-source.ts";
 import {
   CONTENT_ARTICLE_HANDLES,
@@ -45,11 +48,21 @@ const CANONICAL_COLLECTION_HANDLES = [
   "packs",
   "footwear",
 ] as const;
+const CANONICAL_VARIANT_COUNT = 78;
 
 const CANONICAL_SHOP_LINKS = [
   "/shop/outerwear",
   "/shop/packs",
   "/shop/footwear",
+] as const;
+
+const CANONICAL_ABOUT_LINKS = [
+  "/pages/materials-and-care",
+  "/pages/fit-and-sizing",
+  "/pages/field-testing",
+  "/pages/field-repair",
+  "/pages/shipping-returns",
+  "/pages/contact",
 ] as const;
 
 const CANONICAL_FOOTER_COLUMNS = [
@@ -209,16 +222,21 @@ try {
   });
   const navigation = await storefront.getNavigation();
   const shop = navigation.primary.find((item) => item.href === "/shop");
+  const about = navigation.primary.find(
+    (item) => item.href === "/pages/about-forward",
+  );
   check(
     `live ${config.mainMenuHandle} has the canonical two-level tree`,
     !navigationFallbackUsed &&
       navigation.primary.map((item) => item.href).join(",") ===
         "/shop,/journal,/pages/about-forward,/search" &&
       shop?.children?.map((item) => item.href).join(",") ===
-        CANONICAL_SHOP_LINKS.join(","),
+        CANONICAL_SHOP_LINKS.join(",") &&
+      about?.children?.map((item) => item.href).join(",") ===
+        CANONICAL_ABOUT_LINKS.join(","),
     navigationFallbackUsed
       ? "static safeguard active"
-      : `${shop?.children?.length ?? 0} live Shop children`,
+      : `${shop?.children?.length ?? 0} Shop children, ${about?.children?.length ?? 0} About children`,
   );
   check(
     "live footer has the canonical three-column tree",
@@ -254,6 +272,39 @@ try {
   );
 
   for (const product of products) {
+    const profile = getCatalogPresentationProfile(product.handle);
+    const expectedOptionValues = profile?.optionValues;
+    const optionsMatch =
+      expectedOptionValues === undefined
+        ? product.options.length === 0
+        : product.options.length === 1 &&
+          product.options[0]?.name === "Size" &&
+          JSON.stringify(product.options[0].values) ===
+            JSON.stringify(expectedOptionValues);
+    const optionSelections =
+      expectedOptionValues === undefined
+        ? [[]]
+        : expectedOptionValues.map((value) => [{ name: "Size", value }]);
+    const expectedVariants =
+      profile === null
+        ? []
+        : Object.values(profile.colorways).flatMap((colorway) =>
+            optionSelections.map((selectedOptions) => ({
+              colorwayId: colorway.id,
+              selectedOptions,
+            })),
+          );
+    const variantsMatchOrder =
+      product.variants.length === expectedVariants.length &&
+      product.variants.every((variant, index) => {
+        const expected = expectedVariants[index];
+        return (
+          expected !== undefined &&
+          variant.colorwayId === expected.colorwayId &&
+          JSON.stringify(variant.selectedOptions) ===
+            JSON.stringify(expected.selectedOptions)
+        );
+      });
     check(
       `${product.handle} money`,
       product.price.currencyCode === "USD" &&
@@ -264,12 +315,17 @@ try {
 
     check(
       `${product.handle} options`,
-      product.options.every((option) => option.name !== "Color"),
+      profile !== null && optionsMatch,
       product.options.length === 0
         ? "no non-Color options"
         : product.options
             .map((option) => `${option.name} x${option.values.length}`)
             .join(", "),
+    );
+    check(
+      `${product.handle} variant order`,
+      profile !== null && variantsMatchOrder,
+      `${product.variants.length} canonical combinations in order`,
     );
 
     const colorwayIds = product.colorways.map((colorway) => colorway.id);
@@ -307,6 +363,16 @@ try {
       `${product.specs.length} spec rows, ${product.care.length} care lines, ${product.detailParagraphs.length} detail paragraphs`,
     );
   }
+
+  const variantCount = products.reduce(
+    (total, product) => total + product.variants.length,
+    0,
+  );
+  check(
+    "canonical variant matrix",
+    variantCount === CANONICAL_VARIANT_COUNT,
+    `${variantCount} exact merchandise identities`,
+  );
 
   const collections = await storefront.listCollections();
   const canonicalCollectionsInOrder =

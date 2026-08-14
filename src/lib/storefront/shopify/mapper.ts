@@ -162,7 +162,11 @@ interface MappedOptions {
   options: readonly ProductOption[];
 }
 
-function mapOptions(value: unknown, handle: string): MappedOptions {
+function mapOptions(
+  value: unknown,
+  handle: string,
+  profile: CatalogPresentationProfile,
+): MappedOptions {
   const nodes = asArray(value, `${handle} options`);
   if (nodes.length === 0) {
     fail(`${handle} has no product options.`);
@@ -201,6 +205,32 @@ function mapOptions(value: unknown, handle: string): MappedOptions {
 
   if (colorLabels === undefined) {
     fail(`${handle} has no ${COLOR_OPTION_NAME} option.`);
+  }
+  const expectedColorLabels = Object.keys(profile.colorways);
+  if (colorLabels.some((label) => !Object.hasOwn(profile.colorways, label))) {
+    fail(`${handle} has no approved colorway mapping.`);
+  }
+  if (
+    colorLabels.length !== expectedColorLabels.length ||
+    colorLabels.some((label, index) => label !== expectedColorLabels[index])
+  ) {
+    fail(`${handle} ${COLOR_OPTION_NAME} values are not in canonical order.`);
+  }
+  const expectedValues = profile.optionValues;
+  if (expectedValues === undefined) {
+    if (options.length !== 0) {
+      fail(`${handle} has unsupported non-Color product options.`);
+    }
+  } else {
+    const size = options[0];
+    if (
+      options.length !== 1 ||
+      size?.name !== "Size" ||
+      size.values.length !== expectedValues.length ||
+      size.values.some((entry, index) => entry !== expectedValues[index])
+    ) {
+      fail(`${handle} Size values do not match the canonical option contract.`);
+    }
   }
   return { colorLabels, options };
 }
@@ -325,20 +355,8 @@ function mapColorways(
   profile: CatalogPresentationProfile,
 ): readonly ProductColorway[] {
   const handle = profile.handle;
-  const extraLabels = [...mediaMap.keys()].filter(
-    (label) => !colorLabels.includes(label),
-  );
-  if (extraLabels.length > 0) {
-    fail(
-      `${handle} forward.colorway_media_map has entries for unknown ${COLOR_OPTION_NAME} values.`,
-    );
-  }
-
-  const usedIds = new Set<string>();
   const seenIds = new Set<string>();
-  const colorways: ProductColorway[] = [];
-
-  for (const label of colorLabels) {
+  const presentations = colorLabels.map((label) => {
     /* Own-key lookup only: a live Color label such as "constructor" must not
        resolve through the prototype chain. */
     const presentation = Object.hasOwn(profile.colorways, label)
@@ -353,27 +371,42 @@ function mapColorways(
       fail(`${handle} maps more than one colorway to id ${presentation.id}.`);
     }
     seenIds.add(presentation.id);
+    return { label, presentation };
+  });
 
-    const ids = mediaMap.get(label);
+  const usesDisplayLabels =
+    mediaMap.size === presentations.length &&
+    presentations.every(({ label }) => mediaMap.has(label));
+  const usesColorwayIds =
+    mediaMap.size === presentations.length &&
+    presentations.every(({ presentation }) => mediaMap.has(presentation.id));
+  if (!usesDisplayLabels && !usesColorwayIds) {
+    fail(
+      `${handle} forward.colorway_media_map must use one complete approved key set: Color display values or colorway ids.`,
+    );
+  }
+
+  const usedMediaIds = new Set<string>();
+  const colorways = presentations.map(({ label, presentation }) => {
+    const mapKey = usesDisplayLabels ? label : presentation.id;
+    const ids = mediaMap.get(mapKey);
     if (ids === undefined) {
-      fail(
-        `${handle} forward.colorway_media_map has no entry for ${COLOR_OPTION_NAME} value "${label}".`,
-      );
+      fail(`${handle} forward.colorway_media_map is missing key "${mapKey}".`);
     }
-    colorways.push({
+    return {
       id: presentation.id,
       name: label,
       swatchColor: presentation.swatchColor,
       images: buildColorwayImages(
         ids,
         images,
-        usedIds,
+        usedMediaIds,
         `${handle} colorway "${label}"`,
       ),
-    });
-  }
+    };
+  });
 
-  if (usedIds.size !== images.size) {
+  if (usedMediaIds.size !== images.size) {
     fail(`${handle} has unreferenced MediaImage nodes.`);
   }
 
@@ -490,6 +523,44 @@ function specScalarToText(value: unknown, context: string): string {
   return fail(`${context} is not a supported field-spec value.`);
 }
 
+function specValueToText(
+  value: unknown,
+  context: string,
+  objectDepth = 0,
+): string {
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return fail(`${context} is an empty list.`);
+    }
+    return value
+      .map((entry, index) =>
+        specScalarToText(entry, `${context} item ${index}`),
+      )
+      .join(", ");
+  }
+  if (typeof value === "object" && value !== null) {
+    if (objectDepth >= 1) {
+      return fail(`${context} is nested more than one object level.`);
+    }
+    const record = asRecord(value, context);
+    const entries = Object.entries(record);
+    if (entries.length === 0) {
+      return fail(`${context} is an empty object.`);
+    }
+    return entries
+      .map(
+        ([key, entry]) =>
+          `${humanizeSpecKey(key)}: ${specValueToText(
+            entry,
+            `${context} "${key}"`,
+            objectDepth + 1,
+          )}`,
+      )
+      .join("; ");
+  }
+  return specScalarToText(value, context);
+}
+
 function mapFieldSpecs(raw: string, handle: string): readonly SpecRow[] {
   const context = `${handle} forward.field_specs`;
   const parsed = asRecord(parseJsonValue(raw, context), context);
@@ -497,13 +568,7 @@ function mapFieldSpecs(raw: string, handle: string): readonly SpecRow[] {
 
   for (const [key, value] of Object.entries(parsed)) {
     const rowContext = `${context} "${key}"`;
-    const text = Array.isArray(value)
-      ? value
-          .map((entry, index) =>
-            specScalarToText(entry, `${rowContext} item ${index}`),
-          )
-          .join(", ")
-      : specScalarToText(value, rowContext);
+    const text = specValueToText(value, rowContext);
     if (text.trim().length === 0) {
       fail(`${rowContext} is empty.`);
     }
@@ -575,6 +640,23 @@ function mapCare(raw: string, handle: string): readonly string[] {
 interface MappedVariants {
   price: Money;
   variants: readonly ProductVariant[];
+}
+
+type VariantSelectedOption = ProductVariant["selectedOptions"][number];
+
+function optionCombinations(
+  options: readonly ProductOption[],
+): readonly (readonly VariantSelectedOption[])[] {
+  return options.reduce<readonly (readonly VariantSelectedOption[])[]>(
+    (combinations, option) =>
+      combinations.flatMap((combination) =>
+        option.values.map((value) => [
+          ...combination,
+          { name: option.name, value },
+        ]),
+      ),
+    [[]],
+  );
 }
 
 function mapVariants(
@@ -702,6 +784,40 @@ function mapVariants(
       fail(`${handle} has no approved colorway mapping for ${colorway.id}.`);
     }
   }
+  const expectedVariantCount =
+    Object.keys(profile.colorways).length * (profile.optionValues?.length ?? 1);
+  if (variants.length !== expectedVariantCount) {
+    fail(
+      `${handle} must expose exactly ${expectedVariantCount} canonical option combinations.`,
+    );
+  }
+  const combinations = optionCombinations(options);
+  const expectedVariantOrder = Object.values(profile.colorways).flatMap(
+    (colorway) =>
+      combinations.map((selectedOptions) => ({
+        colorwayId: colorway.id,
+        selectedOptions,
+      })),
+  );
+  const orderMismatch = variants.some((variant, index) => {
+    const expected = expectedVariantOrder[index];
+    return (
+      expected === undefined ||
+      variant.colorwayId !== expected.colorwayId ||
+      variant.selectedOptions.length !== expected.selectedOptions.length ||
+      variant.selectedOptions.some((selected, optionIndex) => {
+        const expectedOption = expected.selectedOptions[optionIndex];
+        return (
+          expectedOption === undefined ||
+          selected.name !== expectedOption.name ||
+          selected.value !== expectedOption.value
+        );
+      })
+    );
+  });
+  if (orderMismatch) {
+    fail(`${handle} variants are not in canonical option order.`);
+  }
 
   return { price: minimum, variants };
 }
@@ -741,7 +857,7 @@ function mapProduct(node: unknown, index: number): Product {
     fail(`${handle} description has no readable text.`);
   }
 
-  const { colorLabels, options } = mapOptions(record.options, handle);
+  const { colorLabels, options } = mapOptions(record.options, handle, profile);
   const { price, variants } = mapVariants(
     record.variants,
     handle,

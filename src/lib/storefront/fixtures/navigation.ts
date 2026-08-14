@@ -18,7 +18,18 @@ export const NAVIGATION_FIXTURE: SiteNavigation = {
       ],
     },
     { href: "/journal", label: "Field Notes" },
-    { href: "/pages/about-forward", label: "About" },
+    {
+      href: "/pages/about-forward",
+      label: "About",
+      children: [
+        { href: "/pages/materials-and-care", label: "Materials & Care" },
+        { href: "/pages/fit-and-sizing", label: "Fit & Sizing" },
+        { href: "/pages/field-testing", label: "Field Testing" },
+        { href: "/pages/field-repair", label: "Field Repair" },
+        { href: "/pages/shipping-returns", label: "Shipping & Returns" },
+        { href: "/pages/contact", label: "Contact" },
+      ],
+    },
     { href: "/search", label: "Search" },
   ],
   utility: [

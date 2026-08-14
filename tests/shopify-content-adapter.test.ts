@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
 import {
@@ -106,6 +107,64 @@ describe("Shopify content mapper", () => {
         .flat()
         .find((run) => run.text === "Contact")?.href,
       "/pages/contact",
+    );
+  });
+
+  it("normalizes only canonical Shopify collection links to theme routes", async () => {
+    const response = contentResponseWith((draft) => {
+      draft.data.aboutForward.body = draft.data.aboutForward.body.replace(
+        "We revise the products we already make",
+        '<a href="/collections/outerwear">Shop outerwear</a>',
+      );
+      const privacyPolicy = draft.data.shop.privacyPolicy as { body: string };
+      privacyPolicy.body +=
+        '<p><a href="/collections/outerwear">Shop outerwear</a></p>';
+      const firstArticle = draft.data.blog?.articles.nodes[0];
+      firstArticle.contentHtml = firstArticle.contentHtml.replace(
+        "Begin the climb slightly cool",
+        '<a href="/collections/outerwear">Layer outerwear</a>',
+      );
+    });
+    const result = mapContentResult(response);
+    assert.equal(
+      result.pages
+        .find((page) => page.handle === "about-forward")
+        ?.sections.flatMap((section) => section.paragraphs)
+        .flat()
+        .find((run) => run.text === "Shop outerwear")?.href,
+      "/shop/outerwear",
+    );
+    assert.equal(
+      result.policies[0]?.sections
+        .flatMap((section) => section.paragraphs)
+        .flat()
+        .find((run) => run.text === "Shop outerwear")?.href,
+      "/shop/outerwear",
+    );
+    const articleRun = result.articles[0]?.body
+      .flatMap((block) =>
+        block.type === "paragraph" ||
+        block.type === "heading" ||
+        block.type === "pullquote"
+          ? block.runs
+          : [],
+      )
+      .find((run) => run.text === "Layer outerwear");
+    assert.equal(articleRun?.href, "/shop/outerwear");
+    assert.match(
+      readFileSync(
+        new URL("../src/app/journal/[articleHandle]/page.tsx", import.meta.url),
+        "utf8",
+      ),
+      /<RichTextRuns runs=\{block\.runs\} \/>/,
+    );
+
+    await assertRejectsContent(
+      contentResponseWith((draft) => {
+        draft.data.aboutForward.body +=
+          '<p><a href="/collections/not-forward">Unknown</a></p>';
+      }),
+      "non-canonical link target",
     );
   });
 

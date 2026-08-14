@@ -70,6 +70,20 @@ describe("canonical header presentation", () => {
       assert.ok(collection.fieldNote.length >= 30);
     }
   });
+
+  it("keeps the canonical About branch available in static and live modes", () => {
+    const about = NAVIGATION_FIXTURE.primary.find(
+      (item) => item.href === "/pages/about-forward",
+    );
+    assert.deepEqual(about?.children, [
+      { href: "/pages/materials-and-care", label: "Materials & Care" },
+      { href: "/pages/fit-and-sizing", label: "Fit & Sizing" },
+      { href: "/pages/field-testing", label: "Field Testing" },
+      { href: "/pages/field-repair", label: "Field Repair" },
+      { href: "/pages/shipping-returns", label: "Shipping & Returns" },
+      { href: "/pages/contact", label: "Contact" },
+    ]);
+  });
 });
 
 describe("canonical Field Index header", () => {
@@ -84,6 +98,7 @@ describe("canonical Field Index header", () => {
       'role="dialog"',
       'event.key === "Escape"',
       "desktopTriggerRef.current?.focus()",
+      "aboutTriggerRef.current?.focus()",
       "mobileTriggerRef.current?.focus()",
       "restoreMobileFocusRef.current = true",
       "closeButtonRef.current?.focus()",
@@ -98,6 +113,11 @@ describe("canonical Field Index header", () => {
     }
     assert.ok(styles.includes("@media (prefers-reduced-motion: reduce)"));
     assert.ok(styles.includes(".field-header-root {\n  display: contents;"));
+    assert.ok(
+      styles.includes(
+        ".field-about-panel {\n  grid-template-columns: minmax(0, 1fr);",
+      ),
+    );
     assert.ok(component.includes("onNavigate={closeMobile}"));
     assert.equal(
       component.includes("onClick={() => setMobileOpen(false)}"),
@@ -107,6 +127,11 @@ describe("canonical Field Index header", () => {
     assert.ok(
       component.includes(
         "aria-controls={desktopOpen ? desktopPanelId : undefined}",
+      ),
+    );
+    assert.ok(
+      component.includes(
+        "aria-controls={aboutOpen ? aboutPanelId : undefined}",
       ),
     );
     assert.ok(
@@ -151,6 +176,8 @@ describe("canonical Field Index header", () => {
     }
     assert.ok(queryReader.includes("useSearchParams"));
     assert.ok(component.includes("createHeaderNavigationHref"));
+    assert.ok(component.includes("<AboutIndexPanel"));
+    assert.ok(component.includes("field-mobile-secondary-child"));
     assert.ok(shell.includes("<FieldIndexHeader"));
     assert.ok(shell.includes("<Suspense"));
     assert.ok(shell.includes("<QueryPreservingFieldIndexHeader"));

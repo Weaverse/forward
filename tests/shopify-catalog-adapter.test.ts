@@ -448,6 +448,24 @@ describe("catalog mapping", () => {
     assert.equal(shoe?.specs[0]?.value, "6");
   });
 
+  it("formats one-level structured field specs without losing labels", () => {
+    const response = catalogResponseWith("weatherline-shell", (product) => {
+      const specs = JSON.parse(product.fieldSpecs.value);
+      specs.pockets = { zippered_hand: 2, internal_drop: 1 };
+      product.fieldSpecs.value = JSON.stringify(specs);
+    });
+    const shell = mapped(response).find(
+      (product) => product.handle === "weatherline-shell",
+    );
+    assert.deepEqual(
+      shell?.specs.find((row) => row.label === "Pockets"),
+      {
+        label: "Pockets",
+        value: "Zippered hand: 2; Internal drop: 1",
+      },
+    );
+  });
+
   it("removes Color from options and turns it into colorways", () => {
     for (const product of mapped()) {
       assert.ok(
@@ -481,6 +499,26 @@ describe("catalog mapping", () => {
     assert.deepEqual(
       products[0]?.colorways.map((entry) => entry.name),
       ["Charcoal / Moss", "Claystone / Charcoal"],
+    );
+  });
+
+  it("accepts a complete media map keyed by approved colorway ids", () => {
+    const response = catalogResponseWith("traverse-grid-fleece", (product) => {
+      const map = JSON.parse(product.colorwayMediaMap.value);
+      product.colorwayMediaMap.value = JSON.stringify({
+        "moss-charcoal": map["Moss / Charcoal"],
+        "claystone-bone": map["Claystone / Bone"],
+      });
+    });
+    const fleece = mapped(response).find(
+      (product) => product.handle === "traverse-grid-fleece",
+    );
+    assert.deepEqual(
+      fleece?.colorways.map(({ id, name }) => ({ id, name })),
+      [
+        { id: "moss-charcoal", name: "Moss / Charcoal" },
+        { id: "claystone-bone", name: "Claystone / Bone" },
+      ],
     );
   });
 
@@ -622,14 +660,14 @@ describe("catalog mapping failures", () => {
     );
   });
 
-  it("rejects a colorway map that misses or invents a Color value", async () => {
+  it("rejects incomplete, unknown, or mixed colorway-media key sets", async () => {
     await assertRejectsCatalog(
       catalogResponseWith("weatherline-shell", (product) => {
         const map = JSON.parse(product.colorwayMediaMap.value);
         delete map["Claystone / Charcoal"];
         product.colorwayMediaMap.value = JSON.stringify(map);
       }),
-      "has no entry for Color value",
+      "one complete approved key set",
     );
 
     await assertRejectsCatalog(
@@ -638,7 +676,18 @@ describe("catalog mapping failures", () => {
         map["Fictional / Colour"] = map["Charcoal / Moss"];
         product.colorwayMediaMap.value = JSON.stringify(map);
       }),
-      "unknown Color values",
+      "one complete approved key set",
+    );
+
+    await assertRejectsCatalog(
+      catalogResponseWith("weatherline-shell", (product) => {
+        const map = JSON.parse(product.colorwayMediaMap.value);
+        product.colorwayMediaMap.value = JSON.stringify({
+          charcoal: map["Charcoal / Moss"],
+          "Claystone / Charcoal": map["Claystone / Charcoal"],
+        });
+      }),
+      "one complete approved key set",
     );
   });
 
@@ -688,6 +737,29 @@ describe("catalog mapping failures", () => {
         "no approved colorway mapping",
       );
     }
+  });
+
+  it("rejects empty, nested-list, or overly deep structured field specs", async () => {
+    await assertRejectsCatalog(
+      catalogResponseWith("weatherline-shell", (product) => {
+        product.fieldSpecs.value = JSON.stringify({ pockets: {} });
+      }),
+      "is an empty object",
+    );
+    await assertRejectsCatalog(
+      catalogResponseWith("weatherline-shell", (product) => {
+        product.fieldSpecs.value = JSON.stringify({ layers: [["shell"]] });
+      }),
+      "is not a supported field-spec value",
+    );
+    await assertRejectsCatalog(
+      catalogResponseWith("weatherline-shell", (product) => {
+        product.fieldSpecs.value = JSON.stringify({
+          pockets: { hand: { zippered: 2 } },
+        });
+      }),
+      "nested more than one object level",
+    );
   });
 
   it("rejects invalid metafield JSON, rich text, and metafield types", async () => {
@@ -838,6 +910,50 @@ describe("catalog mapping failures", () => {
     assert.equal(
       new Set(weatherline?.variants.map((variant) => variant.id)).size,
       weatherline?.variants.length,
+    );
+  });
+
+  it("rejects incomplete option values and variant matrices", async () => {
+    await assertRejectsCatalog(
+      catalogResponseWith("weatherline-shell", (product) => {
+        const size = product.options[1];
+        assert.equal(size?.name, "Size");
+        size.optionValues.pop();
+      }),
+      "canonical option contract",
+    );
+
+    await assertRejectsCatalog(
+      catalogResponseWith("weatherline-shell", (product) => {
+        product.variants.nodes.pop();
+      }),
+      "exactly 10 canonical option combinations",
+    );
+
+    await assertRejectsCatalog(
+      catalogResponseWith("ridge-30-field-pack", (product) => {
+        product.options.push({
+          name: "Size",
+          optionValues: [{ name: "One size" }],
+        });
+      }),
+      "unsupported non-Color product options",
+    );
+  });
+
+  it("rejects non-canonical Color and variant order", async () => {
+    await assertRejectsCatalog(
+      catalogResponseWith("weatherline-shell", (product) => {
+        product.options[0].optionValues.reverse();
+      }),
+      "Color values are not in canonical order",
+    );
+
+    await assertRejectsCatalog(
+      catalogResponseWith("weatherline-shell", (product) => {
+        product.variants.nodes.reverse();
+      }),
+      "variants are not in canonical option order",
     );
   });
 

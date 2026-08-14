@@ -4,9 +4,35 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { storefront } from "@/lib/storefront/data-source";
+import type { RichTextParagraph } from "@/lib/storefront/types";
 
 interface StorePageProps {
   params: Promise<{ pageHandle: string }>;
+}
+
+function paragraphKey(paragraph: RichTextParagraph): string {
+  return paragraph.map((run) => `${run.href ?? "text"}:${run.text}`).join("|");
+}
+
+function PageParagraph({ paragraph }: { paragraph: RichTextParagraph }) {
+  return (
+    <>
+      {paragraph.map((run) => {
+        const key = `${run.href ?? "text"}:${run.text}`;
+        return run.href?.startsWith("/") ? (
+          <Link href={run.href} key={key}>
+            {run.text}
+          </Link>
+        ) : run.href ? (
+          <a href={run.href} key={key}>
+            {run.text}
+          </a>
+        ) : (
+          run.text
+        );
+      })}
+    </>
+  );
 }
 
 export const dynamicParams = false;
@@ -78,8 +104,11 @@ export default async function StorePageRoute({ params }: StorePageProps) {
           <div>
             <p className="lede">{page.intro}</p>
             {premise?.paragraphs.map((paragraph) => (
-              <p key={paragraph.slice(0, 32)} className="muted">
-                {paragraph}
+              <p
+                key={`${premise.heading}:${paragraphKey(paragraph)}`}
+                className="muted"
+              >
+                <PageParagraph paragraph={paragraph} />
               </p>
             ))}
           </div>
@@ -96,8 +125,11 @@ export default async function StorePageRoute({ params }: StorePageProps) {
                 </span>
                 <h2 className="h3">{section.heading}</h2>
                 {section.paragraphs.map((paragraph) => (
-                  <p key={paragraph.slice(0, 32)} className="muted">
-                    {paragraph}
+                  <p
+                    key={`${section.heading}:${paragraphKey(paragraph)}`}
+                    className="muted"
+                  >
+                    <PageParagraph paragraph={paragraph} />
                   </p>
                 ))}
               </article>
