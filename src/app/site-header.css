@@ -169,6 +169,71 @@
   color: #aab7ae;
 }
 
+.field-about-panel {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.field-about-grid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.field-about-kicker-links {
+  display: inline-flex;
+  gap: 18px;
+}
+
+.field-about-kicker-links a {
+  color: var(--ink);
+}
+
+.field-about-grid a {
+  min-height: 132px;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 24px var(--pad);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    padding-inline 220ms ease;
+}
+
+.field-about-grid a:nth-child(3n) {
+  border-right: 0;
+}
+
+.field-about-grid a:nth-last-child(-n + 3) {
+  border-bottom: 0;
+}
+
+.field-about-grid a:hover,
+.field-about-grid a:focus-visible,
+.field-about-grid a[aria-current="page"] {
+  padding-inline-start: calc(var(--pad) + 10px);
+  background: var(--ink);
+  color: var(--white);
+}
+
+.field-about-grid > a > span,
+.field-about-grid > a > i {
+  color: var(--muted);
+  font-family: var(--ui);
+  font-size: 9px;
+  font-style: normal;
+}
+
+.field-about-grid strong {
+  font-family: var(--display);
+  font-size: clamp(22px, 2vw, 32px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
 .field-index-visual {
   position: relative;
   min-height: 368px;
@@ -315,6 +380,13 @@
 
 .field-mobile-secondary .cart-count {
   color: var(--white);
+}
+
+.field-mobile-secondary a.field-mobile-secondary-child {
+  min-height: 48px;
+  padding-inline-start: 34px;
+  color: #c7d1ca;
+  font-size: 11px;
 }
 
 @keyframes field-panel-reveal {

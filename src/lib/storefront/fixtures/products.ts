@@ -88,20 +88,8 @@ interface StaticProductDefinition {
   materials: string;
   specs: readonly { label: string; value: string }[];
   care: readonly string[];
-  optionValues?: readonly string[];
   imagePrefixes: readonly string[];
 }
-
-const APPAREL_SIZES = ["XS", "S", "M", "L", "XL"] as const;
-const FOOTWEAR_SIZES = [
-  "US 7",
-  "US 8",
-  "US 9",
-  "US 10",
-  "US 11",
-  "US 12",
-  "US 13",
-] as const;
 
 const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
   "weatherline-shell": {
@@ -120,7 +108,6 @@ const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
       "Machine wash cold with technical cleaner and zips closed.",
       "Tumble dry low to reactivate the water-repellent finish.",
     ],
-    optionValues: APPAREL_SIZES,
     imagePrefixes: ["weatherline-charcoal", "weatherline-claystone"],
   },
   "traverse-grid-fleece": {
@@ -139,7 +126,6 @@ const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
       "Machine wash cold without fabric softener.",
       "Tumble dry low or air dry.",
     ],
-    optionValues: APPAREL_SIZES,
     imagePrefixes: ["weatherline-charcoal", "weatherline-claystone"],
   },
   "drift-insulated-vest": {
@@ -158,7 +144,6 @@ const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
       "Machine wash cold with technical cleaner.",
       "Tumble dry low to restore loft.",
     ],
-    optionValues: APPAREL_SIZES,
     imagePrefixes: ["weatherline-charcoal", "weatherline-claystone"],
   },
   "ridge-30-field-pack": {
@@ -225,7 +210,6 @@ const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
       "Brush off dirt and hand wash with cool water.",
       "Air dry away from direct heat.",
     ],
-    optionValues: FOOTWEAR_SIZES,
     imagePrefixes: ["talus-charcoal", "talus-limestone"],
   },
   "scree-approach-shoe": {
@@ -244,7 +228,6 @@ const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
       "Brush off dry dirt and hand wash.",
       "Air dry away from direct heat.",
     ],
-    optionValues: FOOTWEAR_SIZES,
     imagePrefixes: ["talus-charcoal", "talus-limestone"],
   },
   "camp-recovery-clog": {
@@ -260,7 +243,6 @@ const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
       { label: "Use", value: "Camp, travel, and recovery" },
     ],
     care: ["Rinse with cool water.", "Air dry; do not apply direct heat."],
-    optionValues: FOOTWEAR_SIZES,
     imagePrefixes: ["talus-charcoal", "talus-limestone"],
   },
 };
@@ -288,9 +270,9 @@ function buildProduct(profile: CatalogPresentationProfile): Product {
     );
   });
   const options: readonly ProductOption[] =
-    definition.optionValues === undefined
+    profile.optionValues === undefined
       ? []
-      : [{ name: "Size", values: definition.optionValues }];
+      : [{ name: "Size", values: profile.optionValues }];
   const price: Money = { amount: definition.price, currencyCode: "USD" };
   return {
     handle: profile.handle,

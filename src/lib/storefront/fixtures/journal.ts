@@ -1,9 +1,17 @@
 /** Representative static Field Notes. Shopify owns the published long-form copy. */
 
-import type { JournalArticle } from "../types";
+import type { ArticleBlock, JournalArticle } from "../types";
 import { EDITORIAL_IMAGES } from "./editorial-images";
 
-export const JOURNAL_FIXTURES: readonly JournalArticle[] = [
+type StaticArticleBlock =
+  | { type: "paragraph" | "heading" | "pullquote"; text: string }
+  | Extract<ArticleBlock, { type: "note" | "image" }>;
+
+type StaticJournalArticle = Omit<JournalArticle, "body"> & {
+  body: readonly StaticArticleBlock[];
+};
+
+const STATIC_JOURNAL_FIXTURES: readonly StaticJournalArticle[] = [
   {
     handle: "layering-for-moving-weather",
     title: "Layering for Moving Weather",
@@ -153,3 +161,14 @@ export const JOURNAL_FIXTURES: readonly JournalArticle[] = [
     ],
   },
 ];
+
+export const JOURNAL_FIXTURES: readonly JournalArticle[] =
+  STATIC_JOURNAL_FIXTURES.map((article) => ({
+    ...article,
+    body: article.body.map((block): ArticleBlock => {
+      if (block.type === "note" || block.type === "image") {
+        return block;
+      }
+      return { ...block, runs: [{ text: block.text }] };
+    }),
+  }));

@@ -61,6 +61,17 @@ const CANONICAL_INTERNAL_ROUTE_PATTERNS = [
   /^\/account(?:$|\/)/,
 ] as const;
 
+const CANONICAL_COLLECTION_ROUTE_MAP = new Map<string, string>([
+  ["/collections/forward", "/shop"],
+  ["/collections/outerwear", "/shop/outerwear"],
+  ["/collections/packs", "/shop/packs"],
+  ["/collections/footwear", "/shop/footwear"],
+]);
+
+function normalizeCanonicalHref(href: string): string {
+  return CANONICAL_COLLECTION_ROUTE_MAP.get(href) ?? href;
+}
+
 function fail(message: string): never {
   throw new ShopifyCatalogError(message);
 }
@@ -116,7 +127,12 @@ function validateHref(href: string, context: string): void {
     return;
   }
 
-  if (CANONICAL_INTERNAL_ROUTE_PATTERNS.some((pattern) => pattern.test(href))) {
+  const normalized = normalizeCanonicalHref(href);
+  if (
+    CANONICAL_INTERNAL_ROUTE_PATTERNS.some((pattern) =>
+      pattern.test(normalized),
+    )
+  ) {
     return;
   }
 
@@ -148,12 +164,12 @@ function validateTagSyntax(raw: string, tag: string, context: string): void {
 }
 
 function readAnchorHref(raw: string): string {
-  return (
+  const href =
     raw
       .match(/href\s*=\s*(?:"([^"]*)"|'([^']*)')/i)
       ?.slice(1)
-      .find(Boolean) ?? ""
-  );
+      .find(Boolean) ?? "";
+  return normalizeCanonicalHref(href);
 }
 
 function normalizeRuns(runs: readonly RichTextRun[]): RichTextParagraph {
@@ -420,7 +436,7 @@ export function parsePageHtml(
     }
 
     if (current !== null) {
-      current.paragraphs = [...current.paragraphs, block.text];
+      current.paragraphs = [...current.paragraphs, block.runs];
     }
   }
 
@@ -443,7 +459,7 @@ export function parsePageHtml(
     intro,
     sections: remainingParagraphs.map((paragraph, index) => ({
       heading: fallbackHeadings[index] ?? "",
-      paragraphs: [paragraph.text],
+      paragraphs: [paragraph.runs],
     })),
   };
 }

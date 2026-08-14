@@ -5,7 +5,11 @@ import { notFound } from "next/navigation";
 
 import { storefront } from "@/lib/storefront/data-source";
 import { formatDate } from "@/lib/storefront/format";
-import type { ArticleBlock, JournalArticle } from "@/lib/storefront/types";
+import type {
+  ArticleBlock,
+  JournalArticle,
+  RichTextParagraph,
+} from "@/lib/storefront/types";
 
 interface ArticlePageProps {
   params: Promise<{ articleHandle: string }>;
@@ -63,14 +67,47 @@ function runKey(run: { prose: ProseBlock[]; image?: ImageBlock }): string {
   return run.prose[0]?.text ?? run.image?.image.src ?? "run";
 }
 
+function RichTextRuns({ runs }: { runs: RichTextParagraph }) {
+  return (
+    <>
+      {runs.map((run) => {
+        const key = `${run.href ?? "text"}:${run.text}`;
+        return run.href?.startsWith("/") ? (
+          <Link href={run.href} key={key}>
+            {run.text}
+          </Link>
+        ) : run.href !== undefined ? (
+          <a href={run.href} key={key}>
+            {run.text}
+          </a>
+        ) : (
+          run.text
+        );
+      })}
+    </>
+  );
+}
+
 function ProseBlockView({ block }: { block: ProseBlock }) {
   switch (block.type) {
     case "paragraph":
-      return <p>{block.text}</p>;
+      return (
+        <p>
+          <RichTextRuns runs={block.runs} />
+        </p>
+      );
     case "heading":
-      return <h2>{block.text}</h2>;
+      return (
+        <h2>
+          <RichTextRuns runs={block.runs} />
+        </h2>
+      );
     case "pullquote":
-      return <blockquote>{block.text}</blockquote>;
+      return (
+        <blockquote>
+          <RichTextRuns runs={block.runs} />
+        </blockquote>
+      );
     case "note":
       return (
         <aside className="article-note">

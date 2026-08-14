@@ -3,7 +3,14 @@
 import type { StorePage } from "../types";
 import { EDITORIAL_IMAGES } from "./editorial-images";
 
-export const PAGE_FIXTURES: readonly StorePage[] = [
+type StaticStorePage = Omit<StorePage, "sections"> & {
+  sections: readonly {
+    heading: string;
+    paragraphs: readonly string[];
+  }[];
+};
+
+const STATIC_PAGE_FIXTURES = [
   {
     handle: "about-forward",
     title: "About Forward",
@@ -134,4 +141,14 @@ export const PAGE_FIXTURES: readonly StorePage[] = [
       },
     ],
   },
-];
+] as const satisfies readonly StaticStorePage[];
+
+export const PAGE_FIXTURES: readonly StorePage[] = STATIC_PAGE_FIXTURES.map(
+  (page) => ({
+    ...page,
+    sections: page.sections.map((section) => ({
+      ...section,
+      paragraphs: section.paragraphs.map((text) => [{ text }]),
+    })),
+  }),
+);

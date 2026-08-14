@@ -31,11 +31,26 @@ interface FieldIndexPanelProps {
   queryString: string;
 }
 
+interface AboutIndexPanelProps {
+  item: NavItem;
+  id: string;
+  onClose: () => void;
+  pathname: string;
+  queryString: string;
+}
+
 function isActive(pathname: string, href: string): boolean {
   if (pathname === href || pathname.startsWith(`${href}/`)) {
     return true;
   }
   return href === "/shop" && pathname.startsWith("/products");
+}
+
+function isBranchActive(pathname: string, item: NavItem): boolean {
+  return (
+    isActive(pathname, item.href) ||
+    item.children?.some((child) => isActive(pathname, child.href)) === true
+  );
 }
 
 function accountNavigationLabel(item: NavItem, signedIn: boolean): string {
@@ -119,6 +134,50 @@ function FieldIndexPanel({
   );
 }
 
+function AboutIndexPanel({
+  item,
+  id,
+  onClose,
+  pathname,
+  queryString,
+}: AboutIndexPanelProps) {
+  return (
+    <section
+      className="field-index-panel field-about-panel"
+      id={id}
+      aria-label="About Forward pages"
+    >
+      <div className="field-index-kicker">
+        <span>About / Field manual</span>
+        <span className="field-about-kicker-links">
+          <Link
+            href={createHeaderNavigationHref(item.href, queryString)}
+            aria-current={isActive(pathname, item.href) ? "page" : undefined}
+            onClick={onClose}
+          >
+            Overview ↗
+          </Link>
+          {String(item.children?.length ?? 0).padStart(2, "0")} pages
+        </span>
+      </div>
+      <nav className="field-about-grid" aria-label="About Forward">
+        {item.children?.map((child, index) => (
+          <Link
+            key={child.href}
+            href={createHeaderNavigationHref(child.href, queryString)}
+            aria-current={isActive(pathname, child.href) ? "page" : undefined}
+            onClick={onClose}
+          >
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <strong>{child.label}</strong>
+            <i aria-hidden="true">↗</i>
+          </Link>
+        ))}
+      </nav>
+    </section>
+  );
+}
+
 interface MobileFieldIndexProps {
   collections: readonly FieldIndexCollection[];
   onNavigate: () => void;
@@ -172,11 +231,20 @@ export function FieldIndexHeader({
   if (shopItem === undefined) {
     throw new Error("Header 01 requires a Shop navigation item.");
   }
+  const aboutItem = primary.find(
+    (item) => item.href === "/pages/about-forward",
+  );
+  if (aboutItem?.children === undefined || aboutItem.children.length === 0) {
+    throw new Error(
+      "Header 01 requires the canonical About navigation branch.",
+    );
+  }
   const collections = useMemo(
     () => createFieldIndexCollections(shopItem),
     [shopItem],
   );
   const [desktopOpen, setDesktopOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountSignedIn, setAccountSignedIn] = useState(false);
   const [activeIndex, setActiveIndex] = useState(() =>
@@ -184,12 +252,14 @@ export function FieldIndexHeader({
   );
   const rootRef = useRef<HTMLDivElement>(null);
   const desktopTriggerRef = useRef<HTMLButtonElement>(null);
+  const aboutTriggerRef = useRef<HTMLButtonElement>(null);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const restoreMobileFocusRef = useRef(false);
   const mobileOpenRef = useRef(false);
   const mobilePanelRef = useRef<HTMLElement>(null);
   const desktopPanelId = useId();
+  const aboutPanelId = useId();
   const mobilePanelId = useId();
 
   const searchItem = primary.find((item) => item.href === "/search");
@@ -198,8 +268,13 @@ export function FieldIndexHeader({
   );
   const utilityLinks = utility.filter((item) => item.href !== "/cart");
   const mobileLinks = [
-    ...primary.filter((item) => item.href !== "/shop"),
-    ...utilityLinks,
+    ...primary
+      .filter((item) => item.href !== "/shop")
+      .flatMap((item) => [
+        { item, child: false },
+        ...(item.children ?? []).map((child) => ({ item: child, child: true })),
+      ]),
+    ...utilityLinks.map((item) => ({ item, child: false })),
   ];
 
   useEffect(() => {
@@ -229,13 +304,19 @@ export function FieldIndexHeader({
     }
     mobileOpenRef.current = false;
     setDesktopOpen(false);
+    setAboutOpen(false);
     setMobileOpen(false);
     setActiveIndex(activeCollectionIndex(pathname, collections));
   }, [pathname, collections]);
 
   useEffect(() => {
-    if (!desktopOpen) {
+    if (!desktopOpen && !aboutOpen) {
       return;
+    }
+
+    function closeDesktopPanels() {
+      setDesktopOpen(false);
+      setAboutOpen(false);
     }
 
     function handlePointerDown(event: PointerEvent) {
@@ -243,14 +324,18 @@ export function FieldIndexHeader({
         event.target instanceof Node &&
         !rootRef.current?.contains(event.target)
       ) {
-        setDesktopOpen(false);
+        closeDesktopPanels();
       }
     }
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setDesktopOpen(false);
-        desktopTriggerRef.current?.focus();
+        closeDesktopPanels();
+        if (aboutOpen) {
+          aboutTriggerRef.current?.focus();
+        } else {
+          desktopTriggerRef.current?.focus();
+        }
       }
     }
 
@@ -260,7 +345,7 @@ export function FieldIndexHeader({
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [desktopOpen]);
+  }, [aboutOpen, desktopOpen]);
 
   useEffect(() => {
     if (!mobileOpen) {
@@ -335,11 +420,20 @@ export function FieldIndexHeader({
   function toggleDesktop() {
     mobileOpenRef.current = false;
     setMobileOpen(false);
+    setAboutOpen(false);
     setDesktopOpen((current) => !current);
+  }
+
+  function toggleAbout() {
+    mobileOpenRef.current = false;
+    setMobileOpen(false);
+    setDesktopOpen(false);
+    setAboutOpen((current) => !current);
   }
 
   function openMobile() {
     setDesktopOpen(false);
+    setAboutOpen(false);
     mobileOpenRef.current = true;
     setMobileOpen(true);
   }
@@ -377,18 +471,46 @@ export function FieldIndexHeader({
               {desktopOpen ? "−" : "+"}
             </span>
           </button>
-          {primaryLinks.map((item, index) => (
-            <Link
-              key={item.href}
-              href={createHeaderNavigationHref(item.href, queryString)}
-              className={isActive(pathname, item.href) ? "active" : undefined}
-              aria-current={isActive(pathname, item.href) ? "page" : undefined}
-              onClick={() => setDesktopOpen(false)}
-            >
-              <i>{String(index + 2).padStart(2, "0")}</i>
-              {item.label}
-            </Link>
-          ))}
+          {primaryLinks.map((item, index) =>
+            item.href === aboutItem.href ? (
+              <button
+                key={item.href}
+                ref={aboutTriggerRef}
+                type="button"
+                className={
+                  isBranchActive(pathname, item) ? "active" : undefined
+                }
+                aria-current={
+                  isBranchActive(pathname, item) ? "page" : undefined
+                }
+                aria-expanded={aboutOpen}
+                aria-controls={aboutOpen ? aboutPanelId : undefined}
+                onClick={toggleAbout}
+              >
+                <i>{String(index + 2).padStart(2, "0")}</i>
+                {item.label}
+                <span className="field-header-toggle" aria-hidden="true">
+                  {aboutOpen ? "−" : "+"}
+                </span>
+              </button>
+            ) : (
+              <Link
+                key={item.href}
+                href={createHeaderNavigationHref(item.href, queryString)}
+                className={isActive(pathname, item.href) ? "active" : undefined}
+                aria-current={
+                  isActive(pathname, item.href) ? "page" : undefined
+                }
+                onClick={() => {
+                  setDesktopOpen(false);
+                  setAboutOpen(false);
+                }}
+              >
+                <i>{String(index + 2).padStart(2, "0")}</i>
+                {item.label}
+              </Link>
+            ),
+          )}
         </nav>
         <div className="header-actions field-header-actions">
           {searchItem ? (
@@ -442,6 +564,15 @@ export function FieldIndexHeader({
             queryString={queryString}
           />
         ) : null}
+        {aboutOpen ? (
+          <AboutIndexPanel
+            item={aboutItem}
+            id={aboutPanelId}
+            onClose={() => setAboutOpen(false)}
+            pathname={pathname}
+            queryString={queryString}
+          />
+        ) : null}
       </header>
       {mobileOpen ? (
         <aside
@@ -477,9 +608,10 @@ export function FieldIndexHeader({
             className="field-mobile-secondary"
             aria-label="Mobile primary navigation"
           >
-            {mobileLinks.map((item, index) => (
+            {mobileLinks.map(({ item, child }, index) => (
               <Link
                 key={item.href}
+                className={child ? "field-mobile-secondary-child" : undefined}
                 href={createHeaderNavigationHref(item.href, queryString)}
                 aria-current={
                   isActive(pathname, item.href) ? "page" : undefined

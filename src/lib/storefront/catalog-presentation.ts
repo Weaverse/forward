@@ -10,6 +10,8 @@ export interface PresentationColorway {
 export interface CatalogPresentationProfile {
   handle: string;
   category: ProductCategory;
+  /** Exact non-Color Size values; absent means Color is the only option. */
+  optionValues?: readonly string[];
   activities: readonly string[];
   subtitle: string;
   repair: string;
@@ -22,6 +24,17 @@ const MOSS = "#59654b";
 const CLAYSTONE = "#a9705a";
 const DUNE = "#c4ad83";
 const LIMESTONE = "#cfc8b8";
+
+export const APPAREL_SIZE_VALUES = ["XS", "S", "M", "L", "XL"] as const;
+export const FOOTWEAR_SIZE_VALUES = [
+  "US 7",
+  "US 8",
+  "US 9",
+  "US 10",
+  "US 11",
+  "US 12",
+  "US 13",
+] as const;
 
 export const CANONICAL_PRODUCT_HANDLES = [
   "weatherline-shell",
@@ -40,6 +53,7 @@ export const CATALOG_PRESENTATION_PROFILES: readonly CatalogPresentationProfile[
     {
       handle: "weatherline-shell",
       category: "shells",
+      optionValues: APPAREL_SIZE_VALUES,
       activities: ["alpine", "trail", "camp"],
       subtitle: "Three-layer waterproof shell for shifting coastal weather.",
       repair:
@@ -53,6 +67,7 @@ export const CATALOG_PRESENTATION_PROFILES: readonly CatalogPresentationProfile[
     {
       handle: "traverse-grid-fleece",
       category: "shells",
+      optionValues: APPAREL_SIZE_VALUES,
       activities: ["trail", "alpine", "travel"],
       subtitle: "Breathable grid fleece for fast temperature changes.",
       repair:
@@ -66,6 +81,7 @@ export const CATALOG_PRESENTATION_PROFILES: readonly CatalogPresentationProfile[
     {
       handle: "drift-insulated-vest",
       category: "shells",
+      optionValues: APPAREL_SIZE_VALUES,
       activities: ["alpine", "camp", "travel"],
       subtitle: "Packable synthetic warmth for exposed starts and stops.",
       repair:
@@ -118,6 +134,7 @@ export const CATALOG_PRESENTATION_PROFILES: readonly CatalogPresentationProfile[
     {
       handle: "talus-trail-shoe",
       category: "footwear",
+      optionValues: FOOTWEAR_SIZE_VALUES,
       activities: ["trail", "camp"],
       subtitle: "Grippy, stable footwear for scree, roots, and river rock.",
       repair:
@@ -131,6 +148,7 @@ export const CATALOG_PRESENTATION_PROFILES: readonly CatalogPresentationProfile[
     {
       handle: "scree-approach-shoe",
       category: "footwear",
+      optionValues: FOOTWEAR_SIZE_VALUES,
       activities: ["alpine", "trail"],
       subtitle: "Precise low-profile footwear for rock and mixed approaches.",
       repair:
@@ -144,6 +162,7 @@ export const CATALOG_PRESENTATION_PROFILES: readonly CatalogPresentationProfile[
     {
       handle: "camp-recovery-clog",
       category: "footwear",
+      optionValues: FOOTWEAR_SIZE_VALUES,
       activities: ["camp", "travel"],
       subtitle: "Easy-on recovery footwear with durable wet-ground traction.",
       repair:

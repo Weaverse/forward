@@ -46,6 +46,38 @@ const EXPECTED_MENU = [
     label: "About",
     href: "/pages/about-forward",
     sourcePaths: ["/pages/about-forward"],
+    children: [
+      {
+        label: "Materials & Care",
+        href: "/pages/materials-and-care",
+        sourcePaths: ["/pages/materials-and-care"],
+      },
+      {
+        label: "Fit & Sizing",
+        href: "/pages/fit-and-sizing",
+        sourcePaths: ["/pages/fit-and-sizing"],
+      },
+      {
+        label: "Field Testing",
+        href: "/pages/field-testing",
+        sourcePaths: ["/pages/field-testing"],
+      },
+      {
+        label: "Field Repair",
+        href: "/pages/field-repair",
+        sourcePaths: ["/pages/field-repair"],
+      },
+      {
+        label: "Shipping & Returns",
+        href: "/pages/shipping-returns",
+        sourcePaths: ["/pages/shipping-returns"],
+      },
+      {
+        label: "Contact",
+        href: "/pages/contact",
+        sourcePaths: ["/pages/contact"],
+      },
+    ],
   },
 ] as const satisfies readonly ExpectedMenuItem[];
 
