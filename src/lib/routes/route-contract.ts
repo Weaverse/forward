@@ -56,16 +56,10 @@ export const SMOKE_FIXTURES = {
     "talus-trail-shoe",
   ],
   collectionHandle: "outerwear",
-  articleHandle: "walking-the-long-light",
-  pageHandle: "about-forward",
-  policyHandle: "shipping-policy",
-  orderId: "1001",
-} as const;
-
-export const LIVE_CONTENT_SMOKE_FIXTURES = {
   articleHandle: "layering-for-moving-weather",
   pageHandle: "about-forward",
   policyHandle: "shipping-policy",
+  orderId: "1001",
 } as const;
 
 const PRIMARY_PRODUCT_FIXTURE = SMOKE_FIXTURES.productHandles[0];
@@ -118,6 +112,24 @@ export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [
     label: "Journal",
     category: "editorial",
     smoke: { path: "/journal", expectedStatus: 200 },
+  },
+  {
+    pattern: "/about",
+    label: "About Forward custom page",
+    category: "content",
+    smoke: { path: "/about", expectedStatus: 200 },
+  },
+  {
+    pattern: "/materials",
+    label: "Materials custom page",
+    category: "content",
+    smoke: { path: "/materials", expectedStatus: 200 },
+  },
+  {
+    pattern: "/field-testing",
+    label: "Field testing custom page",
+    category: "content",
+    smoke: { path: "/field-testing", expectedStatus: 200 },
   },
   {
     pattern: "/journal/[articleHandle]",

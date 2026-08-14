@@ -8,7 +8,6 @@
  */
 
 import { type ChildProcess, spawn } from "node:child_process";
-import { readFileSync } from "node:fs";
 import { access } from "node:fs/promises";
 import { connect, createServer } from "node:net";
 import path from "node:path";
@@ -19,7 +18,6 @@ import nextEnv from "@next/env";
 import {
   ACCOUNT_PROTOCOL_SMOKES,
   DYNAMIC_NOT_FOUND_SMOKES,
-  LIVE_CONTENT_SMOKE_FIXTURES,
   NOT_FOUND_SMOKE,
   PERMANENT_REDIRECT_STATUS,
   REDIRECT_CONTRACT,
@@ -63,25 +61,6 @@ if (accountValues.some(Boolean) && !accountValues.every(Boolean)) {
 }
 const CUSTOMER_ACCOUNT_MODE = accountValues.every(Boolean);
 
-function buildHasLiveContent(): boolean {
-  try {
-    const manifest = JSON.parse(
-      readFileSync(
-        path.join(process.cwd(), ".next", "prerender-manifest.json"),
-        "utf8",
-      ),
-    ) as { routes?: Record<string, unknown> };
-    return Object.hasOwn(
-      manifest.routes ?? {},
-      `/journal/${LIVE_CONTENT_SMOKE_FIXTURES.articleHandle}`,
-    );
-  } catch {
-    return false;
-  }
-}
-
-const LIVE_CONTENT_MODE = buildHasLiveContent();
-
 function modeAwareSmoke(route: (typeof ROUTE_CONTRACT)[number]): RouteSmoke {
   if (CUSTOMER_ACCOUNT_MODE && route.category === "account") {
     if (route.pattern === "/account/status") {
@@ -97,28 +76,7 @@ function modeAwareSmoke(route: (typeof ROUTE_CONTRACT)[number]): RouteSmoke {
       expectedContentType: "text/html",
     };
   }
-  if (!LIVE_CONTENT_MODE) {
-    return route.smoke;
-  }
-  switch (route.pattern) {
-    case "/journal/[articleHandle]":
-      return {
-        ...route.smoke,
-        path: `/journal/${LIVE_CONTENT_SMOKE_FIXTURES.articleHandle}`,
-      };
-    case "/pages/[pageHandle]":
-      return {
-        ...route.smoke,
-        path: `/pages/${LIVE_CONTENT_SMOKE_FIXTURES.pageHandle}`,
-      };
-    case "/policies/[policyHandle]":
-      return {
-        ...route.smoke,
-        path: `/policies/${LIVE_CONTENT_SMOKE_FIXTURES.policyHandle}`,
-      };
-    default:
-      return route.smoke;
-  }
+  return route.smoke;
 }
 
 function modeAwareAccountProtocolSmoke(smoke: RouteSmoke): RouteSmoke {

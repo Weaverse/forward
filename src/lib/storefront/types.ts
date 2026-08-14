@@ -65,8 +65,6 @@ export interface Product {
   handle: string;
   title: string;
   subtitle: string;
-  /** Field-plate number used by the editorial framing, e.g. "01". */
-  plate: string;
   category: ProductCategory;
   activities: readonly string[];
   price: Money;

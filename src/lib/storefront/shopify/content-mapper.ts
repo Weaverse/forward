@@ -144,7 +144,15 @@ function readPageNodes(
   data: Record<string, unknown>,
 ): readonly Record<string, unknown>[] {
   return readRequiredHandleSet(
-    [data.aboutForward, data.fieldRepair, data.shippingReturns, data.contact],
+    [
+      data.aboutForward,
+      data.fieldRepair,
+      data.shippingReturns,
+      data.contact,
+      data.materialsAndCare,
+      data.fitAndSizing,
+      data.fieldTesting,
+    ],
     CONTENT_PAGE_HANDLES,
     "content pages",
     (node) => node,

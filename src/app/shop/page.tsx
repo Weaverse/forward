@@ -232,6 +232,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       <div className="shell plp-layout">
         <FilterSidebar groups={filterGroups} idPrefix="desktop" />
         <section aria-label="Products">
+          <h2 className="sr-only">Products</h2>
           {/* Mobile filters: the canonical drawer is a JS prototype, so
               Forward uses a no-JavaScript disclosure instead. */}
           <details className="filter-disclosure">
@@ -251,10 +252,10 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           ) : (
             <div className="empty-state">
               <div className="empty-state-inner">
-                <p className="eyebrow">No matching plates</p>
+                <p className="eyebrow">No matching products</p>
                 <h2 className="h3">Nothing in this drawer.</h2>
                 <p className="muted">
-                  No products match this filter. The full catalog is three
+                  No products match this filter. The full catalog is nine
                   products deep — try widening the view.
                 </p>
                 <Link className="button button-primary" href="/shop">

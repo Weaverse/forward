@@ -102,8 +102,10 @@ export function CartView({ seedLines }: CartViewProps) {
                     <Link href={line.href}>{line.title}</Link>
                   </h2>
                   <p className="muted">
-                    {line.colorwayName}
-                    {line.size !== undefined ? ` · ${line.size}` : ""}
+                    {[
+                      line.colorwayName,
+                      ...Object.values(line.selectedOptions),
+                    ].join(" · ")}
                   </p>
                   <div className="line-controls">
                     {/* Each control names its own line, so the canonical

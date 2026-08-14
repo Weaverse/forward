@@ -1,117 +1,165 @@
-/**
- * Theme-owned catalog presentation profile.
- *
- * Shopify owns product identity, copy, price, options, media, and the `forward`
- * metafields. It does not currently own the editorial framing the approved
- * canonical source port depends on, so those fields stay here, keyed by the
- * three approved product handles.
- *
- * This is deliberately NOT a copy of the static `Product` fixture: it may only
- * carry fields Shopify does not own. Everything else must come from the live
- * adapter (or, in static mode, from `fixtures/products.ts`).
- *
- * Colorway IDs are canonical and load-bearing: PDP/PLP deep links
- * (`?colorway=charcoal`), the demo cart seed, and the demo order fixtures all
- * reference them. Mapping full Shopify Color labels onto these IDs is what
- * keeps those references valid.
- */
+/** Theme-owned presentation fields keyed by the exact managed catalog handles. */
 
 import type { ProductCategory } from "./types";
 
 export interface PresentationColorway {
-  /** Canonical normalized colorway id used by deep links and demo state. */
   id: string;
-  /** Solid swatch color; presentation-owned until Shopify swatches exist. */
   swatchColor: string;
 }
 
 export interface CatalogPresentationProfile {
   handle: string;
-  /** Canonical plate number used by the editorial framing. */
-  plate: string;
   category: ProductCategory;
-  /** Approved activity labels backing the current PLP filters. */
   activities: readonly string[];
-  /** Concise subtitle; the live description is not an equivalent field. */
   subtitle: string;
-  /** Repair-program copy. */
   repair: string;
-  /** Related-product handle order. */
   relatedHandles: readonly string[];
-  /** Exact Shopify `Color` option label -> canonical colorway identity. */
   colorways: Readonly<Record<string, PresentationColorway>>;
 }
 
-const CHARCOAL_SWATCH = "#3b403f";
+const CHARCOAL = "#3b403f";
+const MOSS = "#59654b";
+const CLAYSTONE = "#a9705a";
+const DUNE = "#c4ad83";
+const LIMESTONE = "#cfc8b8";
 
-/**
- * Canonical catalog order. Storefront API title/created ordering is not
- * authoritative for the approved presentation, so the adapter re-orders live
- * products to match this list.
- */
 export const CANONICAL_PRODUCT_HANDLES = [
   "weatherline-shell",
+  "traverse-grid-fleece",
+  "drift-insulated-vest",
   "ridge-30-field-pack",
+  "approach-18-day-pack",
+  "waypoint-sling-6",
   "talus-trail-shoe",
+  "scree-approach-shoe",
+  "camp-recovery-clog",
 ] as const;
 
 export const CATALOG_PRESENTATION_PROFILES: readonly CatalogPresentationProfile[] =
   [
     {
       handle: "weatherline-shell",
-      plate: "01",
       category: "shells",
       activities: ["alpine", "trail", "camp"],
       subtitle: "Three-layer waterproof shell for shifting coastal weather.",
       repair:
         "Field-repair small punctures with tenacious tape; our repairs program handles delaminations, zip replacements, and re-taping for the life of the garment.",
-      relatedHandles: ["ridge-30-field-pack", "talus-trail-shoe"],
+      relatedHandles: ["traverse-grid-fleece", "ridge-30-field-pack"],
       colorways: {
-        "Charcoal / Moss": { id: "charcoal", swatchColor: CHARCOAL_SWATCH },
-        "Claystone / Charcoal": { id: "claystone", swatchColor: "#a9705a" },
+        "Charcoal / Moss": { id: "charcoal", swatchColor: CHARCOAL },
+        "Claystone / Charcoal": { id: "claystone", swatchColor: CLAYSTONE },
+      },
+    },
+    {
+      handle: "traverse-grid-fleece",
+      category: "shells",
+      activities: ["trail", "alpine", "travel"],
+      subtitle: "Breathable grid fleece for fast temperature changes.",
+      repair:
+        "Cuffs, pocket openings, and small tears can be reinforced through the Forward repair program.",
+      relatedHandles: ["weatherline-shell", "drift-insulated-vest"],
+      colorways: {
+        "Moss / Charcoal": { id: "moss-charcoal", swatchColor: MOSS },
+        "Claystone / Bone": { id: "claystone-bone", swatchColor: CLAYSTONE },
+      },
+    },
+    {
+      handle: "drift-insulated-vest",
+      category: "shells",
+      activities: ["alpine", "camp", "travel"],
+      subtitle: "Packable synthetic warmth for exposed starts and stops.",
+      repair:
+        "Shell tears, pocket damage, and insulation migration are assessed and repaired where construction allows.",
+      relatedHandles: ["traverse-grid-fleece", "weatherline-shell"],
+      colorways: {
+        "Charcoal / Signal": { id: "charcoal-signal", swatchColor: CHARCOAL },
+        "Dune / Moss": { id: "dune-moss", swatchColor: DUNE },
       },
     },
     {
       handle: "ridge-30-field-pack",
-      plate: "02",
       category: "packs",
       activities: ["alpine", "trail"],
       subtitle: "A 30-liter pack built for long days above the treeline.",
       repair:
         "Buckles, straps, and stays are standard parts we stock for replacement. Torn panels and blown seams go through the repairs program rather than the landfill.",
-      relatedHandles: ["weatherline-shell", "talus-trail-shoe"],
+      relatedHandles: ["approach-18-day-pack", "weatherline-shell"],
       colorways: {
-        "Charcoal / Moss / Tan": {
-          id: "charcoal",
-          swatchColor: CHARCOAL_SWATCH,
-        },
-        "Dune / Charcoal": { id: "dune", swatchColor: "#c4ad83" },
+        "Charcoal / Moss / Tan": { id: "charcoal", swatchColor: CHARCOAL },
+        "Dune / Charcoal": { id: "dune", swatchColor: DUNE },
+      },
+    },
+    {
+      handle: "approach-18-day-pack",
+      category: "packs",
+      activities: ["alpine", "trail", "travel"],
+      subtitle: "Close-body 18-liter carry for short technical days.",
+      repair:
+        "Replaceable hardware and repairable seams keep the pack in service after hard use.",
+      relatedHandles: ["ridge-30-field-pack", "scree-approach-shoe"],
+      colorways: {
+        "Moss / Charcoal": { id: "moss-charcoal", swatchColor: MOSS },
+        "Claystone / Dune": { id: "claystone-dune", swatchColor: CLAYSTONE },
+      },
+    },
+    {
+      handle: "waypoint-sling-6",
+      category: "packs",
+      activities: ["travel", "camp"],
+      subtitle: "Compact six-liter carry with fast, one-handed access.",
+      repair:
+        "Straps, buckles, zip pulls, and accessible seams can be replaced or reinforced.",
+      relatedHandles: ["approach-18-day-pack", "camp-recovery-clog"],
+      colorways: {
+        "Charcoal / Signal": { id: "charcoal-signal", swatchColor: CHARCOAL },
+        "Dune / Moss": { id: "dune-moss", swatchColor: DUNE },
       },
     },
     {
       handle: "talus-trail-shoe",
-      plate: "03",
       category: "footwear",
       activities: ["trail", "camp"],
       subtitle: "Grippy, stable footwear for scree, roots, and river rock.",
       repair:
         "Delaminated outsoles within reason are re-bonded through the repairs program. Worn laces and insoles are standard replaceable parts.",
-      relatedHandles: ["ridge-30-field-pack", "weatherline-shell"],
+      relatedHandles: ["scree-approach-shoe", "ridge-30-field-pack"],
       colorways: {
-        "Charcoal / Moss / Gum": {
-          id: "charcoal",
-          swatchColor: CHARCOAL_SWATCH,
-        },
-        "Limestone / Clay / Moss": { id: "limestone", swatchColor: "#cfc8b8" },
+        "Charcoal / Moss / Gum": { id: "charcoal", swatchColor: CHARCOAL },
+        "Limestone / Clay / Moss": { id: "limestone", swatchColor: LIMESTONE },
       },
     },
-  ] as const;
+    {
+      handle: "scree-approach-shoe",
+      category: "footwear",
+      activities: ["alpine", "trail"],
+      subtitle: "Precise low-profile footwear for rock and mixed approaches.",
+      repair:
+        "Laces and footbeds are replaceable; repairable bonding failures are assessed by the repair desk.",
+      relatedHandles: ["talus-trail-shoe", "approach-18-day-pack"],
+      colorways: {
+        "Charcoal / Gum": { id: "charcoal-gum", swatchColor: CHARCOAL },
+        "Limestone / Moss": { id: "limestone-moss", swatchColor: LIMESTONE },
+      },
+    },
+    {
+      handle: "camp-recovery-clog",
+      category: "footwear",
+      activities: ["camp", "travel"],
+      subtitle: "Easy-on recovery footwear with durable wet-ground traction.",
+      repair:
+        "Replaceable straps and repairable bonding failures are handled through the repair desk.",
+      relatedHandles: ["talus-trail-shoe", "waypoint-sling-6"],
+      colorways: {
+        "Charcoal / Moss": { id: "charcoal-moss", swatchColor: CHARCOAL },
+        "Dune / Claystone": { id: "dune-claystone", swatchColor: DUNE },
+      },
+    },
+  ];
 
 const PROFILES_BY_HANDLE = new Map<string, CatalogPresentationProfile>(
   CATALOG_PRESENTATION_PROFILES.map((profile) => [profile.handle, profile]),
 );
 
-/** Returns the approved presentation profile, or `null` for unknown handles. */
 export function getCatalogPresentationProfile(
   handle: string,
 ): CatalogPresentationProfile | null {

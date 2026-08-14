@@ -108,7 +108,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             Anything bought from Forward can come back for repair — defects
             free, everything else at an honest quoted cost.
           </p>
-          <Link className="button" href="/pages/repairs">
+          <Link className="button" href="/pages/field-repair">
             The repairs programme
           </Link>
         </article>

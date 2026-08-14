@@ -12,8 +12,9 @@ import {
   storefrontRuntimeMode,
 } from "@/lib/storefront/data-source";
 import {
-  productColorwayHref,
+  productSelectionHref,
   resolveColorway,
+  resolveProductSelection,
 } from "@/lib/storefront/product-state";
 
 export const metadata: Metadata = {
@@ -34,17 +35,25 @@ async function buildSeedLines(): Promise<readonly DemoCartLine[]> {
       continue;
     }
     const colorway = resolveColorway(product, entry.colorwayId);
+    const selection = resolveProductSelection(product, colorway.id, {
+      Size: entry.size,
+    });
     lines.push({
-      key: lineKey(product.handle, colorway.id, entry.size),
+      key: lineKey(product.handle, selection.variant.id),
+      variantId: selection.variant.id,
       productHandle: product.handle,
       title: product.title,
       colorwayId: colorway.id,
       colorwayName: colorway.name,
-      size: entry.size,
+      selectedOptions: selection.selectedOptions,
       quantity: entry.quantity,
-      unitPrice: product.price,
+      unitPrice: selection.variant.price,
       image: colorway.images.primary,
-      href: productColorwayHref(product, colorway.id),
+      href: productSelectionHref(
+        product,
+        colorway.id,
+        selection.selectedOptions,
+      ),
     });
   }
   return lines;

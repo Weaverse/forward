@@ -10,12 +10,18 @@ const PAGE_HANDLES = [
   "field-repair",
   "shipping-returns",
   "contact",
+  "materials-and-care",
+  "fit-and-sizing",
+  "field-testing",
 ] as const;
 
 const ARTICLE_HANDLES = [
   "layering-for-moving-weather",
   "packing-thirty-liters-for-a-long-day",
   "reading-the-trail-underfoot",
+  "how-we-test-a-shell-before-calling-it-weatherproof",
+  "a-two-day-kit-built-around-nine-kilograms",
+  "repair-notes-what-five-years-of-use-should-look-like",
 ] as const;
 
 const POLICY_HANDLES = [
@@ -62,6 +68,12 @@ export interface ContentResponse {
     shippingReturns: any;
     // biome-ignore lint/suspicious/noExplicitAny: synthetic GraphQL payload
     contact: any;
+    // biome-ignore lint/suspicious/noExplicitAny: synthetic GraphQL payload
+    materialsAndCare: any;
+    // biome-ignore lint/suspicious/noExplicitAny: synthetic GraphQL payload
+    fitAndSizing: any;
+    // biome-ignore lint/suspicious/noExplicitAny: synthetic GraphQL payload
+    fieldTesting: any;
     blog: {
       handle: string;
       articles: {
@@ -105,12 +117,51 @@ export function contentResponse(): ContentResponse {
     "Questions about fit, repairs, or an order can be sent to Forward support.",
     "<p>Questions about fit, repairs, or an order can be sent to Forward support.</p>",
   );
+  const materialsAndCare = page(
+    "materials-and-care",
+    "Materials & Care",
+    "What our fabrics are made of, and what keeps them working.",
+    [
+      "<p>What our fabrics are made of, and what keeps them working.</p>",
+      "<h2>Face fabrics and membranes</h2>",
+      "<p>Shell fabrics are woven from recycled nylon and bonded to a breathable waterproof membrane.</p>",
+      "<h2>Washing and reproofing</h2>",
+      "<p>Wash technical fabrics with a dedicated cleaner and restore the finish with low heat.</p>",
+    ].join(""),
+  );
+  const fitAndSizing = page(
+    "fit-and-sizing",
+    "Fit & Sizing",
+    "How Forward layers are cut, and how to choose between two sizes.",
+    [
+      "<p>How Forward layers are cut, and how to choose between two sizes.</p>",
+      "<h2>Apparel fit</h2>",
+      "<p>Shells are cut to clear a midlayer; fleece and insulation are cut trimmer for movement.</p>",
+      "<h2>Footwear sizing</h2>",
+      '<p>Footwear runs true to US sizing. Ask <a href="/pages/contact">Contact</a> before ordering two sizes.</p>',
+    ].join(""),
+  );
+  const fieldTesting = page(
+    "field-testing",
+    "Field Testing",
+    "How a product earns its place in a short catalog.",
+    [
+      "<p>How a product earns its place in a short catalog.</p>",
+      "<h2>What we test</h2>",
+      "<p>Every product is tested wet, loaded, and cold before it is offered for sale.</p>",
+      "<h2>What ends a test</h2>",
+      "<p>A failure that cannot be repaired in the field ends the test and sends the pattern back.</p>",
+    ].join(""),
+  );
   return {
     data: {
       aboutForward,
       fieldRepair,
       shippingReturns,
       contact,
+      materialsAndCare,
+      fitAndSizing,
+      fieldTesting,
       blog: {
         handle: "field-notes",
         articles: {
@@ -136,6 +187,27 @@ export function contentResponse(): ContentResponse {
               "Foot placement, pace, and terrain cues for moving efficiently.",
               "2026-05-08",
               "<p>Terrain speaks early if you look down often enough.</p><p>Small shifts in texture usually tell you more than the color of the trail.</p>",
+            ),
+            article(
+              "how-we-test-a-shell-before-calling-it-weatherproof",
+              "How We Test a Shell Before Calling It Weatherproof",
+              "Hose tests, hill days, and the point where a seam decides everything.",
+              "2026-04-22",
+              "<p>A shell is not weatherproof because a lab number says so.</p><p>We wear the same pattern through wet hill days until a seam or a cuff tells us the truth.</p>",
+            ),
+            article(
+              "a-two-day-kit-built-around-nine-kilograms",
+              "A Two-Day Kit Built Around Nine Kilograms",
+              "The overnight list that fits a thirty-liter pack without leaving margin behind.",
+              "2026-03-19",
+              "<p>Nine kilograms is the weight where an overnight still moves like a day.</p><p>Everything on the list earns its place twice: once on the back, once in use.</p>",
+            ),
+            article(
+              "repair-notes-what-five-years-of-use-should-look-like",
+              "Repair Notes: What Five Years of Use Should Look Like",
+              "Wear patterns, honest failures, and the repairs that keep gear in service.",
+              "2026-02-11",
+              "<p>Five years of honest use leaves marks worth reading.</p><p>Most of what comes through the workshop is wear, not failure, and wear is repairable.</p>",
             ),
           ],
         },

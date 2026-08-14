@@ -18,12 +18,13 @@ import {
 
 function makeLine(overrides: Partial<DemoCartLine> = {}): DemoCartLine {
   return {
-    key: lineKey("weatherline-shell", "charcoal", "M"),
+    key: lineKey("weatherline-shell", "variant-m"),
+    variantId: "variant-m",
     productHandle: "weatherline-shell",
     title: "Weatherline Shell",
     colorwayId: "charcoal",
     colorwayName: "Charcoal",
-    size: "M",
+    selectedOptions: { Size: "M" },
     quantity: 1,
     unitPrice: { amount: 100, currencyCode: "USD" },
     image: {
@@ -38,10 +39,10 @@ function makeLine(overrides: Partial<DemoCartLine> = {}): DemoCartLine {
 }
 
 describe("lineKey", () => {
-  it("is stable per product + colorway + size", () => {
-    assert.equal(lineKey("a", "b", "M"), lineKey("a", "b", "M"));
-    assert.notEqual(lineKey("a", "b", "M"), lineKey("a", "b", "L"));
-    assert.notEqual(lineKey("a", "b"), lineKey("a", "c"));
+  it("is stable per product variant", () => {
+    assert.equal(lineKey("a", "variant-m"), lineKey("a", "variant-m"));
+    assert.notEqual(lineKey("a", "variant-m"), lineKey("a", "variant-l"));
+    assert.notEqual(lineKey("a", "variant-m"), lineKey("b", "variant-m"));
   });
 });
 
@@ -73,8 +74,9 @@ describe("addLine", () => {
     const lines = addLine(
       [makeLine()],
       makeLine({
-        key: lineKey("weatherline-shell", "charcoal", "L"),
-        size: "L",
+        key: lineKey("weatherline-shell", "variant-l"),
+        variantId: "variant-l",
+        selectedOptions: { Size: "L" },
       }),
     );
     assert.equal(lines.length, 2);
@@ -93,7 +95,10 @@ describe("setLineQuantity", () => {
   });
 
   it("leaves other lines untouched", () => {
-    const other = makeLine({ key: lineKey("ridge-30", "dune") });
+    const other = makeLine({
+      key: lineKey("ridge-30", "ridge-variant"),
+      variantId: "ridge-variant",
+    });
     const lines = setLineQuantity([makeLine(), other], makeLine().key, 4);
     assert.equal(lines.length, 2);
     assert.equal(lines[1]?.quantity, 1);
@@ -102,7 +107,10 @@ describe("setLineQuantity", () => {
 
 describe("removeLine", () => {
   it("removes only the addressed line", () => {
-    const other = makeLine({ key: lineKey("ridge-30", "dune") });
+    const other = makeLine({
+      key: lineKey("ridge-30", "ridge-variant"),
+      variantId: "ridge-variant",
+    });
     const lines = removeLine([makeLine(), other], makeLine().key);
     assert.deepEqual(lines, [other]);
   });
@@ -113,7 +121,8 @@ describe("totals", () => {
     const lines = [
       makeLine({ quantity: 2, unitPrice: { amount: 40, currencyCode: "USD" } }),
       makeLine({
-        key: lineKey("ridge-30", "dune"),
+        key: lineKey("ridge-30", "ridge-variant"),
+        variantId: "ridge-variant",
         quantity: 1,
         unitPrice: { amount: 30, currencyCode: "USD" },
       }),
@@ -159,8 +168,13 @@ describe("sanitizeLines", () => {
       null,
       42,
       { key: "missing-everything" },
-      { ...valid, key: lineKey("ridge-30", "dune"), quantity: "2" },
-      { ...valid, key: lineKey("talus-trail", "limestone"), image: {} },
+      {
+        ...valid,
+        key: lineKey("ridge-30", "ridge-variant"),
+        variantId: "ridge-variant",
+        quantity: "2",
+      },
+      { ...valid, key: lineKey("talus-trail", "talus-variant"), image: {} },
     ]);
     assert.equal(lines.length, 1);
     assert.equal(lines[0]?.key, valid.key);
@@ -176,10 +190,11 @@ describe("sanitizeLines", () => {
     assert.equal(lines[0]?.quantity, MAX_LINE_QUANTITY);
   });
 
-  it("drops lines whose revived size no longer matches their key", () => {
+  it("keeps selected options as the only persisted option state", () => {
     const valid = makeLine();
-    const lines = sanitizeLines([{ ...valid, size: 42 }]);
-    assert.deepEqual(lines, []);
+    const lines = sanitizeLines([{ ...valid, size: "stale" }]);
+    assert.deepEqual(lines, [valid]);
+    assert.equal("size" in (lines[0] ?? {}), false);
   });
 
   it("keeps persisted cart lines backed by owned Shopify media", () => {
@@ -214,6 +229,7 @@ describe("sanitizeLines", () => {
         },
       },
       { ...valid, image: { ...valid.image, width: -1 } },
+      { ...valid, selectedOptions: { Size: 42 } },
     ];
     assert.deepEqual(sanitizeLines(invalid), []);
   });

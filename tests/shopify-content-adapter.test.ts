@@ -59,11 +59,22 @@ describe("Shopify content mapper", () => {
         "layering-for-moving-weather",
         "packing-thirty-liters-for-a-long-day",
         "reading-the-trail-underfoot",
+        "how-we-test-a-shell-before-calling-it-weatherproof",
+        "a-two-day-kit-built-around-nine-kilograms",
+        "repair-notes-what-five-years-of-use-should-look-like",
       ],
     );
     assert.deepEqual(
       result.pages.map((page) => page.handle),
-      ["about-forward", "field-repair", "shipping-returns", "contact"],
+      [
+        "about-forward",
+        "field-repair",
+        "shipping-returns",
+        "contact",
+        "materials-and-care",
+        "fit-and-sizing",
+        "field-testing",
+      ],
     );
     assert.deepEqual(
       result.policies.map((policy) => policy.handle),
@@ -80,6 +91,14 @@ describe("Shopify content mapper", () => {
     assert.equal(result.pages[0]?.eyebrow, "About Forward");
     assert.equal(result.pages[0]?.sections[0]?.heading, "The standard");
     assert.equal(result.pages[3]?.sections.length, 0);
+    assert.equal(result.pages[4]?.eyebrow, "Materials & Care");
+    assert.equal(
+      result.pages[4]?.sections[0]?.heading,
+      "Face fabrics and membranes",
+    );
+    assert.equal(result.articles[3]?.plate, "No. 04");
+    assert.ok((result.articles[5]?.readingMinutes ?? 0) > 0);
+    assert.ok(result.articles[5]?.heroImage.src.startsWith("/images/"));
     assert.equal(result.policies[0]?.updatedAt, undefined);
     assert.equal(
       result.policies[0]?.sections
@@ -151,7 +170,7 @@ describe("Shopify content mapper", () => {
       contentResponseWith((response) => {
         response.data.blog?.articles.nodes.pop();
       }),
-      "reading-the-trail-underfoot",
+      "repair-notes-what-five-years-of-use-should-look-like",
     );
   });
 
@@ -213,9 +232,9 @@ describe("Shopify content data source", () => {
         source.getPolicy("shipping-policy"),
       ]);
 
-    assert.equal(articles.length, 3);
+    assert.equal(articles.length, 6);
     assert.equal(article?.title, "Layering for Moving Weather");
-    assert.equal(pages.length, 4);
+    assert.equal(pages.length, 7);
     assert.equal(page?.title, "About Forward");
     assert.equal(policies.length, 4);
     assert.equal(policy?.title, "Shipping Policy");
@@ -246,10 +265,10 @@ describe("Shopify content data source", () => {
 
     assert.ok(source instanceof StaticStorefrontDataSource);
     assert.equal(
-      (await source.getArticle("walking-the-long-light"))?.title,
-      "Walking the Long Light",
+      (await source.getArticle("layering-for-moving-weather"))?.title,
+      "Layering for Moving Weather",
     );
-    assert.equal((await source.getPage("repairs"))?.title, "Repairs");
+    assert.equal((await source.getPage("field-repair"))?.title, "Field Repair");
     assert.equal(
       (await source.getPolicy("shipping-policy"))?.updatedAt,
       "2026-07-01",

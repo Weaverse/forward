@@ -82,7 +82,7 @@ function ProductFieldRecord({ product }: { product: Product }) {
         <summary>Repair</summary>
         <p>{product.repair}</p>
         <p>
-          <Link className="text-link" href="/pages/repairs">
+          <Link className="text-link" href="/pages/field-repair">
             The repairs programme
           </Link>
         </p>

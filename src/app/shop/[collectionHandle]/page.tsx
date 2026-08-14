@@ -104,9 +104,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
             <ul className="kit-list">
               {products.map((product) => (
                 <li key={product.handle}>
-                  <span>
-                    {product.plate} / {product.title}
-                  </span>
+                  <span>{product.title}</span>
                   <span>{product.category}</span>
                 </li>
               ))}

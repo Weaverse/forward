@@ -194,8 +194,14 @@ export function navigationResponse(): NavigationResponse {
               pageInfo: { hasNextPage: false },
               nodes: [
                 { handle: "weatherline-shell" },
+                { handle: "traverse-grid-fleece" },
+                { handle: "drift-insulated-vest" },
                 { handle: "ridge-30-field-pack" },
+                { handle: "approach-18-day-pack" },
+                { handle: "waypoint-sling-6" },
                 { handle: "talus-trail-shoe" },
+                { handle: "scree-approach-shoe" },
+                { handle: "camp-recovery-clog" },
               ],
             },
           },
@@ -205,7 +211,11 @@ export function navigationResponse(): NavigationResponse {
             description: "Weather protection for exposed ground.",
             products: {
               pageInfo: { hasNextPage: false },
-              nodes: [{ handle: "weatherline-shell" }],
+              nodes: [
+                { handle: "weatherline-shell" },
+                { handle: "traverse-grid-fleece" },
+                { handle: "drift-insulated-vest" },
+              ],
             },
           },
           {
@@ -214,7 +224,11 @@ export function navigationResponse(): NavigationResponse {
             description: "Carry systems for long field days.",
             products: {
               pageInfo: { hasNextPage: false },
-              nodes: [{ handle: "ridge-30-field-pack" }],
+              nodes: [
+                { handle: "ridge-30-field-pack" },
+                { handle: "approach-18-day-pack" },
+                { handle: "waypoint-sling-6" },
+              ],
             },
           },
           {
@@ -223,7 +237,11 @@ export function navigationResponse(): NavigationResponse {
             description: "Trail footwear for changing terrain.",
             products: {
               pageInfo: { hasNextPage: false },
-              nodes: [{ handle: "talus-trail-shoe" }],
+              nodes: [
+                { handle: "talus-trail-shoe" },
+                { handle: "scree-approach-shoe" },
+                { handle: "camp-recovery-clog" },
+              ],
             },
           },
         ],

@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { CANONICAL_PRODUCT_HANDLES } from "../src/lib/storefront/catalog-presentation.ts";
 import { StaticStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
+import {
+  CONTENT_ARTICLE_HANDLES,
+  CONTENT_PAGE_HANDLES,
+} from "../src/lib/storefront/shopify/content-query.ts";
 
 const storefront = new StaticStorefrontDataSource();
 
@@ -29,11 +34,40 @@ describe("StaticStorefrontDataSource unknown handles", () => {
 describe("StaticStorefrontDataSource known handles", () => {
   it("returns every fixture product by handle", async () => {
     const products = await storefront.listProducts();
-    assert.ok(products.length > 0);
+    assert.deepEqual(
+      products.map((product) => product.handle),
+      [...CANONICAL_PRODUCT_HANDLES],
+    );
     for (const product of products) {
       const found = await storefront.getProduct(product.handle);
       assert.equal(found?.handle, product.handle);
     }
+  });
+
+  it("keeps exact expanded product and content contracts", async () => {
+    const products = await storefront.listProducts();
+    const byHandle = new Map(
+      products.map((product) => [product.handle, product]),
+    );
+    assert.equal(byHandle.get("ridge-30-field-pack")?.price.amount, 198);
+    assert.equal(byHandle.get("talus-trail-shoe")?.price.amount, 168);
+    assert.deepEqual(byHandle.get("talus-trail-shoe")?.options[0]?.values, [
+      "US 7",
+      "US 8",
+      "US 9",
+      "US 10",
+      "US 11",
+      "US 12",
+      "US 13",
+    ]);
+    assert.deepEqual(
+      (await storefront.listPages()).map((page) => page.handle),
+      [...CONTENT_PAGE_HANDLES],
+    );
+    assert.deepEqual(
+      (await storefront.listArticles()).map((article) => article.handle),
+      [...CONTENT_ARTICLE_HANDLES],
+    );
   });
 
   it("returns only known products for a known collection", async () => {
