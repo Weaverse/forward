@@ -10,11 +10,13 @@ import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/storefront/format";
 import {
   COLORWAY_PARAM,
+  colorwayIsSoldOut,
   findExactVariant,
   galleryImages,
   optionParamKey,
   productSelectionHref,
   resolveProductSelection,
+  saleCompareAtPrice,
   type ProductSelection,
 } from "@/lib/storefront/product-state";
 import type { Product, ProductColorway } from "@/lib/storefront/types";
@@ -246,7 +248,11 @@ function ProductGallery({
               alt={image.alt}
               width={image.width}
               height={image.height}
-              sizes={index === 0 ? "(min-width: 820px) 55vw, 100vw" : "40vw"}
+              sizes={
+                index === 0 || index >= 3
+                  ? "(min-width: 820px) 55vw, 100vw"
+                  : "40vw"
+              }
               priority={index === 0}
               loading={index === 0 ? undefined : "lazy"}
             />
@@ -281,6 +287,7 @@ function ProductDetailView({
 }: ProductDetailViewProps) {
   const { colorway } = selection;
   const specBadge = product.specs[0]?.value ?? product.category;
+  const compareAt = saleCompareAtPrice(selection.variant);
 
   return (
     <div className="pdp">
@@ -298,7 +305,23 @@ function ProductDetailView({
             <span className="meta">{specBadge}</span>
           </div>
           <h1 className="product-title">{product.title}</h1>
-          <strong>{formatMoney(selection.variant.price)}</strong>
+          <p className="product-price">
+            <strong>
+              <span className="sr-only">
+                {compareAt !== null ? "Sale price " : "Price "}
+              </span>
+              {formatMoney(selection.variant.price)}
+            </strong>
+            {compareAt !== null ? (
+              <>
+                <del className="product-compare-at">
+                  <span className="sr-only">Regular price </span>
+                  {formatMoney(compareAt)}
+                </del>
+                <span className="product-sale-flag">On sale</span>
+              </>
+            ) : null}
+          </p>
           <p className="product-intro">{product.description}</p>
 
           <div className="option-group">
@@ -314,10 +337,15 @@ function ProductDetailView({
                   selection.selectedOptions,
                 );
                 const selected = entry.id === colorway.id;
+                const soldOut = colorwayIsSoldOut(product, entry.id);
                 return (
                   <Link
                     key={entry.id}
-                    className={cn("option-chip", selected && "selected")}
+                    className={cn(
+                      "option-chip",
+                      soldOut && "sold-out",
+                      selected && "selected",
+                    )}
                     href={productSelectionHref(
                       product,
                       next.colorway.id,
@@ -325,7 +353,7 @@ function ProductDetailView({
                       currentParams,
                     )}
                     scroll={false}
-                    aria-label={`${entry.name} colorway${selected ? " (selected)" : ""}`}
+                    aria-label={`${entry.name} colorway${selected ? " (selected)" : ""}${soldOut ? " (sold out)" : ""}`}
                     aria-current={selected ? "true" : undefined}
                   >
                     <span
@@ -364,7 +392,7 @@ function ProductDetailView({
                       <span
                         key={value}
                         className={cn(
-                          "option-chip unavailable",
+                          "option-chip sold-out unavailable",
                           selected && "selected",
                         )}
                         aria-disabled="true"

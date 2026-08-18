@@ -35,6 +35,9 @@ export default async function HomePage() {
   const categories = CATEGORY_HANDLES.map((handle) =>
     collectionsByHandle.get(handle),
   ).filter((collection): collection is Collection => collection !== undefined);
+  /* Editorial copy here uses `subtitle` — the theme-owned one-sentence summary
+   * keyed by canonical handle in `catalog-presentation.ts` — because the full
+   * Shopify `description` is a product-page body, not a Home teaser. */
   const spotlight = productsByHandle.get("drift-insulated-vest") ?? featured[0];
   const pack = productsByHandle.get("approach-18-day-pack") ?? featured[1];
   const dispatch = articles[0];
@@ -172,7 +175,7 @@ export default async function HomePage() {
           <div className="home-spotlight-copy">
             <p className="eyebrow">Layer focus / {spotlight.category}</p>
             <h2 className="h2">{spotlight.title}</h2>
-            <p className="lede">{spotlight.description}</p>
+            <p className="lede">{spotlight.subtitle}</p>
             <ul>
               {spotlight.specs.slice(0, 3).map((spec) => (
                 <li key={spec.label}>
@@ -222,7 +225,7 @@ export default async function HomePage() {
           <div className="home-kit-copy">
             <p className="eyebrow">One-day kit</p>
             <h2 className="h2">Carry the day, not the doubt.</h2>
-            <p>{pack.description}</p>
+            <p>{pack.subtitle}</p>
             <Link className="text-link" href={`/products/${pack.handle}`}>
               View {pack.title}
             </Link>

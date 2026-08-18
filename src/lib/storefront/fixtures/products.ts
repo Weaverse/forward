@@ -75,6 +75,8 @@ function productVariants(
         colorwayId,
         selectedOptions,
         price,
+        /* The deterministic catalog never claims a discount it cannot source. */
+        compareAtPrice: null,
         availableForSale: true,
       };
     }),

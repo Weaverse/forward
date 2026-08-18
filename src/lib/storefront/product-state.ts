@@ -5,6 +5,7 @@
  */
 
 import type {
+  Money,
   Product,
   ProductColorway,
   ProductVariant,
@@ -112,6 +113,29 @@ export function findExactVariant(
       (option) => values[option.name] === selectedOptions[option.name],
     );
   });
+}
+
+/**
+ * The compare-at price to strike through, or `null` when there is no honest
+ * sale to show. Merchants leave compare-at set to — or below — the price all
+ * the time, and a foreign currency cannot be compared at all.
+ */
+export function saleCompareAtPrice(variant: ProductVariant): Money | null {
+  const compareAt = variant.compareAtPrice;
+  if (compareAt === null) return null;
+  if (compareAt.currencyCode !== variant.price.currencyCode) return null;
+  if (compareAt.amount <= variant.price.amount) return null;
+  return compareAt;
+}
+
+/** True when no variant of the colorway can be purchased right now. */
+export function colorwayIsSoldOut(
+  product: Product,
+  colorwayId: string,
+): boolean {
+  return !product.variants.some(
+    (variant) => variant.colorwayId === colorwayId && variant.availableForSale,
+  );
 }
 
 /** The complete four-image PDP gallery for a colorway, in display order. */

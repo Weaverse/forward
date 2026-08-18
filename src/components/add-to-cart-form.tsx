@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { announceCartAdd } from "@/lib/cart/mini-cart-signal";
 import {
   ShopifyProductProvider,
   toHydrogenProductInput,
+  useShopifyCart,
   useShopifyCartMode,
   useShopifyProductForm,
 } from "@/lib/cart/shopify-cart-react";
@@ -51,6 +53,7 @@ function DemoAddToCartForm({ product, selection }: AddToCartFormProps) {
         size !== undefined ? `, ${size}` : ""
       }) to the demo cart.`,
     );
+    announceCartAdd(selection.variant.id);
   }
 
   return (
@@ -107,12 +110,52 @@ function ShopifyAddToCartForm({ selection }: AddToCartFormProps) {
   const { formProps, pending, register, selectedVariant } =
     useShopifyProductForm();
   const [quantity, setQuantity] = useState(1);
+  const cartLines = useShopifyCart((state) => state.data.lines.nodes);
+  const submittedVariantRef = useRef<{
+    id: string;
+    previousQuantity: number;
+  } | null>(null);
+  const wasPendingRef = useRef(false);
   const selectedPrice = Number(
     selectedVariant?.price.amount ?? selection.variant.price.amount,
   );
 
+  /* The mini-cart only opens once the server-owned cart actually reports the
+   * merchandise, so a failed add never announces a success. */
+  useEffect(() => {
+    if (pending) {
+      wasPendingRef.current = true;
+      return;
+    }
+    const submitted = submittedVariantRef.current;
+    if (!wasPendingRef.current || submitted === null) {
+      return;
+    }
+    const currentQuantity =
+      cartLines.find((line) => line.merchandise?.id === submitted.id)
+        ?.quantity ?? 0;
+    if (currentQuantity <= submitted.previousQuantity) {
+      return;
+    }
+    wasPendingRef.current = false;
+    submittedVariantRef.current = null;
+    announceCartAdd(submitted.id);
+  }, [cartLines, pending]);
+
   return (
-    <form {...formProps()}>
+    <form
+      {...formProps()}
+      onSubmitCapture={() => {
+        if (selectedVariant === null) return;
+        submittedVariantRef.current = {
+          id: selectedVariant.id,
+          previousQuantity:
+            cartLines.find(
+              (line) => line.merchandise?.id === selectedVariant.id,
+            )?.quantity ?? 0,
+        };
+      }}
+    >
       <input type="hidden" {...register("merchandiseId", {})} />
       <input type="hidden" {...register("quantity", { value: quantity })} />
       <div className="product-actions">
@@ -148,7 +191,12 @@ function ShopifyAddToCartForm({ selection }: AddToCartFormProps) {
             !selectedVariant.availableForSale
           }
         >
-          {pending ? "Adding…" : "Add to cart"} ·{" "}
+          {pending
+            ? "Adding…"
+            : selectedVariant?.availableForSale
+              ? "Add to cart"
+              : "Sold out"}{" "}
+          ·{" "}
           {formatMoney({
             amount: selectedPrice * quantity,
             currencyCode: "USD",

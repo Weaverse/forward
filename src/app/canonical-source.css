@@ -2258,12 +2258,11 @@ body {
   grid-template-columns: repeat(12, 1fr);
   gap: 80px 18px;
 }
+/* The canonical stagger offset every second and fifth card by 100px, which read
+ * as broken alignment rather than rhythm. Every Journal card now shares one
+ * baseline; hover and reduced-motion behaviour are untouched. */
 .article-card {
   grid-column: span 4;
-}
-.article-card:nth-child(2),
-.article-card:nth-child(5) {
-  transform: translateY(100px);
 }
 .article-card h2 {
   font-size: clamp(31px, 3vw, 47px);
@@ -2741,9 +2740,6 @@ a.check-row[aria-current] .check-dot {
   .article-card {
     grid-column: span 6;
   }
-  .article-card:nth-child(n) {
-    transform: none;
-  }
   .article-content blockquote {
     margin-inline: 0;
     padding-inline: 0;
@@ -2975,10 +2971,9 @@ a.check-row[aria-current] .check-dot {
   background: var(--ink);
   color: var(--white);
 }
+/* `Shop by system` reads as a label for the heading, so it stacks above it
+ * instead of sitting beside it on the same baseline. */
 .home-system-intro {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
   padding-bottom: 44px;
 }
 .home-system-grid {
@@ -3038,10 +3033,11 @@ a.check-row[aria-current] .check-dot {
   grid-template-columns: minmax(0, 1.25fr) minmax(380px, 0.75fr);
   gap: 0;
 }
+/* Desktop height comes from the 100svh bound in `production-polish.css`; a
+ * fixed 760px floor pushed the section past a usable viewport. */
 .home-spotlight-media img {
   width: 100%;
   height: 100%;
-  min-height: 760px;
   object-fit: cover;
 }
 .home-spotlight-copy {
@@ -3359,10 +3355,15 @@ a.check-row[aria-current] .check-dot {
 .gallery-button:nth-child(n + 4) {
   grid-column: 1 / -1;
 }
+/* Media four and later continue the gallery full width and uncropped: no fixed
+ * ratio, no fixed height, the whole frame at its natural aspect ratio on every
+ * breakpoint. */
 .gallery-button:nth-child(n + 4) img {
   width: 100%;
   height: auto;
-  aspect-ratio: 16 / 10;
+  min-height: 0;
+  aspect-ratio: auto;
+  object-fit: contain;
 }
 .gallery-zoom-label {
   position: absolute;
@@ -3582,9 +3583,6 @@ a.check-row[aria-current] .check-dot {
   }
   .testing-product img {
     height: 62svh;
-  }
-  .gallery-button:nth-child(n + 4) img {
-    aspect-ratio: 4 / 5;
   }
   .gallery-modal-bar {
     grid-template-columns: 1fr auto;

@@ -4,20 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 import {
+  formatShopifyMoney as money,
   type ShopifyCartLineData,
-  type ShopifyMoney,
   useShopifyCart,
   useShopifyCartForm,
 } from "@/lib/cart/shopify-cart-react";
-import { formatMoney } from "@/lib/storefront/format";
-
-function money(value: ShopifyMoney | undefined) {
-  if (value === undefined || value.currencyCode !== "USD") return "—";
-  return formatMoney({
-    amount: Number(value.amount),
-    currencyCode: "USD",
-  });
-}
 
 function ShopifyCartLine({
   line,

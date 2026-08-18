@@ -51,6 +51,11 @@ export interface ProductVariant {
     value: string;
   }[];
   price: Money;
+  /**
+   * Shopify's compare-at money when the merchant set one, otherwise `null`.
+   * It is not a sale by itself — see `saleCompareAtPrice` in `product-state`.
+   */
+  compareAtPrice: Money | null;
   availableForSale: boolean;
 }
 

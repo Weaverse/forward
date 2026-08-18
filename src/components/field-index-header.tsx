@@ -6,13 +6,23 @@ import { usePathname } from "next/navigation";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { CartCount } from "@/components/cart-count";
+import { CountryControl } from "@/components/country-control";
+import { Icon, type IconName } from "@/components/icon";
+import { MiniCart } from "@/components/mini-cart";
 import { Wordmark } from "@/components/wordmark";
 import {
   createHeaderNavigationHref,
   createFieldIndexCollections,
+  currentCollectionIndex,
   type FieldIndexCollection,
+  isActive,
 } from "@/lib/header-navigation";
 import type { NavItem } from "@/lib/storefront/types";
+
+/** Utility destinations Shopify owns; Forward only supplies their glyphs. */
+const UTILITY_ICONS: Readonly<Record<string, IconName>> = {
+  "/account": "user",
+};
 
 export interface FieldIndexHeaderProps {
   announcement: string;
@@ -39,13 +49,6 @@ interface AboutIndexPanelProps {
   queryString: string;
 }
 
-function isActive(pathname: string, href: string): boolean {
-  if (pathname === href || pathname.startsWith(`${href}/`)) {
-    return true;
-  }
-  return href === "/shop" && pathname.startsWith("/products");
-}
-
 function isBranchActive(pathname: string, item: NavItem): boolean {
   return (
     isActive(pathname, item.href) ||
@@ -61,10 +64,7 @@ function activeCollectionIndex(
   pathname: string,
   collections: readonly FieldIndexCollection[],
 ): number {
-  const index = collections.findIndex((collection) =>
-    isActive(pathname, collection.href),
-  );
-  return index >= 0 ? index : 0;
+  return Math.max(currentCollectionIndex(pathname, collections), 0);
 }
 
 function FieldIndexPanel({
@@ -80,6 +80,7 @@ function FieldIndexPanel({
   if (active === undefined) {
     throw new Error("Header 01 requires at least one Shop collection.");
   }
+  const currentIndex = currentCollectionIndex(pathname, collections);
 
   return (
     <section
@@ -97,9 +98,7 @@ function FieldIndexPanel({
             <Link
               key={collection.id}
               href={createHeaderNavigationHref(collection.href, queryString)}
-              aria-current={
-                isActive(pathname, collection.href) ? "page" : undefined
-              }
+              aria-current={currentIndex === index ? "page" : undefined}
               data-active={activeIndex === index ? "true" : undefined}
               onFocus={() => onSelect(index)}
               onMouseEnter={() => onSelect(index)}
@@ -111,7 +110,7 @@ function FieldIndexPanel({
                 <small>{collection.description}</small>
               </span>
               <span className="field-index-arrow" aria-hidden="true">
-                ↗
+                <Icon name="arrow-up-right" size={16} />
               </span>
             </Link>
           ))}
@@ -155,7 +154,7 @@ function AboutIndexPanel({
             aria-current={isActive(pathname, item.href) ? "page" : undefined}
             onClick={onClose}
           >
-            Overview ↗
+            Overview <Icon name="arrow-up-right" size={13} />
           </Link>
           {String(item.children?.length ?? 0).padStart(2, "0")} pages
         </span>
@@ -170,7 +169,9 @@ function AboutIndexPanel({
           >
             <span>{String(index + 1).padStart(2, "0")}</span>
             <strong>{child.label}</strong>
-            <i aria-hidden="true">↗</i>
+            <i aria-hidden="true">
+              <Icon name="arrow-up-right" size={13} />
+            </i>
           </Link>
         ))}
       </nav>
@@ -191,6 +192,7 @@ function MobileFieldIndex({
   pathname,
   queryString,
 }: MobileFieldIndexProps) {
+  const currentIndex = currentCollectionIndex(pathname, collections);
   return (
     <div className="field-mobile-index">
       <div className="field-mobile-section-label">
@@ -198,13 +200,11 @@ function MobileFieldIndex({
         <span>{String(collections.length).padStart(2, "0")} systems</span>
       </div>
       <nav aria-label="Mobile shop collections">
-        {collections.map((collection) => (
+        {collections.map((collection, index) => (
           <Link
             key={collection.id}
             href={createHeaderNavigationHref(collection.href, queryString)}
-            aria-current={
-              isActive(pathname, collection.href) ? "page" : undefined
-            }
+            aria-current={currentIndex === index ? "page" : undefined}
             onClick={onNavigate}
           >
             <span>{collection.index}</span>
@@ -449,7 +449,7 @@ export function FieldIndexHeader({
       <aside className="announcement" aria-label="Store announcement">
         <span>Forward field report / 01</span>
         <span>{announcement}</span>
-        <span>54.4609° N / 3.0886° W</span>
+        <CountryControl />
       </aside>
       <header className="site-header field-header">
         <Wordmark href={createHeaderNavigationHref("/", queryString)} />
@@ -468,7 +468,7 @@ export function FieldIndexHeader({
             <i>01</i>
             {shopItem.label}
             <span className="field-header-toggle" aria-hidden="true">
-              {desktopOpen ? "−" : "+"}
+              <Icon name={desktopOpen ? "caret-up" : "caret-down"} size={12} />
             </span>
           </button>
           {primaryLinks.map((item, index) =>
@@ -490,7 +490,10 @@ export function FieldIndexHeader({
                 <i>{String(index + 2).padStart(2, "0")}</i>
                 {item.label}
                 <span className="field-header-toggle" aria-hidden="true">
-                  {aboutOpen ? "−" : "+"}
+                  <Icon
+                    name={aboutOpen ? "caret-up" : "caret-down"}
+                    size={12}
+                  />
                 </span>
               </button>
             ) : (
@@ -521,24 +524,34 @@ export function FieldIndexHeader({
                 isActive(pathname, searchItem.href) ? "page" : undefined
               }
             >
-              Search
+              <Icon name="magnifying-glass" />
+              <span className="header-link-label">Search</span>
             </Link>
           ) : null}
-          {utilityLinks.map((item) => (
-            <Link
-              key={item.href}
-              className="header-link account-hide"
-              href={createHeaderNavigationHref(item.href, queryString)}
-              aria-current={isActive(pathname, item.href) ? "page" : undefined}
-            >
-              {accountNavigationLabel(item, accountSignedIn)}
-            </Link>
-          ))}
+          {utilityLinks.map((item) => {
+            const icon = UTILITY_ICONS[item.href];
+            return (
+              <Link
+                key={item.href}
+                className="header-link account-hide"
+                href={createHeaderNavigationHref(item.href, queryString)}
+                aria-current={
+                  isActive(pathname, item.href) ? "page" : undefined
+                }
+              >
+                {icon === undefined ? null : <Icon name={icon} />}
+                <span className="header-link-label">
+                  {accountNavigationLabel(item, accountSignedIn)}
+                </span>
+              </Link>
+            );
+          })}
           <Link
             className="icon-button cart-button"
             href={createHeaderNavigationHref("/cart", queryString)}
             aria-current={isActive(pathname, "/cart") ? "page" : undefined}
           >
+            <Icon name="shopping-bag" />
             <span className="cart-label">Cart</span>
             <CartCount />
           </Link>
@@ -550,8 +563,10 @@ export function FieldIndexHeader({
             aria-controls={mobileOpen ? mobilePanelId : undefined}
             onClick={openMobile}
           >
-            Menu
+            <Icon name="list" />
+            <span className="header-link-label">Menu</span>
           </button>
+          <MiniCart />
         </div>
         {desktopOpen ? (
           <FieldIndexPanel
@@ -595,7 +610,7 @@ export function FieldIndexHeader({
               onClick={closeMobile}
               aria-label="Close menu"
             >
-              Close
+              <Icon name="x" size={20} />
             </button>
           </div>
           <MobileFieldIndex
@@ -620,7 +635,9 @@ export function FieldIndexHeader({
               >
                 <span>{String(index + 4).padStart(2, "0")}</span>
                 {accountNavigationLabel(item, accountSignedIn)}
-                <i aria-hidden="true">↗</i>
+                <i aria-hidden="true">
+                  <Icon name="arrow-up-right" size={13} />
+                </i>
               </Link>
             ))}
             <Link

@@ -5,6 +5,7 @@ import { describe, it } from "node:test";
 import {
   createHeaderNavigationHref,
   createFieldIndexCollections,
+  currentCollectionIndex,
   FIELD_INDEX_PRESENTATION,
 } from "../src/lib/header-navigation.ts";
 import { NAVIGATION_FIXTURE } from "../src/lib/storefront/fixtures/navigation.ts";
@@ -27,48 +28,98 @@ function openingTagContaining(
 }
 
 describe("canonical header presentation", () => {
-  it("preserves the current query across header destinations", () => {
+  it("preserves only destination-owned query state across header navigation", () => {
     assert.equal(createHeaderNavigationHref("/shop", ""), "/shop");
     assert.equal(
       createHeaderNavigationHref(
         "/shop/outerwear",
         "q=trail&sort=price-desc&filter.v.availability=1",
       ),
-      "/shop/outerwear?q=trail&sort=price-desc&filter.v.availability=1",
+      "/shop/outerwear?sort=price-desc",
     );
     assert.equal(
       createHeaderNavigationHref(
         "/search?view=compact#results",
         "q=trail&colorway=claystone",
       ),
-      "/search?view=compact&q=trail&colorway=claystone#results",
+      "/search?view=compact&q=trail#results",
     );
   });
 
-  it("maps the nested Shop fixture into three approved local-image systems", () => {
+  it("maps the nested Shop fixture into four approved local-image systems", () => {
     const shop = NAVIGATION_FIXTURE.primary.find(
       (item) => item.href === "/shop",
     );
     assert.ok(shop !== undefined);
+    assert.deepEqual(shop.children, [
+      { href: "/shop", label: "Shop all" },
+      { href: "/shop/outerwear", label: "Outerwear" },
+      { href: "/shop/packs", label: "Packs" },
+      { href: "/shop/footwear", label: "Footwear" },
+    ]);
     const collections = createFieldIndexCollections(shop);
     assert.deepEqual(
-      collections.map(({ id, index, href }) => ({
+      collections.map(({ id, index, label, href }) => ({
         id,
         index,
+        label,
         href,
       })),
       [
-        { id: "outerwear", index: "01", href: "/shop/outerwear" },
-        { id: "packs", index: "02", href: "/shop/packs" },
-        { id: "footwear", index: "03", href: "/shop/footwear" },
+        { id: "forward", index: "00", label: "Shop all", href: "/shop" },
+        {
+          id: "outerwear",
+          index: "01",
+          label: "Outerwear",
+          href: "/shop/outerwear",
+        },
+        { id: "packs", index: "02", label: "Packs", href: "/shop/packs" },
+        {
+          id: "footwear",
+          index: "03",
+          label: "Footwear",
+          href: "/shop/footwear",
+        },
       ],
     );
-    assert.equal(FIELD_INDEX_PRESENTATION.length, 3);
+    assert.equal(FIELD_INDEX_PRESENTATION.length, 4);
     for (const collection of collections) {
       assert.match(collection.image.src, /^\/images\/editorial\/.+\.webp$/);
       assert.ok(collection.description.length >= 30);
       assert.ok(collection.fieldNote.length >= 30);
     }
+  });
+
+  it("marks only the deepest matching Shop destination as current", () => {
+    const shop = NAVIGATION_FIXTURE.primary.find(
+      (item) => item.href === "/shop",
+    );
+    assert.ok(shop !== undefined);
+    const collections = createFieldIndexCollections(shop);
+
+    assert.equal(currentCollectionIndex("/shop", collections), 0);
+    assert.equal(currentCollectionIndex("/shop/outerwear", collections), 1);
+    assert.equal(currentCollectionIndex("/shop/packs", collections), 2);
+    assert.equal(currentCollectionIndex("/shop/footwear", collections), 3);
+    assert.equal(
+      currentCollectionIndex("/products/weatherline-shell", collections),
+      0,
+    );
+    assert.equal(currentCollectionIndex("/journal", collections), -1);
+  });
+
+  it("renders every Shop child in exact order in both header surfaces", async () => {
+    const header = await readSource("src/components/field-index-header.tsx");
+
+    assert.equal(
+      header.match(/collections\.map\(\(collection, index\) => \(/g)?.length,
+      2,
+    );
+    assert.ok(header.includes("<MobileFieldIndex"));
+    assert.equal(header.includes("collections.slice("), false);
+    assert.equal(header.includes("collections.filter("), false);
+    assert.ok(header.includes("currentCollectionIndex"));
+    assert.ok(header.includes('aria-current={currentIndex === index ? "page"'));
   });
 
   it("keeps the canonical About branch available in static and live modes", () => {

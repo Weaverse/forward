@@ -217,6 +217,18 @@ export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [
 ] as const;
 
 /**
+ * Theme-owned custom compositions. These are Forward's own routes, not Shopify
+ * regular pages (`/pages/*`) or articles (`/journal/*`), so shell navigation
+ * surfaces them under their own heading instead of mixing them into the
+ * Shopify-owned menu columns.
+ */
+export const THEME_CUSTOM_PAGE_LINKS = [
+  { href: "/about", label: "Inside Forward" },
+  { href: "/materials", label: "Material library" },
+  { href: "/field-testing", label: "Field testing" },
+] as const;
+
+/**
  * Customer Account protocol paths.
  *
  * `proxy.ts` owns these before App Router routing whenever the account tuple

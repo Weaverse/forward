@@ -1,0 +1,512 @@
+/* ===========================================================================
+ * Production polish Phase 1 — shared shell and design-system contract.
+ *
+ * Loaded after the canonical source port so the port keeps its original source
+ * order. Everything here is a shopper-visible defect fix approved in
+ * `.weaverse/specs/2026-08-05--advanced-visual-realignment/production-polish-phase-1-handoff.md`:
+ * one readable dark secondary token, header utility spacing and typography,
+ * the Phosphor icon baseline, square swatches, one square hard-shadow button
+ * system, and the compact mini-cart popover.
+ * ======================================================================== */
+
+:root {
+  /* Approved readable secondary/subheading colour on dark surfaces. */
+  --secondary-dark: #aeb1a7;
+}
+
+/* --- Phosphor icon baseline ---------------------------------------------- */
+
+.icon {
+  flex: none;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* --- Header primary and utility typography -------------------------------
+ * Rules below run lowest-specificity first so each override still lands. */
+
+.icon-button,
+.header-link {
+  gap: 8px;
+}
+
+.field-header-actions {
+  position: relative;
+  gap: 12px;
+}
+
+.field-header-toggle {
+  display: inline-flex;
+  align-items: center;
+}
+
+.field-header-primary > a,
+.field-header-primary > button {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+.field-header-primary > a i,
+.field-header-primary > button i {
+  font-size: 11px;
+}
+
+.header-actions .icon-button,
+.header-actions .header-link {
+  font-size: 12px;
+}
+
+/* --- Readable secondary text on dark surfaces ---------------------------- */
+
+.field-mobile-section-label,
+.field-mobile-note,
+.footer-intro,
+.footer-bottom,
+.footer-col h2,
+.field-mobile-index nav small,
+.field-mobile-secondary a i,
+.field-index-list a[data-active="true"] small,
+.field-index-list a:hover small,
+.field-mobile-index nav a > span,
+.field-mobile-secondary a > span:first-child,
+.field-mobile-secondary a.field-mobile-secondary-child,
+.field-header-primary > a:hover i,
+.field-header-primary > button:hover i,
+.field-header-primary > .active i {
+  color: var(--secondary-dark);
+}
+
+/* Compact widths drop the visible labels; assistive tech must still get them,
+ * so the icon-only controls stay named instead of disappearing. */
+@media (max-width: 820px) {
+  .field-header-actions .cart-label,
+  .field-header-actions .header-link-label {
+    position: absolute;
+    display: block;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* --- Topbar country control ---------------------------------------------- */
+
+.country-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 820px) {
+  .field-header-root .announcement span.country-control {
+    display: inline-flex;
+  }
+}
+
+/* --- Square colorway swatches -------------------------------------------- */
+
+.swatch,
+.swatch-ring {
+  border-radius: 0;
+}
+
+/* --- One square hard-shadow button system -------------------------------- */
+
+.button {
+  --button-shadow-color: var(--ink);
+  min-height: 48px;
+  border-radius: 0;
+  box-shadow: 4px 4px 0 var(--button-shadow-color);
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.12s ease,
+    transform 0.12s ease;
+}
+
+.button:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--button-shadow-color);
+}
+
+.button:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--button-shadow-color);
+}
+
+.button:focus-visible {
+  outline: 3px solid var(--button-shadow-color);
+  outline-offset: 4px;
+}
+
+.button:disabled,
+.button[aria-disabled="true"] {
+  transform: none;
+  box-shadow: none;
+}
+
+/* An ink-surfaced button needs a shadow that is not also ink. */
+.button-primary {
+  --button-shadow-color: var(--orange);
+}
+
+/* Dark surfaces: `.button-light` bands and the PDP panel. */
+.button-light,
+.product-panel .product-atc {
+  --button-shadow-color: var(--white);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button:hover,
+  .button:active {
+    transform: none;
+  }
+}
+
+/* --- PDP commerce truth --------------------------------------------------- */
+
+.product-panel .product-price {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+}
+
+.product-panel .product-compare-at {
+  color: var(--secondary-dark);
+  text-decoration: line-through;
+}
+
+.product-panel .product-sale-flag {
+  padding: 4px 8px;
+  background: var(--orange);
+  color: var(--ink);
+  font-family: var(--ui);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.option-chip {
+  font-size: 12px;
+}
+
+/* A line-through alone disappears on short labels like `S` or `US 9`, so a
+ * sold-out chip also carries a full-height diagonal slash. */
+.option-chip.sold-out {
+  position: relative;
+  text-decoration: line-through;
+}
+
+.option-chip.sold-out::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 1px),
+    currentColor calc(50% - 1px),
+    currentColor calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+  pointer-events: none;
+}
+
+/* The struck-through chip must stay legible; dimming it to 0.48 hid the state
+ * it is trying to communicate. */
+.option-chip.unavailable {
+  opacity: 1;
+  color: var(--secondary-dark);
+}
+
+/* --- Compact mini-cart popover ------------------------------------------- */
+
+.mini-cart-mount {
+  display: contents;
+}
+
+.mini-cart {
+  position: absolute;
+  z-index: 130;
+  top: calc(100% + 12px);
+  right: 0;
+  width: min(340px, calc(100vw - 28px));
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 6px 6px 0 var(--ink);
+  text-align: start;
+}
+
+.mini-cart-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.mini-cart-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  display: inline-grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.mini-cart-line {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.mini-cart-line img {
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.mini-cart-line a {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.mini-cart-options,
+.mini-cart-quantity,
+.mini-cart-empty {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.mini-cart-subtotal {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mini-cart .button {
+  min-height: 44px;
+}
+
+/* --- Home Spotlight and Kit within one desktop viewport ------------------ */
+
+/* Desktop only. The section rhythm plus its media has to add up to at most
+ * 100svh, so the media is derived from the viewport instead of a fixed 760px
+ * floor. Below 821px the canonical stacked rules apply untouched and the
+ * sections keep their natural content height, so copy never clips. */
+@media (min-width: 821px) {
+  .home-spotlight,
+  .home-kit {
+    --home-viewport-pad: clamp(48px, 5vw, 96px);
+    --home-viewport-media: calc(100svh - 2 * var(--home-viewport-pad));
+    padding-block: var(--home-viewport-pad);
+  }
+
+  .home-spotlight-media img {
+    height: var(--home-viewport-media);
+  }
+
+  /* The copy column has to fit the same bound beside the media. */
+  .home-spotlight-copy {
+    padding-block: clamp(24px, 4svh, 48px);
+    padding-inline: clamp(28px, 4vw, 60px);
+  }
+
+  .home-spotlight-copy .h2 {
+    font-size: clamp(40px, min(5.6vw, 8svh), 72px);
+    line-height: 0.98;
+  }
+
+  .home-spotlight-copy .lede {
+    margin-bottom: clamp(10px, 2svh, 18px);
+    font-size: clamp(16px, 2.5svh, 19px);
+    line-height: 1.45;
+  }
+
+  .home-spotlight-copy ul {
+    margin-block: clamp(14px, 2.5svh, 24px);
+  }
+
+  .home-spotlight-copy li {
+    padding-block: clamp(8px, 1.7svh, 14px);
+  }
+
+  /* Room for the product name that sits under each kit image. */
+  .home-kit-products img {
+    max-height: calc(var(--home-viewport-media) - 44px);
+  }
+}
+
+/* Very short desktop windows need every part of the composition to contract,
+ * not just the media. The same content remains present and the mobile stack is
+ * untouched because this breakpoint starts above the mobile width boundary. */
+@media (min-width: 821px) and (max-height: 600px) {
+  .home-spotlight,
+  .home-kit {
+    --home-viewport-pad: clamp(8px, 2svh, 16px);
+  }
+
+  .home-spotlight-copy {
+    padding-block: 8px;
+    padding-inline: clamp(20px, 3vw, 36px);
+  }
+
+  .home-spotlight-copy .eyebrow {
+    margin-bottom: 4px;
+    font-size: 11px;
+  }
+
+  .home-spotlight-copy .h2 {
+    margin-bottom: 4px;
+    font-size: clamp(26px, 7svh, 40px);
+    line-height: 0.95;
+  }
+
+  .home-spotlight-copy .lede {
+    margin-bottom: 4px;
+    font-size: clamp(12px, 3.2svh, 15px);
+    line-height: 1.25;
+  }
+
+  .home-spotlight-copy ul {
+    margin-block: 4px;
+  }
+
+  .home-spotlight-copy li {
+    padding-block: clamp(3px, 1svh, 6px);
+    font-size: 11px;
+  }
+
+  .home-spotlight-copy .button {
+    min-height: 40px;
+    padding-block: 8px;
+  }
+
+  .home-kit-products img {
+    max-height: calc(var(--home-viewport-media) - 32px);
+  }
+
+  .home-kit-product-name {
+    margin-top: 4px;
+    font-size: 11px;
+  }
+}
+
+/* --- Footer with the theme-owned custom-page column ---------------------- */
+
+.footer-grid {
+  grid-template-columns: 1.5fr repeat(4, 0.45fr);
+}
+
+.footer-social {
+  width: min(100%, var(--max));
+  margin: 44px auto 0;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.footer-social h2 {
+  margin: 0;
+  color: var(--secondary-dark);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.footer-social ul {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer-social a {
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: inline-grid;
+  place-items: center;
+  color: var(--white);
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.footer-social a:hover {
+  border-color: var(--orange);
+  background: var(--orange);
+  color: var(--ink);
+}
+
+.footer-social a:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 3px;
+}
+
+.footer-social + .footer-bottom {
+  margin-top: 24px;
+}
+
+@media (max-width: 1100px) {
+  .footer-grid {
+    grid-template-columns: 1.2fr repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .footer-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .footer-social {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

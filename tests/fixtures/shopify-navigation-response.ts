@@ -46,6 +46,12 @@ export function navigationResponse(): NavigationResponse {
             url: `${SHOP_ORIGIN}/collections/forward`,
             items: [
               {
+                id: "gid://shopify/MenuItem/shop-all",
+                title: "Shop all",
+                url: `${SHOP_ORIGIN}/collections/forward`,
+                items: [],
+              },
+              {
                 id: "gid://shopify/MenuItem/outerwear",
                 title: "Outerwear",
                 url: `${SHOP_ORIGIN}/collections/outerwear`,
