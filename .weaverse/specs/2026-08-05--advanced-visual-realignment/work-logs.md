@@ -17,8 +17,9 @@
 - Removed the Journal card stagger, replaced Home Spotlight/Kit descriptions
   with bounded presentation-owned merchandising summaries, constrained their
   desktop composition to the viewport, and stacked `Shop by system` above its
-  heading. Browser measurement confirmed Spotlight equals the 633px test
-  viewport, Kit is shorter, and neither creates horizontal overflow.
+  heading. Browser measurement confirmed Spotlight equals both the 633px and
+  short 400px desktop test viewports, Kit remains shorter, mobile stays natural,
+  and neither composition clips or creates horizontal overflow.
 - Applied the guarded Shopify `main-menu` mutation after a fresh dry run. A
   second Admin read returned `NOOP` with the canonical first-level Shop children
   `Shop all`, `Outerwear`, `Packs`, and `Footwear`; unrelated menus remained
@@ -27,7 +28,15 @@
 - Live Storefront localization reports exactly one available country:
   United States with USD. The Header therefore reports the real single-market
   state instead of rendering a non-functional selector with invented choices.
-- Final local gates: frozen install reproducible; 364/364 tests; TypeScript,
+- Exact-candidate independent review found three non-blocking defects: repeated
+  same-variant adds did not restart the mini-cart lifecycle, focus could consume
+  its only dismiss timer, short desktop Spotlight copy could outgrow its media,
+  and PDP option chips still computed to 9px. All findings were fixed with
+  regression coverage. Browser reproduction now confirms the same live
+  Claystone/Charcoal L identity reaches quantity two, the live region mutates,
+  focus pauses then resumes dismissal, option chips compute to 12px, and the
+  1280x400 Spotlight/Kit remain within one viewport without clipping.
+- Final local gates: frozen install reproducible; 367/367 tests; TypeScript,
   Biome lint/format, Hydrogen GraphQL, 42-page build, 20-route/4-redirect
   contract, 35 HTTP smoke checks, live Shopify verification, `git diff --check`,
   and production dependency audit all pass. The live contract remains

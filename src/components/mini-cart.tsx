@@ -33,6 +33,11 @@ interface MiniCartLine {
   quantity: number;
 }
 
+interface MiniCartPresentation {
+  variantId: string;
+  eventId: number;
+}
+
 interface MiniCartBodyProps {
   checkoutUrl: string | null;
   line: MiniCartLine | null;
@@ -163,27 +168,53 @@ function ShopifyMiniCartBody({ variantId }: { variantId: string }) {
  */
 export function MiniCart() {
   const shopifyMode = useShopifyCartMode();
-  const [addedVariantId, setAddedVariantId] = useState<string | null>(null);
+  const [presentation, setPresentation] = useState<MiniCartPresentation | null>(
+    null,
+  );
   const [announcement, setAnnouncement] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(
     () =>
       subscribeToCartAdd((variantId) => {
-        setAddedVariantId(variantId);
-        setAnnouncement("Added to cart.");
+        setPresentation((current) => ({
+          variantId,
+          eventId: (current?.eventId ?? 0) + 1,
+        }));
+        setAnnouncement((current) =>
+          current === "Added to cart."
+            ? "Item added to cart."
+            : "Added to cart.",
+        );
       }),
     [],
   );
 
   useEffect(() => {
-    if (addedVariantId === null) {
+    if (presentation === null) {
       return;
     }
 
+    const root = rootRef.current;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
     function close() {
-      setAddedVariantId(null);
+      setPresentation(null);
       setAnnouncement("");
+    }
+
+    function scheduleDismiss() {
+      if (timer !== undefined) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(() => {
+        /* Auto-dismiss must never pull focus out from under the visitor. */
+        if (root?.contains(document.activeElement) === true) {
+          scheduleDismiss();
+          return;
+        }
+        close();
+      }, AUTO_DISMISS_MS);
     }
 
     function handlePointerDown(event: PointerEvent) {
@@ -201,26 +232,33 @@ export function MiniCart() {
       }
     }
 
-    const timer = setTimeout(() => {
-      /* Auto-dismiss must never pull focus out from under the visitor. */
-      if (rootRef.current?.contains(document.activeElement) === true) {
+    function handleFocusOut(event: FocusEvent) {
+      if (
+        event.relatedTarget instanceof Node &&
+        root?.contains(event.relatedTarget) === true
+      ) {
         return;
       }
-      close();
-    }, AUTO_DISMISS_MS);
+      scheduleDismiss();
+    }
 
+    scheduleDismiss();
+    root?.addEventListener("focusout", handleFocusOut);
     document.addEventListener("pointerdown", handlePointerDown);
     document.addEventListener("keydown", handleKeyDown);
     return () => {
-      clearTimeout(timer);
+      if (timer !== undefined) {
+        clearTimeout(timer);
+      }
+      root?.removeEventListener("focusout", handleFocusOut);
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [addedVariantId]);
+  }, [presentation]);
 
   return (
     <div ref={rootRef} className="mini-cart-mount">
-      {addedVariantId === null ? null : (
+      {presentation === null ? null : (
         <div aria-label="Cart updated" className="mini-cart" role="dialog">
           <p className="mini-cart-head">
             <Icon name="check-circle" size={16} />
@@ -231,16 +269,16 @@ export function MiniCart() {
             type="button"
             aria-label="Close cart preview"
             onClick={() => {
-              setAddedVariantId(null);
+              setPresentation(null);
               setAnnouncement("");
             }}
           >
             <Icon name="x" size={16} />
           </button>
           {shopifyMode ? (
-            <ShopifyMiniCartBody variantId={addedVariantId} />
+            <ShopifyMiniCartBody variantId={presentation.variantId} />
           ) : (
-            <DemoMiniCartBody variantId={addedVariantId} />
+            <DemoMiniCartBody variantId={presentation.variantId} />
           )}
         </div>
       )}

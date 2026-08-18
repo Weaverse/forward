@@ -253,6 +253,12 @@ describe("sold-out truth on the PDP", () => {
     );
     assert.match(polish, /\.option-chip\.unavailable \{[^}]*opacity: 1;/);
   });
+
+  it("keeps every option value readable instead of inheriting the 9px source size", async () => {
+    const polish = await readSource("src/app/production-polish.css");
+
+    assert.match(polish, /\.option-chip \{[^}]*font-size: 12px;/);
+  });
 });
 
 describe("PDP gallery continuation", () => {

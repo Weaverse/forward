@@ -395,6 +395,22 @@ describe("compact mini-cart popover", () => {
     assert.doesNotMatch(miniCart, /aria-modal/);
   });
 
+  it("restarts the lifecycle for every add and resumes dismissal after focus leaves", async () => {
+    const miniCart = await readSource("src/components/mini-cart.tsx");
+
+    assert.match(miniCart, /interface MiniCartPresentation/);
+    assert.match(miniCart, /eventId: \(current\?\.eventId \?\? 0\) \+ 1/);
+    assert.match(miniCart, /function scheduleDismiss\(\)/);
+    assert.match(miniCart, /scheduleDismiss\(\);/);
+    assert.match(miniCart, /addEventListener\("focusout", handleFocusOut\)/);
+    assert.match(miniCart, /removeEventListener\("focusout", handleFocusOut\)/);
+    assert.match(
+      miniCart,
+      /current === "Added to cart\."\s*\? "Item added to cart\."\s*: "Added to cart\."/,
+      "same-variant adds need a fresh live-region text update",
+    );
+  });
+
   it("reads the exact existing cart rather than writing a second one", async () => {
     const miniCart = await readSource("src/components/mini-cart.tsx");
 

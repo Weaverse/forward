@@ -42,6 +42,23 @@ function desktopBoundBlock(polish: string): string {
   throw new Error("unterminated desktop media query");
 }
 
+/** Short desktop heights need a second, stricter no-clipping composition. */
+function shortDesktopBoundBlock(polish: string): string {
+  const marker = "@media (min-width: 821px) and (max-height: 600px)";
+  const start = polish.indexOf(marker);
+  assert.notEqual(start, -1, "short desktop heights need an explicit bound");
+  const open = polish.indexOf("{", start);
+  let depth = 0;
+  for (let index = open; index < polish.length; index += 1) {
+    if (polish[index] === "{") depth += 1;
+    if (polish[index] === "}") {
+      depth -= 1;
+      if (depth === 0) return polish.slice(start, index + 1);
+    }
+  }
+  throw new Error("unterminated short desktop media query");
+}
+
 describe("journal card alignment", () => {
   it("drops the staggered nth-child transform entirely", async () => {
     const canonical = await readSource(CANONICAL_CSS);
@@ -162,9 +179,13 @@ describe("one-viewport desktop Spotlight and Kit", () => {
       readSource(POLISH_CSS),
     ]);
     const desktop = desktopBoundBlock(polish);
+    const shortDesktop = shortDesktopBoundBlock(polish);
 
     assert.doesNotMatch(
-      polish.replace(desktop, "").replace(/\/\*[\s\S]*?\*\//g, ""),
+      polish
+        .replace(desktop, "")
+        .replace(shortDesktop, "")
+        .replace(/\/\*[\s\S]*?\*\//g, ""),
       /--home-viewport-media|100svh/,
       "the viewport bound must not apply outside the desktop media query",
     );
@@ -176,6 +197,28 @@ describe("one-viewport desktop Spotlight and Kit", () => {
     assert.match(
       canonical,
       /@media \(max-width: 820px\)[\s\S]*\.home-spotlight,[\s\S]*grid-template-columns: minmax\(0, 1fr\);/,
+    );
+  });
+
+  it("shrinks the whole Spotlight composition on short desktop viewports", async () => {
+    const polish = await readSource(POLISH_CSS);
+    const shortDesktop = shortDesktopBoundBlock(polish);
+
+    assert.match(
+      shortDesktop,
+      /--home-viewport-pad: clamp\(8px, 2svh, 16px\);/,
+    );
+    assert.match(
+      shortDesktop,
+      /\.home-spotlight-copy \.h2 \{[^}]*clamp\(26px, 7svh, 40px\)/,
+    );
+    assert.match(
+      shortDesktop,
+      /\.home-spotlight-copy li \{[^}]*clamp\(3px, 1svh, 6px\)/,
+    );
+    assert.match(
+      shortDesktop,
+      /\.home-kit-products img \{[^}]*var\(--home-viewport-media\) - 32px/,
     );
   });
 });
