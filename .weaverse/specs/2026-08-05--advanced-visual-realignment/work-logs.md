@@ -1,5 +1,63 @@
 # Work log
 
+## 2026-08-18 — Production polish Phase 1 local acceptance
+
+- Implemented the approved shell and commerce corrections: shared Phosphor SVG
+  icons, readable Header controls, destination-owned query state, truthful
+  US/USD market indicator, square 44px swatches, one hard-shadow button system,
+  and the compact add-success mini-cart backed by the existing cart identity.
+- Footer now omits shopper-facing runtime markers and renders only the verified
+  Weaverse social accounts. Forward has no verified checkout payment-mark list
+  or newsletter provider configuration, so both integrations remain absent
+  rather than presenting decorative or fake behavior.
+- Extended the live variant contract through Storefront GraphQL, strict mapping,
+  normalized state, and PDP rendering. The selected exact variant now owns
+  price, compare-at/sale, availability, sold-out ATC state, and media. Gallery
+  media four and later span full width at natural aspect ratio.
+- Removed the Journal card stagger, replaced Home Spotlight/Kit descriptions
+  with bounded presentation-owned merchandising summaries, constrained their
+  desktop composition to the viewport, and stacked `Shop by system` above its
+  heading. Browser measurement confirmed Spotlight equals the 633px test
+  viewport, Kit is shorter, and neither creates horizontal overflow.
+- Applied the guarded Shopify `main-menu` mutation after a fresh dry run. A
+  second Admin read returned `NOOP` with the canonical first-level Shop children
+  `Shop all`, `Outerwear`, `Packs`, and `Footwear`; unrelated menus remained
+  unchanged. The adapter was then tightened to reject the retired legacy
+  three-child Shop tree.
+- Live Storefront localization reports exactly one available country:
+  United States with USD. The Header therefore reports the real single-market
+  state instead of rendering a non-functional selector with invented choices.
+- Final local gates: frozen install reproducible; 364/364 tests; TypeScript,
+  Biome lint/format, Hydrogen GraphQL, 42-page build, 20-route/4-redirect
+  contract, 35 HTTP smoke checks, live Shopify verification, `git diff --check`,
+  and production dependency audit all pass. The live contract remains
+  9 products / 18 colorways / 78 variants / 4 collections / 7 pages /
+  6 articles / 4 policies.
+- Production remains on the accepted baseline. Preview review, PR, and merge are
+  separate gates; no order, payment, newsletter, customer, or Markets mutation
+  was performed.
+
+## 2026-08-18 — Production polish Phase 1 kickoff
+
+- Leo reviewed canonical Production after PR #59 and approved a 19-item
+  storefront-wide correction pass before deeper Home redesign.
+- Baseline is clean synchronized `main@29e1242263c576a0635427585873bd606c412aca`.
+- Added `production-polish-phase-1-handoff.md` with the deduplicated user
+  requirements, Phosphor/hard-shadow direction, route-aware query ownership,
+  truthful integration boundaries, protected commerce contracts, TDD coverage,
+  Shopify menu mutation boundary, and Preview-before-Production gate.
+- Source audit confirmed the reported defects: Header intentionally forwards
+  every query string; menu remains 10px and utility/option controls 9px; Journal
+  cards translate 100px; Home Spotlight/Kit render full product descriptions;
+  ProductVariant lacks compare-at money; gallery images are cropped by fixed
+  aspect/object-fit rules; the live Footer renders an implementation-status
+  placeholder.
+- Current Store truth remains one active US/en/USD market. Forward has no
+  Klaviyo environment key. Country/newsletter/social/payment UI must not invent
+  unavailable options, success, accounts, or methods.
+- No commit, push, deployment, Production mutation, Shopify mutation, customer
+  mutation, order, payment, or newsletter submission has occurred.
+
 ## 2026-08-05 — kickoff
 
 - Leo rejected the merged static demo visual direction as completely different from the approved Advanced POC.

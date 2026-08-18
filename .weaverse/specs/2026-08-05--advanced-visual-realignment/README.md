@@ -2,6 +2,14 @@
 
 ## Status
 
+Production polish Phase 1 was approved by Leo on 2026-08-18 against
+`main@29e1242263c576a0635427585873bd606c412aca`. The exact continuation scope,
+integration truth boundaries, TDD requirements, and release gates are in
+[`production-polish-phase-1-handoff.md`](./production-polish-phase-1-handoff.md).
+This supersedes the old visual-approval-pending state for the specific global
+shell, commerce correctness, PDP, typography, Footer, and bounded editorial
+findings listed there; deeper Home redesign remains a later approval phase.
+
 The screenshot-reconstructed correction merged through PR #52 on 2026-08-06 but Leo rejected the result as still not matching the owned canonical POC. The prior rendered-evidence approach is superseded across the full storefront.
 
 The full canonical source-port specified in [`full-canonical-source-port-handoff.md`](./full-canonical-source-port-handoff.md) is implemented on `fix/full-canonical-source-port`: the pinned POC stylesheet is ported as `src/app/canonical-source.css` in true source order, the Literata/Manrope/IBM Plex Mono contract is served through `next/font`, and every canonical render function is translated into the matching Next route. All technical, route, interaction, and per-route visual gates pass; see [`work-logs.md`](./work-logs.md) for the source-to-target checklist, the intentional normalized-data adaptations, and the evidence paths. Leo visual approval remains pending.

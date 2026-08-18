@@ -6,6 +6,7 @@ import {
   createFieldIndexCollections,
   FIELD_INDEX_PRESENTATION,
 } from "../src/lib/header-navigation.ts";
+import { COLLECTION_PRESENTATION_PROFILES } from "../src/lib/storefront/collection-presentation.ts";
 import { StaticStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
 import { createNavigationQueryExecutor } from "../src/lib/storefront/shopify/client.ts";
 import { ShopifyCatalogDataSource } from "../src/lib/storefront/shopify/data-source.ts";
@@ -19,16 +20,30 @@ import { FOOTER_MENU_HANDLE } from "../src/lib/storefront/shopify/navigation-que
 import {
   navigationResponse,
   navigationResponseWith,
+  type ShopifyMenuItemFixture,
 } from "./fixtures/shopify-navigation-response.ts";
 import { catalogResponse } from "./fixtures/shopify-catalog-response.ts";
 
 const SYNTHETIC_STORE_DOMAIN = "forward-test-shop.myshopify.com";
+const SYNTHETIC_STORE_ORIGIN = `https://${SYNTHETIC_STORE_DOMAIN}`;
+
+/** Canonical upstream `main-menu` with `Shop all` as its first Shop child. */
+function targetShopMenuResponse(
+  mutate: (shopChildren: ShopifyMenuItemFixture[]) => void = () => undefined,
+) {
+  return navigationResponseWith((draft) => {
+    const shop = draft.data.menu?.items[0];
+    assert.ok(shop !== undefined);
+    mutate(shop.items);
+  });
+}
 
 const expectedPrimary = [
   {
     href: "/shop",
     label: "Shop",
     children: [
+      { href: "/shop", label: "Shop all" },
       { href: "/shop/outerwear", label: "Outerwear" },
       { href: "/shop/packs", label: "Packs" },
       { href: "/shop/footwear", label: "Footwear" },
@@ -61,7 +76,7 @@ const expectedFooterColumns = [
     heading: "Shop",
     links: [
       { href: "/shop", label: "All products" },
-      ...expectedPrimary[0].children,
+      ...expectedPrimary[0].children.slice(1),
     ],
   },
   { heading: "Company", links: expectedCompanyLinks },
@@ -354,6 +369,79 @@ describe("Shopify navigation mapping", () => {
     }
   });
 
+  it("maps the canonical upstream Shop tree that starts with Shop all", () => {
+    assert.equal(targetShopMenuResponse().data.menu?.items[0]?.items.length, 4);
+    assert.deepEqual(mapped(targetShopMenuResponse()).primary, expectedPrimary);
+  });
+
+  it("rejects the legacy upstream Shop tree after the live cutover", () => {
+    const response = navigationResponseWith((draft) => {
+      draft.data.menu?.items[0]?.items.shift();
+    });
+    assert.equal(response.data.menu?.items[0]?.items.length, 3);
+    assert.throws(() => mapped(response), ShopifyCatalogError);
+  });
+
+  it("rejects Shop trees outside the canonical upstream shape", () => {
+    const cases = [
+      targetShopMenuResponse((children) => {
+        const shopAll = children[0];
+        assert.ok(shopAll !== undefined);
+        shopAll.title = "All products";
+      }),
+      targetShopMenuResponse((children) => {
+        const shopAll = children[0];
+        assert.ok(shopAll !== undefined);
+        children.splice(0, 1);
+        children.push(shopAll);
+      }),
+      targetShopMenuResponse((children) => {
+        const shopAll = children[0];
+        assert.ok(shopAll !== undefined);
+        shopAll.url = `${SYNTHETIC_STORE_ORIGIN}/collections/outerwear`;
+      }),
+      targetShopMenuResponse((children) => {
+        const shopAll = children[0];
+        assert.ok(shopAll !== undefined);
+        shopAll.url = `${SYNTHETIC_STORE_ORIGIN}/collections/forward?view=all`;
+      }),
+      targetShopMenuResponse((children) => {
+        const shopAll = children[0];
+        assert.ok(shopAll !== undefined);
+        shopAll.items.push({
+          id: "gid://shopify/MenuItem/shop-all-deeper",
+          title: "Too deep",
+          url: `${SYNTHETIC_STORE_ORIGIN}/collections/forward`,
+          items: [],
+        });
+      }),
+      targetShopMenuResponse((children) => {
+        children.push({
+          id: "gid://shopify/MenuItem/accessories",
+          title: "Accessories",
+          url: `${SYNTHETIC_STORE_ORIGIN}/collections/accessories`,
+          items: [],
+        });
+      }),
+      navigationResponseWith((draft) => {
+        draft.data.menu?.items[0]?.items.pop();
+      }),
+      navigationResponseWith((draft) => {
+        const shop = draft.data.menu?.items[0];
+        assert.ok(shop !== undefined);
+        shop.items.unshift({
+          id: "gid://shopify/MenuItem/shop-all-wrong-route",
+          title: "Shop all",
+          url: `${SYNTHETIC_STORE_ORIGIN}/pages/about-forward`,
+          items: [],
+        });
+      }),
+    ];
+    for (const response of cases) {
+      assert.throws(() => mapped(response), ShopifyCatalogError);
+    }
+  });
+
   it("rejects a flat Shop menu instead of guessing parentage", () => {
     const response = navigationResponseWith((draft) => {
       const shop = draft.data.menu?.items[0];
@@ -456,7 +544,7 @@ describe("Shopify navigation data source", () => {
     assert.equal(navigation.footerColumns.length, 3);
     assert.deepEqual(
       navigation.footerColumns[0]?.links.slice(1),
-      navigation.primary[0]?.children,
+      navigation.primary[0]?.children?.slice(1),
     );
     assert.deepEqual(
       (await source.listCollections()).map((collection) => collection.handle),
@@ -882,39 +970,70 @@ describe("Footer navigation query/cache contract", () => {
 });
 
 describe("Field Index presentation", () => {
-  it("maps the ordered Shopify Shop children into three presentation cards", () => {
-    const shop = mapped().primary[0];
-    assert.ok(shop !== undefined);
-    assert.deepEqual(
-      createFieldIndexCollections(shop).map(({ id, index, label, href }) => ({
-        id,
-        index,
-        label,
-        href,
-      })),
-      [
-        {
-          id: "outerwear",
-          index: "01",
-          label: "Outerwear",
-          href: "/shop/outerwear",
-        },
-        { id: "packs", index: "02", label: "Packs", href: "/shop/packs" },
-        {
-          id: "footwear",
-          index: "03",
-          label: "Footwear",
-          href: "/shop/footwear",
-        },
-      ],
-    );
-    assert.equal(FIELD_INDEX_PRESENTATION.length, 3);
+  const expectedCards = [
+    { id: "forward", index: "00", label: "Shop all", href: "/shop" },
+    {
+      id: "outerwear",
+      index: "01",
+      label: "Outerwear",
+      href: "/shop/outerwear",
+    },
+    { id: "packs", index: "02", label: "Packs", href: "/shop/packs" },
+    {
+      id: "footwear",
+      index: "03",
+      label: "Footwear",
+      href: "/shop/footwear",
+    },
+  ] as const;
+
+  it("maps the ordered Shopify Shop children into four presentation cards", () => {
+    for (const response of [navigationResponse(), targetShopMenuResponse()]) {
+      const shop = mapped(response).primary[0];
+      assert.ok(shop !== undefined);
+      assert.deepEqual(
+        createFieldIndexCollections(shop).map(({ id, index, label, href }) => ({
+          id,
+          index,
+          label,
+          href,
+        })),
+        expectedCards,
+      );
+    }
+    assert.equal(FIELD_INDEX_PRESENTATION.length, 4);
   });
 
-  it("rejects a Shop item without the exact three canonical children", () => {
+  it("uses the canonical forward collection image for the Shop all card", () => {
+    const shop = mapped().primary[0];
+    assert.ok(shop !== undefined);
+    const shopAll = createFieldIndexCollections(shop)[0];
+    assert.deepEqual(
+      shopAll?.image,
+      COLLECTION_PRESENTATION_PROFILES.find(
+        (profile) => profile.handle === "forward",
+      )?.heroImage,
+    );
+  });
+
+  it("rejects a Shop item without the exact four canonical children", () => {
     assert.throws(
       () => createFieldIndexCollections({ href: "/shop", label: "Shop" }),
-      /exactly three children/i,
+      /exactly four children/i,
+    );
+    assert.throws(
+      () =>
+        createFieldIndexCollections({
+          href: "/shop",
+          label: "Shop",
+          children: [
+            { href: "/shop/outerwear", label: "Outerwear" },
+            { href: "/shop", label: "Shop all" },
+            { href: "/shop/packs", label: "Packs" },
+            { href: "/shop/footwear", label: "Footwear" },
+          ],
+        }),
+      /must target \/shop/i,
     );
   });
 });

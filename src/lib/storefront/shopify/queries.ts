@@ -63,6 +63,10 @@ export const CATALOG_QUERY = gql(`
               amount
               currencyCode
             }
+            compareAtPrice {
+              amount
+              currencyCode
+            }
             selectedOptions {
               name
               value

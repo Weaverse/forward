@@ -12,6 +12,7 @@ import {
 } from "@shopify/hydrogen/react";
 import { createContext, type ReactNode, useContext } from "react";
 
+import { formatMoney } from "@/lib/storefront/format";
 import type { Product } from "@/lib/storefront/types";
 
 type CartHandlers = typeof import("./shopify-cart").shopifyCartHandlers;
@@ -49,6 +50,12 @@ export function ShopifyCartRuntime({
 
 export function useShopifyCartMode(): boolean {
   return useContext(ShopifyCartModeContext);
+}
+
+/** Renders Shopify cart money, or an em dash when it is absent or off-currency. */
+export function formatShopifyMoney(value: ShopifyMoney | undefined): string {
+  if (value === undefined || value.currencyCode !== "USD") return "—";
+  return formatMoney({ amount: Number(value.amount), currencyCode: "USD" });
 }
 
 export function toHydrogenProductInput(

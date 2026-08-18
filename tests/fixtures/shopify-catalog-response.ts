@@ -352,6 +352,9 @@ function buildProduct(spec: ProductSpec) {
         }`,
         availableForSale: true,
         price: { amount: spec.price, currencyCode: "USD" },
+        // Live Forward variants all carry compare-at money; equal to the price
+        // is the neutral "set but not discounted" state.
+        compareAtPrice: { amount: spec.price, currencyCode: "USD" },
         selectedOptions: [
           { name: "Color", value: colorway.label },
           ...(size === undefined ? [] : [{ name: "Size", value: size }]),

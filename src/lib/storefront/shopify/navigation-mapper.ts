@@ -21,6 +21,11 @@ const EXPECTED_MENU = [
     sourcePaths: ["/shop", "/collections/forward"],
     children: [
       {
+        label: "Shop all",
+        href: "/shop",
+        sourcePaths: ["/shop", "/collections/forward"],
+      },
+      {
         label: "Outerwear",
         href: "/shop/outerwear",
         sourcePaths: ["/shop/outerwear", "/collections/outerwear"],

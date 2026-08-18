@@ -151,6 +151,16 @@ function mapMoney(value: unknown, context: string): Money {
   return { amount, currencyCode: REQUIRED_CURRENCY_CODE };
 }
 
+/**
+ * Compare-at money is optional in Shopify and stays optional here. An absent
+ * value maps to `null`; a present one is validated exactly like a price so a
+ * drifted or malformed amount can never be rendered as a discount.
+ */
+function mapNullableMoney(value: unknown, context: string): Money | null {
+  if (value === null || value === undefined) return null;
+  return mapMoney(value, context);
+}
+
 /* -------------------------------------------------------------------------- */
 /* Options and colorways                                                      */
 /* -------------------------------------------------------------------------- */
@@ -772,6 +782,10 @@ function mapVariants(
       colorwayId: presentationColorway.id,
       selectedOptions,
       price,
+      compareAtPrice: mapNullableMoney(
+        record.compareAtPrice,
+        `${context} compareAtPrice`,
+      ),
       availableForSale: record.availableForSale,
     });
   }

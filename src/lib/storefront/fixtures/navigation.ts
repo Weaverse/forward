@@ -12,6 +12,7 @@ export const NAVIGATION_FIXTURE: SiteNavigation = {
       href: "/shop",
       label: "Shop",
       children: [
+        { href: "/shop", label: "Shop all" },
         { href: "/shop/outerwear", label: "Outerwear" },
         { href: "/shop/packs", label: "Packs" },
         { href: "/shop/footwear", label: "Footwear" },

@@ -51,6 +51,7 @@ const CANONICAL_COLLECTION_HANDLES = [
 const CANONICAL_VARIANT_COUNT = 78;
 
 const CANONICAL_SHOP_LINKS = [
+  "/shop",
   "/shop/outerwear",
   "/shop/packs",
   "/shop/footwear",
@@ -226,7 +227,7 @@ try {
     (item) => item.href === "/pages/about-forward",
   );
   check(
-    `live ${config.mainMenuHandle} has the canonical two-level tree`,
+    "live main-menu has the canonical two-level tree",
     !navigationFallbackUsed &&
       navigation.primary.map((item) => item.href).join(",") ===
         "/shop,/journal,/pages/about-forward,/search" &&

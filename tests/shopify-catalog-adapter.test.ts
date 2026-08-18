@@ -905,6 +905,7 @@ describe("catalog mapping failures", () => {
       colorwayId: "charcoal",
       selectedOptions: [{ name: "Size", value: "XS" }],
       price: { amount: 248, currencyCode: "USD" },
+      compareAtPrice: { amount: 248, currencyCode: "USD" },
       availableForSale: true,
     });
     assert.equal(
@@ -1206,7 +1207,7 @@ describe("ShopifyCatalogDataSource", () => {
       liveTheme.demoNotice,
       /live Shopify catalog, navigation, content, and a secure Shopify cart/i,
     );
-    assert.match(liveTheme.footerStatus, /content, and cart$/i);
+    assert.equal(liveTheme.footerStatus, "");
     assert.match(staticTheme.footerStatus, /Not a live store/i);
     assert.deepEqual(await source.listArticles(), await base.listArticles());
     assert.deepEqual(await source.listPages(), await base.listPages());
