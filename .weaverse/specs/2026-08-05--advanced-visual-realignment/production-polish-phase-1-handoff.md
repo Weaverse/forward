@@ -1,8 +1,13 @@
 # Production polish Phase 1 handoff
 
-Updated: 2026-08-18 16:04 +07
+Updated: 2026-08-20 10:47 +07
+Status: `COMPLETED`
 Approved by Leo: 2026-08-18
 Baseline: `main@29e1242263c576a0635427585873bd606c412aca`
+Merged: PR [#60](https://github.com/Weaverse/forward/pull/60) → `main@8fa94b727cc7977d75dc2400bcddf8b2d492e83f`
+Production: `dpl_8PBjAYooDCyicPEW9oY1Sk4R2FBY` → https://forward-sandy.vercel.app
+
+Phase 1 is closed. Continue from [`../2026-08-20--tailwind-presentation-migration/README.md`](../2026-08-20--tailwind-presentation-migration/README.md); preserve this completed phase's behavioral contracts while replacing its legacy CSS implementation under issue #61.
 
 ## Goal
 

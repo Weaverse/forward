@@ -5,14 +5,14 @@
 Forward is a fresh Next.js App Router storefront theme using
 `@shopify/hydrogen@preview`, powered by Weaverse.
 
-The current milestone is the ordered **Shopify Content, Cart, and Customer
-Account productionization**
-(`.weaverse/specs/2026-08-09--shopify-content-cart-account/README.md`). Products,
-normalized search/filter/sort, collection resolution, Header `main-menu`, and
-the complete Footer tree from the single Shopify handle `footer` are already
-live when Shopify credentials are present. Implement and release the remaining
-slices independently in this order: Content → Cart/checkout handoff → Customer
-Account API. No credentials still selects the deterministic static mode.
+The current milestone is the issue [#61](https://github.com/Weaverse/forward/issues/61)
+**Tailwind presentation migration**
+(`.weaverse/specs/2026-08-20--tailwind-presentation-migration/README.md`).
+Production polish Phase 1 is complete on `main@8fa94b7`. Migrate in the locked
+order: behavior-level UI coverage → effective Tailwind v4 tokens → global shell
+→ complete route inventory → ownership/runtime hardening → legacy CSS removal.
+This is an architecture migration, not a visual redesign. Preserve the accepted
+Production storefront and its live Shopify contracts.
 
 ## Architecture constraints
 
@@ -21,6 +21,18 @@ Account API. No credentials still selects the deterministic static mode.
 - The existing static Forward POC is a visual reference only; do not copy its implementation wholesale.
 - Storefront completeness is defined by `.weaverse/specs/2026-08-05--static-demo-productionization/README.md` and the Shopify route contract.
 - Build the theme before making deployment or demo-integration decisions.
+- `src/app/globals.css` is the only target global stylesheet: Tailwind import,
+  one semantic `@theme` token set, and minimal document-level base rules only.
+  Components/routes own presentation through utilities; use `cn()` for
+  conditions and `cva` for reusable variants. Do not add global component
+  selectors to hide a partial migration.
+- Replace shopper-visible source-regex assertions with rendered DOM,
+  interaction, or browser behavior coverage before migrating their styles.
+  JSDOM does not prove layout, overflow, responsive visibility, focus geometry,
+  or reduced motion; keep those contracts in the permanent browser suite.
+- Delete `canonical-source.css`, `site-header.css`, and
+  `production-polish.css` only after all consumers and behavior contracts have
+  migrated. Do not retain dead selectors or compatibility imports.
 
 ## Storefront data boundary
 
