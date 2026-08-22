@@ -125,6 +125,15 @@
 - Verification: frozen install, Biome format/lint, typecheck, `323/323` node tests, expanded `66/66` DOM tests, GraphQL, Production build with 42 pages, compiled theme check, route contract `20 + 4`, `git diff --check`, and `bun run check` passed. Fresh static browser matrix passed `146 / 10 intentional skips / 0 failures` across 156 desktop, short-desktop, and true-mobile executions.
 - No dependency, ProductCard behavior/presentation, adapter/data contract, external system, deployment, GitHub, Weaverse, or Production mutation occurred.
 
+## 2026-08-22 — Phase 4B structural Shopify content parser
+
+- Starting SHA: `23ac1e42bb4156cf9f589ba8c28c3b300a93a6fe` (pushed Phase 4A Header fail-soft commit).
+- Replaced regex tag scanning/attribute parsing/structural sanitization with a parse5 `8.0.1` server-side fragment AST walk. The production dependency is pinned exactly and the Bun lock keeps parse5's `entities@8` separate from Happy DOM's existing `entities@7` requirement.
+- The parser collects HTML parse errors, verifies source-span coverage against browser recovery, walks one explicit HTML-namespace tag allowlist, permits only a quoted `href` on anchors, ignores comments without permitting comment-disguised markup, decodes entities through parse5, and preserves canonical collection rewrites, internal/HTTPS link rules, nested inline runs, headings, paragraphs, pullquotes, lists, pages, and policies. Remaining regexes are limited to the pre-parse Liquid sentinel, canonical route allowlist, and whitespace normalization; none parses HTML structure or attributes.
+- Added ten adversarial parser contracts covering exact nested/entity/link/list output, page/policy sections, every internal route, comments, recovered malformed nesting, empty/unreadable/Liquid input, mixed-case embedded/unknown tags, encoded event and duplicate/unquoted/missing/unsupported attributes, unsafe/protocol-relative/backslash/http/data/javascript/credential/noncanonical links, and raw merchant-secret error redaction.
+- Verification: frozen install resolved 118 installs/182 packages without changes; focused content suite passed `28/28`; production audit reported no vulnerabilities; Biome/typecheck/GraphQL/build/theme/routes and full `bun run check` passed with expanded `333/333` node and `66/66` DOM tests. Production artifact scan found parser/error markers in two server chunks and zero `.next/static` client chunks.
+- No normalized content/data contract, shopper-rendered rich-text structure, external system, deployment, GitHub, Weaverse, or Production mutation occurred.
+
 ## Phase log template
 
 ```text

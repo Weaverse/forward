@@ -1,3 +1,10 @@
+import {
+  type DefaultTreeAdapterTypes,
+  defaultTreeAdapter,
+  html as parse5Html,
+  parseFragment,
+} from "parse5";
+
 import type {
   ArticleBlock,
   PageSection,
@@ -13,19 +20,17 @@ interface ParsedRichTextBlock {
   runs: RichTextParagraph;
 }
 
-interface ParsedNode {
-  tag: string;
+interface ParsedNodeContent {
   textParts: string[];
-  rawParts: string[];
-  openRaw: string;
+  runs: RichTextRun[];
 }
 
-const DISALLOWED_TAG_PATTERN =
-  /<\s*(script|style|form|iframe|embed|object|svg)\b/i;
-const EVENT_HANDLER_PATTERN = /\son[a-z]+\s*=/i;
+interface SourceSpan {
+  start: number;
+  end: number;
+}
+
 const LIQUID_PATTERN = /\{\{|\}\}|\{%|%\}/;
-const COMMENT_PATTERN = /<!--[\s\S]*?-->/g;
-const TAG_PATTERN = /<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g;
 
 const ALLOWED_TAGS = new Set([
   "a",
@@ -76,44 +81,18 @@ function fail(message: string): never {
   throw new ShopifyCatalogError(message);
 }
 
-function decodeEntities(text: string): string {
-  return text.replace(
-    /&(#x[0-9a-f]+|#\d+|amp|lt|gt|quot|apos|nbsp);/gi,
-    (match, entity: string) => {
-      switch (entity.toLowerCase()) {
-        case "amp":
-          return "&";
-        case "lt":
-          return "<";
-        case "gt":
-          return ">";
-        case "quot":
-          return '"';
-        case "apos":
-          return "'";
-        case "nbsp":
-          return " ";
-        default:
-          if (entity.startsWith("#x")) {
-            return String.fromCodePoint(Number.parseInt(entity.slice(2), 16));
-          }
-          if (entity.startsWith("#")) {
-            return String.fromCodePoint(Number.parseInt(entity.slice(1), 10));
-          }
-          return match;
-      }
-    },
-  );
-}
-
 function normalizeText(text: string): string {
-  return decodeEntities(text)
+  return text
     .replace(/\u00a0/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
 function validateHref(href: string, context: string): void {
+  if (href.includes("\\")) {
+    fail(`${context} contains a non-canonical link target.`);
+  }
+
   if (href.startsWith("https://")) {
     let url: URL;
     try {
@@ -139,45 +118,149 @@ function validateHref(href: string, context: string): void {
   fail(`${context} contains a non-canonical link target.`);
 }
 
-function validateTagSyntax(raw: string, tag: string, context: string): void {
-  if (raw.startsWith("</")) {
-    if (!new RegExp(`^</${tag}\\s*>$`, "i").test(raw)) {
-      fail(`${context} contains malformed closing tag </${tag}>.`);
-    }
-    return;
+function hasQuotedAttributeValue(source: string): boolean {
+  const equalsIndex = source.indexOf("=");
+  if (equalsIndex === -1) {
+    return false;
   }
-
-  const inner = raw.slice(1, -1).trim().replace(/\/$/, "").trim();
-  const attributes = inner.slice(tag.length).trim();
-  if (tag !== "a") {
-    if (attributes.length > 0) {
-      fail(`${context} contains an unapproved attribute on <${tag}>.`);
-    }
-    return;
-  }
-
-  const href = attributes.match(/^href\s*=\s*(?:"([^"]*)"|'([^']*)')$/i);
-  if (href === null) {
-    fail(`${context} contains an unapproved or malformed attribute on <a>.`);
-  }
-  validateHref(href[1] ?? href[2] ?? "", context);
+  const value = source.slice(equalsIndex + 1).trim();
+  const quote = value[0];
+  return (
+    value.length >= 2 &&
+    (quote === '"' || quote === "'") &&
+    value.at(-1) === quote
+  );
 }
 
-function readAnchorHref(raw: string): string {
-  const href =
-    raw
-      .match(/href\s*=\s*(?:"([^"]*)"|'([^']*)')/i)
-      ?.slice(1)
-      .find(Boolean) ?? "";
-  return normalizeCanonicalHref(href);
+function addSpan(
+  location: { startOffset: number; endOffset: number } | null | undefined,
+  spans: SourceSpan[],
+  context: string,
+): void {
+  if (location === null || location === undefined) {
+    fail(`${context} contains malformed HTML.`);
+  }
+  spans.push({ start: location.startOffset, end: location.endOffset });
+}
+
+function validateElement(
+  element: DefaultTreeAdapterTypes.Element,
+  html: string,
+  spans: SourceSpan[],
+  context: string,
+): void {
+  const tag = element.tagName;
+  if (element.namespaceURI !== parse5Html.NS.HTML || !ALLOWED_TAGS.has(tag)) {
+    fail(`${context} contains unsupported markup.`);
+  }
+
+  const location = element.sourceCodeLocation;
+  addSpan(location?.startTag, spans, context);
+  if (tag === "br") {
+    if (location?.endTag !== undefined || element.childNodes.length > 0) {
+      fail(`${context} contains malformed HTML.`);
+    }
+  } else {
+    addSpan(location?.endTag, spans, context);
+  }
+
+  if (element.attrs.some((attribute) => attribute.name.startsWith("on"))) {
+    fail(`${context} contains an inline event handler attribute.`);
+  }
+
+  if (tag === "a") {
+    const attribute = element.attrs[0];
+    if (
+      element.attrs.length !== 1 ||
+      attribute?.name !== "href" ||
+      attribute.namespace !== undefined ||
+      attribute.prefix !== undefined
+    ) {
+      fail(`${context} contains an unapproved attribute on <a>.`);
+    }
+    const attributeLocation = location?.attrs?.href;
+    if (
+      attributeLocation === undefined ||
+      !hasQuotedAttributeValue(
+        html.slice(attributeLocation.startOffset, attributeLocation.endOffset),
+      )
+    ) {
+      fail(`${context} contains an unapproved or malformed attribute on <a>.`);
+    }
+    validateHref(attribute.value, context);
+  } else if (element.attrs.length > 0) {
+    fail(`${context} contains an unapproved attribute on <${tag}>.`);
+  }
+
+  for (const child of element.childNodes) {
+    validateNode(child, html, spans, context);
+  }
+}
+
+function validateNode(
+  node: DefaultTreeAdapterTypes.ChildNode,
+  html: string,
+  spans: SourceSpan[],
+  context: string,
+): void {
+  if (
+    defaultTreeAdapter.isTextNode(node) ||
+    defaultTreeAdapter.isCommentNode(node)
+  ) {
+    addSpan(node.sourceCodeLocation, spans, context);
+    return;
+  }
+  if (defaultTreeAdapter.isDocumentTypeNode(node)) {
+    fail(`${context} contains unsupported markup.`);
+  }
+  validateElement(node, html, spans, context);
+}
+
+function parseHtmlFragment(
+  html: string,
+  context: string,
+): DefaultTreeAdapterTypes.DocumentFragment {
+  const trimmed = html.trim();
+  if (trimmed.length === 0) {
+    fail(`${context} HTML is empty.`);
+  }
+  if (LIQUID_PATTERN.test(trimmed)) {
+    fail(`${context} contains Liquid markup, which is rejected.`);
+  }
+
+  const parseErrors: string[] = [];
+  const fragment = parseFragment(trimmed, {
+    sourceCodeLocationInfo: true,
+    onParseError: (error) => parseErrors.push(error.code),
+  });
+  if (parseErrors.length > 0) {
+    fail(`${context} contains malformed HTML.`);
+  }
+
+  const spans: SourceSpan[] = [];
+  for (const child of fragment.childNodes) {
+    validateNode(child, trimmed, spans, context);
+  }
+  // parse5 can recover without reporting an error; every source token must
+  // still belong to an explicitly located node in the accepted tree.
+  spans.sort((left, right) => left.start - right.start);
+  let cursor = 0;
+  for (const span of spans) {
+    if (span.start !== cursor || span.end <= span.start) {
+      fail(`${context} contains malformed HTML.`);
+    }
+    cursor = span.end;
+  }
+  if (cursor !== trimmed.length) {
+    fail(`${context} contains malformed HTML.`);
+  }
+  return fragment;
 }
 
 function normalizeRuns(runs: readonly RichTextRun[]): RichTextParagraph {
   const merged: RichTextRun[] = [];
   for (const run of runs) {
-    const text = decodeEntities(run.text)
-      .replace(/\u00a0/g, " ")
-      .replace(/\s+/g, " ");
+    const text = run.text.replace(/\u00a0/g, " ").replace(/\s+/g, " ");
     if (text.length === 0) {
       continue;
     }
@@ -198,159 +281,92 @@ function normalizeRuns(runs: readonly RichTextRun[]): RichTextParagraph {
   return merged.filter((run) => run.text.length > 0);
 }
 
-function parseInlineRuns(html: string): RichTextParagraph {
-  const runs: RichTextRun[] = [];
-  const hrefStack: string[] = [];
-  let cursor = 0;
-  for (const match of html.matchAll(TAG_PATTERN)) {
-    const index = match.index ?? 0;
-    const text = html.slice(cursor, index);
-    const href = hrefStack.at(-1);
-    if (text.length > 0) {
-      runs.push(href ? { text, href } : { text });
-    }
-    const raw = match[0];
-    if (match[1]?.toLowerCase() === "a") {
-      if (raw.startsWith("</")) {
-        hrefStack.pop();
-      } else {
-        hrefStack.push(readAnchorHref(raw));
-      }
-    }
-    cursor = index + raw.length;
-  }
-  const tail = html.slice(cursor);
-  const href = hrefStack.at(-1);
-  if (tail.length > 0) {
-    runs.push(href ? { text: tail, href } : { text: tail });
-  }
-  return normalizeRuns(runs);
-}
-
-function validateHtml(html: string, context: string): string {
-  const trimmed = html.trim();
-  if (trimmed.length === 0) {
-    fail(`${context} HTML is empty.`);
-  }
-  if (LIQUID_PATTERN.test(trimmed)) {
-    fail(`${context} contains Liquid markup, which is rejected.`);
-  }
-  if (DISALLOWED_TAG_PATTERN.test(trimmed)) {
-    const match =
-      trimmed.match(DISALLOWED_TAG_PATTERN)?.[0] ?? "disallowed tag";
-    fail(`${context} contains unsupported markup (${match}).`);
-  }
-  if (EVENT_HANDLER_PATTERN.test(trimmed)) {
-    fail(`${context} contains an inline event handler attribute.`);
-  }
-  const withoutComments = trimmed.replace(COMMENT_PATTERN, "");
-  for (const match of withoutComments.matchAll(TAG_PATTERN)) {
-    const tag = match[1]?.toLowerCase() ?? "";
-    if (!ALLOWED_TAGS.has(tag)) {
-      fail(`${context} contains unsupported tag <${tag}>.`);
-    }
-    validateTagSyntax(match[0], tag, context);
-  }
-  if (/[<>]/.test(withoutComments.replace(TAG_PATTERN, ""))) {
-    fail(`${context} contains malformed HTML.`);
-  }
-  return withoutComments;
-}
-
-function appendText(
-  target: ParsedNode | null,
-  text: string,
-  rootText: string[],
+function appendContent(
+  target: ParsedNodeContent,
+  source: ParsedNodeContent,
 ): void {
-  if (text.length === 0) {
-    return;
+  target.textParts.push(...source.textParts);
+  target.runs.push(...source.runs);
+}
+
+function extractNodeContent(
+  node: DefaultTreeAdapterTypes.ChildNode,
+  parentTag: string | undefined,
+  blocks: ParsedRichTextBlock[],
+  context: string,
+): ParsedNodeContent {
+  if (defaultTreeAdapter.isTextNode(node)) {
+    return { textParts: [node.value], runs: [{ text: node.value }] };
   }
-  if (target === null) {
-    rootText.push(text);
-    return;
+  if (
+    defaultTreeAdapter.isCommentNode(node) ||
+    defaultTreeAdapter.isDocumentTypeNode(node)
+  ) {
+    return { textParts: [], runs: [] };
   }
-  target.textParts.push(text);
-  target.rawParts.push(text);
+
+  const tag = node.tagName;
+  if (tag === "br") {
+    return { textParts: [" "], runs: [{ text: " " }] };
+  }
+
+  const content: ParsedNodeContent = { textParts: [], runs: [] };
+  for (const child of node.childNodes) {
+    appendContent(content, extractNodeContent(child, tag, blocks, context));
+  }
+
+  if (tag === "a") {
+    const href = normalizeCanonicalHref(node.attrs[0]?.value ?? "");
+    content.runs = content.runs.map((run) => ({ ...run, href }));
+  }
+
+  const text = normalizeText(content.textParts.join(""));
+  const runs = normalizeRuns(content.runs);
+  if (["h1", "h2", "h3", "h4"].includes(tag)) {
+    if (text.length === 0) {
+      fail(`${context} contains an empty heading.`);
+    }
+    blocks.push({ type: "heading", text, runs });
+    return { textParts: [], runs: [] };
+  }
+  if (tag === "p" && parentTag !== "blockquote") {
+    if (text.length > 0) {
+      blocks.push({ type: "paragraph", text, runs });
+    }
+    return { textParts: [], runs: [] };
+  }
+  if (tag === "blockquote") {
+    if (text.length === 0) {
+      fail(`${context} contains an empty blockquote.`);
+    }
+    blocks.push({ type: "pullquote", text, runs });
+    return { textParts: [], runs: [] };
+  }
+  if (tag === "li") {
+    if (text.length > 0) {
+      blocks.push({ type: "paragraph", text, runs });
+    }
+    return { textParts: [], runs: [] };
+  }
+  return content;
 }
 
 function extractBlocks(
   html: string,
   context: string,
 ): readonly ParsedRichTextBlock[] {
-  const sanitized = validateHtml(html, context);
-  const stack: ParsedNode[] = [];
+  const fragment = parseHtmlFragment(html, context);
   const blocks: ParsedRichTextBlock[] = [];
-  const rootText: string[] = [];
-  let cursor = 0;
+  const rootContent: ParsedNodeContent = { textParts: [], runs: [] };
 
-  for (const match of sanitized.matchAll(TAG_PATTERN)) {
-    const index = match.index ?? 0;
-    const raw = match[0];
-    const tag = match[1]?.toLowerCase() ?? "";
-
-    appendText(stack.at(-1) ?? null, sanitized.slice(cursor, index), rootText);
-    cursor = index + raw.length;
-
-    if (!ALLOWED_TAGS.has(tag)) {
-      fail(`${context} contains unsupported tag <${tag}>.`);
-    }
-
-    const isClosing = raw.startsWith("</");
-    if (tag === "br") {
-      appendText(stack.at(-1) ?? null, " ", rootText);
-      continue;
-    }
-
-    if (isClosing) {
-      const node = stack.pop();
-      if (node === undefined || node.tag !== tag) {
-        fail(`${context} contains malformed HTML.`);
-      }
-      const text = normalizeText(node.textParts.join(""));
-      const runs = parseInlineRuns(node.rawParts.join(""));
-      const parent = stack.at(-1) ?? null;
-
-      if (["h1", "h2", "h3", "h4"].includes(tag)) {
-        if (text.length === 0) {
-          fail(`${context} contains an empty heading.`);
-        }
-        blocks.push({ type: "heading", text, runs });
-      } else if (tag === "p" && parent?.tag !== "blockquote") {
-        if (text.length > 0) {
-          blocks.push({ type: "paragraph", text, runs });
-        }
-      } else if (tag === "blockquote") {
-        if (text.length === 0) {
-          fail(`${context} contains an empty blockquote.`);
-        }
-        blocks.push({ type: "pullquote", text, runs });
-      } else if (tag === "li") {
-        if (text.length > 0) {
-          blocks.push({ type: "paragraph", text, runs });
-        }
-      } else if (text.length > 0) {
-        if (parent === null) {
-          rootText.push(text);
-        } else {
-          parent.textParts.push(node.textParts.join(""));
-          parent.rawParts.push(
-            `${node.openRaw}${node.rawParts.join("")}${raw}`,
-          );
-        }
-      }
-      continue;
-    }
-
-    stack.push({ tag, textParts: [], rawParts: [], openRaw: raw });
+  for (const child of fragment.childNodes) {
+    appendContent(
+      rootContent,
+      extractNodeContent(child, undefined, blocks, context),
+    );
   }
 
-  appendText(stack.at(-1) ?? null, sanitized.slice(cursor), rootText);
-
-  if (stack.length > 0) {
-    fail(`${context} contains malformed HTML.`);
-  }
-
-  const looseText = normalizeText(rootText.join(" "));
+  const looseText = normalizeText(rootContent.textParts.join(" "));
   if (looseText.length > 0) {
     blocks.unshift({
       type: "paragraph",
