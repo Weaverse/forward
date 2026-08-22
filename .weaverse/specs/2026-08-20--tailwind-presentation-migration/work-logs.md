@@ -87,6 +87,16 @@
 - Verification: Biome format/lint, typecheck, `323/323` node tests, `54/54` DOM tests, GraphQL, Production build with 42 pages, compiled theme check, route contract `20 + 4`, `git diff --check`, and full `bun run check` passed. Fresh explicit-empty browser matrix passed `134 / 7 intentional cross-viewport skips / 0 failures` across 141 desktop, short-desktop, and true-mobile executions, including gallery geometry, no overflow, zoom/focus restoration, 44px option/focus contract, URL/price selection, and semantic panel/gallery order.
 - No dependency, commerce/data/security, Shopify, account, Weaverse, deployment, GitHub, or Production mutation occurred.
 
+## 2026-08-22 — Phase 2E cart and account presentation
+
+- Starting SHA: `c09ed6b5b9b89ed5b531ce517c8729e213367667` (pushed Phase 2D PDP commit).
+- Migrated static and Shopify Cart views plus all Account overview/orders/order-detail/addresses/access-shell/form presentation to semantic Tailwind utilities. Preserved separate cart ownership, line/quantity/remove/totals/shipping behavior, validated raw Shopify checkout handoff, disabled demo checkout truth, private dynamic Account routes, raw login/refresh handoffs, same-origin logout POST, generic failure copy, address Server Action validation, and no token/session exposure.
+- Added direct DOM protocol coverage for selected account navigation, raw no-prefetch login/refresh links, generic login failure, and logout POST. Added real browser coverage for Cart mode truth, responsive line/summary/image/quantity geometry, disabled checkout, Account private/no-store response headers, signed-out access URL, responsive navigation order, and no horizontal overflow.
+- Deleted 418 Cart/Account CSS lines from `canonical-source.css`; full CSS search now returns no Cart/Account/auth/address/order selector. Review restored the accepted Cart quantity frame winner: `44px` desktop and `48px` at ≤560 in both static and Shopify views, with a computed regression assertion.
+- Full live browser verification initially exposed a pre-existing harness race: the lazy fourth remote PDP image remained below the viewport, so its rendered height was zero and the aspect-ratio calculation produced `Infinity`. The test now scrolls the continuation image and waits for `complete && naturalWidth > 0` in every mode before comparing its loaded natural/rendered ratios; PDP CSS was unchanged. The exact three-mode rerun passed.
+- Verification: Biome format/lint, typecheck, `323/323` node tests, expanded `57/57` DOM tests, GraphQL, Production build with 42 pages, compiled theme check, route contract `20 + 4`, `git diff --check`, and `bun run check` passed. The exact browser aggregate passed `414 / 27 intentional skips / 0 failures`: static `137/10`, live account-disabled `137/10`, and live account-enabled `140/7`.
+- No dependency, external account/login/address/order mutation, checkout/payment, deployment, GitHub, Weaverse, or Production mutation occurred.
+
 ## Phase log template
 
 ```text

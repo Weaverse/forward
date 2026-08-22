@@ -39,8 +39,7 @@
 /* Effective tokens are defined once in the advanced winner block below and
  * resolve for every legacy selector through normal CSS custom-property cascade. */
 
-/* Phase 2E/2F still own these shared layout, type, link, and button
- * primitives. Phase 2C routes no longer consume them. */
+/* Phase 2F still owns these shared layout, type, link, and button primitives. */
 
 .shell {
   width: min(100%, var(--max));
@@ -225,7 +224,7 @@ p {
   background: var(--line);
   border: 1px solid var(--line);
 }
-/* Phase 2E/2F still own the shared page hero. */
+/* Phase 2F still owns the shared page hero. */
 .page-hero {
   padding: clamp(70px, 10vw, 148px) var(--pad) clamp(46px, 7vw, 90px);
   background: var(--sand);
@@ -242,249 +241,6 @@ p {
 .page-hero .lede {
   margin: 0;
   justify-self: end;
-}
-/* Phase 2E address forms still own the shared checkbox-row primitive. */
-.check-row {
-  min-height: 40px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--muted);
-  font-size: 13px;
-}
-.check-row input {
-  width: 17px;
-  height: 17px;
-  accent-color: var(--forest);
-}
-.quantity {
-  height: 52px;
-  display: grid;
-  grid-template-columns: 36px 1fr 36px;
-  border: 1px solid var(--line);
-}
-.quantity button {
-  background: transparent;
-  font-size: 20px;
-}
-.quantity button:hover {
-  background: var(--sand);
-}
-.quantity output {
-  display: grid;
-  place-items: center;
-  font-weight: 700;
-}
-/* Phase 2E cart states still own the shared empty-state primitives. */
-.empty-state {
-  min-height: 340px;
-  display: grid;
-  place-items: center;
-  padding: 60px 20px;
-  background: var(--sand);
-  text-align: center;
-}
-.empty-state-inner {
-  max-width: 500px;
-}
-.empty-state .h3 {
-  margin-bottom: 18px;
-}
-.cart-page {
-  padding-block: clamp(56px, 8vw, 110px);
-}
-.cart-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
-  gap: clamp(40px, 8vw, 110px);
-}
-.cart-list {
-  border-top: 1px solid var(--line);
-}
-.cart-line {
-  display: grid;
-  grid-template-columns: 150px 1fr auto;
-  gap: 24px;
-  padding: 22px 0;
-  border-bottom: 1px solid var(--line);
-}
-.cart-line img {
-  width: 150px;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-}
-.cart-line h2 {
-  margin: 0 0 4px;
-  font-family: var(--display);
-  font-size: 24px;
-  font-weight: 500;
-}
-.line-controls {
-  margin-top: 18px;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-.line-controls .quantity {
-  width: 112px;
-  height: 44px;
-}
-.remove-button {
-  min-height: 44px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 11px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.line-price {
-  font-weight: 700;
-  white-space: nowrap;
-}
-.order-summary {
-  align-self: start;
-  padding: 28px;
-  background: var(--sand);
-  border-top: 3px solid var(--forest);
-}
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--line);
-}
-.summary-total {
-  padding: 20px 0;
-  font-family: var(--display);
-  font-size: 27px;
-}
-.summary-note {
-  margin: 14px 0 20px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.auth-layout {
-  min-height: calc(100svh - var(--header-h) - 32px);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-.auth-image {
-  min-height: 680px;
-}
-.auth-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.auth-panel {
-  display: grid;
-  place-items: center;
-  padding: var(--pad);
-  background: var(--sand);
-}
-.auth-inner {
-  width: min(100%, 480px);
-}
-.auth-inner .h2 {
-  margin-bottom: 16px;
-}
-.form-field {
-  margin: 22px 0;
-}
-.form-field label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-.form-field input {
-  width: 100%;
-  min-height: 52px;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 0;
-  background: var(--paper);
-}
-.form-field input:focus {
-  border-color: var(--forest);
-  outline: 3px solid rgba(23, 61, 45, 0.18);
-}
-.form-note {
-  color: var(--muted);
-  font-size: 12px;
-}
-.auth-feedback {
-  min-height: 24px;
-  margin-top: 12px;
-  color: var(--forest);
-  font-weight: 700;
-}
-
-.account-layout {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: clamp(42px, 8vw, 120px);
-  padding-block: 70px 120px;
-}
-.account-nav {
-  align-self: start;
-  border-top: 1px solid var(--line);
-}
-.account-nav a {
-  min-height: 50px;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid var(--line);
-  font-size: 12px;
-  font-weight: 700;
-}
-.account-nav a.active {
-  color: var(--orange-dark);
-}
-.account-header {
-  margin-bottom: 52px;
-}
-.order-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.order-table th,
-.order-table td {
-  padding: 18px 12px;
-  border-bottom: 1px solid var(--line);
-  text-align: left;
-}
-.order-table th {
-  padding-top: 0;
-  color: var(--muted);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.order-status {
-  font-weight: 700;
-  color: var(--forest);
-}
-.account-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  margin-top: 50px;
-  background: var(--line);
-  border: 1px solid var(--line);
-}
-.account-block {
-  padding: 28px;
-  background: var(--paper);
-}
-.account-block h3 {
-  font-family: var(--display);
-  font-size: 26px;
-  font-weight: 500;
 }
 
 .journal-feature {
@@ -722,29 +478,6 @@ p {
   .page-hero .lede {
     justify-self: start;
   }
-  .cart-layout {
-    grid-template-columns: 1fr;
-  }
-  .auth-layout {
-    grid-template-columns: 1fr;
-  }
-  .auth-image {
-    min-height: 48svh;
-  }
-  .auth-panel {
-    min-height: 620px;
-  }
-  .account-layout {
-    grid-template-columns: 1fr;
-  }
-  .account-nav {
-    display: flex;
-    overflow-x: auto;
-  }
-  .account-nav a {
-    min-width: 120px;
-    padding-right: 20px;
-  }
   .journal-feature {
     grid-template-columns: 1fr;
   }
@@ -789,47 +522,8 @@ p {
     grid-template-columns: 1fr 1fr;
     gap: 1px;
   }
-  .quantity {
-    height: 48px;
-  }
-  .cart-line {
-    grid-template-columns: 92px 1fr;
-    gap: 14px;
-  }
-  .cart-line img {
-    width: 92px;
-  }
-  .line-price {
-    grid-column: 2;
-  }
-  .line-controls {
-    align-items: start;
-    flex-direction: column;
-  }
-  .account-grid,
   .about-values {
     grid-template-columns: 1fr;
-  }
-  .order-table thead {
-    display: none;
-  }
-  .order-table tr,
-  .order-table td {
-    display: block;
-  }
-  .order-table tr {
-    padding: 15px 0;
-    border-bottom: 1px solid var(--line);
-  }
-  .order-table td {
-    padding: 3px 0;
-    border: 0;
-  }
-  .order-table td::before {
-    content: attr(data-label) ": ";
-    color: var(--muted);
-    font-size: 10px;
-    text-transform: uppercase;
   }
   .journal-grid {
     grid-template-columns: 1fr;
@@ -958,103 +652,6 @@ p {
 .page-hero .h1 {
   max-width: 1050px;
 }
-.check-row {
-  font-family: var(--ui);
-  font-size: 9px;
-}
-.check-row input {
-  accent-color: var(--orange-dark);
-}
-
-.quantity {
-  border-color: var(--color-border-dark-strong);
-}
-.quantity button:hover {
-  background: var(--orange);
-  color: var(--ink);
-}
-.cart-page {
-  padding-top: 105px;
-}
-.empty-state {
-  background: var(--sand);
-  border: 1px solid var(--ink);
-}
-.cart-layout {
-  grid-template-columns: 1.45fr 0.55fr;
-}
-.cart-line {
-  grid-template-columns: 190px 1fr auto;
-}
-.cart-line img {
-  width: 190px;
-  filter: saturate(0.72);
-}
-.cart-line h2 {
-  font-size: 31px;
-}
-.order-summary {
-  background: var(--orange);
-  border-top: 0;
-  color: var(--ink);
-}
-
-.auth-layout {
-  min-height: calc(100svh - var(--header-h) - 30px);
-  grid-template-columns: 1.2fr 0.8fr;
-  background: var(--ink);
-}
-.auth-image {
-  margin: 24px 0 24px 24px;
-}
-.auth-image img {
-  filter: grayscale(0.2) saturate(0.62);
-}
-.auth-panel {
-  background: var(--ink);
-  color: var(--white);
-}
-.auth-inner {
-  padding: 45px;
-  border: 1px solid #52564c;
-}
-.auth-inner .muted,
-.form-note {
-  color: var(--color-text-dark-muted);
-}
-.form-field input {
-  background: transparent;
-  color: var(--white);
-  border-color: #686b63;
-}
-
-.account-layout {
-  grid-template-columns: 190px 1fr;
-}
-.account-nav {
-  font-family: var(--ui);
-}
-.account-nav a {
-  font-size: 9px;
-  text-transform: uppercase;
-}
-.account-nav a.active {
-  color: var(--orange-dark);
-}
-.account-grid {
-  gap: 12px;
-  border: 0;
-  background: transparent;
-}
-.account-block {
-  min-height: 280px;
-  border: 1px solid var(--ink);
-  background: transparent;
-}
-.order-status {
-  color: var(--orange-dark);
-}
-
 .journal-feature {
   grid-template-columns: 0.65fr 1.35fr;
   margin: 0 28px;
@@ -1328,19 +925,6 @@ p {
   }
   .page-hero .h1 {
     font-size: clamp(53px, 17vw, 80px);
-  }
-  .cart-line {
-    grid-template-columns: 92px 1fr;
-  }
-  .cart-line img {
-    width: 92px;
-  }
-  .auth-image {
-    margin: 10px;
-  }
-  .auth-inner {
-    padding: 5px 0;
-    border: 0;
   }
   .article-card {
     grid-column: 1 / -1;

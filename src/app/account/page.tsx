@@ -26,9 +26,22 @@ interface AccountPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
+const EYEBROW_CLASS =
+  "mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase";
+const ACCOUNT_BLOCK_CLASS =
+  "min-h-[280px] border border-ink bg-transparent p-7";
+const ORDER_ROW_CLASS =
+  "max-sm:block max-sm:border-border-subtle max-sm:border-b max-sm:py-[15px]";
+const ORDER_CELL_CLASS =
+  "border-border-subtle border-b px-3 py-[18px] text-left max-sm:block max-sm:border-0 max-sm:px-0 max-sm:py-[3px] max-sm:before:text-[10px] max-sm:before:text-text-muted max-sm:before:uppercase max-sm:before:content-[attr(data-label)_':_']";
+const ORDER_HEADING_CLASS =
+  "border-border-subtle border-b px-3 pt-0 pb-[18px] text-left text-[10px] text-text-muted tracking-[0.1em] uppercase";
+const BUTTON_CLASS =
+  "inline-flex min-h-12 items-center justify-center gap-2.5 border border-ink bg-transparent px-[22px] py-3 font-body text-[11px] font-bold text-ink tracking-[0.09em] uppercase shadow-button [transition:background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),border-color_var(--duration-fast)_var(--ease-standard),box-shadow_120ms_var(--ease-standard),transform_120ms_var(--ease-standard)] hover:translate-[2px] hover:bg-ink hover:text-text-inverse hover:shadow-button-hover active:translate-1 active:shadow-none focus-visible:outline-[3px] focus-visible:outline-ink focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0";
+
 /**
- * Account overview — the canonical account header, `.order-table` history, and
- * bordered `.account-grid` blocks, filled from the Customer Account API.
+ * Account overview — the accepted order history and bordered account blocks,
+ * filled from the Customer Account API.
  */
 export default async function AccountPage({ searchParams }: AccountPageProps) {
   const params = await searchParams;
@@ -63,60 +76,70 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
       lede="Recent orders, where they ship, and the standing repairs offer — in one quiet place."
       signedIn
     >
-      <div className="account-header">
-        <p className="eyebrow">{profile.displayName}</p>
-        <h2 className="h2">Recent orders</h2>
+      <div className="mb-[52px]">
+        <p className={EYEBROW_CLASS}>{profile.displayName}</p>
+        <h2 className="m-0 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading">
+          Recent orders
+        </h2>
       </div>
       {profile.orders.length > 0 ? (
-        <table className="order-table">
-          <thead>
+        <table className="w-full border-collapse">
+          <thead className="max-sm:hidden">
             <tr>
-              <th>Order</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Total</th>
+              <th className={ORDER_HEADING_CLASS}>Order</th>
+              <th className={ORDER_HEADING_CLASS}>Date</th>
+              <th className={ORDER_HEADING_CLASS}>Status</th>
+              <th className={ORDER_HEADING_CLASS}>Total</th>
             </tr>
           </thead>
           <tbody>
             {profile.orders.map((order) => (
-              <tr key={order.number}>
-                <td data-label="Order">
+              <tr className={ORDER_ROW_CLASS} key={order.number}>
+                <td className={ORDER_CELL_CLASS} data-label="Order">
                   <strong>
                     <Link href={order.href}>{order.name}</Link>
                   </strong>
                 </td>
-                <td data-label="Date">
+                <td className={ORDER_CELL_CLASS} data-label="Date">
                   {formatDate(order.processedAt.slice(0, 10))}
                 </td>
-                <td data-label="Status">
-                  <span className="order-status">{order.status}</span>
+                <td className={ORDER_CELL_CLASS} data-label="Status">
+                  <span className="font-bold text-signal-strong">
+                    {order.status}
+                  </span>
                 </td>
-                <td data-label="Total">{order.total}</td>
+                <td className={ORDER_CELL_CLASS} data-label="Total">
+                  {order.total}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       ) : (
-        <p className="muted">No orders on record yet.</p>
+        <p className="text-text-muted">No orders on record yet.</p>
       )}
 
-      <div className="account-grid">
-        <article className="account-block">
-          <p className="eyebrow">Repair desk</p>
-          <h3>Keep good gear moving.</h3>
-          <p className="muted">
+      <div className="mt-[50px] grid grid-cols-2 gap-3 max-sm:grid-cols-1">
+        <article className={ACCOUNT_BLOCK_CLASS}>
+          <p className={EYEBROW_CLASS}>Repair desk</p>
+          <h3 className="text-balance font-heading text-[26px] font-medium">
+            Keep good gear moving.
+          </h3>
+          <p className="text-text-muted">
             Anything bought from Forward can come back for repair — defects
             free, everything else at an honest quoted cost.
           </p>
-          <Link className="button" href="/pages/field-repair">
+          <Link className={BUTTON_CLASS} href="/pages/field-repair">
             The repairs programme
           </Link>
         </article>
-        <article className="account-block">
-          <p className="eyebrow">Default trailhead</p>
+        <article className={ACCOUNT_BLOCK_CLASS}>
+          <p className={EYEBROW_CLASS}>Default trailhead</p>
           {defaultAddress !== undefined ? (
             <>
-              <h3>{profile.displayName}</h3>
+              <h3 className="text-balance font-heading text-[26px] font-medium">
+                {profile.displayName}
+              </h3>
               <address>
                 {defaultAddress.lines.map((line) => (
                   <span key={line}>
@@ -127,7 +150,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
               </address>
             </>
           ) : (
-            <p className="muted">No addresses saved.</p>
+            <p className="text-text-muted">No addresses saved.</p>
           )}
         </article>
       </div>

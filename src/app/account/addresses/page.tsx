@@ -45,6 +45,19 @@ interface AddressFieldsProps {
   values: AddressFormValues;
 }
 
+const EYEBROW_CLASS =
+  "mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase";
+const FIELD_CLASS = "my-[22px]";
+const LABEL_CLASS =
+  "mb-2 block text-[11px] font-bold tracking-[0.09em] uppercase";
+const INPUT_CLASS =
+  "min-h-[52px] w-full rounded-none border border-[#686b63] bg-transparent p-3 text-text-inverse focus:border-surface-dark focus:outline-[3px] focus:outline-[rgba(23,61,45,0.18)]";
+const FORM_NOTE_CLASS = "text-[12px] text-text-dark-muted";
+const TEXT_LINK_CLASS =
+  "inline-flex min-h-touch items-center gap-[14px] border-ink border-b bg-transparent font-body text-[11px] font-medium tracking-[0.06em] uppercase after:text-[20px] after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-[5px]";
+const ACCOUNT_BLOCK_CLASS =
+  "min-h-[280px] border border-ink bg-transparent p-7";
+
 /**
  * The bounded `CustomerAddressInput` subset Forward writes, as plain inputs.
  * `required`/`maxLength`/`pattern` mirror the server-side schema; the server
@@ -54,9 +67,12 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
   const field = (name: string) => `${idPrefix}-${name}`;
   return (
     <>
-      <div className="form-field">
-        <label htmlFor={field("firstName")}>First name</label>
+      <div className={FIELD_CLASS}>
+        <label className={LABEL_CLASS} htmlFor={field("firstName")}>
+          First name
+        </label>
         <input
+          className={INPUT_CLASS}
           id={field("firstName")}
           name="firstName"
           defaultValue={values.firstName}
@@ -65,9 +81,12 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
           required
         />
       </div>
-      <div className="form-field">
-        <label htmlFor={field("lastName")}>Last name</label>
+      <div className={FIELD_CLASS}>
+        <label className={LABEL_CLASS} htmlFor={field("lastName")}>
+          Last name
+        </label>
         <input
+          className={INPUT_CLASS}
           id={field("lastName")}
           name="lastName"
           defaultValue={values.lastName}
@@ -76,9 +95,12 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
           required
         />
       </div>
-      <div className="form-field">
-        <label htmlFor={field("company")}>Company (optional)</label>
+      <div className={FIELD_CLASS}>
+        <label className={LABEL_CLASS} htmlFor={field("company")}>
+          Company (optional)
+        </label>
         <input
+          className={INPUT_CLASS}
           id={field("company")}
           name="company"
           defaultValue={values.company}
@@ -86,9 +108,12 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
           autoComplete="organization"
         />
       </div>
-      <div className="form-field">
-        <label htmlFor={field("address1")}>Address</label>
+      <div className={FIELD_CLASS}>
+        <label className={LABEL_CLASS} htmlFor={field("address1")}>
+          Address
+        </label>
         <input
+          className={INPUT_CLASS}
           id={field("address1")}
           name="address1"
           defaultValue={values.address1}
@@ -97,11 +122,12 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
           required
         />
       </div>
-      <div className="form-field">
-        <label htmlFor={field("address2")}>
+      <div className={FIELD_CLASS}>
+        <label className={LABEL_CLASS} htmlFor={field("address2")}>
           Apartment, suite, unit (optional)
         </label>
         <input
+          className={INPUT_CLASS}
           id={field("address2")}
           name="address2"
           defaultValue={values.address2}
@@ -109,9 +135,12 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
           autoComplete="address-line2"
         />
       </div>
-      <div className="form-field">
-        <label htmlFor={field("city")}>City</label>
+      <div className={FIELD_CLASS}>
+        <label className={LABEL_CLASS} htmlFor={field("city")}>
+          City
+        </label>
         <input
+          className={INPUT_CLASS}
           id={field("city")}
           name="city"
           defaultValue={values.city}
@@ -120,11 +149,12 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
           required
         />
       </div>
-      <div className="form-field">
-        <label htmlFor={field("zoneCode")}>
+      <div className={FIELD_CLASS}>
+        <label className={LABEL_CLASS} htmlFor={field("zoneCode")}>
           State / province code (optional)
         </label>
         <input
+          className={INPUT_CLASS}
           id={field("zoneCode")}
           name="zoneCode"
           defaultValue={values.zoneCode}
@@ -132,14 +162,17 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
           placeholder="CA"
           autoComplete="address-level1"
         />
-        <p className="form-note">
+        <p className={FORM_NOTE_CLASS}>
           Use a region code, not a name. Leave blank when the country has no
           state or province code, such as Vietnam.
         </p>
       </div>
-      <div className="form-field">
-        <label htmlFor={field("zip")}>Postal code (optional)</label>
+      <div className={FIELD_CLASS}>
+        <label className={LABEL_CLASS} htmlFor={field("zip")}>
+          Postal code (optional)
+        </label>
         <input
+          className={INPUT_CLASS}
           id={field("zip")}
           name="zip"
           defaultValue={values.zip}
@@ -147,9 +180,12 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
           autoComplete="postal-code"
         />
       </div>
-      <div className="form-field">
-        <label htmlFor={field("territoryCode")}>Country code</label>
+      <div className={FIELD_CLASS}>
+        <label className={LABEL_CLASS} htmlFor={field("territoryCode")}>
+          Country code
+        </label>
         <input
+          className={INPUT_CLASS}
           id={field("territoryCode")}
           name="territoryCode"
           defaultValue={values.territoryCode}
@@ -159,11 +195,16 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
           autoComplete="country"
           required
         />
-        <p className="form-note">Two-letter ISO country code, such as US.</p>
+        <p className={FORM_NOTE_CLASS}>
+          Two-letter ISO country code, such as US.
+        </p>
       </div>
-      <div className="form-field">
-        <label htmlFor={field("phoneNumber")}>Phone (optional)</label>
+      <div className={FIELD_CLASS}>
+        <label className={LABEL_CLASS} htmlFor={field("phoneNumber")}>
+          Phone (optional)
+        </label>
         <input
+          className={INPUT_CLASS}
           id={field("phoneNumber")}
           name="phoneNumber"
           defaultValue={values.phoneNumber}
@@ -172,7 +213,9 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
           placeholder="+16135551111"
           autoComplete="tel"
         />
-        <p className="form-note">E.164 format, including the country code.</p>
+        <p className={FORM_NOTE_CLASS}>
+          E.164 format, including the country code.
+        </p>
       </div>
     </>
   );
@@ -217,15 +260,17 @@ export default async function AddressesPage({
       lede="Add, edit, or retire the addresses we ship your kit to."
       signedIn
     >
-      <div className="account-header">
-        <p className="eyebrow">Saved trailheads</p>
-        <h2 className="h2">Addresses</h2>
+      <div className="mb-[52px]">
+        <p className={EYEBROW_CLASS}>Saved trailheads</p>
+        <h2 className="m-0 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading">
+          Addresses
+        </h2>
       </div>
       {addresses.length > 0 ? (
-        <div className="account-grid">
+        <div className="mt-[50px] grid grid-cols-2 gap-3 max-sm:grid-cols-1">
           {addresses.map((address) => (
-            <article key={address.id} className="account-block">
-              <p className="eyebrow">
+            <article key={address.id} className={ACCOUNT_BLOCK_CLASS}>
+              <p className={EYEBROW_CLASS}>
                 {address.isDefault ? "Default" : "Saved"}
               </p>
               <address>
@@ -239,7 +284,7 @@ export default async function AddressesPage({
               {address.isDefault ? null : (
                 <AddressActionForm
                   submitLabel="Make default"
-                  submitClassName="text-link"
+                  submitClassName={TEXT_LINK_CLASS}
                 >
                   <input type="hidden" name="intent" value="default" />
                   <input type="hidden" name="addressId" value={address.id} />
@@ -247,13 +292,13 @@ export default async function AddressesPage({
               )}
               <AddressActionForm
                 submitLabel="Delete address"
-                submitClassName="text-link"
+                submitClassName={TEXT_LINK_CLASS}
               >
                 <input type="hidden" name="intent" value="delete" />
                 <input type="hidden" name="addressId" value={address.id} />
               </AddressActionForm>
               <details>
-                <summary className="text-link">Edit address</summary>
+                <summary className={TEXT_LINK_CLASS}>Edit address</summary>
                 <AddressActionForm submitLabel="Save changes">
                   <input type="hidden" name="intent" value="update" />
                   <input type="hidden" name="addressId" value={address.id} />
@@ -267,16 +312,17 @@ export default async function AddressesPage({
           ))}
         </div>
       ) : (
-        <p className="muted">No addresses saved yet.</p>
+        <p className="text-text-muted">No addresses saved yet.</p>
       )}
-      <div className="account-block">
+      <div className={ACCOUNT_BLOCK_CLASS}>
         <details>
-          <summary className="text-link">Add an address</summary>
+          <summary className={TEXT_LINK_CLASS}>Add an address</summary>
           <AddressActionForm submitLabel="Save address">
             <input type="hidden" name="intent" value="create" />
             <AddressFields idPrefix="new-address" values={EMPTY_ADDRESS} />
-            <div className="check-row">
+            <div className="flex min-h-10 items-center gap-2.5 font-body text-[9px] text-text-muted">
               <input
+                className="size-[17px] accent-signal-strong"
                 id="new-address-default"
                 type="checkbox"
                 name="defaultAddress"

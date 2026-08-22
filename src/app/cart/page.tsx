@@ -76,7 +76,6 @@ export default async function CartPage() {
 
   const seedLines = await buildSeedLines();
 
-  /* CartView owns the canonical `.cart-page` shell so the live item count can
-     join the heading. */
+  /* CartView owns the page shell so the live item count can join the heading. */
   return <CartView seedLines={seedLines} />;
 }

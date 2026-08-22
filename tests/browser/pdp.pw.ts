@@ -3,7 +3,7 @@
  * and browser contracts rather than markup contracts.
  */
 
-import { boxOf, expect, gotoReady, SHOPIFY_MODE, test } from "./fixtures.ts";
+import { boxOf, expect, gotoReady, test } from "./fixtures.ts";
 
 const PDP = "/products/weatherline-shell";
 
@@ -57,33 +57,30 @@ test.describe("PDP gallery geometry", () => {
     expect(Math.abs(fourth.x + fourth.width - gridRight)).toBeLessThan(2);
 
     const image = media.nth(3).locator("img");
-    if (!SHOPIFY_MODE) {
-      await image.scrollIntoViewIfNeeded();
-      await expect(image).toHaveJSProperty("complete", true);
-    }
-    const natural = await image.evaluate((node: HTMLImageElement) => ({
-      width: node.naturalWidth,
-      height: node.naturalHeight,
-      attributeWidth: Number(node.getAttribute("width")),
-      attributeHeight: Number(node.getAttribute("height")),
-      rendered: node.getBoundingClientRect(),
-      fit: getComputedStyle(node).objectFit,
-    }));
+    await image.scrollIntoViewIfNeeded();
+    await expect
+      .poll(() =>
+        image.evaluate(
+          (node: HTMLImageElement) => node.complete && node.naturalWidth > 0,
+        ),
+      )
+      .toBe(true);
+    const natural = await image.evaluate((node: HTMLImageElement) => {
+      const rendered = node.getBoundingClientRect();
+      return {
+        width: node.naturalWidth,
+        height: node.naturalHeight,
+        renderedWidth: rendered.width,
+        renderedHeight: rendered.height,
+        fit: getComputedStyle(node).objectFit,
+      };
+    });
 
-    if (!SHOPIFY_MODE) {
-      expect(natural.width).toBeGreaterThan(0);
-    }
+    expect(natural.width).toBeGreaterThan(0);
+    expect(natural.height).toBeGreaterThan(0);
     expect(natural.fit).toBe("contain");
-    const intrinsicWidth = SHOPIFY_MODE
-      ? natural.attributeWidth
-      : natural.width;
-    const intrinsicHeight = SHOPIFY_MODE
-      ? natural.attributeHeight
-      : natural.height;
-    expect(intrinsicWidth).toBeGreaterThan(0);
-    expect(intrinsicHeight).toBeGreaterThan(0);
-    const naturalRatio = intrinsicWidth / intrinsicHeight;
-    const renderedRatio = natural.rendered.width / natural.rendered.height;
+    const naturalRatio = natural.width / natural.height;
+    const renderedRatio = natural.renderedWidth / natural.renderedHeight;
     expect(
       Math.abs(naturalRatio - renderedRatio),
       "the continuation media must not be cropped",
