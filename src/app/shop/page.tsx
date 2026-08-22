@@ -76,11 +76,7 @@ interface FilterGroup {
   links: readonly FilterLink[];
 }
 
-/**
- * Canonical filter hierarchy (source `app.js:109–139`). The prototype mutates
- * global state from inputs; Forward keeps its no-JavaScript query contract, so
- * each row is a link carrying validated `activity`/`category`/`sort` params.
- */
+/** Each filter row links to validated query state without requiring JavaScript. */
 function FilterSidebar({
   groups,
   idPrefix,
@@ -130,11 +126,6 @@ interface ShopPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-/**
- * Shop / PLP — port of the canonical `shopPage()` (source `app.js:252–263`):
- * dark page hero, signal count/sort rail, filter sidebar, and responsive
- * product grid.
- */
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const params = await searchParams;
   const category = parseCategory(

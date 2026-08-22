@@ -8,10 +8,10 @@
  */
 
 import {
+  test as base,
   expect,
   type Page,
   type Response as PlaywrightResponse,
-  test as base,
 } from "@playwright/test";
 
 export type MatrixId =
@@ -75,14 +75,16 @@ export { expect };
 /**
  * Navigates to a normal route and waits for the streamed App Router loading
  * boundary to be replaced by the route content. Deliberate error/404 tests use
- * `page.goto()` directly because `.system-state` is their final UI.
+ * `page.goto()` directly because the system state is their final UI.
  */
 export async function gotoReady(
   page: Page,
   path: string,
 ): Promise<PlaywrightResponse | null> {
   const response = await page.goto(path);
-  await expect(page.locator("#main-content .system-state")).toHaveCount(0);
+  await expect(
+    page.getByText("Forward field report / Loading…", { exact: true }),
+  ).toHaveCount(0);
   await expect(page.locator("#main-content")).toBeVisible();
   return response;
 }

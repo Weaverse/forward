@@ -13,14 +13,7 @@ interface SearchPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-/**
- * Search — port of the canonical `searchPage()` (source `app.js:293–300`):
- * oversized search heading and input, the start state, the results head plus
- * canonical grid, and the no-match state.
- *
- * The query stays a plain GET so search works without JavaScript, and results
- * come from the normalized server-side search.
- */
+/** Plain GET search backed by the normalized server-side catalog. */
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
   const rawQuery = typeof params.q === "string" ? params.q : "";

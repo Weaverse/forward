@@ -16,10 +16,8 @@ const FOOTER_COLUMN_CLASS =
   "[&>a]:flex [&>a]:min-h-9 [&>a]:items-center [&>a]:text-[12px] [&>a:hover]:text-signal [&>h2]:mt-0 [&>h2]:mb-[15px] [&>h2]:font-body [&>h2]:text-[10px] [&>h2]:text-text-dark-muted [&>h2]:tracking-field-meta [&>h2]:uppercase";
 
 /**
- * Canonical footer. Source `app.js:162–176`: stacked wordmark, intro,
- * navigation columns, and the bottom rail. Shopify owns the menu columns; the
- * theme-owned custom pages get their own heading so they are discoverable
- * without being mistaken for `/pages/*`.
+ * Shopify owns the menu columns; theme-owned custom pages get their own
+ * heading so they are discoverable without being mistaken for `/pages/*`.
  *
  * Integrations render only when verified. Unverified social accounts, payment
  * marks, and the (currently unconfigured) newsletter provider render nothing

@@ -1,16 +1,13 @@
 "use client";
 
-import { totalQuantity } from "@/lib/demo-cart/cart-logic";
-import { useDemoCartLines } from "@/lib/demo-cart/use-demo-cart";
 import {
   useShopifyCart,
   useShopifyCartMode,
 } from "@/lib/cart/shopify-cart-react";
+import { totalQuantity } from "@/lib/demo-cart/cart-logic";
+import { useDemoCartLines } from "@/lib/demo-cart/use-demo-cart";
 
-/**
- * Canonical cart badge (source `app.js:155`), kept live and announced politely
- * so assistive tech hears cart updates from anywhere.
- */
+/** Live cart badge announced politely to assistive technology. */
 function Count({ count }: { count: number }) {
   return (
     <span aria-live="polite" aria-atomic="true">

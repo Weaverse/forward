@@ -11,11 +11,6 @@ export const metadata: Metadata = {
     "Field notes from the Forward journal: trips, gear arguments, and weather worth going out in.",
 };
 
-/**
- * Journal index — port of the canonical `journalPage()` (source
- * `app.js:328`): dark page hero, the reversed `.journal-feature` lead, and the
- * 12-column staggered `.journal-grid`.
- */
 export default async function JournalPage() {
   const articles = await storefront.listArticles();
   const [lead, ...rest] = articles;

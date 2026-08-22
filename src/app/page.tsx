@@ -62,12 +62,16 @@ export default async function HomePage() {
 
   return (
     <div className="bg-text-inverse">
-      <section className="commerce-hero grid min-h-[calc(100svh_-_var(--spacing-header))] grid-cols-[minmax(390px,0.78fr)_minmax(0,1.22fr)] bg-ink text-text-inverse max-md:min-h-[calc(100svh_-_var(--spacing-header-compact))] max-md:grid-cols-[minmax(0,1fr)]">
-        <div className="commerce-hero-copy flex flex-col justify-center p-[clamp(48px,6vw,100px)] max-md:px-page-gutter max-md:py-[55px]">
-          <p className={`eyebrow ${EYEBROW_CLASS}`}>
-            Forward / Field equipment 2026
-          </p>
-          <h1 className="mt-[22px]! mb-7 max-w-[760px] text-balance font-heading text-[clamp(58px,6.7vw,112px)] leading-[0.88] font-medium tracking-[-0.065em] max-md:text-[clamp(52px,16vw,78px)]">
+      <section
+        aria-labelledby="home-hero-title"
+        className="grid min-h-[calc(100svh_-_var(--spacing-header))] grid-cols-[minmax(390px,0.78fr)_minmax(0,1.22fr)] bg-ink text-text-inverse max-md:min-h-[calc(100svh_-_var(--spacing-header-compact))] max-md:grid-cols-[minmax(0,1fr)]"
+      >
+        <div className="flex flex-col justify-center p-[clamp(48px,6vw,100px)] max-md:px-page-gutter max-md:py-[55px]">
+          <p className={EYEBROW_CLASS}>Forward / Field equipment 2026</p>
+          <h1
+            className="mt-[22px]! mb-7 max-w-[760px] text-balance font-heading text-[clamp(58px,6.7vw,112px)] leading-[0.88] font-medium tracking-[-0.065em] max-md:text-[clamp(52px,16vw,78px)]"
+            id="home-hero-title"
+          >
             Equipment for weather that changes the plan.
           </h1>
           <p className={`${LEDE_CLASS} max-w-[570px] text-text-dark-subtle`}>
@@ -110,7 +114,7 @@ export default async function HomePage() {
             </div>
           </dl>
         </div>
-        <div className="commerce-hero-media relative m-5 min-h-[760px] overflow-hidden max-md:mx-2.5 max-md:mt-0 max-md:mb-2.5 max-md:min-h-[68svh]">
+        <div className="relative m-5 min-h-[760px] overflow-hidden max-md:mx-2.5 max-md:mt-0 max-md:mb-2.5 max-md:min-h-[68svh]">
           <Image
             className="absolute inset-0 h-full object-cover saturate-[0.78] contrast-[1.05]"
             src={themeContent.homeHeroImage.src}
@@ -139,11 +143,16 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className={SHELL_SECTION_CLASS}>
+      <section
+        aria-labelledby="home-featured-title"
+        className={SHELL_SECTION_CLASS}
+      >
         <header className="mb-[45px] grid grid-cols-[minmax(0,1fr)_minmax(260px,0.42fr)_auto] items-end gap-10 max-md:grid-cols-1 max-md:gap-5">
           <div>
             <p className={EYEBROW_CLASS}>New field rotation</p>
-            <h2 className={HEADING_CLASS}>Start with the core four.</h2>
+            <h2 className={HEADING_CLASS} id="home-featured-title">
+              Start with the core four.
+            </h2>
           </div>
           <p className="m-0 max-w-[460px]">
             A weather layer, breathable midlayer, close-body carry, and trail
@@ -153,7 +162,7 @@ export default async function HomePage() {
             Shop all {products.length}
           </Link>
         </header>
-        <div className="home-featured-grid grid grid-cols-4 gap-[18px] max-md:grid-cols-2 max-sm:gap-2.5">
+        <div className="grid grid-cols-4 gap-[18px] max-md:grid-cols-2 max-sm:gap-2.5">
           {featured.map((product, index) => (
             <ProductCard
               key={product.handle}

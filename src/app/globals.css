@@ -1,8 +1,4 @@
-/*
- * Forward's effective design contract. Tailwind v4 emits utilities and CSS
- * variables from this single semantic theme while legacy selectors consume
- * temporary aliases during the slice-by-slice migration.
- */
+/* Forward's effective Tailwind design contract. */
 
 @import "tailwindcss";
 

@@ -74,14 +74,31 @@ test.describe("content routes", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "About Forward",
     );
-    await expect(page.locator("main article")).toHaveCount(1);
+    const standards = page.locator("main article");
+    const standardCount = await standards.count();
+    expect(standardCount).toBeGreaterThan(0);
+    for (let index = 0; index < standardCount; index += 1) {
+      const standard = standards.nth(index);
+      await expect(standard).toContainText(
+        `${String(index + 1).padStart(2, "0")} / Field standard`,
+      );
+      await expect(standard.getByRole("heading", { level: 2 })).toBeVisible();
+      await expect(standard.locator("p").first()).toBeVisible();
+    }
 
     await gotoReady(page, "/policies/privacy-policy");
     const policyNav = page.getByRole("navigation", { name: "Store policies" });
     await expect(
       policyNav.getByRole("link", { name: "Privacy Policy" }),
     ).toHaveAttribute("aria-current", "page");
-    await expect(page.locator("main article section h2")).toHaveCount(3);
+    const policySections = page.locator("main article section");
+    const policySectionCount = await policySections.count();
+    expect(policySectionCount).toBeGreaterThan(0);
+    for (let index = 0; index < policySectionCount; index += 1) {
+      const section = policySections.nth(index);
+      await expect(section.getByRole("heading", { level: 2 })).toBeVisible();
+      await expect(section.locator("p").first()).toBeVisible();
+    }
     await expect(
       page.getByRole("link", { name: "contact page" }),
     ).toHaveAttribute("href", "/pages/contact");

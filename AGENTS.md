@@ -30,9 +30,8 @@ Production storefront and its live Shopify contracts.
   interaction, or browser behavior coverage before migrating their styles.
   JSDOM does not prove layout, overflow, responsive visibility, focus geometry,
   or reduced motion; keep those contracts in the permanent browser suite.
-- Delete `canonical-source.css`, `site-header.css`, and
-  `production-polish.css` only after all consumers and behavior contracts have
-  migrated. Do not retain dead selectors or compatibility imports.
+- `canonical-source.css`, `site-header.css`, and `production-polish.css` are
+  retired. Do not restore legacy selectors or compatibility imports.
 
 ## Storefront data boundary
 

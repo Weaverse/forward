@@ -134,6 +134,16 @@
 - Verification: frozen install resolved 118 installs/182 packages without changes; focused content suite passed `28/28`; production audit reported no vulnerabilities; Biome/typecheck/GraphQL/build/theme/routes and full `bun run check` passed with expanded `333/333` node and `66/66` DOM tests. Production artifact scan found parser/error markers in two server chunks and zero `.next/static` client chunks.
 - No normalized content/data contract, shopper-rendered rich-text structure, external system, deployment, GitHub, Weaverse, or Production mutation occurred.
 
+## 2026-08-22 — Phase 5 legacy deletion and final release gates
+
+- Starting SHA: `25b511dfa4060124617c142bf7e193524660ca4e` (pushed Phase 4B structural-parser commit).
+- Deleted `canonical-source.css`, `site-header.css`, and `production-polish.css` and removed all three root-layout imports. `globals.css` is now the sole stylesheet: one Tailwind import, one semantic `@theme`, document-level reset/focus/cursor/reduced-motion policy, and exactly the three shell keyframes.
+- Removed stale POC/source-line ownership comments and CSS-only marker classes; browser coverage now locates Home heroes/cards, loading, and route surfaces through semantic regions/headings/articles/text. Strengthened content tests to assert every normalized About standard and Privacy Policy section has visible heading/paragraph structure instead of fixed fixture counts.
+- Added architecture guards proving the retired files stay absent, layout loads only `globals.css`, globals has one theme/no `@apply`/no compatibility selectors/exact keyframes, and behavior suites cannot read presentation source. Current tracked references to retired filenames are only the explicit AGENTS prohibition and architecture guard, plus historical spec/work-log evidence.
+- Final non-browser gates: frozen install `118` installs/`182` packages; `337/337` node tests; `66/66` DOM tests; GraphQL; Production build with 42 pages; compiled theme; route contract `20 + 4`; 35 production HTTP smokes; static and live account-disabled/account-enabled build/smoke matrices; live read-only catalog/content/navigation/policy verification; production audit; and `git diff --check` all passed. `next start` emitted the existing five internal `NoFallbackError` stderr lines during each route-smoke run, while all 35 checks passed and the server stopped cleanly.
+- Final browser aggregate passed `441 / 27 intentional skips / 0 failures`: static `146/10`, live account-disabled `146/10`, live account-enabled `149/7`. Browser matrix cleanup restored `tsconfig.json` SHA-256 `42eed74e77020627f0861ef5671814ed53b6b613283e13352f244bfc11e00a49` and `next-env.d.ts` SHA-256 `1862ac4bbbc5192d4bf562161df66ea547ed3e67173100656ab606ae9797db2b` byte-for-byte.
+- No write-side Shopify/account/address/order/checkout/payment action, deployment, GitHub issue/PR mutation, Weaverse mutation, or Production mutation occurred.
+
 ## Phase log template
 
 ```text

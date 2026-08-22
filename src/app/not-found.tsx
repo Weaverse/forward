@@ -3,11 +3,7 @@ import Link from "next/link";
 
 import { storefront } from "@/lib/storefront/data-source";
 
-/**
- * 404 — port of the canonical `notFoundPage()` (source `app.js:340`): the
- * bordered signal copy panel beside a full-bleed image plane. Serves the root
- * 404 and every unknown dynamic handle.
- */
+/** Shared accessible 404 for the root and every unknown dynamic handle. */
 export default async function NotFound() {
   const [collections, themeContent] = await Promise.all([
     storefront.listCollections(),

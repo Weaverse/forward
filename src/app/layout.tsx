@@ -8,9 +8,6 @@ import { ShopifyCartRuntime } from "@/lib/cart/shopify-cart-react";
 import { storefrontRuntimeMode } from "@/lib/storefront/data-source";
 
 import "./globals.css";
-import "./canonical-source.css";
-import "./site-header.css";
-import "./production-polish.css";
 
 /* Premium type contract: Archivo for display, Manrope for body/UI, and
  * IBM Plex Mono only for compact field metadata. Next serves all three. */

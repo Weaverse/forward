@@ -17,13 +17,9 @@ interface ProductCardProps {
 }
 
 /**
- * Canonical product card. Source `app.js:87–107` — one card hierarchy shared
- * by Home, PLP, collection, search, and related-product grids. Parent surfaces
- * own grid geometry while the card keeps one consistent 4:5 image treatment.
- *
- * The canonical `.swatches` row is inert decoration. Forward's swatches are
- * real controls: native radios in 44×44 targets, a visible selected ring and
- * name, and a deep link that retargets to the selected colorway.
+ * Product card shared by Home, catalog, search, and related-product grids.
+ * Parent surfaces own grid geometry while the card keeps one consistent 4:5
+ * image treatment and real colorway controls.
  */
 export function ProductCard({ product, priority }: ProductCardProps) {
   const [activeColorwayId, setActiveColorwayId] = useState(
@@ -35,7 +31,7 @@ export function ProductCard({ product, priority }: ProductCardProps) {
   const badge = product.activities[0];
 
   return (
-    <article className="product-card relative min-w-0 bg-transparent">
+    <article className="relative min-w-0 bg-transparent">
       <Link
         className="group relative block overflow-hidden bg-[#d4cdbf]"
         href={href}

@@ -36,11 +36,7 @@ export async function generateMetadata({
 type ProseBlock = Exclude<ArticleBlock, { type: "image" }>;
 type ImageBlock = Extract<ArticleBlock, { type: "image" }>;
 
-/**
- * The canonical article alternates measured prose runs with full-width
- * figures (source `app.js:332`). Splitting the normalized block list at every
- * image reproduces that rhythm without inventing content.
- */
+/** Split normalized article blocks at images without inventing content. */
 function splitBody(
   body: readonly ArticleBlock[],
 ): Array<{ prose: ProseBlock[]; image?: ImageBlock }> {
@@ -160,11 +156,6 @@ function ArticleAside({
   );
 }
 
-/**
- * Journal article — port of the canonical `articlePage()` (source
- * `app.js:332`): split article hero with the metadata rail, side route notes,
- * the editorial measure with its rule-bound pullquote, and wide images.
- */
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { articleHandle } = await params;
   const article = await storefront.getArticle(articleHandle);

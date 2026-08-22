@@ -8,7 +8,7 @@
  */
 
 import assert from "node:assert/strict";
-import { access, readFile, readdir } from "node:fs/promises";
+import { access, readdir, readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
 const read = (path: string) => readFile(path, "utf8");
@@ -20,7 +20,9 @@ async function testFiles(path = "tests"): Promise<string[]> {
       const child = `${path}/${entry.name}`;
       return entry.isDirectory()
         ? testFiles(child)
-        : Promise.resolve(entry.name.endsWith(".test.ts") ? [child] : []);
+        : Promise.resolve(
+            /(?:\.test\.tsx?|\.pw\.ts)$/.test(entry.name) ? [child] : [],
+          );
     }),
   );
   return nested.flat();
@@ -35,6 +37,26 @@ describe("test-layer separation", () => {
         source,
         /src\/app\/(?:canonical-source|site-header|production-polish|globals)\.css/,
         path,
+      );
+    }
+  });
+
+  it("keeps behavior suites from asserting presentation source text", async () => {
+    const behaviorSuites = (await testFiles()).filter(
+      (path) =>
+        path.startsWith("tests/dom/") ||
+        path.startsWith("tests/browser/") ||
+        /tests\/(?:production-polish-(?:home|pdp|shell)|site-header)\.test\.ts$/.test(
+          path,
+        ),
+    );
+
+    assert.ok(behaviorSuites.length > 0);
+    for (const path of behaviorSuites) {
+      assert.doesNotMatch(
+        await read(path),
+        /from\s+["']node:fs(?:\/promises)?["']|Bun\.file|readFile(?:Sync)?|readSource/,
+        `${path} must render behavior instead of reading presentation source`,
       );
     }
   });
@@ -81,6 +103,49 @@ describe("test-layer separation", () => {
         `${spec} would be discovered by \`bun test\``,
       );
     }
+  });
+});
+
+describe("Tailwind presentation ownership", () => {
+  const legacyStylesheets = [
+    "src/app/canonical-source.css",
+    "src/app/site-header.css",
+    "src/app/production-polish.css",
+  ];
+
+  it("keeps retired presentation stylesheets absent", async () => {
+    await Promise.all(
+      legacyStylesheets.map((legacyPath) => assert.rejects(access(legacyPath))),
+    );
+  });
+
+  it("loads only the Tailwind global stylesheet from the root layout", async () => {
+    const layout = await read("src/app/layout.tsx");
+    const stylesheets = [
+      ...layout.matchAll(/import\s+["'](\.\/[^"']+\.css)["']/g),
+    ].map(([, stylesheet]) => stylesheet);
+
+    assert.deepEqual(stylesheets, ["./globals.css"]);
+    for (const legacyPath of legacyStylesheets) {
+      assert.ok(!layout.includes(legacyPath.split("/").at(-1) ?? legacyPath));
+    }
+  });
+
+  it("keeps globals.css limited to the semantic theme and document policy", async () => {
+    const globals = await read("src/app/globals.css");
+
+    assert.equal(globals.match(/@import\s+["']tailwindcss["']/g)?.length, 1);
+    assert.equal(globals.match(/@theme\b/g)?.length, 1);
+    assert.doesNotMatch(globals, /@apply\b/);
+    assert.doesNotMatch(
+      globals,
+      /^\s*(?:[.#][\w-]+|[a-z][\w-]*[.#][\w-]+|\[data-[\w-]+)/m,
+      "globals.css must not regain a component compatibility selector",
+    );
+    assert.deepEqual(
+      [...globals.matchAll(/@keyframes\s+([\w-]+)/g)].map(([, name]) => name),
+      ["shell-panel-enter", "shell-mobile-enter", "shell-image-enter"],
+    );
   });
 });
 

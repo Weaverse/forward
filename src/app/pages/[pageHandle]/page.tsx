@@ -54,13 +54,7 @@ export async function generateMetadata({
   return { title: page.title, description: page.intro };
 }
 
-/**
- * Store pages — port of the canonical `aboutPage()` (source `app.js:336`),
- * the canonical rich-content surface: split image/dark-copy hero, the premise
- * intro grid, the 12-column staggered `.about-values` blocks, and the origin
- * grid. `about-forward` maps most directly; other normalized pages use the
- * same grammar with their own sections.
- */
+/** Rich-content surface shared by normalized Shopify pages. */
 export default async function StorePageRoute({ params }: StorePageProps) {
   const { pageHandle } = await params;
   const [page, themeContent, collections] = await Promise.all([

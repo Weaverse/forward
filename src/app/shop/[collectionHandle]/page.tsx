@@ -36,15 +36,7 @@ export async function generateMetadata({
   };
 }
 
-/**
- * Collection landing — port of the canonical `activityPage()` (source
- * `app.js:265–273`): split image/dark-copy activity hero, the shifted guide
- * image with its signal shadow, a field-system product section, and the
- * closing field-practice grid.
- *
- * Title, copy, hero image, kit rows, and products all come from the
- * normalized collection model.
- */
+/** Collection content comes entirely from the normalized storefront model. */
 export default async function CollectionPage({ params }: CollectionPageProps) {
   const { collectionHandle } = await params;
   const [collection, products, themeContent, articles] = await Promise.all([

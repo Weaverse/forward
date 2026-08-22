@@ -28,11 +28,6 @@ export async function generateMetadata({
   return { title: policy.title, description: policy.summary };
 }
 
-/**
- * Policy — port of the canonical `policyPage()` (source `app.js:324`): dark
- * page hero, the route-note aside, the editorial article measure with its
- * heading rhythm, and the closing call to action.
- */
 export default async function PolicyPage({ params }: PolicyPageProps) {
   const { policyHandle } = await params;
   const [policy, allPolicies] = await Promise.all([

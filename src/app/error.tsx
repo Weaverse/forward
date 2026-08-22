@@ -1,10 +1,6 @@
 "use client";
 
-/**
- * Error state. The canonical POC has no error render function, so this uses
- * the canonical tokens, type scale, and system-state geometry rather than a
- * new art direction. Reset behavior and status semantics are unchanged.
- */
+/** Error state with the accepted geometry, reset behavior, and semantics. */
 export default function ErrorPage({
   error,
   reset,
@@ -13,7 +9,7 @@ export default function ErrorPage({
   reset: () => void;
 }) {
   return (
-    <div className="system-state grid min-h-[60svh] place-items-center bg-surface-subtle px-page-gutter py-[clamp(60px,10vw,140px)] text-center">
+    <div className="grid min-h-[60svh] place-items-center bg-surface-subtle px-page-gutter py-[clamp(60px,10vw,140px)] text-center">
       <div className="max-w-[560px]" role="alert">
         <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
           Field report / Error

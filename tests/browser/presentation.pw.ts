@@ -28,8 +28,7 @@ test.describe("premium presentation behavior", () => {
         .locator("main h1")
         .evaluate((node) => getComputedStyle(node).fontFamily),
       meta: await page
-        .locator("main .eyebrow")
-        .first()
+        .getByText("Forward / Field equipment 2026", { exact: true })
         .evaluate((node) => getComputedStyle(node).fontFamily),
     };
 
@@ -42,7 +41,9 @@ test.describe("premium presentation behavior", () => {
     page,
   }) => {
     await gotoReady(page, "/");
-    const homeCards = page.locator(".home-featured-grid .product-card");
+    const homeCards = page
+      .getByRole("region", { name: "Start with the core four." })
+      .getByRole("article");
     expect(await homeCards.count()).toBe(4);
     expect((await homeCards.allTextContents()).join(" ")).not.toMatch(
       /plate\s+\d+/i,
@@ -69,7 +70,7 @@ test.describe("premium presentation behavior", () => {
     await gotoReady(page, "/shop");
     const plpCards = page
       .getByRole("region", { name: "Products" })
-      .locator(".product-card");
+      .getByRole("article");
     expect(await plpCards.count()).toBe(9);
     const firstPlp = await boxOf(plpCards.nth(0));
     const secondPlp = await boxOf(plpCards.nth(1));
@@ -113,9 +114,13 @@ test.describe("premium presentation behavior", () => {
     page,
   }) => {
     await gotoReady(page, "/");
-    const hero = page.locator(".commerce-hero");
-    const heroCopy = await boxOf(hero.locator(".commerce-hero-copy"));
-    const heroMedia = await boxOf(hero.locator(".commerce-hero-media"));
+    const hero = page.getByRole("region", {
+      name: "Equipment for weather that changes the plan.",
+    });
+    const heroCopy = await boxOf(
+      hero.getByRole("heading", { level: 1 }).locator(".."),
+    );
+    const heroMedia = await boxOf(hero.locator("img").first().locator(".."));
     const viewport = page.viewportSize();
 
     if ((viewport?.width ?? 0) > 820) {
