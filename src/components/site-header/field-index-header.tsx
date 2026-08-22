@@ -266,27 +266,26 @@ export function FieldIndexHeader({
 }: FieldIndexHeaderProps) {
   const pathname = usePathname();
   const shopItem = primary.find((item) => item.href === "/shop");
-  if (shopItem === undefined) {
-    throw new Error("Header 01 requires a Shop navigation item.");
-  }
   const aboutItem = primary.find(
     (item) => item.href === "/pages/about-forward",
   );
-  if (aboutItem?.children === undefined || aboutItem.children.length === 0) {
-    throw new Error(
-      "Header 01 requires the canonical About navigation branch.",
-    );
-  }
-  const collections = useMemo(
-    () => createFieldIndexCollections(shopItem),
-    [shopItem],
-  );
+  const collections = useMemo(() => {
+    if (shopItem === undefined) {
+      return null;
+    }
+    try {
+      return createFieldIndexCollections(shopItem);
+    } catch {
+      return null;
+    }
+  }, [shopItem]);
+  const aboutHasPanel = (aboutItem?.children?.length ?? 0) > 0;
   const [desktopOpen, setDesktopOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountSignedIn, setAccountSignedIn] = useState(false);
   const [activeIndex, setActiveIndex] = useState(() =>
-    activeCollectionIndex(pathname, collections),
+    activeCollectionIndex(pathname, collections ?? []),
   );
   const rootRef = useRef<HTMLDivElement>(null);
   const desktopTriggerRef = useRef<HTMLButtonElement>(null);
@@ -310,7 +309,7 @@ export function FieldIndexHeader({
   );
   const mobileLinks = [
     ...primary
-      .filter((item) => item.href !== "/shop")
+      .filter((item) => item.href !== "/shop" || collections === null)
       .flatMap((item) => [
         { item, child: false },
         ...(item.children ?? []).map((child) => ({ item: child, child: true })),
@@ -351,7 +350,7 @@ export function FieldIndexHeader({
     setDesktopOpen(false);
     setAboutOpen(false);
     setMobileOpen(false);
-    setActiveIndex(activeCollectionIndex(pathname, collections));
+    setActiveIndex(activeCollectionIndex(pathname, collections ?? []));
   }, [pathname, collections]);
 
   useEffect(() => {
@@ -507,30 +506,48 @@ export function FieldIndexHeader({
           className="flex self-stretch justify-center max-lg:hidden"
           aria-label="Primary navigation"
         >
-          <button
-            ref={desktopTriggerRef}
-            type="button"
-            className={PRIMARY_NAV_ITEM_CLASS}
-            aria-current={
-              isActive(pathname, shopItem.href) ? "page" : undefined
-            }
-            aria-expanded={desktopOpen}
-            aria-controls={desktopOpen ? desktopPanelId : undefined}
-            onClick={toggleDesktop}
-          >
-            <i className="text-[11px] text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
-              01
-            </i>
-            {shopItem.label}
-            <span
-              className="inline-flex min-w-[10px] items-center text-[13px] text-signal-strong"
-              aria-hidden="true"
+          {shopItem === undefined ? null : collections === null ? (
+            <Link
+              href={createHeaderNavigationHref(shopItem.href, queryString)}
+              className={PRIMARY_NAV_ITEM_CLASS}
+              aria-current={
+                isActive(pathname, shopItem.href) ? "page" : undefined
+              }
             >
-              <Icon name={desktopOpen ? "caret-up" : "caret-down"} size={12} />
-            </span>
-          </button>
+              <i className="text-[11px] text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
+                01
+              </i>
+              {shopItem.label}
+            </Link>
+          ) : (
+            <button
+              ref={desktopTriggerRef}
+              type="button"
+              className={PRIMARY_NAV_ITEM_CLASS}
+              aria-current={
+                isActive(pathname, shopItem.href) ? "page" : undefined
+              }
+              aria-expanded={desktopOpen}
+              aria-controls={desktopOpen ? desktopPanelId : undefined}
+              onClick={toggleDesktop}
+            >
+              <i className="text-[11px] text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
+                01
+              </i>
+              {shopItem.label}
+              <span
+                className="inline-flex min-w-[10px] items-center text-[13px] text-signal-strong"
+                aria-hidden="true"
+              >
+                <Icon
+                  name={desktopOpen ? "caret-up" : "caret-down"}
+                  size={12}
+                />
+              </span>
+            </button>
+          )}
           {primaryLinks.map((item, index) =>
-            item.href === aboutItem.href ? (
+            item === aboutItem && aboutHasPanel ? (
               <button
                 key={item.href}
                 ref={aboutTriggerRef}
@@ -641,7 +658,7 @@ export function FieldIndexHeader({
           </button>
           <MiniCart />
         </div>
-        {desktopOpen ? (
+        {desktopOpen && collections !== null ? (
           <FieldIndexPanel
             activeIndex={activeIndex}
             collections={collections}
@@ -652,7 +669,7 @@ export function FieldIndexHeader({
             queryString={queryString}
           />
         ) : null}
-        {aboutOpen ? (
+        {aboutOpen && aboutItem !== undefined && aboutHasPanel ? (
           <AboutIndexPanel
             item={aboutItem}
             id={aboutPanelId}
@@ -686,19 +703,21 @@ export function FieldIndexHeader({
               <Icon name="x" size={20} />
             </button>
           </div>
-          <MobileFieldIndex
-            collections={collections}
-            onNavigate={closeMobile}
-            pathname={pathname}
-            queryString={queryString}
-          />
+          {collections === null ? null : (
+            <MobileFieldIndex
+              collections={collections}
+              onNavigate={closeMobile}
+              pathname={pathname}
+              queryString={queryString}
+            />
+          )}
           <nav
             className="mt-[30px] border-white/22 border-t"
             aria-label="Mobile primary navigation"
           >
             {mobileLinks.map(({ item, child }, index) => (
               <Link
-                key={item.href}
+                key={`${child ? "child" : "item"}:${item.href}`}
                 className={cn(
                   "grid grid-cols-[34px_1fr_auto] items-center gap-2.5 border-white/18 border-b font-body uppercase",
                   child

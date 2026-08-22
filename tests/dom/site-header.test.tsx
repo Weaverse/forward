@@ -16,6 +16,7 @@ import { ICON_PATHS } from "@/components/icon";
 import { FieldIndexHeader } from "@/components/site-header/field-index-header";
 import { createFieldIndexCollections } from "@/components/site-header/header-navigation";
 import { THEME_CONTENT_FIXTURE } from "@/lib/storefront/fixtures/navigation";
+import type { NavItem } from "@/lib/storefront/types";
 import { currentRoute, setRoute } from "./preload";
 import {
   type AccountStatusStub,
@@ -51,6 +52,7 @@ afterEach(() => {
 
 interface MountOptions {
   pathname?: string;
+  primary?: readonly NavItem[];
   queryString?: string;
   signedIn?: boolean | null;
   withAccount?: boolean;
@@ -58,6 +60,7 @@ interface MountOptions {
 
 function mountHeader({
   pathname = "/",
+  primary = PRIMARY_NAV,
   queryString = "",
   signedIn = false,
   withAccount = true,
@@ -67,7 +70,7 @@ function mountHeader({
   return render(
     <FieldIndexHeader
       announcement={THEME_CONTENT_FIXTURE.announcement}
-      primary={PRIMARY_NAV}
+      primary={primary}
       queryString={queryString}
       utility={withAccount ? UTILITY_NAV_WITH_ACCOUNT : UTILITY_NAV_NO_ACCOUNT}
     />,
@@ -150,6 +153,112 @@ describe("header shell", () => {
       container.querySelectorAll("[data-mini-cart-mount]").length,
       1,
     );
+  });
+});
+
+describe("header enhancement fallbacks", () => {
+  it("keeps the canonical Shop and About panel controls", () => {
+    mountHeader();
+
+    assert.ok(screen.getByRole("button", { name: /Shop/ }));
+    assert.ok(screen.getByRole("button", { name: /About/ }));
+    assert.equal(screen.queryByRole("link", { name: /^Shop$/ }), null);
+    assert.equal(screen.queryByRole("link", { name: /^About$/ }), null);
+  });
+
+  it("renders the remaining ordinary links when Shop is missing", async () => {
+    const user = userEvent.setup();
+    mountHeader({
+      primary: PRIMARY_NAV.filter((item) => item.href !== "/shop"),
+    });
+
+    assert.equal(screen.queryByRole("button", { name: /Shop/ }), null);
+    assert.ok(screen.getByRole("link", { name: /Field Notes/ }));
+    assert.ok(screen.getByRole("button", { name: /About/ }));
+
+    await user.click(screen.getByRole("button", { name: /^Menu$/ }));
+    const dialog = screen.getByRole("dialog", { name: "Site menu" });
+    assert.ok(within(dialog).getByRole("link", { name: /Field Notes/ }));
+    assert.ok(within(dialog).getByRole("link", { name: /About$/ }));
+  });
+
+  it("renders About as a plain link when its children are missing", () => {
+    mountHeader({
+      primary: PRIMARY_NAV.map((item) =>
+        item.href === "/pages/about-forward"
+          ? { href: item.href, label: item.label }
+          : item,
+      ),
+    });
+
+    assert.equal(screen.queryByRole("button", { name: /About/ }), null);
+    const link = screen.getByRole("link", { name: /About$/ });
+    assert.equal(link.getAttribute("href"), "/pages/about-forward");
+    assert.equal(link.getAttribute("aria-controls"), null);
+  });
+
+  for (const [name, children] of [
+    ["unexpected child count", SHOP_CHILDREN.slice(0, -1)],
+    [
+      "unexpected child order",
+      [SHOP_CHILDREN[1], SHOP_CHILDREN[0], ...SHOP_CHILDREN.slice(2)],
+    ],
+    [
+      "unmapped presentation handle",
+      SHOP_CHILDREN.map((child, index) =>
+        index === 2 ? { ...child, href: "/shop/daypacks" } : child,
+      ),
+    ],
+  ] as const) {
+    it(`renders Shop as a query-preserving plain link for ${name}`, () => {
+      mountHeader({
+        primary: PRIMARY_NAV.map((item) =>
+          item.href === "/shop" ? { ...item, children } : item,
+        ),
+        queryString: "sort=name&colorway=claystone",
+      });
+
+      assert.equal(screen.queryByRole("button", { name: /Shop/ }), null);
+      const link = screen.getByRole("link", { name: /Shop$/ });
+      assert.equal(link.getAttribute("href"), "/shop?sort=name");
+      assert.equal(link.getAttribute("aria-controls"), null);
+      assert.equal(
+        screen.queryByRole("region", { name: "Shop field index" }),
+        null,
+      );
+    });
+  }
+
+  it("keeps malformed Shop links in the accessible mobile dialog", async () => {
+    const user = userEvent.setup();
+    mountHeader({
+      primary: PRIMARY_NAV.map((item) =>
+        item.href === "/shop"
+          ? { ...item, children: SHOP_CHILDREN.slice(0, -1) }
+          : item,
+      ),
+      queryString: "sort=name",
+    });
+
+    await user.click(screen.getByRole("button", { name: /^Menu$/ }));
+    const dialog = screen.getByRole("dialog", { name: "Site menu" });
+    assert.equal(
+      within(dialog).queryByRole("navigation", {
+        name: "Mobile shop collections",
+      }),
+      null,
+    );
+    assert.equal(
+      within(dialog).getByRole("link", { name: /Shop$/ }).getAttribute("href"),
+      "/shop?sort=name",
+    );
+    for (const child of SHOP_CHILDREN.slice(0, -1)) {
+      assert.ok(
+        within(dialog).getByRole("link", {
+          name: new RegExp(`${child.label}$`),
+        }),
+      );
+    }
   });
 });
 

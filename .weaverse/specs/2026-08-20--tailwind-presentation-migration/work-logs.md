@@ -115,6 +115,16 @@
 - Verification: Biome format/lint, typecheck, `323/323` node tests, `59/59` DOM tests, GraphQL, Production build with 42 pages, compiled theme check, route contract `20 + 4`, `git diff --check`, and `bun run check` passed. Fresh static browser matrix passed `146 / 10 intentional skips / 0 failures` across 156 desktop, short-desktop, and true-mobile executions.
 - No route/data/auth/cart/sanitizer/security behavior, dependency, external system, deployment, GitHub, Weaverse, or Production mutation occurred.
 
+## 2026-08-22 — Phase 4A Header fail-soft and runtime decisions
+
+- Starting SHA: `e5989f36d49fdece96b31fdb59f84a9e3dc9ddfa` (pushed Phase 3 ownership/variants commit).
+- Removed root-shell presentation throws for missing Shop, missing About children, unexpected Shop child count/order, and unmapped Shop presentation handles. Canonical data still gets the full desktop/mobile panels; unsupported enhancement data falls back to query-preserving plain links with no false `aria-controls`, while ordinary links and the mobile dialog remain usable.
+- Added seven direct DOM regressions covering canonical controls, missing Shop, About plain-link fallback, three malformed Shop shapes, query ownership, and malformed Shop mobile-dialog reachability. The lower-level adapter/verifier remains fail-closed; the UI catch emits no raw merchant data or diagnostics.
+- React Compiler remains disabled. Installed Next 16.3 exposes the official `reactCompiler?: boolean | ReactCompilerOptions` config, and its runtime explicitly requires resolvable `babel-plugin-react-compiler`; the package is absent. A bounded no-save/no-lock dependency spike made no progress for more than six minutes and was stopped, then `bun install --frozen-lockfile` restored the exact 116-install graph with no package/config/lock drift. Without deterministic dependency or build-regression evidence, enablement does not meet the spec gate. No tracked repo claimed automatic compiler memoization.
+- ProductCard remains a Client Component. Its one colorway selection simultaneously owns the primary image, image link, title link, native radio checked state, visible colorway name, and encoded query target; a smaller island would either duplicate state/interactive links or hydrate nearly the whole article, so a nominal server wrapper would not reduce the boundary.
+- Verification: frozen install, Biome format/lint, typecheck, `323/323` node tests, expanded `66/66` DOM tests, GraphQL, Production build with 42 pages, compiled theme check, route contract `20 + 4`, `git diff --check`, and `bun run check` passed. Fresh static browser matrix passed `146 / 10 intentional skips / 0 failures` across 156 desktop, short-desktop, and true-mobile executions.
+- No dependency, ProductCard behavior/presentation, adapter/data contract, external system, deployment, GitHub, Weaverse, or Production mutation occurred.
+
 ## Phase log template
 
 ```text
