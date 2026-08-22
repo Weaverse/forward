@@ -146,7 +146,10 @@ test.describe("PDP option controls", () => {
     page,
   }) => {
     await gotoReady(page, PDP);
-    const options = page.locator("main .option-chip");
+    const panel = page.getByRole("region", { name: "Purchase panel" });
+    const options = panel
+      .getByRole("group", { name: /^(Color|Size)$/ })
+      .locator('a, [aria-disabled="true"]');
     const count = await options.count();
     expect(count).toBeGreaterThan(4);
 
@@ -163,8 +166,20 @@ test.describe("PDP option controls", () => {
       expect(
         box.height,
         `option ${index} is too short to hit`,
-      ).toBeGreaterThanOrEqual(32);
+      ).toBeGreaterThanOrEqual(44);
     }
+
+    const firstColorway = panel
+      .getByRole("group", { name: "Color" })
+      .getByRole("link")
+      .first();
+    await firstColorway.focus();
+    const focus = await firstColorway.evaluate((node) => {
+      const style = getComputedStyle(node);
+      return { width: style.outlineWidth, offset: style.outlineOffset };
+    });
+    expect(Number.parseFloat(focus.width)).toBeGreaterThanOrEqual(3);
+    expect(Number.parseFloat(focus.offset)).toBeGreaterThanOrEqual(3);
   });
 
   test("moves the selected variant into the URL and back into the price", async ({
@@ -173,7 +188,9 @@ test.describe("PDP option controls", () => {
     await gotoReady(page, `${PDP}?colorway=charcoal&size=XS`);
     const price = page
       .getByRole("region", { name: "Purchase panel" })
-      .locator(".product-price");
+      .locator("strong")
+      .filter({ hasText: /\$/ })
+      .first();
     await expect(price).toContainText("$");
     const before = await price.innerText();
 

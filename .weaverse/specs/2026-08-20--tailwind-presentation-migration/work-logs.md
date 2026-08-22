@@ -78,6 +78,15 @@
 - Verification: Biome format/lint, typecheck, `323/323` node tests, `54/54` DOM tests, GraphQL, Production build with 42 pages, compiled theme check, route contract `20 + 4`, `git diff --check`, and full `bun run check` passed. The expanded fresh explicit-empty browser matrix ran 141 executions and passed `134 / 7 intentional cross-viewport skips / 0 failures` across desktop, short desktop, and true mobile.
 - No dependency, commerce/data/security, Shopify, account, Weaverse, deployment, GitHub, or Production mutation occurred.
 
+## 2026-08-22 — Phase 2D product detail and add-to-cart presentation
+
+- Starting SHA: `0dea9de0e19bb89d67bc5dc42c4114a259343a9f` (pushed Phase 2C catalog/search commit).
+- Migrated the PDP route, URL-owned ProductDetail interface, gallery/zoom modal, field record, related products, and static/Shopify add-to-cart presentation to semantic Tailwind utilities. Preserved static params/metadata/not-found/revalidation, exact colorway/options query state, unrelated query retention, selected variant price/compare-at sale/sold-out truth, exact merchandise identity, cart ownership, full-screen zoom lifecycle, optimized media hints, and fourth-plus natural full-width images.
+- Replaced CSS-coupled ProductDetail test locators with semantic `region`/`group` ownership. PDP options now expose native fieldset group names and permanent browser coverage requires every selectable/unavailable value to remain readable, at least 44px tall, and visibly focused.
+- Deleted 606 PDP/ATC CSS lines across `canonical-source.css` and `production-polish.css`. Remaining generic `.quantity` and `.product-grid` rules are owned by unmigrated Cart/content surfaces and no longer style PDP markup.
+- Verification: Biome format/lint, typecheck, `323/323` node tests, `54/54` DOM tests, GraphQL, Production build with 42 pages, compiled theme check, route contract `20 + 4`, `git diff --check`, and full `bun run check` passed. Fresh explicit-empty browser matrix passed `134 / 7 intentional cross-viewport skips / 0 failures` across 141 desktop, short-desktop, and true-mobile executions, including gallery geometry, no overflow, zoom/focus restoration, 44px option/focus contract, URL/price selection, and semantic panel/gallery order.
+- No dependency, commerce/data/security, Shopify, account, Weaverse, deployment, GitHub, or Production mutation occurred.
+
 ## Phase log template
 
 ```text

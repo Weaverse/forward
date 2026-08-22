@@ -24,6 +24,19 @@ interface AddToCartFormProps {
   selection: ProductSelection;
 }
 
+const ACTIONS_CLASS =
+  "mt-[30px] grid grid-cols-[112px_1fr] gap-2 max-sm:grid-cols-1";
+const QUANTITY_CLASS =
+  "grid h-[52px] grid-cols-[36px_1fr_36px] border border-border-dark-strong max-sm:h-12";
+const QUANTITY_BUTTON_CLASS =
+  "bg-transparent text-[20px] hover:bg-signal hover:text-ink disabled:text-text-disabled disabled:hover:bg-transparent disabled:hover:text-text-disabled";
+const QUANTITY_OUTPUT_CLASS = "grid place-items-center font-bold";
+const ADD_TO_CART_CLASS =
+  "inline-flex min-h-12 items-center justify-center gap-2.5 border border-signal bg-signal px-[22px] py-3 font-body text-[11px] font-bold text-ink tracking-[0.09em] uppercase shadow-[4px_4px_0_var(--color-text-inverse)] [transition:background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),border-color_var(--duration-fast)_var(--ease-standard),box-shadow_120ms_var(--ease-standard),transform_120ms_var(--ease-standard)] hover:translate-[2px] hover:border-text-inverse hover:bg-text-inverse hover:shadow-[2px_2px_0_var(--color-text-inverse)] active:translate-1 active:shadow-none focus-visible:outline-2 focus-visible:outline-signal focus-visible:outline-offset-[3px] disabled:translate-0 disabled:border-control-disabled disabled:bg-control-disabled disabled:text-text-disabled disabled:opacity-[0.46] disabled:shadow-none disabled:hover:translate-0 disabled:hover:border-control-disabled disabled:hover:bg-control-disabled disabled:hover:text-text-disabled disabled:hover:shadow-none motion-reduce:hover:translate-0 motion-reduce:active:translate-0";
+const FEEDBACK_CLASS = "mt-3 mb-0 min-h-6 text-[12px] font-bold text-signal";
+const NOTE_CLASS =
+  "mt-[18px] mb-0 border-signal border-l-2 px-3.5 py-3 font-body text-[9px] leading-[1.7] text-text-dark-muted tracking-[0.06em] uppercase";
+
 function DemoAddToCartForm({ product, selection }: AddToCartFormProps) {
   const [quantity, setQuantity] = useState(1);
   const [status, setStatus] = useState("");
@@ -58,9 +71,10 @@ function DemoAddToCartForm({ product, selection }: AddToCartFormProps) {
 
   return (
     <>
-      <div className="product-actions">
-        <div className="quantity">
+      <div className={ACTIONS_CLASS}>
+        <div className={QUANTITY_CLASS}>
           <button
+            className={QUANTITY_BUTTON_CLASS}
             type="button"
             aria-label="Decrease quantity"
             disabled={quantity <= 1}
@@ -68,10 +82,15 @@ function DemoAddToCartForm({ product, selection }: AddToCartFormProps) {
           >
             −
           </button>
-          <output aria-live="polite" aria-label="Quantity">
+          <output
+            className={QUANTITY_OUTPUT_CLASS}
+            aria-live="polite"
+            aria-label="Quantity"
+          >
             {quantity}
           </output>
           <button
+            className={QUANTITY_BUTTON_CLASS}
             type="button"
             aria-label="Increase quantity"
             disabled={quantity >= MAX_LINE_QUANTITY}
@@ -83,7 +102,7 @@ function DemoAddToCartForm({ product, selection }: AddToCartFormProps) {
           </button>
         </div>
         <button
-          className="button button-signal product-atc"
+          className={ADD_TO_CART_CLASS}
           type="button"
           disabled={!selection.variant.availableForSale}
           onClick={handleAdd}
@@ -95,10 +114,10 @@ function DemoAddToCartForm({ product, selection }: AddToCartFormProps) {
           })}
         </button>
       </div>
-      <p className="add-feedback" role="status">
+      <p className={FEEDBACK_CLASS} role="status">
         {status}
       </p>
-      <p className="demo-note">
+      <p className={NOTE_CLASS}>
         Demo cart only — items stay in this browser and no checkout is
         connected.
       </p>
@@ -158,9 +177,10 @@ function ShopifyAddToCartForm({ selection }: AddToCartFormProps) {
     >
       <input type="hidden" {...register("merchandiseId", {})} />
       <input type="hidden" {...register("quantity", { value: quantity })} />
-      <div className="product-actions">
-        <div className="quantity">
+      <div className={ACTIONS_CLASS}>
+        <div className={QUANTITY_CLASS}>
           <button
+            className={QUANTITY_BUTTON_CLASS}
             aria-label="Decrease quantity"
             disabled={pending || quantity <= 1}
             onClick={() => setQuantity((current) => Math.max(1, current - 1))}
@@ -168,10 +188,15 @@ function ShopifyAddToCartForm({ selection }: AddToCartFormProps) {
           >
             −
           </button>
-          <output aria-live="polite" aria-label="Quantity">
+          <output
+            className={QUANTITY_OUTPUT_CLASS}
+            aria-live="polite"
+            aria-label="Quantity"
+          >
             {quantity}
           </output>
           <button
+            className={QUANTITY_BUTTON_CLASS}
             aria-label="Increase quantity"
             disabled={pending || quantity >= MAX_LINE_QUANTITY}
             onClick={() =>
@@ -184,7 +209,7 @@ function ShopifyAddToCartForm({ selection }: AddToCartFormProps) {
         </div>
         <button
           {...register("addToCart", {})}
-          className="button button-signal product-atc"
+          className={ADD_TO_CART_CLASS}
           disabled={
             pending ||
             selectedVariant === null ||
@@ -203,10 +228,10 @@ function ShopifyAddToCartForm({ selection }: AddToCartFormProps) {
           })}
         </button>
       </div>
-      <p className="add-feedback" role="status" aria-live="polite">
+      <p className={FEEDBACK_CLASS} role="status" aria-live="polite">
         {pending ? "Updating your cart…" : ""}
       </p>
-      <p className="demo-note">
+      <p className={NOTE_CLASS}>
         Secure Shopify cart. Checkout is handed off to Shopify; no payment runs
         on this page.
       </p>

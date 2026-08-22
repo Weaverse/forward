@@ -4,21 +4,9 @@
  * Loaded after the canonical source port so the port keeps its original source
  * order. Everything here is a shopper-visible defect fix approved in
  * `.weaverse/specs/2026-08-05--advanced-visual-realignment/production-polish-phase-1-handoff.md`:
- * one readable dark secondary token, header utility spacing and typography,
- * the Phosphor icon baseline, square swatches, one square hard-shadow button
- * system, and the compact mini-cart popover.
+ * header utility spacing and typography, the Phosphor icon baseline, one
+ * square hard-shadow button system, and the compact mini-cart popover.
  * ======================================================================== */
-
-:root {
-  /* Approved readable secondary/subheading colour on dark surfaces. */
-  --secondary-dark: var(--color-text-dark-muted);
-}
-
-/* --- Square colorway swatches -------------------------------------------- */
-
-.swatch {
-  border-radius: 0;
-}
 
 /* --- One square hard-shadow button system -------------------------------- */
 
@@ -61,9 +49,8 @@
   --button-shadow-color: var(--orange);
 }
 
-/* Dark surfaces: `.button-light` bands and the PDP panel. */
-.button-light,
-.product-panel .product-atc {
+/* Dark-surface `.button-light` bands. */
+.button-light {
   --button-shadow-color: var(--white);
 }
 
@@ -72,62 +59,4 @@
   .button:active {
     transform: none;
   }
-}
-
-/* --- PDP commerce truth --------------------------------------------------- */
-
-.product-panel .product-price {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 0;
-}
-
-.product-panel .product-compare-at {
-  color: var(--secondary-dark);
-  text-decoration: line-through;
-}
-
-.product-panel .product-sale-flag {
-  padding: 4px 8px;
-  background: var(--orange);
-  color: var(--ink);
-  font-family: var(--ui);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.option-chip {
-  font-size: 12px;
-}
-
-/* A line-through alone disappears on short labels like `S` or `US 9`, so a
- * sold-out chip also carries a full-height diagonal slash. */
-.option-chip.sold-out {
-  position: relative;
-  text-decoration: line-through;
-}
-
-.option-chip.sold-out::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top right,
-    transparent calc(50% - 1px),
-    currentColor calc(50% - 1px),
-    currentColor calc(50% + 1px),
-    transparent calc(50% + 1px)
-  );
-  pointer-events: none;
-}
-
-/* The struck-through chip must stay legible; dimming it to 0.48 hid the state
- * it is trying to communicate. */
-.option-chip.unavailable {
-  opacity: 1;
-  color: var(--secondary-dark);
 }

@@ -43,10 +43,7 @@ function mountPdp(product: Product, query: string) {
 }
 
 function optionRowFor(label: string): HTMLElement {
-  const heading = screen.getByText(label, { selector: "span" });
-  const group = heading.closest("div")?.parentElement;
-  assert.ok(group !== null && group !== undefined);
-  return group;
+  return screen.getByRole("group", { name: label });
 }
 
 describe("selected variant truth", () => {

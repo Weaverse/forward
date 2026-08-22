@@ -89,8 +89,10 @@ test.describe("premium presentation behavior", () => {
     page,
   }) => {
     await gotoReady(page, PDP);
-    const panel = await boxOf(page.locator(".product-panel"));
-    const gallery = await boxOf(page.locator(".gallery"));
+    const panel = await boxOf(
+      page.getByRole("region", { name: "Purchase panel" }),
+    );
+    const gallery = await boxOf(page.getByRole("region", { name: /gallery$/ }));
     const viewport = page.viewportSize();
 
     if ((viewport?.width ?? 0) > 820) {
