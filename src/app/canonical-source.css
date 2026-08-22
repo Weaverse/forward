@@ -82,26 +82,8 @@ legend {
  * Source 1-471 - base tokens, elements, and components
  * ------------------------------------------------------------------------ */
 
-:root {
-  --sand: #f2eee6;
-  --paper: #fbf9f4;
-  --stone: #d8d0c2;
-  --stone-dark: #9a9184;
-  --forest: #173d2d;
-  --forest-deep: #0c241a;
-  --moss: #6d7658;
-  --ink: #17201b;
-  --muted: #60655f;
-  --orange: #e4562a;
-  --orange-dark: #b53b18;
-  --white: #fffdf8;
-  --line: rgba(23, 32, 27, 0.19);
-  --display: "Fraunces", Georgia, serif;
-  --ui: "Manrope", "Helvetica Neue", Arial, sans-serif;
-  --max: 1440px;
-  --pad: clamp(18px, 3.5vw, 56px);
-  --header-h: 72px;
-}
+/* Effective tokens are defined once in the advanced winner block below and
+ * resolve for every legacy selector through normal CSS custom-property cascade. */
 
 * {
   box-sizing: border-box;
@@ -705,7 +687,7 @@ p {
   width: min(850px, 90%);
 }
 .activity-hero-content .eyebrow {
-  color: #ff9b77;
+  color: var(--color-accent-warm);
 }
 .activity-hero-content .lede {
   margin: 24px 0 32px;
@@ -1175,7 +1157,7 @@ p {
   padding: clamp(36px, 6vw, 90px);
 }
 .journal-feature-copy .eyebrow {
-  color: #ff9b77;
+  color: var(--color-accent-warm);
 }
 .journal-feature-copy .h2 {
   margin-bottom: 28px;
@@ -1227,7 +1209,7 @@ p {
   width: min(100%, 1080px);
 }
 .article-hero .eyebrow {
-  color: #ff9b77;
+  color: var(--color-accent-warm);
 }
 .article-hero .h1 {
   max-width: 1000px;
@@ -1310,7 +1292,7 @@ p {
   width: min(100%, 1050px);
 }
 .about-hero .eyebrow {
-  color: #ff9b77;
+  color: var(--color-accent-warm);
 }
 .about-values {
   display: grid;
@@ -1391,7 +1373,7 @@ p {
 }
 .footer-col h2 {
   margin: 0 0 15px;
-  color: #8fa095;
+  color: var(--color-text-inverse-muted);
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1403,7 +1385,7 @@ p {
   font-size: 13px;
 }
 .footer-col a:hover {
-  color: #ff9b77;
+  color: var(--color-accent-warm);
 }
 .footer-bottom {
   width: min(100%, var(--max));
@@ -1412,7 +1394,7 @@ p {
   border-top: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   justify-content: space-between;
-  color: #8fa095;
+  color: var(--color-text-inverse-muted);
   font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1752,25 +1734,25 @@ p {
  * ======================================================================== */
 
 :root {
-  --sand: #e8e2d4;
-  --paper: #f2eee4;
-  --stone: #c8c0b0;
-  --stone-dark: #817d73;
-  --forest: #2f3a2f;
-  --forest-deep: #11130f;
-  --moss: #737c5f;
-  --ink: #11130f;
-  --muted: #66695f;
-  --orange: #d9ff57;
-  --orange-dark: #485c00;
-  --white: #f5f1e8;
-  --line: rgba(17, 19, 15, 0.22);
-  --display: var(--font-archivo), sans-serif;
-  --ui: var(--font-manrope), "Helvetica Neue", sans-serif;
-  --meta: var(--font-plex-mono), monospace;
-  --max: 1540px;
-  --pad: clamp(22px, 4.2vw, 72px);
-  --header-h: 84px;
+  --sand: var(--color-surface-subtle);
+  --paper: var(--color-canvas);
+  --stone: var(--color-media-placeholder);
+  --stone-dark: var(--color-media-muted);
+  --forest: var(--color-surface-dark);
+  --forest-deep: var(--color-ink);
+  --moss: var(--color-moss);
+  --ink: var(--color-ink);
+  --muted: var(--color-text-muted);
+  --orange: var(--color-signal);
+  --orange-dark: var(--color-signal-strong);
+  --white: var(--color-text-inverse);
+  --line: var(--color-border-subtle);
+  --display: var(--font-heading);
+  --ui: var(--font-body);
+  --meta: var(--font-field-meta);
+  --max: var(--container-page);
+  --pad: var(--spacing-page-gutter);
+  --header-h: var(--spacing-header);
 }
 
 html,
@@ -1787,7 +1769,7 @@ body {
   color: var(--ink);
 }
 :focus-visible {
-  outline-color: #b8dc38;
+  outline-color: var(--color-focus);
 }
 .eyebrow,
 .meta,
@@ -2054,7 +2036,7 @@ body {
   line-height: 0.98;
 }
 .activity-hero-content .lede {
-  color: #c5c8be;
+  color: var(--color-text-dark-subtle);
 }
 .activity-guide {
   grid-template-columns: 0.8fr 1.2fr;
@@ -2109,7 +2091,7 @@ body {
 .product-panel .meta,
 .product-panel .product-intro,
 .product-panel .accordion-list p {
-  color: #aeb1a7;
+  color: var(--color-text-dark-muted);
 }
 .product-panel .eyebrow {
   color: var(--orange);
@@ -2120,7 +2102,7 @@ body {
   overflow-wrap: anywhere;
 }
 .option-chip {
-  border-color: #65685f;
+  border-color: var(--color-border-dark-strong);
   color: var(--white);
   font-family: var(--ui);
   font-size: 9px;
@@ -2132,7 +2114,7 @@ body {
   color: var(--ink);
 }
 .quantity {
-  border-color: #65685f;
+  border-color: var(--color-border-dark-strong);
 }
 .quantity button:hover {
   background: var(--orange);
@@ -2143,7 +2125,7 @@ body {
 }
 .accordion-list,
 .accordion-list details {
-  border-color: #4a4d45;
+  border-color: var(--color-border-dark);
 }
 
 .search-wrap,
@@ -2202,7 +2184,7 @@ body {
 }
 .auth-inner .muted,
 .form-note {
-  color: #aeb1a7;
+  color: var(--color-text-dark-muted);
 }
 .form-field input {
   background: transparent;
@@ -2460,7 +2442,7 @@ body {
   border-color: var(--ink);
 }
 .swatch-control:has(input:focus-visible) .swatch-ring {
-  outline: 3px solid #b8dc38;
+  outline: 3px solid var(--color-focus);
   outline-offset: 2px;
 }
 .swatch-name {
@@ -2484,7 +2466,7 @@ label.option-chip {
   cursor: pointer;
 }
 label.option-chip:has(input:focus-visible) {
-  outline: 3px solid #b8dc38;
+  outline: 3px solid var(--color-focus);
   outline-offset: 2px;
 }
 a.option-chip .swatch {
@@ -2581,7 +2563,7 @@ a.check-row[aria-current] .check-dot {
   justify-content: space-between;
   gap: 20px;
   padding: 9px 0;
-  border-bottom: 1px solid #4a4d45;
+  border-bottom: 1px solid var(--color-border-dark);
   font-size: 12px;
 }
 .spec-row:last-child {
@@ -2592,7 +2574,7 @@ a.check-row[aria-current] .check-dot {
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #aeb1a7;
+  color: var(--color-text-dark-muted);
 }
 .spec-row dd {
   margin: 0;
@@ -2632,7 +2614,7 @@ a.check-row[aria-current] .check-dot {
 }
 .product-panel .demo-note,
 .auth-panel .demo-note {
-  color: #aeb1a7;
+  color: var(--color-text-dark-muted);
 }
 
 /* Loading and error system states, on canonical tokens. The POC has no
@@ -2675,7 +2657,7 @@ a.check-row[aria-current] .check-dot {
 @media (max-width: 820px) {
   /* source 851-895 */
   :root {
-    --header-h: 66px;
+    --header-h: var(--spacing-header-compact);
   }
   .announcement span:first-child,
   .announcement span:last-child {
@@ -2723,7 +2705,7 @@ a.check-row[aria-current] .check-dot {
   }
   .product-panel {
     border-right: 0;
-    border-top: 1px solid #4a4d45;
+    border-top: 1px solid var(--color-border-dark);
   }
   .product-panel-inner {
     background: var(--ink);
@@ -2884,7 +2866,7 @@ a.check-row[aria-current] .check-dot {
 }
 .commerce-hero .lede {
   max-width: 570px;
-  color: #c5c8be;
+  color: var(--color-text-dark-subtle);
 }
 .commerce-hero-actions,
 .home-proof-links {
@@ -3020,7 +3002,7 @@ a.check-row[aria-current] .check-dot {
 }
 .home-system-card p {
   max-width: 420px;
-  color: #c5c8be;
+  color: var(--color-text-dark-subtle);
 }
 .home-system-card > div > span:last-child {
   display: block;
@@ -3079,7 +3061,7 @@ a.check-row[aria-current] .check-dot {
 }
 .home-proof-copy > p:not(.eyebrow) {
   max-width: 560px;
-  color: #c5c8be;
+  color: var(--color-text-dark-subtle);
   font-size: 18px;
 }
 .home-proof-band > img {
@@ -3340,13 +3322,13 @@ a.check-row[aria-current] .check-dot {
 }
 .testing-product dl {
   margin: 35px 0;
-  border-top: 1px solid #4a4d45;
+  border-top: 1px solid var(--color-border-dark);
 }
 .testing-product dl div {
   display: flex;
   justify-content: space-between;
   padding: 13px 0;
-  border-bottom: 1px solid #4a4d45;
+  border-bottom: 1px solid var(--color-border-dark);
 }
 .testing-product img {
   width: 100%;
@@ -3398,7 +3380,7 @@ a.check-row[aria-current] .check-dot {
   align-items: center;
   gap: 30px;
   padding: 0 20px;
-  border-bottom: 1px solid #4a4d45;
+  border-bottom: 1px solid var(--color-border-dark);
   font-family: var(--meta);
   font-size: 9px;
   text-transform: uppercase;
@@ -3443,7 +3425,7 @@ a.check-row[aria-current] .check-dot {
   justify-content: center;
   gap: 8px;
   padding: 9px;
-  border-top: 1px solid #4a4d45;
+  border-top: 1px solid var(--color-border-dark);
 }
 .gallery-modal-thumbs button {
   width: 56px;
@@ -3474,9 +3456,9 @@ a.check-row[aria-current] .check-dot {
   outline-offset: 3px;
 }
 .product-panel .product-atc:disabled {
-  background: #53564f;
-  border-color: #53564f;
-  color: #b9bcb4;
+  background: var(--color-control-disabled);
+  border-color: var(--color-control-disabled);
+  color: var(--color-text-disabled);
 }
 
 @media (max-width: 820px) {

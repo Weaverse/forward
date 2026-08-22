@@ -28,15 +28,17 @@
     "test:browser:live-account-enabled": "bun scripts/browser-matrix.mts live-account-enabled",
     "test:browser": "bun run test:browser:static && bun run test:browser:live-account-disabled && bun run test:browser:live-account-enabled",
     "check:graphql": "hydrogen gql check",
+    "check:theme": "node scripts/check-tailwind-theme.mts",
     "check:routes": "node scripts/check-routes.mts",
     "smoke:routes": "node scripts/smoke-routes.mts",
     "verify:shopify": "bun scripts/verify-shopify.mts",
     "verify:static": "bun scripts/verify-matrix.mts static",
     "verify:live": "bun scripts/verify-matrix.mts live",
-    "check": "bun run typecheck && bun run lint && bun run format:check && bun run test && bun run check:graphql && bun run build && bun run check:routes"
+    "check": "bun run typecheck && bun run lint && bun run format:check && bun run test && bun run check:graphql && bun run build && bun run check:theme && bun run check:routes"
   },
   "dependencies": {
     "@shopify/hydrogen": "0.0.0-preview-116d5d7-20260730141607",
+    "class-variance-authority": "0.7.1",
     "next": "16.3.0",
     "react": "19.2.8",
     "react-dom": "19.2.8"

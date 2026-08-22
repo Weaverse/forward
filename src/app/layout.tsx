@@ -56,6 +56,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${archivo.variable} ${manrope.variable} ${plexMono.variable}`}
     >
       <head>
+        {/* Non-rendering Tailwind theme probe, verified from compiled CSS by
+         * `bun run check:theme`. */}
+        <meta
+          className="max-w-page bg-canvas font-heading text-signal"
+          content="semantic-utilities"
+          name="forward-tailwind-theme"
+        />
         {shopifyCartEnabled ? (
           <script
             crossOrigin="anonymous"

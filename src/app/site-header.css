@@ -60,7 +60,7 @@
 .field-header-primary > a:hover i,
 .field-header-primary > button:hover i,
 .field-header-primary > .active i {
-  color: #aab7ae;
+  color: var(--color-text-inverse-subtle);
 }
 
 .field-header-actions {
@@ -166,7 +166,7 @@
 
 .field-index-list a[data-active="true"] small,
 .field-index-list a:hover small {
-  color: #aab7ae;
+  color: var(--color-text-inverse-subtle);
 }
 
 .field-about-panel {
@@ -313,7 +313,7 @@
 .field-mobile-section-label {
   min-height: 48px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.22);
-  color: #8fa095;
+  color: var(--color-text-inverse-muted);
 }
 
 .field-mobile-index nav a {
@@ -327,7 +327,7 @@
 
 .field-mobile-index nav a > span {
   grid-row: 1 / span 2;
-  color: #8fa095;
+  color: var(--color-text-inverse-muted);
   font-family: var(--ui);
   font-size: 9px;
 }
@@ -339,14 +339,14 @@
 }
 
 .field-mobile-index nav small {
-  color: #aab7ae;
+  color: var(--color-text-inverse-subtle);
   font-size: 10px;
   line-height: 1.5;
 }
 
 .field-mobile-note {
   margin: 22px 0 0;
-  color: #8fa095;
+  color: var(--color-text-inverse-muted);
   font-family: var(--ui);
   font-size: 8px;
   letter-spacing: 0.1em;
@@ -372,7 +372,7 @@
 
 .field-mobile-secondary a > span:first-child,
 .field-mobile-secondary a i {
-  color: #8fa095;
+  color: var(--color-text-inverse-muted);
   font-family: var(--ui);
   font-size: 8px;
   font-style: normal;

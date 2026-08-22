@@ -11,7 +11,7 @@
 
 :root {
   /* Approved readable secondary/subheading colour on dark surfaces. */
-  --secondary-dark: #aeb1a7;
+  --secondary-dark: var(--color-text-dark-muted);
 }
 
 /* --- Phosphor icon baseline ---------------------------------------------- */

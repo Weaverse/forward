@@ -1,12 +1,84 @@
 /*
- * Tailwind stays in the toolchain (see `AGENTS.md`), but storefront
- * presentation is owned by `canonical-source.css`, which is a direct port of
- * the Advanced POC stylesheet. That file is imported after this one and its
- * rules are unlayered, so they take precedence over Tailwind's `@layer base`
- * preflight in the cascade.
- *
- * Design tokens, typography, and every component rule live in
- * `canonical-source.css`. Do not re-approximate canonical values here.
+ * Forward's effective design contract. Tailwind v4 emits utilities and CSS
+ * variables from this single semantic theme while legacy selectors consume
+ * temporary aliases during the slice-by-slice migration.
  */
 
 @import "tailwindcss";
+
+@theme static {
+  /* Surfaces and text */
+  --color-canvas: #f2eee4;
+  --color-surface-subtle: #e8e2d4;
+  --color-media-placeholder: #c8c0b0;
+  --color-media-muted: #817d73;
+  --color-moss: #737c5f;
+  --color-surface-dark: #2f3a2f;
+  --color-ink: #11130f;
+  --color-text-muted: #66695f;
+  --color-text-dark-muted: #aeb1a7;
+  --color-text-dark-subtle: #c5c8be;
+  --color-text-inverse: #f5f1e8;
+  --color-text-inverse-muted: #8fa095;
+  --color-text-inverse-subtle: #aab7ae;
+  --color-text-disabled: #b9bcb4;
+  --color-border-subtle: rgb(17 19 15 / 22%);
+  --color-border-dark: #4a4d45;
+  --color-border-dark-strong: #65685f;
+  --color-control-disabled: #53564f;
+
+  /* Signal and state */
+  --color-signal: #d9ff57;
+  --color-signal-strong: #485c00;
+  --color-accent-warm: #ff9b77;
+  --color-focus: #b8dc38;
+  --color-sale: var(--color-signal);
+
+  /* Typography */
+  --font-heading: var(--font-archivo), sans-serif;
+  --font-body: var(--font-manrope), "Helvetica Neue", sans-serif;
+  --font-field-meta: var(--font-plex-mono), monospace;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.6;
+  --text-ui: 0.6875rem;
+  --text-field-meta: 0.625rem;
+  --text-display: clamp(3.5rem, 7.3vw, 7.25rem);
+  --text-display--line-height: 0.94;
+  --text-heading-2: clamp(2.875rem, 5.6vw, 5.25rem);
+  --text-heading-2--line-height: 0.98;
+  --text-heading-3: clamp(1.9375rem, 3.6vw, 3.25rem);
+  --text-heading-3--line-height: 1.02;
+  --font-weight-heading: 500;
+  --font-weight-ui: 500;
+  --font-weight-ui-strong: 700;
+  --font-weight-field-meta: 500;
+  --tracking-heading: -0.035em;
+  --tracking-field-meta: 0.12em;
+
+  /* Layout and controls */
+  --container-page: 96.25rem;
+  --spacing-page-gutter: clamp(1.375rem, 4.2vw, 4.5rem);
+  --spacing-header: 5.25rem;
+  --spacing-header-compact: 4.125rem;
+  --spacing-announcement: 1.875rem;
+  --spacing-touch: 2.75rem;
+  --radius-control: 0;
+  --radius-pill: 9999px;
+  --shadow-button: 4px 4px 0 var(--color-ink);
+  --shadow-button-hover: 2px 2px 0 var(--color-ink);
+  --shadow-panel: 0 28px 48px rgb(16 22 18 / 16%);
+
+  /* Responsive boundaries */
+  --breakpoint-xs: 26.875rem;
+  --breakpoint-sm: 35rem;
+  --breakpoint-md: 51.25rem;
+  --breakpoint-lg: 68.75rem;
+  --breakpoint-xl: 78.75rem;
+
+  /* Motion */
+  --duration-fast: 180ms;
+  --duration-panel: 240ms;
+  --duration-media: 320ms;
+  --ease-standard: ease;
+  --ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
+}

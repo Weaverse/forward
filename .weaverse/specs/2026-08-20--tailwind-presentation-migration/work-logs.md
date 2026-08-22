@@ -28,6 +28,27 @@
 - `bun install --frozen-lockfile` made no changes and `bun audit --production` reported no vulnerabilities.
 - Generated browser builds/reports/traces remain ignored and untracked. No deployment, GitHub mutation, checkout, payment, account/address/customer, Shopify Admin, or Weaverse mutation occurred.
 
+## 2026-08-22 — Phase 1 semantic Tailwind theme
+
+- Starting SHA: `3e3946113ab65e99adfe1a95d7b55d33a2433a2b` (pushed Phase 0 behavior-coverage commit).
+- Replaced the two stacked legacy palette definitions with one semantic Tailwind v4 `@theme static` contract in `src/app/globals.css`. The remaining legacy stylesheet owns one temporary alias block only; every alias resolves to a semantic theme variable and is deleted with that stylesheet in Phase 5.
+- Effective token table:
+
+| Role | Semantic tokens | Winning values |
+| --- | --- | --- |
+| Surfaces and text | `canvas`, `surface-subtle`, `media-placeholder`, `surface-dark`, `ink`, muted/inverse roles | `#f2eee4`, `#e8e2d4`, `#c8c0b0`, `#2f3a2f`, `#11130f`, accepted dark/inverse muted values |
+| Signal and state | `signal`, `signal-strong`, `accent-warm`, `sale`, `focus`, disabled roles | `#d9ff57`, `#485c00`, `#ff9b77`, sale aliases signal, `#b8dc38`, accepted disabled colours |
+| Typography | `font-heading`, `font-body`, `font-field-meta`, semantic text/weight/tracking roles | Archivo, Manrope, IBM Plex Mono; accepted effective clamp scales and weights |
+| Layout and controls | `container-page`, `spacing-page-gutter`, Header/announcement/touch spacing, control radii, button/panel shadows | `1540px`, `clamp(22px, 4.2vw, 72px)`, `84px`/`66px` Header heights, `44px` touch target, accepted hard shadows |
+| Responsive | `breakpoint-xs/sm/md/lg/xl` | `430px`, `560px`, `820px`, `1100px`, `1260px` |
+| Motion | `duration-fast/panel/media`, `ease-standard`, `ease-enter` | `180ms`, `240ms`, `320ms`, `ease`, `cubic-bezier(0.22, 1, 0.36, 1)` |
+
+- Added `class-variance-authority@0.7.1` as a production presentation dependency for later reusable multi-axis variants; no component was forced into `cva` during token extraction.
+- Added a non-rendering root-layout meta probe and `bun run check:theme`. The checker reads compiled Next/Tailwind CSS and proves `bg-canvas`, `font-heading`, `text-signal`, and `max-w-page` plus representative theme variables are emitted; it is part of `bun run check` after `next build`.
+- Replaced repeated legacy colour literals with semantic variables and verified every old palette alias has exactly one declaration; no repeated six-digit legacy colour literal remains across the three legacy stylesheets.
+- Verification: frozen install unchanged; typecheck, Biome lint/format, `git diff --check`, 323 node tests, 54 DOM tests, GraphQL, Production build with 42 pages, compiled theme check, route contract `20 + 4`, and `bun run check` passed. Fresh explicit-empty browser matrix passed `128 / 7 intentional cross-viewport skips / 0 failures`, preserving computed typography, geometry, controls, focus, and runtime behavior. `bun audit --production` reported no vulnerabilities.
+- No Shopify, account, Weaverse, deployment, GitHub, or Production mutation occurred.
+
 ## Phase log template
 
 ```text
