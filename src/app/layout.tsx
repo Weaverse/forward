@@ -53,7 +53,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${archivo.variable} ${manrope.variable} ${plexMono.variable}`}
+      className={`${archivo.variable} ${manrope.variable} ${plexMono.variable} max-w-full scroll-smooth overflow-x-clip motion-reduce:scroll-auto`}
     >
       <head>
         {/* Non-rendering Tailwind theme probe, verified from compiled CSS by
@@ -72,13 +72,23 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           />
         ) : null}
       </head>
-      <body>
+      <body className="m-0 max-w-full overflow-x-clip bg-canvas font-body text-[14px] leading-[1.6] text-ink antialiased">
         <ShopifyCartRuntime enabled={shopifyCartEnabled}>
-          <a className="skip-link" href="#main-content">
+          <a
+            className="fixed top-[10px] left-[10px] z-[1000] -translate-y-[150%] bg-ink px-4 py-[11px] text-text-inverse focus:translate-y-0"
+            data-shell-background
+            href="#main-content"
+          >
             Skip to content
           </a>
           <SiteHeader />
-          <main id="main-content">{children}</main>
+          <main
+            className="min-h-[66vh]"
+            data-shell-background
+            id="main-content"
+          >
+            {children}
+          </main>
           <SiteFooter />
         </ShopifyCartRuntime>
       </body>

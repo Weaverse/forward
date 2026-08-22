@@ -49,6 +49,16 @@
 - Verification: frozen install unchanged; typecheck, Biome lint/format, `git diff --check`, 323 node tests, 54 DOM tests, GraphQL, Production build with 42 pages, compiled theme check, route contract `20 + 4`, and `bun run check` passed. Fresh explicit-empty browser matrix passed `128 / 7 intentional cross-viewport skips / 0 failures`, preserving computed typography, geometry, controls, focus, and runtime behavior. `bun audit --production` reported no vulnerabilities.
 - No Shopify, account, Weaverse, deployment, GitHub, or Production mutation occurred.
 
+## 2026-08-22 — Phase 2A document and global shell
+
+- Starting SHA: `07308763d1b6e28a623b32d8039858f23213e8d1` (pushed Phase 1 semantic-theme commit).
+- Migrated the root document, announcement, sticky Header, primary navigation, Shop/About desktop panels, mobile dialog, localization indicator, account/search/cart controls, mini-cart, wordmarks/icons, skip link, and Footer to semantic Tailwind utilities colocated with their JSX.
+- Replaced selector-coupled shell targeting with explicit `data-shell-background` and `data-mini-cart-mount` ownership markers. Mobile body lock now uses Tailwind's `overflow-hidden` utility while preserving inert state, focus trap/restoration, Escape/outside dismissal, and repeated navigation behavior.
+- Kept only truly global base/reset, focus/reduced-motion policy, and three named shell entrance keyframes in `globals.css`; every other shell style is utility-owned. `site-header.css` is now an empty compatibility import comment pending final stylesheet deletion. Full CSS search found no remaining Header/field-index/mobile-menu/mini-cart/Footer/wordmark/country/cart-count/skip-link selectors in the legacy stylesheets.
+- During browser verification, a shared control constant initially combined base `inline-flex` with `hidden`, making the mobile Menu visible at desktop utility order. The constant was split so each consumer owns display; `hidden max-lg:inline-flex` now passes the real responsive contract without weakening the test.
+- Verification: typecheck, Biome lint/format, `323/323` node tests, `54/54` DOM tests, GraphQL, Production build with 42 pages, compiled semantic-theme check, route contract `20 + 4`, `git diff --check`, and full `bun run check` passed. Fresh explicit-empty browser matrix passed `128 / 7 intentional cross-viewport skips / 0 failures` after the responsive fix, covering desktop, short desktop, tablet Footer, and true mobile shell behavior.
+- No dependency, commerce/data/security, Shopify, account, Weaverse, deployment, GitHub, or Production mutation occurred.
+
 ## Phase log template
 
 ```text

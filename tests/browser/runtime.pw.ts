@@ -48,7 +48,7 @@ test.describe("route health", () => {
       ]) {
         await gotoReady(page, path);
         await expect(page.getByRole("banner")).toHaveCount(1);
-        await expect(page.locator(".mini-cart-mount")).toHaveCount(1);
+        await expect(page.locator("[data-mini-cart-mount]")).toHaveCount(1);
         await expect(
           page.getByRole("dialog", { name: "Site menu" }),
         ).toHaveCount(0);
@@ -56,7 +56,9 @@ test.describe("route health", () => {
           page.getByRole("region", { name: "Shop field index" }),
         ).toHaveCount(0);
         expect(
-          await page.evaluate(() => document.body.classList.contains("locked")),
+          await page.evaluate(() =>
+            document.body.classList.contains("overflow-hidden"),
+          ),
           `${path} left the body locked`,
         ).toBe(false);
       }

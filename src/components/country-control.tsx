@@ -13,7 +13,7 @@ import {
  */
 export function CountryControl() {
   return (
-    <span className="country-control">
+    <span className="inline-flex items-center gap-1.5 font-body text-[11px] font-ui tracking-[0.08em] uppercase">
       <Icon name="globe-hemisphere-west" size={14} />
       {countryControlLabel(ACTIVE_STOREFRONT_COUNTRY)}
       <span className="sr-only">

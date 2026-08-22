@@ -82,3 +82,157 @@
   --ease-standard: ease;
   --ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  blockquote,
+  figure,
+  ul,
+  ol,
+  dl,
+  dd {
+    margin: 0;
+  }
+
+  h1 {
+    margin-block-end: 0.67em;
+  }
+
+  h2 {
+    margin-block-end: 0.83em;
+  }
+
+  h3 {
+    margin-block-end: 1em;
+  }
+
+  p {
+    margin-block-end: 1em;
+  }
+
+  fieldset {
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+    border: 0;
+  }
+
+  legend {
+    padding: 0;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    background: var(--color-media-placeholder);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button,
+  input,
+  select {
+    color: inherit;
+    font: inherit;
+  }
+
+  a[href]:not([aria-disabled="true"]),
+  button:not(:disabled),
+  select:not(:disabled),
+  summary,
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  label:has(> input[type="checkbox"]:not(:disabled)),
+  label:has(> input[type="radio"]:not(:disabled)),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="link"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  select:disabled,
+  a[href][aria-disabled="true"],
+  input[type="checkbox"]:disabled,
+  input[type="radio"]:disabled,
+  label:has(> input[type="checkbox"]:disabled),
+  label:has(> input[type="radio"]:disabled),
+  [role="button"][aria-disabled="true"],
+  [role="link"][aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  button {
+    border: 0;
+  }
+
+  ::selection {
+    color: var(--color-ink);
+    background: var(--color-signal);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+}
+
+/* Shell entrance motion needs named keyframes; components own every other
+ * animation value through utilities. */
+@keyframes shell-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shell-mobile-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shell-image-enter {
+  from {
+    opacity: 0.45;
+    transform: scale(1.025);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Browser-wide reduced motion must beat route styles and inline utilities. */
+@media (prefers-reduced-motion: reduce) {
+  /* biome-ignore-start lint/complexity/noImportantStyles: global accessibility override */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  /* biome-ignore-end lint/complexity/noImportantStyles: global accessibility override */
+}

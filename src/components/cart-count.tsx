@@ -8,8 +8,8 @@ import {
 } from "@/lib/cart/shopify-cart-react";
 
 /**
- * Canonical `.cart-count` badge (source `app.js:155`), kept live and
- * announced politely so assistive tech hears cart updates from anywhere.
+ * Canonical cart badge (source `app.js:155`), kept live and announced politely
+ * so assistive tech hears cart updates from anywhere.
  */
 function Count({ count }: { count: number }) {
   return (
@@ -17,7 +17,10 @@ function Count({ count }: { count: number }) {
       <span className="sr-only">
         , {count} {count === 1 ? "item" : "items"} in cart
       </span>
-      <span aria-hidden="true" className="cart-count">
+      <span
+        aria-hidden="true"
+        className="inline-grid h-5 min-w-5 place-items-center rounded-[50%] bg-signal px-[5px] text-[10px]"
+      >
         {count}
       </span>
     </span>

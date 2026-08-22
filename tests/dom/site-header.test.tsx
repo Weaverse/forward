@@ -146,7 +146,10 @@ describe("header shell", () => {
   it("mounts exactly one mini-cart region in the shell", () => {
     const { container } = mountHeader();
 
-    assert.equal(container.querySelectorAll(".mini-cart-mount").length, 1);
+    assert.equal(
+      container.querySelectorAll("[data-mini-cart-mount]").length,
+      1,
+    );
   });
 });
 
@@ -394,14 +397,14 @@ describe("mobile navigation dialog", () => {
     mountHeader();
     const trigger = screen.getByRole("button", { name: /^Menu$/ });
 
-    assert.equal(document.body.classList.contains("locked"), false);
+    assert.equal(document.body.classList.contains("overflow-hidden"), false);
     await user.click(trigger);
 
     const dialog = screen.getByRole("dialog", { name: "Site menu" });
     assert.equal(dialog.getAttribute("aria-modal"), "true");
     assert.equal(trigger.getAttribute("aria-expanded"), "true");
     assert.equal(trigger.getAttribute("aria-controls"), dialog.id);
-    assert.equal(document.body.classList.contains("locked"), true);
+    assert.equal(document.body.classList.contains("overflow-hidden"), true);
     assert.equal(
       document.activeElement,
       within(dialog).getByRole("button", { name: "Close menu" }),
@@ -435,7 +438,7 @@ describe("mobile navigation dialog", () => {
     await user.keyboard("{Escape}");
 
     assert.equal(screen.queryByRole("dialog", { name: "Site menu" }), null);
-    assert.equal(document.body.classList.contains("locked"), false);
+    assert.equal(document.body.classList.contains("overflow-hidden"), false);
     assert.equal(document.activeElement, trigger);
   });
 
@@ -453,7 +456,7 @@ describe("mobile navigation dialog", () => {
     const dialog = screen.getByRole("dialog", { name: "Site menu" });
     await user.click(within(dialog).getByRole("link", { name: /Outerwear/ }));
     assert.equal(screen.queryByRole("dialog", { name: "Site menu" }), null);
-    assert.equal(document.body.classList.contains("locked"), false);
+    assert.equal(document.body.classList.contains("overflow-hidden"), false);
   });
 
   it("keeps Tab inside the open dialog", async () => {

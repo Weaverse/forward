@@ -30,7 +30,7 @@ test.describe("shell structure", () => {
 
     await expect(page.getByRole("banner")).toHaveCount(1);
     await expect(page.getByRole("contentinfo")).toHaveCount(1);
-    await expect(page.locator(".mini-cart-mount")).toHaveCount(1);
+    await expect(page.locator("[data-mini-cart-mount]")).toHaveCount(1);
   });
 
   test("loads the approved wordmark artwork", async ({ page }) => {
@@ -174,7 +174,9 @@ test.describe("header navigation surface", () => {
       "the page behind the dialog must be inert",
     ).toBe(true);
     expect(
-      await page.evaluate(() => document.body.classList.contains("locked")),
+      await page.evaluate(() =>
+        document.body.classList.contains("overflow-hidden"),
+      ),
       "the body must not scroll behind the dialog",
     ).toBe(true);
 
@@ -284,7 +286,7 @@ test.describe("footer integration truth", () => {
   }, testInfo) => {
     await gotoReady(page, "/");
     const columnCount = await page
-      .locator(".footer-grid")
+      .locator("[data-footer-grid]")
       .evaluate(
         (node) =>
           getComputedStyle(node).gridTemplateColumns.split(" ").filter(Boolean)
@@ -305,7 +307,7 @@ test.describe("footer integration truth", () => {
     await page.setViewportSize({ width: 768, height: 900 });
     await gotoReady(page, "/");
     const columnCount = await page
-      .locator(".footer-grid")
+      .locator("[data-footer-grid]")
       .evaluate(
         (node) =>
           getComputedStyle(node).gridTemplateColumns.split(" ").filter(Boolean)
