@@ -199,20 +199,43 @@ test.describe("header navigation surface", () => {
 });
 
 test.describe("interactive affordances", () => {
-  test("keeps every colorway swatch at a 44px target", async ({ page }) => {
+  test("keeps every colorway swatch at a distinct 44px target", async ({
+    page,
+  }) => {
     await gotoReady(page, "/");
-    const swatches = page.locator("main label:has(input[type='radio'])");
-    const count = await swatches.count();
-    expect(count).toBeGreaterThan(0);
+    const groups = page.locator("main fieldset:has(input[type='radio'])");
+    const groupCount = await groups.count();
+    expect(groupCount).toBeGreaterThan(0);
 
-    for (let index = 0; index < Math.min(count, 8); index += 1) {
-      const box = await boxOf(swatches.nth(index));
-      expect(box.width, `swatch ${index} is too narrow`).toBeGreaterThanOrEqual(
-        44,
-      );
-      expect(box.height, `swatch ${index} is too short`).toBeGreaterThanOrEqual(
-        44,
-      );
+    for (
+      let groupIndex = 0;
+      groupIndex < Math.min(groupCount, 4);
+      groupIndex += 1
+    ) {
+      const swatches = groups
+        .nth(groupIndex)
+        .locator("label:has(input[type='radio'])");
+      const count = await swatches.count();
+      let previousRight: number | undefined;
+
+      for (let index = 0; index < count; index += 1) {
+        const box = await boxOf(swatches.nth(index));
+        expect(
+          box.width,
+          `group ${groupIndex} swatch ${index} is too narrow`,
+        ).toBeGreaterThanOrEqual(44);
+        expect(
+          box.height,
+          `group ${groupIndex} swatch ${index} is too short`,
+        ).toBeGreaterThanOrEqual(44);
+        if (previousRight !== undefined) {
+          expect(
+            box.x,
+            `group ${groupIndex} swatch ${index} overlaps its predecessor`,
+          ).toBeGreaterThanOrEqual(previousRight - 0.5);
+        }
+        previousRight = box.x + box.width;
+      }
     }
   });
 

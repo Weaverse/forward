@@ -16,8 +16,7 @@
 
 /* --- Square colorway swatches -------------------------------------------- */
 
-.swatch,
-.swatch-ring {
+.swatch {
   border-radius: 0;
 }
 
@@ -131,108 +130,4 @@
 .option-chip.unavailable {
   opacity: 1;
   color: var(--secondary-dark);
-}
-
-/* --- Home Spotlight and Kit within one desktop viewport ------------------ */
-
-/* Desktop only. The section rhythm plus its media has to add up to at most
- * 100svh, so the media is derived from the viewport instead of a fixed 760px
- * floor. Below 821px the canonical stacked rules apply untouched and the
- * sections keep their natural content height, so copy never clips. */
-@media (min-width: 821px) {
-  .home-spotlight,
-  .home-kit {
-    --home-viewport-pad: clamp(48px, 5vw, 96px);
-    --home-viewport-media: calc(100svh - 2 * var(--home-viewport-pad));
-    padding-block: var(--home-viewport-pad);
-  }
-
-  .home-spotlight-media img {
-    height: var(--home-viewport-media);
-  }
-
-  /* The copy column has to fit the same bound beside the media. */
-  .home-spotlight-copy {
-    padding-block: clamp(24px, 4svh, 48px);
-    padding-inline: clamp(28px, 4vw, 60px);
-  }
-
-  .home-spotlight-copy .h2 {
-    font-size: clamp(40px, min(5.6vw, 8svh), 72px);
-    line-height: 0.98;
-  }
-
-  .home-spotlight-copy .lede {
-    margin-bottom: clamp(10px, 2svh, 18px);
-    font-size: clamp(16px, 2.5svh, 19px);
-    line-height: 1.45;
-  }
-
-  .home-spotlight-copy ul {
-    margin-block: clamp(14px, 2.5svh, 24px);
-  }
-
-  .home-spotlight-copy li {
-    padding-block: clamp(8px, 1.7svh, 14px);
-  }
-
-  /* Room for the product name that sits under each kit image. */
-  .home-kit-products img {
-    max-height: calc(var(--home-viewport-media) - 44px);
-  }
-}
-
-/* Very short desktop windows need every part of the composition to contract,
- * not just the media. The same content remains present and the mobile stack is
- * untouched because this breakpoint starts above the mobile width boundary. */
-@media (min-width: 821px) and (max-height: 600px) {
-  .home-spotlight,
-  .home-kit {
-    --home-viewport-pad: clamp(8px, 2svh, 16px);
-  }
-
-  .home-spotlight-copy {
-    padding-block: 8px;
-    padding-inline: clamp(20px, 3vw, 36px);
-  }
-
-  .home-spotlight-copy .eyebrow {
-    margin-bottom: 4px;
-    font-size: 11px;
-  }
-
-  .home-spotlight-copy .h2 {
-    margin-bottom: 4px;
-    font-size: clamp(26px, 7svh, 40px);
-    line-height: 0.95;
-  }
-
-  .home-spotlight-copy .lede {
-    margin-bottom: 4px;
-    font-size: clamp(12px, 3.2svh, 15px);
-    line-height: 1.25;
-  }
-
-  .home-spotlight-copy ul {
-    margin-block: 4px;
-  }
-
-  .home-spotlight-copy li {
-    padding-block: clamp(3px, 1svh, 6px);
-    font-size: 11px;
-  }
-
-  .home-spotlight-copy .button {
-    min-height: 40px;
-    padding-block: 8px;
-  }
-
-  .home-kit-products img {
-    max-height: calc(var(--home-viewport-media) - 32px);
-  }
-
-  .home-kit-product-name {
-    margin-top: 4px;
-    font-size: 11px;
-  }
 }

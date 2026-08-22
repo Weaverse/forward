@@ -59,6 +59,15 @@
 - Verification: typecheck, Biome lint/format, `323/323` node tests, `54/54` DOM tests, GraphQL, Production build with 42 pages, compiled semantic-theme check, route contract `20 + 4`, `git diff --check`, and full `bun run check` passed. Fresh explicit-empty browser matrix passed `128 / 7 intentional cross-viewport skips / 0 failures` after the responsive fix, covering desktop, short desktop, tablet Footer, and true mobile shell behavior.
 - No dependency, commerce/data/security, Shopify, account, Weaverse, deployment, GitHub, or Production mutation occurred.
 
+## 2026-08-22 — Phase 2B Home and ProductCard
+
+- Starting SHA: `0e661b46552f642b3522d2f17db500e6c04cabf1` (pushed Phase 2A shell commit).
+- Migrated the complete Home composition and the shared interactive `ProductCard` to semantic Tailwind utilities colocated in `page.tsx` and `product-card.tsx`. Preserved exact section order, handles, copy, links, `next/image` ownership, priority/sizes contracts, 4:5 media, active colorway link/image/name updates, and all desktop/short-height/mobile layouts.
+- Removed 585 lines of effective Home/ProductCard rules from the two remaining legacy stylesheets. `.home-commerce-head` remains intentionally because the unmigrated About route still owns that shared class; its Home consumer was removed. Generic PDP-owned `.product-price` rules likewise remain until Phase 2D.
+- Review caught and corrected an agent-authored visual mismatch: negative margin had been applied to every 44px swatch target instead of only the first target, causing overlap. The browser contract now checks both minimum 44px geometry and non-overlap per colorway group at every project viewport.
+- Verification: Biome format/lint, typecheck, `323/323` node tests, `54/54` DOM tests, GraphQL, Production build with 42 pages, compiled theme check, route contract `20 + 4`, `git diff --check`, and full `bun run check` passed. Fresh explicit-empty browser matrix passed `128 / 7 intentional cross-viewport skips / 0 failures`, including Home composition, image contracts, desktop/short-desktop/mobile geometry, overflow, viewport-bounded Spotlight/Kit, Journal alignment, reduced motion, ProductCard grids, and the strengthened swatch target contract.
+- No dependency, commerce/data/security, Shopify, account, Weaverse, deployment, GitHub, or Production mutation occurred.
+
 ## Phase log template
 
 ```text
