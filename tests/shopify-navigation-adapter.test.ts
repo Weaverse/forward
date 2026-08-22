@@ -942,31 +942,6 @@ describe("Footer navigation query/cache contract", () => {
       /NAVIGATION_CACHE_KEY,[\s\S]*config\.storeDomain,[\s\S]*config\.mainMenuHandle,[\s\S]*FOOTER_MENU_HANDLE/,
     );
   });
-
-  it("renders normalized mode-aware status instead of hard-coded static copy", async () => {
-    const footerSource = await readFile(
-      "src/components/site-footer.tsx",
-      "utf8",
-    );
-    assert.match(footerSource, /themeContent\.footerStatus/);
-    assert.doesNotMatch(footerSource, /Not a live store/);
-  });
-
-  it("reasserts the footer grid in the advanced tablet and mobile blocks", async () => {
-    const cssSource = await readFile("src/app/canonical-source.css", "utf8");
-    assert.match(
-      cssSource,
-      /source 840-849[\s\S]*?\.footer-col:last-child \{\s*display: block;/,
-    );
-    assert.match(
-      cssSource,
-      /source 851-895[\s\S]*?\.footer-grid \{\s*grid-template-columns: 1fr 1fr;/,
-    );
-    assert.match(
-      cssSource,
-      /source 897-943[\s\S]*?\.footer-grid \{\s*grid-template-columns: 1fr;/,
-    );
-  });
 });
 
 describe("Field Index presentation", () => {

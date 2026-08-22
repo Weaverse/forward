@@ -1,13 +1,15 @@
 /**
- * Slice B — PDP commerce truth.
+ * PDP commerce truth — the normalized data half.
  *
- * Covers the nullable compare-at money contract, selected-variant price
- * switching, sold-out option/ATC semantics, and the full-width natural-aspect
- * gallery continuation for the fourth and later media.
+ * The nullable compare-at money contract, honest sale detection, and
+ * selected-variant resolution are pure mapper/selection logic and stay here.
+ * How the PDP renders them — price, sale markup, sold-out semantics, option
+ * readability, gallery composition, zoom accessibility, and add-to-cart
+ * identity — is proved in `tests/dom/product-detail.test.tsx`, and gallery
+ * geometry in `tests/browser/pdp.pw.ts`.
  */
 
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
 import { PRODUCT_FIXTURES } from "../src/lib/storefront/fixtures/products.ts";
@@ -23,8 +25,6 @@ import {
   catalogResponseWith,
 } from "./fixtures/shopify-catalog-response.ts";
 
-const readSource = (path: string) => readFile(path, "utf8");
-
 const USD = (amount: number): Money => ({ amount, currencyCode: "USD" });
 
 function mappedShell(response: CatalogResponse = catalogResponse()): Product {
@@ -36,16 +36,6 @@ function mappedShell(response: CatalogResponse = catalogResponse()): Product {
 }
 
 describe("compare-at money contract", () => {
-  it("asks Shopify for compare-at money on every variant", async () => {
-    const queries = await readSource("src/lib/storefront/shopify/queries.ts");
-
-    assert.match(
-      queries,
-      /compareAtPrice \{\s*amount\s*currencyCode\s*\}/,
-      "the catalog query must request compare-at money for each variant",
-    );
-  });
-
   it("maps a present compare-at price for every mapped variant", () => {
     const shell = mappedShell();
 
@@ -180,27 +170,6 @@ describe("selected-variant pricing on the PDP", () => {
     assert.deepEqual(discounted.variant.price, USD(199.5));
     assert.deepEqual(saleCompareAtPrice(discounted.variant), USD(248));
   });
-
-  it("renders the current price with a semantic del only for a real sale", async () => {
-    const [pdp, polish] = await Promise.all([
-      readSource("src/app/products/[productHandle]/product-detail.tsx"),
-      readSource("src/app/production-polish.css"),
-    ]);
-
-    assert.match(pdp, /saleCompareAtPrice\(selection\.variant\)/);
-    assert.match(pdp, /<del/);
-    assert.match(pdp, /compareAt !== null \? \(/);
-    assert.match(pdp, /Regular price/);
-    assert.match(pdp, /Sale price/);
-    assert.match(polish, /\.product-panel \.product-price \{/);
-    assert.doesNotMatch(
-      polish,
-      /(?:^|\n)\.product-price \{/,
-      "PDP sale styling must not restyle every product card price",
-    );
-    /* Percent-off and savings claims need data this contract does not carry. */
-    assert.doesNotMatch(pdp, /% off|Save \$|You save/i);
-  });
 });
 
 describe("sold-out truth on the PDP", () => {
@@ -215,107 +184,5 @@ describe("sold-out truth on the PDP", () => {
     assert.equal(selection.selectedOptions.Size, "L");
     assert.equal(selection.variant.availableForSale, false);
     assert.equal(shell.variants[3]?.id, "gid://shopify/ProductVariant/1003");
-  });
-
-  it("marks unavailable option values for assistive tech and sight", async () => {
-    const pdp = await readSource(
-      "src/app/products/[productHandle]/product-detail.tsx",
-    );
-
-    assert.match(pdp, /option-chip sold-out unavailable/);
-    assert.match(pdp, /aria-disabled="true"/);
-    assert.match(pdp, /<span className="sr-only"> \(sold out\)<\/span>/);
-    /* A fully sold-out colorway stays a working deep link, but must say so. */
-    assert.match(pdp, /colorwayIsSoldOut/);
-  });
-
-  it("says Sold out in both cart modes rather than disabling Add to cart", async () => {
-    const form = await readSource("src/components/add-to-cart-form.tsx");
-
-    assert.equal(form.match(/"Sold out"/g)?.length, 2);
-    assert.match(
-      form,
-      /selectedVariant\?\.availableForSale\s*\?\s*"Add to cart"\s*:\s*"Sold out"/,
-    );
-    assert.match(form, /!selectedVariant\.availableForSale/);
-  });
-
-  it("draws a robust strike over sold-out chips without dimming them away", async () => {
-    const polish = await readSource("src/app/production-polish.css");
-
-    assert.match(
-      polish,
-      /\.option-chip\.sold-out \{[^}]*text-decoration: line-through;/,
-    );
-    assert.match(
-      polish,
-      /\.option-chip\.sold-out::after \{[^}]*linear-gradient\(/,
-    );
-    assert.match(polish, /\.option-chip\.unavailable \{[^}]*opacity: 1;/);
-  });
-
-  it("keeps every option value readable instead of inheriting the 9px source size", async () => {
-    const polish = await readSource("src/app/production-polish.css");
-
-    assert.match(polish, /\.option-chip \{[^}]*font-size: 12px;/);
-  });
-});
-
-describe("PDP gallery continuation", () => {
-  it("keeps the first three media in the canonical composition", async () => {
-    const canonical = await readSource("src/app/canonical-source.css");
-
-    assert.match(
-      canonical,
-      /\.gallery-button:first-child \{\s*grid-column: 1 \/ -1;/,
-    );
-    assert.match(canonical, /\.gallery-button img \{[^}]*object-fit: cover;/);
-  });
-
-  it("spans image four and later full width at natural aspect ratio", async () => {
-    const [canonical, pdp] = await Promise.all([
-      readSource("src/app/canonical-source.css"),
-      readSource("src/app/products/[productHandle]/product-detail.tsx"),
-    ]);
-    const continuation = canonical.match(
-      /\.gallery-button:nth-child\(n \+ 4\) img \{[^}]*\}/g,
-    );
-
-    assert.match(
-      canonical,
-      /\.gallery-button:nth-child\(n \+ 4\) \{\s*grid-column: 1 \/ -1;\s*\}/,
-    );
-    assert.equal(
-      continuation?.length,
-      1,
-      "one responsive-agnostic rule keeps the natural aspect ratio everywhere",
-    );
-    const [rule] = continuation ?? [];
-    assert.ok(rule !== undefined);
-    assert.match(rule, /width: 100%;/);
-    assert.match(rule, /height: auto;/);
-    assert.match(rule, /aspect-ratio: auto;/);
-    assert.match(rule, /object-fit: contain;/);
-    assert.match(
-      pdp,
-      /index === 0 \|\| index >= 3[\s\S]*?55vw, 100vw/,
-      "full-width continuation media must advertise a full-width Next image size",
-    );
-    assert.doesNotMatch(
-      rule,
-      /aspect-ratio: \d|min-height: \d*[1-9]/,
-      "a fixed ratio or height would crop the full-width media again",
-    );
-  });
-
-  it("keeps zoom, dialog, and gallery accessibility intact", async () => {
-    const pdp = await readSource(
-      "src/app/products/[productHandle]/product-detail.tsx",
-    );
-
-    assert.match(pdp, /aria-label=\{`Zoom image \$\{index \+ 1\}/);
-    assert.match(pdp, /className="gallery-modal"/);
-    assert.match(pdp, /dialog\.showModal\(\)/);
-    assert.match(pdp, /event\.key === "Escape"/);
   });
 });

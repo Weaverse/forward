@@ -2424,6 +2424,7 @@ body {
   margin-top: 4px;
 }
 .swatch-control {
+  flex: 0 0 44px;
   width: 44px;
   height: 44px;
   display: inline-flex;

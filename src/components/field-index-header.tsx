@@ -267,6 +267,9 @@ export function FieldIndexHeader({
     (item) => item.href !== "/shop" && item.href !== "/search",
   );
   const utilityLinks = utility.filter((item) => item.href !== "/cart");
+  const accountAvailable = utilityLinks.some(
+    (item) => item.href === "/account",
+  );
   const mobileLinks = [
     ...primary
       .filter((item) => item.href !== "/shop")
@@ -278,6 +281,10 @@ export function FieldIndexHeader({
   ];
 
   useEffect(() => {
+    if (!accountAvailable) {
+      setAccountSignedIn(false);
+      return;
+    }
     const controller = new AbortController();
     fetch("/account/status", {
       cache: "no-store",
@@ -296,7 +303,7 @@ export function FieldIndexHeader({
       })
       .catch(() => undefined);
     return () => controller.abort();
-  }, []);
+  }, [accountAvailable]);
 
   useEffect(() => {
     if (mobileOpenRef.current) {
