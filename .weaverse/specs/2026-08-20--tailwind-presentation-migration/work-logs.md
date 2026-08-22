@@ -97,6 +97,15 @@
 - Verification: Biome format/lint, typecheck, `323/323` node tests, expanded `57/57` DOM tests, GraphQL, Production build with 42 pages, compiled theme check, route contract `20 + 4`, `git diff --check`, and `bun run check` passed. The exact browser aggregate passed `414 / 27 intentional skips / 0 failures`: static `137/10`, live account-disabled `137/10`, and live account-enabled `140/7`.
 - No dependency, external account/login/address/order mutation, checkout/payment, deployment, GitHub, Weaverse, or Production mutation occurred.
 
+## 2026-08-22 — Phase 2F content and system states
+
+- Starting SHA: `2bc2d7c67725fcede6977d012f636f3ef93cbac1` (pushed Phase 2E Cart/Account commit).
+- Migrated Journal index/articles, Shopify pages/policies, About, Materials, Field Testing, loading, error, and not-found presentation to semantic Tailwind utilities. Preserved static params/metadata/not-found/data-source boundaries, structured rich-text runs and internal/external links, article block splitting, image sources/alts/sizes, editorial order, error retry, and canonical system-state actions.
+- Added real browser coverage for Journal feature/card/article structure, desktop/mobile editorial order, Materials/Field Testing art direction, custom-page versus Shopify policy separation, canonical policy navigation/links, 404 status/actions, and viewport overflow. Added DOM coverage for loading status and error alert/reset behavior.
+- Deleted 1,302 content/system/shared-button CSS lines. `canonical-source.css`, `site-header.css`, and `production-polish.css` now contain seven comment lines total and zero selectors; imports/files remain only for the ordered Phase 5 deletion.
+- Verification: Biome format/lint, typecheck, `323/323` node tests, expanded `59/59` DOM tests, GraphQL, Production build with 42 pages, compiled theme check, route contract `20 + 4`, `git diff --check`, and `bun run check` passed. The expanded fresh static browser matrix ran 156 executions and passed `146 / 10 intentional skips / 0 failures` across desktop, short desktop, and true mobile.
+- No content/sanitizer/data/security behavior, dependency, Shopify, account, checkout/payment, deployment, GitHub, Weaverse, or Production mutation occurred.
+
 ## Phase log template
 
 ```text

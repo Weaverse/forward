@@ -92,27 +92,31 @@ function ProseBlockView({ block }: { block: ProseBlock }) {
   switch (block.type) {
     case "paragraph":
       return (
-        <p>
+        <p className="mb-[1.4em]">
           <RichTextRuns runs={block.runs} />
         </p>
       );
     case "heading":
       return (
-        <h2>
+        <h2 className="mt-[2.5em] mb-[0.8em] text-balance text-[clamp(34px,4vw,52px)] leading-[1.05] font-medium">
           <RichTextRuns runs={block.runs} />
         </h2>
       );
     case "pullquote":
       return (
-        <blockquote>
+        <blockquote className="my-[2.4em] mr-[-8vw] ml-[-12vw] border-ink border-y py-[45px] pr-[8vw] pl-[12vw] text-[clamp(34px,5vw,72px)] text-signal-strong italic leading-[1.2] max-md:mx-0 max-md:px-0">
           <RichTextRuns runs={block.runs} />
         </blockquote>
       );
     case "note":
       return (
-        <aside className="article-note">
-          <p className="eyebrow">{block.label}</p>
-          <p>{block.text}</p>
+        <aside className="my-[2em] border-signal border-l-2 py-5 pr-0 pl-6">
+          <p className="mb-[1.4em] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
+            {block.label}
+          </p>
+          <p className="m-0 font-body text-[14px] leading-[1.7] text-text-muted">
+            {block.text}
+          </p>
         </aside>
       );
   }
@@ -128,8 +132,10 @@ function ArticleAside({
 }) {
   if (index === 0) {
     return (
-      <aside className="article-aside">
-        <p className="eyebrow">Route notes</p>
+      <aside className="text-[12px] text-text-muted max-md:border-border-subtle max-md:border-b max-md:pb-5">
+        <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
+          Route notes
+        </p>
         <p>
           {article.location}
           <br />
@@ -141,8 +147,10 @@ function ArticleAside({
     );
   }
   return (
-    <aside className="article-aside">
-      <p className="eyebrow">Filed</p>
+    <aside className="text-[12px] text-text-muted max-md:border-border-subtle max-md:border-b max-md:pb-5">
+      <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
+        Filed
+      </p>
       <p>
         {article.plate}
         <br />
@@ -167,9 +175,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   return (
     <>
-      <header className="article-hero">
-        <div className="article-hero-media">
+      <header className="mt-[22px] mr-7 ml-7 grid min-h-[86svh] grid-cols-[1.35fr_0.65fr] items-stretch bg-ink text-text-inverse max-md:mx-3 max-md:min-h-0 max-md:grid-cols-1">
+        <div className="relative min-w-0 overflow-hidden max-md:min-h-[54svh]">
           <Image
+            className="absolute inset-0 h-full object-cover object-center saturate-[0.76]"
             src={article.heroImage.src}
             alt={article.heroImage.alt}
             width={article.heroImage.width}
@@ -178,12 +187,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             priority
           />
         </div>
-        <div className="article-hero-inner">
-          <p className="eyebrow">
+        <div className="relative z-[2] flex flex-col justify-center bg-ink p-[clamp(45px,5vw,80px)] max-md:px-page-gutter max-md:pt-12 max-md:pb-[58px]">
+          <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-accent-warm tracking-field-meta uppercase">
             <Link href="/journal">Journal</Link> / {article.plate}
           </p>
-          <h1 className="h1">{article.title}</h1>
-          <div className="article-meta">
+          <h1 className="m-0 max-w-[1000px] text-balance font-heading text-[clamp(58px,6.8vw,104px)] leading-[0.98] font-medium tracking-heading">
+            {article.title}
+          </h1>
+          <div className="mt-7 flex flex-wrap gap-6 text-[11px] font-bold tracking-[0.09em] uppercase">
             <span>{formatDate(article.publishedAt)}</span>
             <span>{article.location}</span>
             <span>{article.readingMinutes} minute read</span>
@@ -195,9 +206,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         {runs.map((run, index) => (
           <div key={runKey(run)}>
             {run.prose.length > 0 ? (
-              <div className="shell article-body">
+              <div className="mx-auto grid w-[min(100%,var(--container-page))] grid-cols-[180px_minmax(0,720px)] justify-center gap-[clamp(40px,8vw,120px)] px-page-gutter py-[clamp(70px,9vw,130px)] max-md:grid-cols-1">
                 <ArticleAside article={article} index={index} />
-                <div className="article-content">
+                <div className="font-heading text-[clamp(21px,2vw,27px)] leading-[1.7]">
                   {run.prose.map((block) => (
                     <ProseBlockView
                       key={`${block.type}-${block.text}`}
@@ -208,8 +219,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               </div>
             ) : null}
             {run.image !== undefined ? (
-              <figure className="article-wide-image">
+              <figure className="mt-5 mb-[70px]">
                 <Image
+                  className="max-h-[760px] object-cover"
                   src={run.image.image.src}
                   alt={run.image.image.alt}
                   width={run.image.image.width}
@@ -217,13 +229,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   sizes="100vw"
                   loading="lazy"
                 />
-                <figcaption className="meta">{run.image.caption}</figcaption>
+                <figcaption className="mt-2 px-page-gutter font-field-meta text-[12px] font-medium text-text-muted tracking-field-meta uppercase">
+                  {run.image.caption}
+                </figcaption>
               </figure>
             ) : null}
           </div>
         ))}
-        <div className="shell section-tight">
-          <Link className="text-link" href="/journal">
+        <div className="mx-auto w-[min(100%,var(--container-page))] px-page-gutter py-[clamp(42px,6vw,84px)]">
+          <Link
+            className="inline-flex min-h-touch items-center gap-[14px] border-ink border-b font-body text-[11px] font-medium tracking-[0.06em] uppercase after:text-[20px] after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-[5px]"
+            href="/journal"
+          >
             All field notes
           </Link>
         </div>
