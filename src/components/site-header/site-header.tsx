@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
-import { FieldIndexHeader } from "@/components/field-index-header";
-import { QueryPreservingFieldIndexHeader } from "@/components/query-preserving-field-index-header";
+import { FieldIndexHeader } from "./field-index-header";
+import { QueryPreservingFieldIndexHeader } from "./query-preserving-field-index-header";
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
 import { storefront } from "@/lib/storefront/data-source";
 

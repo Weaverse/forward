@@ -115,8 +115,10 @@ describe("header ownership", () => {
 
   it("routes header navigation through one query-preserving wrapper", async () => {
     const [shell, wrapper] = await Promise.all([
-      read("src/components/site-header.tsx"),
-      read("src/components/query-preserving-field-index-header.tsx"),
+      read("src/components/site-header/site-header.tsx"),
+      read(
+        "src/components/site-header/query-preserving-field-index-header.tsx",
+      ),
     ]);
 
     assert.ok(shell.includes("<Suspense"));

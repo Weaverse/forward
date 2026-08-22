@@ -5,10 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 
-import { CartCount } from "@/components/cart-count";
-import { CountryControl } from "@/components/country-control";
 import { Icon, type IconName } from "@/components/icon";
-import { MiniCart } from "@/components/mini-cart";
 import { Wordmark } from "@/components/wordmark";
 import { cn } from "@/lib/cn";
 import {
@@ -17,7 +14,10 @@ import {
   currentCollectionIndex,
   type FieldIndexCollection,
   isActive,
-} from "@/lib/header-navigation";
+} from "./header-navigation";
+import { CartCount } from "./cart-count";
+import { CountryControl } from "./country-control";
+import { MiniCart } from "./mini-cart";
 import type { NavItem } from "@/lib/storefront/types";
 
 /** Utility destinations Shopify owns; Forward only supplies their glyphs. */

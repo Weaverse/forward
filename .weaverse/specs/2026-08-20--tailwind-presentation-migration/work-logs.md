@@ -106,6 +106,15 @@
 - Verification: Biome format/lint, typecheck, `323/323` node tests, expanded `59/59` DOM tests, GraphQL, Production build with 42 pages, compiled theme check, route contract `20 + 4`, `git diff --check`, and `bun run check` passed. The expanded fresh static browser matrix ran 156 executions and passed `146 / 10 intentional skips / 0 failures` across desktop, short desktop, and true mobile.
 - No content/sanitizer/data/security behavior, dependency, Shopify, account, checkout/payment, deployment, GitHub, Weaverse, or Production mutation occurred.
 
+## 2026-08-22 — Phase 3 ownership and variants
+
+- Starting SHA: `0fe37e99a38d6131b7f67b9be52bff03b9977194` (pushed Phase 2F content/system commit).
+- Moved 11 real owners with no compatibility shims: the complete Header feature (public `SiteHeader`, field-index implementation, query reader, navigation mapping, cart count, country indicator, mini-cart) into `src/components/site-header/`; static/Shopify Cart views into `src/app/cart/`; address form into `src/app/account/addresses/`; and add-to-cart form into the PDP route folder. Old files were deleted and all source/test imports use the new explicit paths.
+- Applied `class-variance-authority` only where multi-axis state justified it: PDP option chips (`interactive`, `selected`, `soldOut`) and mini-cart actions (`cart`, `checkout`). One-off utility strings remain inline and `cn()` remains the sole merge helper.
+- Full exact stale-path search returned zero references to the deleted component/lib paths. Move-only owners remain byte-identical; modified Header files contain relative feature imports and modified interactive owners preserve their previous class output through cva.
+- Verification: Biome format/lint, typecheck, `323/323` node tests, `59/59` DOM tests, GraphQL, Production build with 42 pages, compiled theme check, route contract `20 + 4`, `git diff --check`, and `bun run check` passed. Fresh static browser matrix passed `146 / 10 intentional skips / 0 failures` across 156 desktop, short-desktop, and true-mobile executions.
+- No route/data/auth/cart/sanitizer/security behavior, dependency, external system, deployment, GitHub, Weaverse, or Production mutation occurred.
+
 ## Phase log template
 
 ```text

@@ -12,8 +12,8 @@ import { afterEach, beforeEach, describe, it, jest } from "bun:test";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { AddToCartForm } from "@/components/add-to-cart-form";
-import { MiniCart } from "@/components/mini-cart";
+import { AddToCartForm } from "@/app/products/[productHandle]/add-to-cart-form";
+import { MiniCart } from "@/components/site-header/mini-cart";
 import { addCartLine } from "@/lib/demo-cart/store";
 import { formatMoney } from "@/lib/storefront/format";
 import { resolveProductSelection } from "@/lib/storefront/product-state";

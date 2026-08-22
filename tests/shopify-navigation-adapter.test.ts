@@ -5,7 +5,7 @@ import { describe, it } from "node:test";
 import {
   createFieldIndexCollections,
   FIELD_INDEX_PRESENTATION,
-} from "../src/lib/header-navigation.ts";
+} from "../src/components/site-header/header-navigation.ts";
 import { COLLECTION_PRESENTATION_PROFILES } from "../src/lib/storefront/collection-presentation.ts";
 import { StaticStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
 import { createNavigationQueryExecutor } from "../src/lib/storefront/shopify/client.ts";

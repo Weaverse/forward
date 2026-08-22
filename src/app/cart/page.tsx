@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 
-import { CartView } from "@/components/cart-view";
-import { ShopifyCartView } from "@/components/shopify-cart-view";
 import { readShopifyCart, type ShopifyCartData } from "@/lib/cart/shopify-cart";
 import { ShopifyCartProvider } from "@/lib/cart/shopify-cart-react";
 import type { DemoCartLine } from "@/lib/demo-cart/cart-logic";
@@ -16,6 +14,8 @@ import {
   resolveColorway,
   resolveProductSelection,
 } from "@/lib/storefront/product-state";
+import { CartView } from "./cart-view";
+import { ShopifyCartView } from "./shopify-cart-view";
 
 export const metadata: Metadata = {
   title: "Cart",

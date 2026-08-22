@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 
 import { AccountAccessPanel } from "@/components/account-access";
 import { AccountShell } from "@/components/account-shell";
-import { AddressActionForm } from "@/components/address-form";
 import {
   hasRefreshMarker,
   readAccountSession,
@@ -12,6 +11,7 @@ import {
   type AddressFormValues,
   readAccountAddresses,
 } from "@/lib/account/addresses";
+import { AddressActionForm } from "./address-form";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";

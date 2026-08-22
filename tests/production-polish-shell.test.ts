@@ -12,7 +12,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { ICON_PATHS } from "../src/components/icon.tsx";
-import { createHeaderNavigationHref } from "../src/lib/header-navigation.ts";
+import { createHeaderNavigationHref } from "../src/components/site-header/header-navigation.ts";
 import {
   CANONICAL_ROUTES,
   THEME_CUSTOM_PAGE_LINKS,

@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -11,15 +12,23 @@ import {
   useShopifyCart,
   useShopifyCartMode,
 } from "@/lib/cart/shopify-cart-react";
-import { cn } from "@/lib/cn";
 import { subtotal } from "@/lib/demo-cart/cart-logic";
 import { useDemoCartLines } from "@/lib/demo-cart/use-demo-cart";
 import { formatMoney } from "@/lib/storefront/format";
 
 /** Long enough to read, short enough not to sit over the page. */
 const AUTO_DISMISS_MS = 8000;
-const MINI_CART_BUTTON_CLASS =
-  "inline-flex min-h-touch w-full items-center justify-center gap-2.5 border px-[22px] py-3 text-[12px] font-ui-strong text-ink tracking-[0.09em] uppercase shadow-button [transition:background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),border-color_var(--duration-fast)_var(--ease-standard),box-shadow_120ms_var(--ease-standard),transform_120ms_var(--ease-standard)] hover:translate-[2px] hover:border-ink hover:bg-ink hover:text-text-inverse hover:shadow-button-hover active:translate-[4px] active:shadow-none focus-visible:outline-ink focus-visible:outline-3 focus-visible:outline-offset-4 motion-reduce:hover:translate-none motion-reduce:active:translate-none";
+const miniCartAction = cva(
+  "inline-flex min-h-touch w-full items-center justify-center gap-2.5 border px-[22px] py-3 text-[12px] font-ui-strong text-ink tracking-[0.09em] uppercase shadow-button [transition:background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),border-color_var(--duration-fast)_var(--ease-standard),box-shadow_120ms_var(--ease-standard),transform_120ms_var(--ease-standard)] hover:translate-[2px] hover:border-ink hover:bg-ink hover:text-text-inverse hover:shadow-button-hover active:translate-[4px] active:shadow-none focus-visible:outline-ink focus-visible:outline-3 focus-visible:outline-offset-4 motion-reduce:hover:translate-none motion-reduce:active:translate-none",
+  {
+    variants: {
+      intent: {
+        cart: "border-ink",
+        checkout: "border-signal bg-signal",
+      },
+    },
+  },
+);
 
 interface MiniCartImage {
   src: string;
@@ -88,12 +97,12 @@ function MiniCartBody({ checkoutUrl, line, subtotalLabel }: MiniCartBodyProps) {
         <span>Subtotal</span>
         <strong>{subtotalLabel}</strong>
       </p>
-      <Link className={cn(MINI_CART_BUTTON_CLASS, "border-ink")} href="/cart">
+      <Link className={miniCartAction({ intent: "cart" })} href="/cart">
         View cart
       </Link>
       {checkoutUrl === null ? null : (
         <a
-          className={cn(MINI_CART_BUTTON_CLASS, "border-signal bg-signal")}
+          className={miniCartAction({ intent: "checkout" })}
           href={checkoutUrl}
           rel="external nofollow"
         >

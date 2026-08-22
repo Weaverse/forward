@@ -12,10 +12,10 @@ import { afterEach, describe, it } from "bun:test";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { FieldIndexHeader } from "@/components/field-index-header";
 import { ICON_PATHS } from "@/components/icon";
+import { FieldIndexHeader } from "@/components/site-header/field-index-header";
+import { createFieldIndexCollections } from "@/components/site-header/header-navigation";
 import { THEME_CONTENT_FIXTURE } from "@/lib/storefront/fixtures/navigation";
-import { createFieldIndexCollections } from "@/lib/header-navigation";
 import { currentRoute, setRoute } from "./preload";
 import {
   type AccountStatusStub,

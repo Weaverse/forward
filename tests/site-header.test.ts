@@ -16,7 +16,7 @@ import {
   createFieldIndexCollections,
   currentCollectionIndex,
   FIELD_INDEX_PRESENTATION,
-} from "../src/lib/header-navigation.ts";
+} from "../src/components/site-header/header-navigation.ts";
 import { NAVIGATION_FIXTURE } from "../src/lib/storefront/fixtures/navigation.ts";
 
 describe("canonical header presentation", () => {

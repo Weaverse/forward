@@ -7,9 +7,9 @@ import assert from "node:assert/strict";
 import { describe, it } from "bun:test";
 import { act, render, screen, within } from "@testing-library/react";
 
-import { CartCount } from "@/components/cart-count";
-import { CountryControl } from "@/components/country-control";
 import { Icon, ICON_PATHS } from "@/components/icon";
+import { CartCount } from "@/components/site-header/cart-count";
+import { CountryControl } from "@/components/site-header/country-control";
 import { Wordmark } from "@/components/wordmark";
 import { addCartLine } from "@/lib/demo-cart/store";
 import {

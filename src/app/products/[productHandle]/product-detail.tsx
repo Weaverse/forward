@@ -1,11 +1,11 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
-import { AddToCartForm } from "@/components/add-to-cart-form";
 import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/storefront/format";
 import {
@@ -20,16 +20,40 @@ import {
   type ProductSelection,
 } from "@/lib/storefront/product-state";
 import type { Product, ProductColorway } from "@/lib/storefront/types";
+import { AddToCartForm } from "./add-to-cart-form";
 
 interface ProductDetailProps {
   product: Product;
   fieldRecord: ReactNode;
 }
 
-const OPTION_CHIP_CLASS =
-  "relative inline-flex min-h-touch min-w-12 items-center justify-center gap-2 border px-3.5 py-2 font-body text-[12px] font-bold";
-const SOLD_OUT_CLASS =
-  "line-through after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(to_top_right,transparent_calc(50%_-_1px),currentColor_calc(50%_-_1px),currentColor_calc(50%_+_1px),transparent_calc(50%_+_1px))] after:content-['']";
+const optionChip = cva(
+  "relative inline-flex min-h-touch min-w-12 items-center justify-center gap-2 border px-3.5 py-2 font-body text-[12px] font-bold",
+  {
+    variants: {
+      interactive: {
+        true: "hover:border-signal hover:bg-signal hover:text-ink",
+        false: "cursor-not-allowed text-text-dark-muted",
+      },
+      selected: {
+        true: "border-signal bg-signal",
+        false: "border-border-dark-strong bg-transparent",
+      },
+      soldOut: {
+        true: "line-through after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(to_top_right,transparent_calc(50%_-_1px),currentColor_calc(50%_-_1px),currentColor_calc(50%_+_1px),transparent_calc(50%_+_1px))] after:content-['']",
+        false: null,
+      },
+    },
+    compoundVariants: [
+      { interactive: true, selected: true, className: "text-ink" },
+      {
+        interactive: true,
+        selected: false,
+        className: "text-text-inverse",
+      },
+    ],
+  },
+);
 
 function requestedOptions(
   product: Product,
@@ -385,14 +409,11 @@ function ProductDetailView({
                 return (
                   <Link
                     key={entry.id}
-                    className={cn(
-                      OPTION_CHIP_CLASS,
-                      "hover:border-signal hover:bg-signal hover:text-ink",
-                      selected
-                        ? "border-signal bg-signal text-ink"
-                        : "border-border-dark-strong bg-transparent text-text-inverse",
-                      soldOut && SOLD_OUT_CLASS,
-                    )}
+                    className={optionChip({
+                      interactive: true,
+                      selected,
+                      soldOut,
+                    })}
                     href={productSelectionHref(
                       product,
                       next.colorway.id,
@@ -439,14 +460,11 @@ function ProductDetailView({
                     return (
                       <span
                         key={value}
-                        className={cn(
-                          OPTION_CHIP_CLASS,
-                          SOLD_OUT_CLASS,
-                          "cursor-not-allowed text-text-dark-muted",
-                          selected
-                            ? "border-signal bg-signal"
-                            : "border-border-dark-strong bg-transparent",
-                        )}
+                        className={optionChip({
+                          interactive: false,
+                          selected,
+                          soldOut: true,
+                        })}
                         aria-disabled="true"
                         aria-current={selected ? "true" : undefined}
                         title={`${value} is unavailable`}
@@ -459,13 +477,11 @@ function ProductDetailView({
                   return (
                     <Link
                       key={value}
-                      className={cn(
-                        OPTION_CHIP_CLASS,
-                        "hover:border-signal hover:bg-signal hover:text-ink",
-                        selected
-                          ? "border-signal bg-signal text-ink"
-                          : "border-border-dark-strong bg-transparent text-text-inverse",
-                      )}
+                      className={optionChip({
+                        interactive: true,
+                        selected,
+                        soldOut: false,
+                      })}
                       href={productSelectionHref(
                         product,
                         colorway.id,

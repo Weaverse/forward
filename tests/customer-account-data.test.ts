@@ -306,7 +306,7 @@ describe("disabled account configuration", () => {
 
   it("renders no auth affordance outside the account boundary", async () => {
     for (const file of [
-      "src/components/site-header.tsx",
+      "src/components/site-header/site-header.tsx",
       "src/components/site-footer.tsx",
     ]) {
       const source = await readFile(path.join(process.cwd(), file), "utf8");
