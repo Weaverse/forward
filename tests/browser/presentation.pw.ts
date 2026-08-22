@@ -67,7 +67,9 @@ test.describe("premium presentation behavior", () => {
     }
 
     await gotoReady(page, "/shop");
-    const plpCards = page.locator(".plp-grid .product-card");
+    const plpCards = page
+      .getByRole("region", { name: "Products" })
+      .locator(".product-card");
     expect(await plpCards.count()).toBe(9);
     const firstPlp = await boxOf(plpCards.nth(0));
     const secondPlp = await boxOf(plpCards.nth(1));
@@ -122,7 +124,9 @@ test.describe("premium presentation behavior", () => {
     }
 
     await gotoReady(page, "/shop");
-    const pageHero = page.locator(".page-hero-inner");
+    const pageHero = page
+      .getByRole("heading", { name: "Field goods for moving outside." })
+      .locator("../..");
     const lead = await boxOf(pageHero.locator(":scope > div"));
     const lede = await boxOf(pageHero.locator(":scope > p"));
     if ((viewport?.width ?? 0) > 820) {
@@ -142,7 +146,9 @@ test.describe("premium presentation behavior", () => {
     await expect(page.getByRole("heading", { name: "Products" })).toHaveCount(
       1,
     );
-    await expect(page.locator(".result-copy")).toContainText("9 products");
+    await expect(
+      page.locator('main [aria-live="polite"]').first(),
+    ).toContainText("9 products");
     await expect(
       page.getByText(/No matching plates|full catalog is three/i),
     ).toHaveCount(0);
@@ -158,5 +164,105 @@ test.describe("premium presentation behavior", () => {
       headings.push((await page.locator("main h1").first().innerText()).trim());
     }
     expect(new Set(headings).size).toBe(4);
+  });
+
+  test("preserves catalog query state and responsive filter ownership", async ({
+    page,
+  }) => {
+    await gotoReady(
+      page,
+      "/shop?category=packs&activity=trail&sort=price-desc",
+    );
+
+    const sortForm = page.locator('form[action="/shop"]');
+    await expect(sortForm).toHaveAttribute("method", "get");
+    await expect(sortForm.locator('input[name="category"]')).toHaveValue(
+      "packs",
+    );
+    await expect(sortForm.locator('input[name="activity"]')).toHaveValue(
+      "trail",
+    );
+    await expect(page.getByLabel("Sort")).toHaveValue("price-desc");
+
+    for (const name of [/^packs$/i, /^trail$/i]) {
+      const selected = page.locator("main a").filter({ hasText: name });
+      await expect(selected).toHaveCount(2);
+      for (let index = 0; index < 2; index += 1) {
+        await expect(selected.nth(index)).toHaveAttribute(
+          "aria-current",
+          "page",
+        );
+      }
+    }
+    await expect(
+      page
+        .locator("main a")
+        .filter({ hasText: /^All categories$/ })
+        .first(),
+    ).not.toHaveAttribute("aria-current", "page");
+
+    const tools = sortForm.locator("..");
+    expect(
+      await tools.evaluate((node) => getComputedStyle(node).position),
+    ).toBe("sticky");
+
+    if ((page.viewportSize()?.width ?? 0) <= 820) {
+      await page.getByText("Filters", { exact: true }).click();
+      await expect(
+        page.getByRole("link", { name: /^packs$/i }).last(),
+      ).toBeVisible();
+    }
+
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth),
+    ).toBeLessThanOrEqual(
+      page.viewportSize()?.width ?? Number.POSITIVE_INFINITY,
+    );
+  });
+
+  test("keeps collection composition and search states truthful", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/shop/outerwear");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByText("The system", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: "A focused kit for a full day out.",
+      }),
+    ).toBeVisible();
+    await expect(page.locator("main img").first()).toHaveAttribute(
+      "sizes",
+      "(min-width: 820px) 65vw, 100vw",
+    );
+
+    await gotoReady(page, "/search");
+    const searchForm = page.locator('form[action="/search"]');
+    const searchBox = page.getByRole("searchbox", { name: "Search products" });
+    await expect(searchForm).toHaveAttribute("method", "get");
+    await expect(
+      page.getByRole("heading", {
+        name: "Search by product, activity, or material.",
+      }),
+    ).toBeVisible();
+    expect((await boxOf(searchBox)).height).toBe(
+      (page.viewportSize()?.width ?? 0) <= 560 ? 64 : 110,
+    );
+
+    await gotoReady(page, "/search?q=%20shell%20");
+    await expect(
+      page.getByRole("heading", { name: "Results for “shell”" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("searchbox", { name: "Search products" }),
+    ).toHaveValue(" shell ");
+    await expect(page.locator('main [aria-live="polite"]')).toContainText(
+      "found",
+    );
+
+    await gotoReady(page, "/search?q=__no_forward_match__");
+    await expect(page.locator('main [aria-live="polite"]')).toContainText(
+      "0 found",
+    );
   });
 });

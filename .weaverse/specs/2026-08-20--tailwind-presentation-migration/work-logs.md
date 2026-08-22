@@ -68,6 +68,16 @@
 - Verification: Biome format/lint, typecheck, `323/323` node tests, `54/54` DOM tests, GraphQL, Production build with 42 pages, compiled theme check, route contract `20 + 4`, `git diff --check`, and full `bun run check` passed. Fresh explicit-empty browser matrix passed `128 / 7 intentional cross-viewport skips / 0 failures`, including Home composition, image contracts, desktop/short-desktop/mobile geometry, overflow, viewport-bounded Spotlight/Kit, Journal alignment, reduced motion, ProductCard grids, and the strengthened swatch target contract.
 - No dependency, commerce/data/security, Shopify, account, Weaverse, deployment, GitHub, or Production mutation occurred.
 
+## 2026-08-22 — Phase 2C catalog, collections, and search
+
+- Starting SHA: `8930bad42e989d2aa6e2d326f7269e35aa43f3a7` (pushed Phase 2B Home/ProductCard commit).
+- Migrated `/shop`, collection landings, and `/search` to semantic Tailwind utilities while preserving normalized storefront reads, static/dynamic route ownership, metadata/not-found behavior, image source/alt/sizes contracts, no-JavaScript GET sorting/search, validated category/activity query state, selected `aria-current`, desktop sidebar/mobile disclosure, ProductCard colorway behavior, result counts, and start/empty/no-match states.
+- Deleted 401 catalog/search/collection CSS lines from `canonical-source.css`. Shared `.page-hero`, `.product-grid`, `.empty-state`, and `.intro-grid` rules remain intentionally for unmigrated Phase 2D–2F owners; catalog/search no longer consume those classes.
+- Added permanent browser behavior coverage for query-preserving filters/sort, responsive filter ownership, sticky tools/no overflow, collection composition/media hints, raw search-input restoration with trimmed result semantics, truthful counts/no-match state, and the exact desktop/mobile search input height.
+- Review caught one omitted responsive winner: the Search input had retained desktop `110px` height on true mobile instead of the accepted `64px`; `max-sm:h-16` and a computed geometry assertion now protect that contract.
+- Verification: Biome format/lint, typecheck, `323/323` node tests, `54/54` DOM tests, GraphQL, Production build with 42 pages, compiled theme check, route contract `20 + 4`, `git diff --check`, and full `bun run check` passed. The expanded fresh explicit-empty browser matrix ran 141 executions and passed `134 / 7 intentional cross-viewport skips / 0 failures` across desktop, short desktop, and true mobile.
+- No dependency, commerce/data/security, Shopify, account, Weaverse, deployment, GitHub, or Production mutation occurred.
+
 ## Phase log template
 
 ```text
