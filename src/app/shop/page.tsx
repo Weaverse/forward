@@ -3,6 +3,12 @@ import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
 import { cn } from "@/lib/cn";
+import {
+  cta,
+  emptyState,
+  eyebrow,
+  sectionHeading,
+} from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
 import type {
   ProductCategory,
@@ -183,7 +189,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             <p className="mb-7 font-field-meta text-[11px] font-medium text-signal tracking-field-meta uppercase">
               <Link href="/">Home</Link> / Shop
             </p>
-            <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal tracking-field-meta uppercase">
+            <p className={eyebrow({ tone: "signal" })}>
               Explore / All equipment
             </p>
             <h1 className="m-0 max-w-[1050px] text-balance font-heading text-display leading-[0.94] font-medium tracking-heading max-sm:text-[clamp(53px,17vw,80px)]">
@@ -267,22 +273,17 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               ))}
             </div>
           ) : (
-            <div className="grid min-h-[340px] place-items-center border border-ink bg-surface-subtle px-5 py-[60px] text-center">
+            <div className={emptyState()}>
               <div className="max-w-[500px]">
-                <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-                  No matching products
-                </p>
-                <h2 className="mb-[18px] text-balance font-heading text-heading-3 leading-[1.02] font-medium tracking-heading">
+                <p className={eyebrow()}>No matching products</p>
+                <h2 className={sectionHeading({ size: "subsectionSpaced" })}>
                   Nothing in this drawer.
                 </h2>
                 <p className="text-text-muted">
                   No products match this filter. The full catalog is nine
                   products deep — try widening the view.
                 </p>
-                <Link
-                  className="inline-flex min-h-12 items-center justify-center gap-2.5 border border-ink bg-ink px-[22px] py-3 font-body text-[11px] font-bold text-text-inverse tracking-[0.09em] uppercase shadow-[4px_4px_0_var(--color-signal)] [transition:background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),border-color_var(--duration-fast)_var(--ease-standard),box-shadow_120ms_var(--ease-standard),transform_120ms_var(--ease-standard)] hover:translate-[2px] hover:shadow-[2px_2px_0_var(--color-signal)] active:translate-1 active:shadow-none focus-visible:outline-[3px] focus-visible:outline-signal focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0"
-                  href="/shop"
-                >
+                <Link className={cta()} href="/shop">
                   View all products
                 </Link>
               </div>

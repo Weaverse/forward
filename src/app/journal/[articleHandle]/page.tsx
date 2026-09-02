@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { eyebrow, textLink } from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
 import { formatDate } from "@/lib/storefront/format";
 import type {
@@ -129,9 +130,7 @@ function ArticleAside({
   if (index === 0) {
     return (
       <aside className="text-[12px] text-text-muted max-md:border-border-subtle max-md:border-b max-md:pb-5">
-        <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-          Route notes
-        </p>
+        <p className={eyebrow()}>Route notes</p>
         <p>
           {article.location}
           <br />
@@ -144,9 +143,7 @@ function ArticleAside({
   }
   return (
     <aside className="text-[12px] text-text-muted max-md:border-border-subtle max-md:border-b max-md:pb-5">
-      <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-        Filed
-      </p>
+      <p className={eyebrow()}>Filed</p>
       <p>
         {article.plate}
         <br />
@@ -179,7 +176,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           />
         </div>
         <div className="relative z-[2] flex flex-col justify-center bg-ink p-[clamp(45px,5vw,80px)] max-md:px-page-gutter max-md:pt-12 max-md:pb-[58px]">
-          <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-accent-warm tracking-field-meta uppercase">
+          <p className={eyebrow({ tone: "warm" })}>
             <Link href="/journal">Journal</Link> / {article.plate}
           </p>
           <h1 className="m-0 max-w-[1000px] text-balance font-heading text-[clamp(58px,6.8vw,104px)] leading-[0.98] font-medium tracking-heading">
@@ -228,10 +225,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </div>
         ))}
         <div className="mx-auto w-[min(100%,var(--container-page))] px-page-gutter py-[clamp(42px,6vw,84px)]">
-          <Link
-            className="inline-flex min-h-touch items-center gap-[14px] border-ink border-b font-body text-[11px] font-medium tracking-[0.06em] uppercase after:text-[20px] after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-[5px]"
-            href="/journal"
-          >
+          <Link className={textLink()} href="/journal">
             All field notes
           </Link>
         </div>

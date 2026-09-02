@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
+import { cta, eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
 
 export const metadata: Metadata = {
@@ -36,9 +37,7 @@ export default async function FieldTestingCustomPage() {
           priority
         />
         <div className="relative z-[1] max-w-[820px] p-[clamp(70px,9vw,150px)] max-md:px-page-gutter max-md:py-[65px]">
-          <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-            Custom page / Field testing
-          </p>
+          <p className={eyebrow()}>Custom page / Field testing</p>
           <h1 className="mt-5 mb-[30px] text-balance font-heading text-[clamp(58px,7vw,112px)] leading-[0.9] tracking-[-0.06em] max-md:text-[clamp(50px,15vw,76px)]">
             Test the system, not the claim.
           </h1>
@@ -50,10 +49,8 @@ export default async function FieldTestingCustomPage() {
       </section>
       <section className="mx-auto grid w-[min(100%,var(--container-page))] grid-cols-[0.7fr_1.3fr] gap-20 px-page-gutter py-[clamp(70px,9vw,140px)] max-md:grid-cols-1">
         <header>
-          <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-            The sequence
-          </p>
-          <h2 className="m-0 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading">
+          <p className={eyebrow()}>The sequence</p>
+          <h2 className={sectionHeading()}>
             From controlled checks to useful failure.
           </h2>
         </header>
@@ -111,9 +108,7 @@ export default async function FieldTestingCustomPage() {
       {shell !== undefined && shellImage !== undefined ? (
         <section className="grid grid-cols-[0.75fr_1.25fr] bg-ink text-text-inverse max-md:grid-cols-1">
           <div className="self-center p-[clamp(50px,7vw,110px)] max-md:order-2">
-            <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-              Case study / Weatherline
-            </p>
+            <p className={eyebrow()}>Case study / Weatherline</p>
             <h2 className="text-balance font-heading text-[clamp(50px,6vw,94px)] leading-[0.92]">
               {shell.title}
             </h2>
@@ -130,7 +125,7 @@ export default async function FieldTestingCustomPage() {
               ))}
             </dl>
             <Link
-              className="inline-flex min-h-12 items-center justify-center gap-2.5 border border-text-inverse bg-transparent px-[22px] py-3 font-body text-[11px] font-bold text-text-inverse tracking-[0.09em] uppercase shadow-[4px_4px_0_var(--color-text-inverse)] [transition:background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),border-color_var(--duration-fast)_var(--ease-standard),box-shadow_120ms_var(--ease-standard),transform_120ms_var(--ease-standard)] hover:translate-[2px] hover:bg-text-inverse hover:text-ink hover:shadow-[2px_2px_0_var(--color-text-inverse)] active:translate-1 active:shadow-none focus-visible:outline-[3px] focus-visible:outline-text-inverse focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0"
+              className={cta({ intent: "light" })}
               href={`/products/${shell.handle}`}
             >
               View the shell
@@ -149,18 +144,13 @@ export default async function FieldTestingCustomPage() {
       {testingArticle !== undefined ? (
         <section className="mx-auto grid w-[min(100%,var(--container-page))] grid-cols-[1fr_0.7fr_auto] items-end gap-[45px] px-page-gutter py-[clamp(70px,9vw,140px)] max-md:grid-cols-1">
           <div>
-            <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-              Field note
-            </p>
-            <h2 className="m-0 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading">
+            <p className={eyebrow()}>Field note</p>
+            <h2 className={sectionHeading()}>
               Read the complete shell protocol.
             </h2>
           </div>
           <p>{testingArticle.excerpt}</p>
-          <Link
-            className="inline-flex min-h-12 items-center justify-center gap-2.5 border border-ink bg-ink px-[22px] py-3 font-body text-[11px] font-bold text-text-inverse tracking-[0.09em] uppercase shadow-[4px_4px_0_var(--color-signal)] [transition:background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),border-color_var(--duration-fast)_var(--ease-standard),box-shadow_120ms_var(--ease-standard),transform_120ms_var(--ease-standard)] hover:translate-[2px] hover:shadow-[2px_2px_0_var(--color-signal)] active:translate-1 active:shadow-none focus-visible:outline-[3px] focus-visible:outline-signal focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0"
-            href={`/journal/${testingArticle.handle}`}
-          >
+          <Link className={cta()} href={`/journal/${testingArticle.handle}`}>
             Open field note
           </Link>
         </section>

@@ -20,37 +20,29 @@ import {
 import { useDemoCartLines } from "@/lib/demo-cart/use-demo-cart";
 import { formatMoney } from "@/lib/storefront/format";
 
+import {
+  demoCartDisabledCta,
+  demoCartPrimaryCta,
+  cartEmptyHeading,
+  cartEmptyState,
+  cartEyebrow,
+  cartImage,
+  cartLine,
+  cartLineControls,
+  cartLineHeading,
+  cartPageHeading,
+  cartQuantity,
+  cartQuantityButton,
+  cartRemoveButton,
+  cartSummaryNote,
+  cartSummaryRow,
+  cartSummaryTotal,
+} from "./presentation";
+
 interface CartViewProps {
   /** Demo lines the cart starts with on a first visit, resolved server-side. */
   seedLines: readonly DemoCartLine[];
 }
-
-const EYEBROW_CLASS =
-  "mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase";
-const PAGE_HEADING_CLASS =
-  "m-0 text-balance font-heading text-display leading-[0.94] font-medium tracking-heading";
-const CART_LINE_CLASS =
-  "grid grid-cols-[190px_1fr_auto] gap-6 border-border-subtle border-b py-[22px] max-sm:grid-cols-[92px_1fr] max-sm:gap-3.5";
-const CART_IMAGE_CLASS =
-  "aspect-[4/5] w-[190px] object-cover saturate-[0.72] max-sm:w-[92px]";
-const LINE_HEADING_CLASS =
-  "m-0 mb-1 text-balance font-heading text-[31px] font-medium";
-const LINE_CONTROLS_CLASS =
-  "mt-[18px] flex items-center gap-[15px] max-sm:flex-col max-sm:items-start";
-const QUANTITY_CLASS =
-  "grid h-11 w-28 grid-cols-[36px_1fr_36px] border border-border-dark-strong max-sm:h-12";
-const QUANTITY_BUTTON_CLASS =
-  "bg-transparent text-[20px] hover:bg-signal hover:text-ink";
-const REMOVE_BUTTON_CLASS =
-  "min-h-touch bg-transparent text-[11px] text-text-muted underline underline-offset-[3px]";
-const SUMMARY_ROW_CLASS =
-  "flex justify-between gap-5 border-border-subtle border-b py-2.5";
-const SUMMARY_NOTE_CLASS = "mt-[14px] mb-5 text-[12px] text-text-muted";
-const BUTTON_CLASS =
-  "inline-flex min-h-12 items-center justify-center gap-2.5 border px-[22px] py-3 font-body text-[11px] font-bold tracking-[0.09em] uppercase shadow-button [transition:background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),border-color_var(--duration-fast)_var(--ease-standard),box-shadow_120ms_var(--ease-standard),transform_120ms_var(--ease-standard)] hover:translate-[2px] hover:border-ink hover:bg-ink hover:text-text-inverse hover:shadow-button-hover active:translate-1 active:shadow-none focus-visible:outline-[3px] focus-visible:outline-ink focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0";
-const PRIMARY_BUTTON_CLASS = `${BUTTON_CLASS} border-ink bg-ink text-text-inverse shadow-[4px_4px_0_var(--color-signal)] hover:shadow-[2px_2px_0_var(--color-signal)] focus-visible:outline-signal`;
-const EMPTY_STATE_CLASS =
-  "grid min-h-[340px] place-items-center border border-ink bg-surface-subtle px-5 py-[60px] text-center";
 
 /**
  * Cart — the accepted manifest hierarchy, live count, signal summary panel,
@@ -95,8 +87,8 @@ export function CartView({ seedLines }: CartViewProps) {
       <p aria-live="polite" role="status" className="sr-only">
         {announcement}
       </p>
-      <p className={EYEBROW_CLASS}>Your field bag · demo only</p>
-      <h1 className={PAGE_HEADING_CLASS}>
+      <p className={cartEyebrow}>Your field bag · demo only</p>
+      <h1 className={cartPageHeading}>
         Cart
         {hydrated
           ? ` · ${itemCount} ${itemCount === 1 ? "item" : "items"}`
@@ -104,9 +96,9 @@ export function CartView({ seedLines }: CartViewProps) {
       </h1>
 
       {!hydrated ? (
-        <div className={EMPTY_STATE_CLASS}>
+        <div className={cartEmptyState}>
           <div className="max-w-[500px]">
-            <p className={EYEBROW_CLASS}>Opening the cart…</p>
+            <p className={cartEyebrow}>Opening the cart…</p>
           </div>
         </div>
       ) : lines.length > 0 ? (
@@ -116,10 +108,10 @@ export function CartView({ seedLines }: CartViewProps) {
             aria-label="Cart items"
           >
             {lines.map((line) => (
-              <article key={line.key} className={CART_LINE_CLASS}>
+              <article key={line.key} className={cartLine}>
                 <Link href={line.href}>
                   <Image
-                    className={CART_IMAGE_CLASS}
+                    className={cartImage}
                     src={line.image.src}
                     alt={line.image.alt}
                     width={line.image.width}
@@ -128,7 +120,7 @@ export function CartView({ seedLines }: CartViewProps) {
                   />
                 </Link>
                 <div>
-                  <h2 className={LINE_HEADING_CLASS}>
+                  <h2 className={cartLineHeading}>
                     <Link href={line.href}>{line.title}</Link>
                   </h2>
                   <p className="text-text-muted">
@@ -137,12 +129,12 @@ export function CartView({ seedLines }: CartViewProps) {
                       ...Object.values(line.selectedOptions),
                     ].join(" · ")}
                   </p>
-                  <div className={LINE_CONTROLS_CLASS}>
+                  <div className={cartLineControls}>
                     {/* Each control names its own line, so the quantity group
                         needs no wrapper role. */}
-                    <div className={QUANTITY_CLASS}>
+                    <div className={cartQuantity}>
                       <button
-                        className={QUANTITY_BUTTON_CLASS}
+                        className={cartQuantityButton}
                         type="button"
                         aria-label={`Decrease quantity of ${line.title}`}
                         onClick={() => updateQuantity(line, line.quantity - 1)}
@@ -156,7 +148,7 @@ export function CartView({ seedLines }: CartViewProps) {
                         {line.quantity}
                       </output>
                       <button
-                        className={QUANTITY_BUTTON_CLASS}
+                        className={cartQuantityButton}
                         type="button"
                         aria-label={`Increase quantity of ${line.title}`}
                         onClick={() => updateQuantity(line, line.quantity + 1)}
@@ -165,7 +157,7 @@ export function CartView({ seedLines }: CartViewProps) {
                       </button>
                     </div>
                     <button
-                      className={REMOVE_BUTTON_CLASS}
+                      className={cartRemoveButton}
                       type="button"
                       onClick={() => remove(line)}
                     >
@@ -187,12 +179,12 @@ export function CartView({ seedLines }: CartViewProps) {
             className="self-start bg-signal p-7 text-ink"
             aria-label="Order summary"
           >
-            <p className={EYEBROW_CLASS}>Order summary</p>
-            <div className={SUMMARY_ROW_CLASS}>
+            <p className={cartEyebrow}>Order summary</p>
+            <div className={cartSummaryRow}>
               <span>Subtotal</span>
               <strong>{formatMoney(cartSubtotal)}</strong>
             </div>
-            <div className={SUMMARY_ROW_CLASS}>
+            <div className={cartSummaryRow}>
               <span>Ground delivery</span>
               <span>
                 {cartShipping.amount === 0
@@ -200,13 +192,11 @@ export function CartView({ seedLines }: CartViewProps) {
                   : formatMoney(cartShipping)}
               </span>
             </div>
-            <div
-              className={`${SUMMARY_ROW_CLASS} py-5 font-heading text-[27px]`}
-            >
+            <div className={cartSummaryTotal}>
               <span>Total</span>
               <strong>{formatMoney(cartTotal)}</strong>
             </div>
-            <p className={SUMMARY_NOTE_CLASS}>
+            <p className={cartSummaryNote}>
               {cartSubtotal.amount < FREE_SHIPPING_THRESHOLD
                 ? `${formatMoney({
                     amount: FREE_SHIPPING_THRESHOLD - cartSubtotal.amount,
@@ -214,13 +204,10 @@ export function CartView({ seedLines }: CartViewProps) {
                   })} away from free ground delivery.`
                 : "Ground delivery is included on this order."}
             </p>
-            <p
-              className={`${PRIMARY_BUTTON_CLASS} w-full cursor-not-allowed opacity-[0.46] shadow-none`}
-              aria-disabled
-            >
+            <p className={demoCartDisabledCta} aria-disabled>
               Checkout — not connected
             </p>
-            <p className={SUMMARY_NOTE_CLASS}>
+            <p className={cartSummaryNote}>
               This is a demonstration cart held in your browser. No live store,
               payment, or checkout is connected, and nothing here is sent
               anywhere.
@@ -228,15 +215,13 @@ export function CartView({ seedLines }: CartViewProps) {
           </aside>
         </div>
       ) : (
-        <div className={EMPTY_STATE_CLASS}>
+        <div className={cartEmptyState}>
           <div className="max-w-[500px]">
-            <h2 className="m-0 mb-[18px] text-balance font-heading text-heading-3 leading-[1.02] font-medium tracking-heading">
-              Nothing packed yet.
-            </h2>
+            <h2 className={cartEmptyHeading}>Nothing packed yet.</h2>
             <p className="text-text-muted">
               Build a field system around the weather and miles ahead.
             </p>
-            <Link className={PRIMARY_BUTTON_CLASS} href="/shop">
+            <Link className={demoCartPrimaryCta} href="/shop">
               Explore all gear
             </Link>
           </div>

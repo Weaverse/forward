@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { cn } from "@/lib/cn";
+import { eyebrow, sectionHeading, textLink } from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
 import type { RichTextParagraph } from "@/lib/storefront/types";
 
@@ -84,9 +85,7 @@ export default async function StorePageRoute({ params }: StorePageProps) {
           />
         </div>
         <div className="relative z-[2] flex flex-col justify-center bg-ink p-[clamp(45px,6vw,96px)] max-md:px-page-gutter max-md:pt-12 max-md:pb-[58px]">
-          <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-accent-warm tracking-field-meta uppercase">
-            {page.eyebrow}
-          </p>
+          <p className={eyebrow({ tone: "warm" })}>{page.eyebrow}</p>
           <h1 className="m-0 max-w-[650px] text-balance font-heading text-[clamp(60px,7vw,112px)] leading-[0.98] font-medium tracking-heading max-md:text-[clamp(54px,12vw,82px)]">
             {page.title}
           </h1>
@@ -96,13 +95,9 @@ export default async function StorePageRoute({ params }: StorePageProps) {
       <section className="mx-auto w-[min(100%,var(--container-page))] px-page-gutter py-[clamp(70px,9vw,140px)]">
         <div className="grid grid-cols-[0.85fr_1.15fr] items-start gap-[clamp(48px,10vw,150px)] max-md:grid-cols-1">
           <div>
-            <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-              Our premise
-            </p>
+            <p className={eyebrow()}>Our premise</p>
             {premise !== undefined ? (
-              <h2 className="m-0 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading">
-                {premise.heading}
-              </h2>
+              <h2 className={sectionHeading()}>{premise.heading}</h2>
             ) : null}
           </div>
           <div>
@@ -156,10 +151,8 @@ export default async function StorePageRoute({ params }: StorePageProps) {
       <section className="mx-auto w-[min(100%,var(--container-page))] px-page-gutter py-[clamp(70px,9vw,140px)]">
         <div className="grid grid-cols-[0.75fr_1.25fr] items-start gap-20 max-md:grid-cols-1">
           <div>
-            <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-              Where this goes
-            </p>
-            <h2 className="m-0 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading">
+            <p className={eyebrow()}>Where this goes</p>
+            <h2 className={sectionHeading()}>
               A short catalog,
               <br />
               built slowly.
@@ -178,10 +171,7 @@ export default async function StorePageRoute({ params }: StorePageProps) {
             <p className="max-w-[670px] text-[clamp(17px,1.45vw,22px)] leading-[1.55] text-text-muted">
               {themeContent.footerTagline}
             </p>
-            <Link
-              className="inline-flex min-h-touch items-center gap-[14px] border-ink border-b font-body text-[11px] font-medium tracking-[0.06em] uppercase after:text-[20px] after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-[5px]"
-              href="/shop"
-            >
+            <Link className={textLink()} href="/shop">
               Shop the catalog
             </Link>
           </div>

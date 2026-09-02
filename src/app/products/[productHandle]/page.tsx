@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { ProductCard } from "@/components/product-card";
+import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
 import type { Product } from "@/lib/storefront/types";
 
@@ -136,12 +137,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <section className="mx-auto w-[min(100%,var(--container-page))] px-page-gutter py-[clamp(70px,9vw,140px)]">
           <div className="mb-11 flex items-end justify-between gap-[30px] max-sm:flex-col max-sm:items-start">
             <div>
-              <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-                Works well with
-              </p>
-              <h2 className="m-0 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading">
-                Complete the field system.
-              </h2>
+              <p className={eyebrow()}>Works well with</p>
+              <h2 className={sectionHeading()}>Complete the field system.</h2>
             </div>
           </div>
           <div className="grid grid-cols-4 gap-[18px] max-lg:grid-cols-2 max-sm:grid-cols-2 max-sm:gap-2.5">

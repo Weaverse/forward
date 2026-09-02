@@ -1,5 +1,6 @@
 import type { AccountSession } from "@/lib/account/account-view";
 import { loginHref } from "@/lib/account/customer-account";
+import { cta, eyebrow, sectionHeading } from "@/lib/presentation/variants";
 
 interface AccountAccessPanelProps {
   /** Same-origin path to return to after authentication. */
@@ -8,9 +9,6 @@ interface AccountAccessPanelProps {
   /** True for the fixed `/account?login=failed` target. */
   loginFailed?: boolean;
 }
-
-const PRIMARY_BUTTON_CLASS =
-  "inline-flex min-h-12 items-center justify-center gap-2.5 border border-ink bg-ink px-[22px] py-3 font-body text-[11px] font-bold text-text-inverse tracking-[0.09em] uppercase shadow-[4px_4px_0_var(--color-signal)] [transition:background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),border-color_var(--duration-fast)_var(--ease-standard),box-shadow_120ms_var(--ease-standard),transform_120ms_var(--ease-standard)] hover:translate-[2px] hover:shadow-[2px_2px_0_var(--color-signal)] active:translate-1 active:shadow-none focus-visible:outline-[3px] focus-visible:outline-signal focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0";
 
 /**
  * The only auth affordance Forward renders. Both links are raw full-page
@@ -30,10 +28,8 @@ export function AccountAccessPanel({
 
   return (
     <div className="min-h-[280px] border border-ink bg-transparent p-7">
-      <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-        Field account
-      </p>
-      <h2 className="m-0 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading">
+      <p className={eyebrow()}>Field account</p>
+      <h2 className={sectionHeading()}>
         {needsRefresh ? "Continue your session." : "Sign in to continue."}
       </h2>
       <p className="text-text-muted">
@@ -48,7 +44,7 @@ export function AccountAccessPanel({
       ) : null}
       {needsRefresh ? (
         <a
-          className={PRIMARY_BUTTON_CLASS}
+          className={cta()}
           href={session.href}
           rel="nofollow"
           data-prefetch="false"
@@ -57,7 +53,7 @@ export function AccountAccessPanel({
         </a>
       ) : (
         <a
-          className={PRIMARY_BUTTON_CLASS}
+          className={cta()}
           href={loginHref(path)}
           rel="nofollow"
           data-prefetch="false"

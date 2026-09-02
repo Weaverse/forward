@@ -7,6 +7,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
+import { eyebrow } from "@/lib/presentation/variants";
 import { formatMoney } from "@/lib/storefront/format";
 import {
   COLORWAY_PARAM,
@@ -358,7 +359,7 @@ function ProductDetailView({
             </Link>
           </p>
           <div className="mb-[22px] flex justify-between gap-5">
-            <span className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal tracking-field-meta uppercase">
+            <span className={eyebrow({ tone: "signal" })}>
               Forward equipment
             </span>
             <span className="font-field-meta text-[12px] font-medium text-text-dark-muted tracking-field-meta uppercase">

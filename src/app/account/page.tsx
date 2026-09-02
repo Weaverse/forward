@@ -9,6 +9,7 @@ import {
   readAccountSession,
 } from "@/lib/account/account-view";
 import { ACCOUNT_RECENT_ORDER_LIMIT } from "@/lib/account/queries";
+import { cta, eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { formatDate } from "@/lib/storefront/format";
 
 export const dynamic = "force-dynamic";
@@ -26,8 +27,6 @@ interface AccountPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-const EYEBROW_CLASS =
-  "mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase";
 const ACCOUNT_BLOCK_CLASS =
   "min-h-[280px] border border-ink bg-transparent p-7";
 const ORDER_ROW_CLASS =
@@ -36,8 +35,6 @@ const ORDER_CELL_CLASS =
   "border-border-subtle border-b px-3 py-[18px] text-left max-sm:block max-sm:border-0 max-sm:px-0 max-sm:py-[3px] max-sm:before:text-[10px] max-sm:before:text-text-muted max-sm:before:uppercase max-sm:before:content-[attr(data-label)_':_']";
 const ORDER_HEADING_CLASS =
   "border-border-subtle border-b px-3 pt-0 pb-[18px] text-left text-[10px] text-text-muted tracking-[0.1em] uppercase";
-const BUTTON_CLASS =
-  "inline-flex min-h-12 items-center justify-center gap-2.5 border border-ink bg-transparent px-[22px] py-3 font-body text-[11px] font-bold text-ink tracking-[0.09em] uppercase shadow-button [transition:background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),border-color_var(--duration-fast)_var(--ease-standard),box-shadow_120ms_var(--ease-standard),transform_120ms_var(--ease-standard)] hover:translate-[2px] hover:bg-ink hover:text-text-inverse hover:shadow-button-hover active:translate-1 active:shadow-none focus-visible:outline-[3px] focus-visible:outline-ink focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0";
 
 /**
  * Account overview — the accepted order history and bordered account blocks,
@@ -77,10 +74,8 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
       signedIn
     >
       <div className="mb-[52px]">
-        <p className={EYEBROW_CLASS}>{profile.displayName}</p>
-        <h2 className="m-0 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading">
-          Recent orders
-        </h2>
+        <p className={eyebrow()}>{profile.displayName}</p>
+        <h2 className={sectionHeading()}>Recent orders</h2>
       </div>
       {profile.orders.length > 0 ? (
         <table className="w-full border-collapse">
@@ -121,7 +116,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
 
       <div className="mt-[50px] grid grid-cols-2 gap-3 max-sm:grid-cols-1">
         <article className={ACCOUNT_BLOCK_CLASS}>
-          <p className={EYEBROW_CLASS}>Repair desk</p>
+          <p className={eyebrow()}>Repair desk</p>
           <h3 className="text-balance font-heading text-[26px] font-medium">
             Keep good gear moving.
           </h3>
@@ -129,12 +124,15 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             Anything bought from Forward can come back for repair — defects
             free, everything else at an honest quoted cost.
           </p>
-          <Link className={BUTTON_CLASS} href="/pages/field-repair">
+          <Link
+            className={cta({ intent: "outline" })}
+            href="/pages/field-repair"
+          >
             The repairs programme
           </Link>
         </article>
         <article className={ACCOUNT_BLOCK_CLASS}>
-          <p className={EYEBROW_CLASS}>Default trailhead</p>
+          <p className={eyebrow()}>Default trailhead</p>
           {defaultAddress !== undefined ? (
             <>
               <h3 className="text-balance font-heading text-[26px] font-medium">

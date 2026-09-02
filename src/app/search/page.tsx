@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
+import {
+  cta,
+  emptyState,
+  eyebrow,
+  sectionHeading,
+} from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
 
 export const metadata: Metadata = {
@@ -24,10 +30,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <div className="mx-auto w-[min(100%,var(--container-page))] px-page-gutter pt-[105px] pb-[clamp(56px,8vw,110px)]">
-      <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-        Search the field catalog
-      </p>
-      <h1 className="m-0 text-balance font-heading text-display leading-[0.94] font-medium tracking-heading">
+      <p className={eyebrow()}>Search the field catalog</p>
+      <h1 className={sectionHeading({ size: "display" })}>
         What are you looking for?
       </h1>
       <form
@@ -55,21 +59,16 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       </form>
 
       {!hasQuery ? (
-        <section className="grid min-h-[340px] place-items-center border border-ink bg-surface-subtle px-5 py-[60px] text-center">
+        <section className={emptyState()}>
           <div className="max-w-[500px]">
-            <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-              Start here
-            </p>
-            <h2 className="mb-[18px] text-balance font-heading text-heading-3 leading-[1.02] font-medium tracking-heading">
+            <p className={eyebrow()}>Start here</p>
+            <h2 className={sectionHeading({ size: "subsectionSpaced" })}>
               Search by product, activity, or material.
             </h2>
             <p className="text-text-muted">
               Try trail, alpine, shell, pack, camp, or charcoal.
             </p>
-            <Link
-              className="inline-flex min-h-12 items-center justify-center gap-2.5 border border-ink bg-ink px-[22px] py-3 font-body text-[11px] font-bold text-text-inverse tracking-[0.09em] uppercase shadow-[4px_4px_0_var(--color-signal)] [transition:background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),border-color_var(--duration-fast)_var(--ease-standard),box-shadow_120ms_var(--ease-standard),transform_120ms_var(--ease-standard)] hover:translate-[2px] hover:shadow-[2px_2px_0_var(--color-signal)] active:translate-1 active:shadow-none focus-visible:outline-[3px] focus-visible:outline-signal focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0"
-              href="/shop"
-            >
+            <Link className={cta()} href="/shop">
               Browse all gear
             </Link>
           </div>
@@ -77,7 +76,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       ) : results.length > 0 ? (
         <section aria-label="Search results">
           <div className="mb-[30px] flex justify-between gap-5">
-            <h2 className="m-0 text-balance font-heading text-heading-3 leading-[1.02] font-medium tracking-heading">
+            <h2 className={sectionHeading({ size: "subsection" })}>
               Results for “{query}”
             </h2>
             <span
@@ -98,21 +97,16 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </div>
         </section>
       ) : (
-        <section className="grid min-h-[340px] place-items-center border border-ink bg-surface-subtle px-5 py-[60px] text-center">
+        <section className={emptyState()}>
           <div className="max-w-[500px]">
-            <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-              No exact match
-            </p>
-            <h2 className="mb-[18px] text-balance font-heading text-heading-3 leading-[1.02] font-medium tracking-heading">
+            <p className={eyebrow()}>No exact match</p>
+            <h2 className={sectionHeading({ size: "subsectionSpaced" })}>
               Nothing turned up for “{query}”.
             </h2>
             <p className="text-text-muted" aria-live="polite">
               0 found. Try a broader term, or explore the full field system.
             </p>
-            <Link
-              className="inline-flex min-h-12 items-center justify-center gap-2.5 border border-ink bg-ink px-[22px] py-3 font-body text-[11px] font-bold text-text-inverse tracking-[0.09em] uppercase shadow-[4px_4px_0_var(--color-signal)] [transition:background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),border-color_var(--duration-fast)_var(--ease-standard),box-shadow_120ms_var(--ease-standard),transform_120ms_var(--ease-standard)] hover:translate-[2px] hover:shadow-[2px_2px_0_var(--color-signal)] active:translate-1 active:shadow-none focus-visible:outline-[3px] focus-visible:outline-signal focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0"
-              href="/shop"
-            >
+            <Link className={cta()} href="/shop">
               View all gear
             </Link>
           </div>

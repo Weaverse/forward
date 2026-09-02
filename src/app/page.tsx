@@ -2,6 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
+import {
+  cta,
+  eyebrow,
+  sectionHeading,
+  textLink,
+} from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
 import type { Collection, Product } from "@/lib/storefront/types";
 
@@ -16,16 +22,8 @@ const FEATURED_HANDLES = [
 
 const CATEGORY_HANDLES = ["outerwear", "packs", "footwear"] as const;
 
-const EYEBROW_CLASS =
-  "mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase";
-const HEADING_CLASS =
-  "m-0 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading";
 const LEDE_CLASS =
   "mb-[1em] max-w-[670px] text-[clamp(17px,1.45vw,22px)] leading-[1.55] text-text-muted";
-const TEXT_LINK_CLASS =
-  "inline-flex min-h-touch items-center gap-[14px] border-ink border-b font-body text-[11px] font-medium tracking-[0.06em] uppercase after:text-[20px] after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-[5px]";
-const BUTTON_CLASS =
-  "inline-flex min-h-12 items-center justify-center gap-2.5 border px-[22px] py-3 font-body text-[11px] font-bold tracking-[0.09em] uppercase [transition:background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),border-color_var(--duration-fast)_var(--ease-standard),box-shadow_120ms_var(--ease-standard),transform_120ms_var(--ease-standard)] hover:translate-[2px] active:translate-1 active:shadow-none focus-visible:outline-[3px] focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0";
 const SHELL_SECTION_CLASS =
   "mx-auto w-[min(100%,var(--container-page))] px-page-gutter py-[clamp(70px,9vw,140px)]";
 
@@ -67,9 +65,9 @@ export default async function HomePage() {
         className="grid min-h-[calc(100svh_-_var(--spacing-header))] grid-cols-[minmax(390px,0.78fr)_minmax(0,1.22fr)] bg-ink text-text-inverse max-md:min-h-[calc(100svh_-_var(--spacing-header-compact))] max-md:grid-cols-[minmax(0,1fr)]"
       >
         <div className="flex flex-col justify-center p-[clamp(48px,6vw,100px)] max-md:px-page-gutter max-md:py-[55px]">
-          <p className={EYEBROW_CLASS}>Forward / Field equipment 2026</p>
+          <p className={eyebrow()}>Forward / Field equipment 2026</p>
           <h1
-            className="mt-[22px]! mb-7 max-w-[760px] text-balance font-heading text-[clamp(58px,6.7vw,112px)] leading-[0.88] font-medium tracking-[-0.065em] max-md:text-[clamp(52px,16vw,78px)]"
+            className="mt-[22px] mb-7 max-w-[760px] text-balance font-heading text-[clamp(58px,6.7vw,112px)] leading-[0.88] font-medium tracking-[-0.065em] max-md:text-[clamp(52px,16vw,78px)]"
             id="home-hero-title"
           >
             Equipment for weather that changes the plan.
@@ -79,13 +77,10 @@ export default async function HomePage() {
             made to move together.
           </p>
           <div className="mt-[34px] flex flex-wrap items-center gap-6">
-            <Link
-              className={`${BUTTON_CLASS} border-signal bg-signal text-ink shadow-button hover:border-ink hover:bg-ink hover:text-signal hover:shadow-button-hover focus-visible:outline-ink`}
-              href="/shop"
-            >
+            <Link className={cta({ intent: "signal" })} href="/shop">
               Shop all equipment
             </Link>
-            <Link className={TEXT_LINK_CLASS} href="/field-testing">
+            <Link className={textLink()} href="/field-testing">
               How we test
             </Link>
           </div>
@@ -149,8 +144,8 @@ export default async function HomePage() {
       >
         <header className="mb-[45px] grid grid-cols-[minmax(0,1fr)_minmax(260px,0.42fr)_auto] items-end gap-10 max-md:grid-cols-1 max-md:gap-5">
           <div>
-            <p className={EYEBROW_CLASS}>New field rotation</p>
-            <h2 className={HEADING_CLASS} id="home-featured-title">
+            <p className={eyebrow()}>New field rotation</p>
+            <h2 className={sectionHeading()} id="home-featured-title">
               Start with the core four.
             </h2>
           </div>
@@ -158,7 +153,7 @@ export default async function HomePage() {
             A weather layer, breathable midlayer, close-body carry, and trail
             shoe form the shortest route to a complete Forward system.
           </p>
-          <Link className={TEXT_LINK_CLASS} href="/shop">
+          <Link className={textLink()} href="/shop">
             Shop all {products.length}
           </Link>
         </header>
@@ -175,8 +170,10 @@ export default async function HomePage() {
 
       <section className="bg-ink pt-20 text-text-inverse">
         <header className="mx-auto w-[min(100%,var(--container-page))] px-page-gutter pb-11">
-          <p className={EYEBROW_CLASS}>Shop by system</p>
-          <h2 className={HEADING_CLASS}>Built separately. Better together.</h2>
+          <p className={eyebrow()}>Shop by system</p>
+          <h2 className={sectionHeading()}>
+            Built separately. Better together.
+          </h2>
         </header>
         <div className="grid grid-cols-3 max-md:grid-cols-1">
           {categories.map((collection) => (
@@ -194,8 +191,8 @@ export default async function HomePage() {
                 sizes="(min-width: 820px) 34vw, 100vw"
               />
               <div className="absolute right-0 bottom-0 left-0 z-[1] p-[34px]">
-                <span className={EYEBROW_CLASS}>{collection.fieldCode}</span>
-                <h3 className="mt-2! mb-4 font-heading text-[clamp(42px,4vw,68px)] leading-[0.95]">
+                <span className={eyebrow()}>{collection.fieldCode}</span>
+                <h3 className="mt-2 mb-4 font-heading text-[clamp(42px,4vw,68px)] leading-[0.95]">
                   {collection.title}
                 </h3>
                 <p className="mb-[1em] max-w-[420px] text-text-dark-subtle">
@@ -226,12 +223,12 @@ export default async function HomePage() {
           </div>
           <div className="flex flex-col justify-center bg-surface-subtle p-[clamp(42px,6vw,92px)] min-[821px]:px-[clamp(28px,4vw,60px)] min-[821px]:py-[clamp(24px,4svh,48px)] [@media(min-width:821px)_and_(max-height:600px)]:px-[clamp(20px,3vw,36px)] [@media(min-width:821px)_and_(max-height:600px)]:py-2">
             <p
-              className={`${EYEBROW_CLASS} [@media(min-width:821px)_and_(max-height:600px)]:mb-1`}
+              className={`${eyebrow()} [@media(min-width:821px)_and_(max-height:600px)]:mb-1`}
             >
               Layer focus / {spotlight.category}
             </p>
             <h2
-              className={`${HEADING_CLASS} min-[821px]:text-[clamp(40px,min(5.6vw,8svh),72px)] [@media(min-width:821px)_and_(max-height:600px)]:mb-1 [@media(min-width:821px)_and_(max-height:600px)]:text-[clamp(26px,7svh,40px)] [@media(min-width:821px)_and_(max-height:600px)]:leading-[0.95]`}
+              className={`${sectionHeading()} min-[821px]:text-[clamp(40px,min(5.6vw,8svh),72px)] [@media(min-width:821px)_and_(max-height:600px)]:mb-1 [@media(min-width:821px)_and_(max-height:600px)]:text-[clamp(26px,7svh,40px)] [@media(min-width:821px)_and_(max-height:600px)]:leading-[0.95]`}
             >
               {spotlight.title}
             </h2>
@@ -252,7 +249,7 @@ export default async function HomePage() {
               ))}
             </ul>
             <Link
-              className={`${BUTTON_CLASS} self-start border-ink bg-ink text-text-inverse shadow-[4px_4px_0_var(--color-signal)] hover:bg-ink hover:shadow-[2px_2px_0_var(--color-signal)] focus-visible:outline-signal [@media(min-width:821px)_and_(max-height:600px)]:min-h-10 [@media(min-width:821px)_and_(max-height:600px)]:py-2`}
+              className={`${cta()} self-start [@media(min-width:821px)_and_(max-height:600px)]:min-h-10 [@media(min-width:821px)_and_(max-height:600px)]:py-2`}
               href={`/products/${spotlight.handle}`}
             >
               Explore the layer
@@ -263,20 +260,19 @@ export default async function HomePage() {
 
       <section className="grid grid-cols-[0.85fr_1.15fr] bg-ink text-text-inverse max-md:grid-cols-[minmax(0,1fr)]">
         <div className="flex flex-col justify-center p-[clamp(48px,7vw,110px)]">
-          <p className={EYEBROW_CLASS}>Material standard</p>
-          <h2 className={HEADING_CLASS}>Fewer materials. Better understood.</h2>
+          <p className={eyebrow()}>Material standard</p>
+          <h2 className={sectionHeading()}>
+            Fewer materials. Better understood.
+          </h2>
           <p className="mb-[1em] max-w-[560px] text-[18px] text-text-dark-subtle">
             Every fabric, foam, buckle, and compound is selected around useful
             life, field repair, and performance you can actually feel.
           </p>
           <div className="mt-[34px] flex flex-wrap items-center gap-6">
-            <Link
-              className={`${BUTTON_CLASS} border-text-inverse bg-transparent text-text-inverse shadow-[4px_4px_0_var(--color-text-inverse)] hover:bg-text-inverse hover:text-ink hover:shadow-[2px_2px_0_var(--color-text-inverse)] focus-visible:outline-text-inverse`}
-              href="/materials"
-            >
+            <Link className={cta({ intent: "light" })} href="/materials">
               Explore materials
             </Link>
-            <Link className={TEXT_LINK_CLASS} href="/about">
+            <Link className={textLink()} href="/about">
               About Forward
             </Link>
           </div>
@@ -296,10 +292,10 @@ export default async function HomePage() {
           className={`${SHELL_SECTION_CLASS} grid grid-cols-[0.55fr_1.45fr] items-end gap-[60px] max-md:grid-cols-[minmax(0,1fr)] min-[821px]:[--home-viewport-pad:clamp(48px,5vw,96px)] min-[821px]:[--home-viewport-media:calc(100svh_-_2_*_var(--home-viewport-pad))] min-[821px]:py-[var(--home-viewport-pad)] [@media(min-width:821px)_and_(max-height:600px)]:[--home-viewport-pad:clamp(8px,2svh,16px)]`}
         >
           <div className="pb-[30px]">
-            <p className={EYEBROW_CLASS}>One-day kit</p>
-            <h2 className={HEADING_CLASS}>Carry the day, not the doubt.</h2>
+            <p className={eyebrow()}>One-day kit</p>
+            <h2 className={sectionHeading()}>Carry the day, not the doubt.</h2>
             <p className="mb-[1em]">{pack.subtitle}</p>
-            <Link className={TEXT_LINK_CLASS} href={`/products/${pack.handle}`}>
+            <Link className={textLink()} href={`/products/${pack.handle}`}>
               View {pack.title}
             </Link>
           </div>
@@ -327,7 +323,7 @@ export default async function HomePage() {
         className={`${SHELL_SECTION_CLASS} grid grid-cols-[0.7fr_1.3fr] gap-3 max-md:grid-cols-[minmax(0,1fr)]`}
       >
         <article className="min-h-[560px] bg-signal p-[clamp(35px,5vw,70px)] max-md:min-h-0">
-          <p className={EYEBROW_CLASS}>Repair, not replace</p>
+          <p className={eyebrow()}>Repair, not replace</p>
           <h2 className="mb-[0.83em] text-balance font-heading text-[clamp(44px,5vw,78px)] leading-[0.95]">
             Keep equipment in motion.
           </h2>
@@ -335,7 +331,7 @@ export default async function HomePage() {
             Product defects are repaired free. Wear, accidents, and hard-earned
             damage are assessed honestly before work begins.
           </p>
-          <Link className={TEXT_LINK_CLASS} href="/pages/field-repair">
+          <Link className={textLink()} href="/pages/field-repair">
             Visit the repair desk
           </Link>
         </article>
@@ -350,15 +346,12 @@ export default async function HomePage() {
               sizes="(min-width: 820px) 45vw, 100vw"
             />
             <div className="self-center p-[45px]">
-              <p className={EYEBROW_CLASS}>Latest field note</p>
+              <p className={eyebrow()}>Latest field note</p>
               <h2 className="mb-[0.83em] text-balance font-heading text-[clamp(44px,5vw,78px)] leading-[0.95]">
                 {dispatch.title}
               </h2>
               <p className="mb-[1em]">{dispatch.excerpt}</p>
-              <Link
-                className={TEXT_LINK_CLASS}
-                href={`/journal/${dispatch.handle}`}
-              >
+              <Link className={textLink()} href={`/journal/${dispatch.handle}`}>
                 Read the dispatch
               </Link>
             </div>

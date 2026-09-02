@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProductCard } from "@/components/product-card";
+import { eyebrow, sectionHeading, textLink } from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
 
 interface CollectionPageProps {
@@ -65,7 +66,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
           />
         </div>
         <div className="relative z-[2] flex flex-col justify-center bg-ink p-[clamp(45px,5vw,80px)] max-md:px-page-gutter max-md:pt-12 max-md:pb-[58px]">
-          <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-accent-warm tracking-field-meta uppercase">
+          <p className={eyebrow({ tone: "warm" })}>
             Movement system / {collection.fieldCode}
           </p>
           <h1 className="m-0 max-w-[620px] text-balance font-heading text-[clamp(62px,6.8vw,108px)] leading-[0.98] font-medium tracking-heading max-md:text-[clamp(54px,12vw,82px)]">
@@ -97,9 +98,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
             />
           </div>
           <div>
-            <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-              The system
-            </p>
+            <p className={eyebrow()}>The system</p>
             <h2 className="mb-7 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading">
               Prepare for change, not every possibility.
             </h2>
@@ -121,7 +120,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
             </ul>
             {guideArticle !== undefined ? (
               <Link
-                className="inline-flex min-h-touch items-center gap-[14px] border-ink border-b font-body text-[11px] font-medium tracking-[0.06em] uppercase after:text-[20px] after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-[5px]"
+                className={textLink()}
                 href={`/journal/${guideArticle.handle}`}
               >
                 Read the field note
@@ -135,10 +134,8 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
         <div className="mx-auto w-[min(100%,var(--container-page))] px-page-gutter">
           <div className="mb-11 flex items-end justify-between gap-[30px] max-sm:flex-col max-sm:items-start">
             <div>
-              <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-                {collection.title} essentials
-              </p>
-              <h2 className="m-0 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading">
+              <p className={eyebrow()}>{collection.title} essentials</p>
+              <h2 className={sectionHeading()}>
                 A focused kit for a full day out.
               </h2>
             </div>
@@ -160,12 +157,8 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
       <section className="mx-auto w-[min(100%,var(--container-page))] px-page-gutter py-[clamp(70px,9vw,140px)]">
         <div className="grid grid-cols-[0.85fr_1.15fr] items-start gap-[clamp(48px,10vw,150px)] max-md:grid-cols-1">
           <div>
-            <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-              Field practice / {collection.fieldCode}
-            </p>
-            <h2 className="m-0 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading">
-              Let the route set the pace.
-            </h2>
+            <p className={eyebrow()}>Field practice / {collection.fieldCode}</p>
+            <h2 className={sectionHeading()}>Let the route set the pace.</h2>
           </div>
           <div>
             <p className="max-w-[670px] text-[clamp(17px,1.45vw,22px)] leading-[1.55] text-text-muted">
@@ -173,10 +166,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
               even, noticing what changes, and reaching the last descent with
               enough attention left to enjoy it.
             </p>
-            <Link
-              className="inline-flex min-h-touch items-center gap-[14px] border-ink border-b font-body text-[11px] font-medium tracking-[0.06em] uppercase after:text-[20px] after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-[5px]"
-              href="/journal"
-            >
+            <Link className={textLink()} href="/journal">
               More field stories
             </Link>
           </div>

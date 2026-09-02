@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
+import { eyebrow, sectionHeading, textLink } from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
 
 export const metadata: Metadata = {
@@ -20,9 +21,7 @@ export default async function AboutCustomPage() {
     <div>
       <section className="mt-[22px] mr-7 ml-7 grid min-h-[82svh] grid-cols-[0.9fr_1.1fr] bg-ink text-text-inverse max-md:mx-2.5 max-md:mt-2.5 max-md:min-h-0 max-md:grid-cols-1">
         <div className="flex flex-col justify-center p-[clamp(45px,6vw,95px)] max-md:px-page-gutter max-md:py-[55px]">
-          <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-            Custom page / About Forward
-          </p>
+          <p className={eyebrow()}>Custom page / About Forward</p>
           <h1 className="mt-5 mb-[30px] text-balance font-heading text-[clamp(58px,7vw,112px)] leading-[0.9] tracking-[-0.06em] max-md:text-[clamp(50px,15vw,76px)]">
             Make less equipment. Make every piece matter.
           </h1>
@@ -42,9 +41,7 @@ export default async function AboutCustomPage() {
         />
       </section>
       <section className="mx-auto w-[min(100%,var(--container-page))] px-page-gutter py-[clamp(70px,9vw,140px)]">
-        <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-          The Forward standard
-        </p>
+        <p className={eyebrow()}>The Forward standard</p>
         <h2 className="max-w-[1100px] text-balance font-heading text-[clamp(48px,7vw,100px)] leading-[0.95]">
           Useful over novel. Repairable over disposable. Quiet over loud.
         </h2>
@@ -93,14 +90,9 @@ export default async function AboutCustomPage() {
             <p className="m-0 max-w-[460px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
               Representative equipment
             </p>
-            <h2 className="m-0 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading">
-              The standard, made physical.
-            </h2>
+            <h2 className={sectionHeading()}>The standard, made physical.</h2>
           </div>
-          <Link
-            className="inline-flex min-h-touch items-center gap-[14px] border-ink border-b font-body text-[11px] font-medium tracking-[0.06em] uppercase after:text-[20px] after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-[5px]"
-            href="/shop"
-          >
+          <Link className={textLink()} href="/shop">
             Complete catalog
           </Link>
         </header>

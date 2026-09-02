@@ -9,6 +9,7 @@ import {
   readAccountSession,
 } from "@/lib/account/account-view";
 import { ACCOUNT_ORDER_LIMIT } from "@/lib/account/queries";
+import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { formatDate } from "@/lib/storefront/format";
 
 export const dynamic = "force-dynamic";
@@ -64,12 +65,8 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
       signedIn
     >
       <div className="mb-[52px]">
-        <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-          Recent log
-        </p>
-        <h2 className="m-0 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading">
-          Orders
-        </h2>
+        <p className={eyebrow()}>Recent log</p>
+        <h2 className={sectionHeading()}>Orders</h2>
       </div>
       {profile.orders.length > 0 ? (
         <table className="w-full border-collapse">

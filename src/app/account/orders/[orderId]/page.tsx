@@ -9,6 +9,7 @@ import {
   readAccountOrder,
   readAccountSession,
 } from "@/lib/account/account-view";
+import { eyebrow, textLink } from "@/lib/presentation/variants";
 import { formatDate } from "@/lib/storefront/format";
 
 /**
@@ -29,8 +30,6 @@ interface OrderPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-const TEXT_LINK_CLASS =
-  "inline-flex min-h-touch items-center gap-[14px] border-ink border-b font-body text-[11px] font-medium tracking-[0.06em] uppercase after:text-[20px] after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-[5px]";
 const CART_LINE_CLASS =
   "grid grid-cols-[190px_1fr_auto] gap-6 border-border-subtle border-b py-[22px] max-sm:grid-cols-[92px_1fr] max-sm:gap-3.5";
 const ACCOUNT_BLOCK_CLASS =
@@ -85,7 +84,7 @@ export default async function OrderPage({
         </div>
       }
     >
-      <Link className={TEXT_LINK_CLASS} href="/account/orders">
+      <Link className={textLink()} href="/account/orders">
         Back to orders
       </Link>
 
@@ -110,9 +109,7 @@ export default async function OrderPage({
 
       <div className="mt-[50px] grid grid-cols-2 gap-3 py-[clamp(42px,6vw,84px)] max-sm:grid-cols-1">
         <article className={ACCOUNT_BLOCK_CLASS}>
-          <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-            Delivery address
-          </p>
+          <p className={eyebrow()}>Delivery address</p>
           {order.shippingAddress === null ? (
             <p className="text-text-muted">
               No delivery address on this order.
@@ -129,9 +126,7 @@ export default async function OrderPage({
           )}
         </article>
         <article className={ACCOUNT_BLOCK_CLASS}>
-          <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-            Order total
-          </p>
+          <p className={eyebrow()}>Order total</p>
           {order.subtotal === null ? null : (
             <div className={SUMMARY_ROW_CLASS}>
               <span>Subtotal</span>

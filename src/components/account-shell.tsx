@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { CUSTOMER_ACCOUNT_LOGOUT_PATH } from "@/lib/account/customer-account";
 import { cn } from "@/lib/cn";
+import { eyebrow as eyebrowClass, textLink } from "@/lib/presentation/variants";
 
 const ACCOUNT_NAV = [
   { href: "/account", label: "Overview" },
@@ -45,9 +46,7 @@ export function AccountShell({
       <header className="flex min-h-[560px] items-end bg-ink px-page-gutter pt-[100px] pb-[75px] text-text-inverse max-md:min-h-[520px] max-sm:min-h-[430px] max-sm:pt-[70px]">
         <div className="mx-auto grid w-full grid-cols-[1.35fr_0.65fr] items-end gap-[50px] max-md:grid-cols-[minmax(0,1fr)] max-md:gap-7">
           <div>
-            <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal tracking-field-meta uppercase">
-              {eyebrow}
-            </p>
+            <p className={eyebrowClass({ tone: "signal" })}>{eyebrow}</p>
             <h1 className="m-0 max-w-[1050px] text-balance font-heading text-display leading-[0.94] font-medium tracking-heading max-sm:text-[clamp(53px,17vw,80px)]">
               {title}
             </h1>
@@ -82,10 +81,7 @@ export function AccountShell({
           })}
           {signedIn ? (
             <form method="post" action={CUSTOMER_ACCOUNT_LOGOUT_PATH}>
-              <button
-                type="submit"
-                className="inline-flex min-h-touch items-center gap-[14px] border-ink border-b bg-transparent font-body text-[11px] font-medium tracking-[0.06em] uppercase after:text-[20px] after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-[5px]"
-              >
+              <button type="submit" className={textLink({ kind: "control" })}>
                 Sign out
               </button>
             </form>

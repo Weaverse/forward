@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
+import { eyebrow, sectionHeading, textLink } from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
 import { formatDate } from "@/lib/storefront/format";
 
@@ -20,9 +21,7 @@ export default async function JournalPage() {
       <header className="flex min-h-[560px] items-end border-border-subtle border-b bg-ink px-page-gutter pt-[100px] pb-[75px] text-text-inverse max-md:min-h-[520px] max-sm:min-h-[430px] max-sm:pt-[70px]">
         <div className="mx-auto grid w-full grid-cols-[1.35fr_0.65fr] items-end gap-[50px] max-md:grid-cols-[minmax(0,1fr)] max-md:gap-7">
           <div>
-            <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal tracking-field-meta uppercase">
-              The field journal
-            </p>
+            <p className={eyebrow({ tone: "signal" })}>The field journal</p>
             <h1 className="m-0 max-w-[1050px] text-balance font-heading text-display leading-[0.94] font-medium tracking-heading max-sm:text-[clamp(53px,17vw,80px)]">
               Notes from farther out.
             </h1>
@@ -51,7 +50,7 @@ export default async function JournalPage() {
             />
           </div>
           <div className="order-1 flex flex-col justify-center p-[clamp(36px,6vw,90px)] max-md:order-2">
-            <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-accent-warm tracking-field-meta uppercase">
+            <p className={eyebrow({ tone: "warm" })}>
               {lead.plate} · {lead.readingMinutes} min read ·{" "}
               {formatDate(lead.publishedAt)}
             </p>
@@ -69,12 +68,8 @@ export default async function JournalPage() {
       <section className="mx-auto w-[min(100%,var(--container-page))] px-page-gutter py-[clamp(70px,9vw,140px)]">
         <div className="mb-11 flex items-end justify-between gap-[30px] max-sm:flex-col max-sm:items-start">
           <div>
-            <p className="mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase">
-              Latest dispatches
-            </p>
-            <h2 className="m-0 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading">
-              Read, learn, head out.
-            </h2>
+            <p className={eyebrow()}>Latest dispatches</p>
+            <h2 className={sectionHeading()}>Read, learn, head out.</h2>
           </div>
         </div>
         <div className="grid grid-cols-12 gap-x-[18px] gap-y-20">
@@ -100,9 +95,7 @@ export default async function JournalPage() {
                   {article.title}
                 </h2>
                 <p className="text-text-muted">{article.excerpt}</p>
-                <span className="inline-flex min-h-touch items-center gap-[14px] border-ink border-b font-body text-[11px] font-medium tracking-[0.06em] uppercase after:text-[20px] after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-[5px]">
-                  Read story
-                </span>
+                <span className={textLink()}>Read story</span>
               </Link>
             </article>
           ))}

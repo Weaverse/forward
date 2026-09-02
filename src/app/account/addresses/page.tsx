@@ -11,6 +11,7 @@ import {
   type AddressFormValues,
   readAccountAddresses,
 } from "@/lib/account/addresses";
+import { eyebrow, sectionHeading, textLink } from "@/lib/presentation/variants";
 import { AddressActionForm } from "./address-form";
 
 export const dynamic = "force-dynamic";
@@ -45,16 +46,12 @@ interface AddressFieldsProps {
   values: AddressFormValues;
 }
 
-const EYEBROW_CLASS =
-  "mb-[14px] font-field-meta text-[11px] leading-[1.3] font-medium text-signal-strong tracking-field-meta uppercase";
 const FIELD_CLASS = "my-[22px]";
 const LABEL_CLASS =
   "mb-2 block text-[11px] font-bold tracking-[0.09em] uppercase";
 const INPUT_CLASS =
   "min-h-[52px] w-full rounded-none border border-[#686b63] bg-transparent p-3 text-text-inverse focus:border-surface-dark focus:outline-[3px] focus:outline-[rgba(23,61,45,0.18)]";
 const FORM_NOTE_CLASS = "text-[12px] text-text-dark-muted";
-const TEXT_LINK_CLASS =
-  "inline-flex min-h-touch items-center gap-[14px] border-ink border-b bg-transparent font-body text-[11px] font-medium tracking-[0.06em] uppercase after:text-[20px] after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-[5px]";
 const ACCOUNT_BLOCK_CLASS =
   "min-h-[280px] border border-ink bg-transparent p-7";
 
@@ -261,16 +258,14 @@ export default async function AddressesPage({
       signedIn
     >
       <div className="mb-[52px]">
-        <p className={EYEBROW_CLASS}>Saved trailheads</p>
-        <h2 className="m-0 text-balance font-heading text-heading-2 leading-[0.98] font-medium tracking-heading">
-          Addresses
-        </h2>
+        <p className={eyebrow()}>Saved trailheads</p>
+        <h2 className={sectionHeading()}>Addresses</h2>
       </div>
       {addresses.length > 0 ? (
         <div className="mt-[50px] grid grid-cols-2 gap-3 max-sm:grid-cols-1">
           {addresses.map((address) => (
             <article key={address.id} className={ACCOUNT_BLOCK_CLASS}>
-              <p className={EYEBROW_CLASS}>
+              <p className={eyebrow()}>
                 {address.isDefault ? "Default" : "Saved"}
               </p>
               <address>
@@ -284,7 +279,7 @@ export default async function AddressesPage({
               {address.isDefault ? null : (
                 <AddressActionForm
                   submitLabel="Make default"
-                  submitClassName={TEXT_LINK_CLASS}
+                  submitClassName={textLink({ kind: "control" })}
                 >
                   <input type="hidden" name="intent" value="default" />
                   <input type="hidden" name="addressId" value={address.id} />
@@ -292,13 +287,15 @@ export default async function AddressesPage({
               )}
               <AddressActionForm
                 submitLabel="Delete address"
-                submitClassName={TEXT_LINK_CLASS}
+                submitClassName={textLink({ kind: "control" })}
               >
                 <input type="hidden" name="intent" value="delete" />
                 <input type="hidden" name="addressId" value={address.id} />
               </AddressActionForm>
               <details>
-                <summary className={TEXT_LINK_CLASS}>Edit address</summary>
+                <summary className={textLink({ kind: "control" })}>
+                  Edit address
+                </summary>
                 <AddressActionForm submitLabel="Save changes">
                   <input type="hidden" name="intent" value="update" />
                   <input type="hidden" name="addressId" value={address.id} />
@@ -316,7 +313,9 @@ export default async function AddressesPage({
       )}
       <div className={ACCOUNT_BLOCK_CLASS}>
         <details>
-          <summary className={TEXT_LINK_CLASS}>Add an address</summary>
+          <summary className={textLink({ kind: "control" })}>
+            Add an address
+          </summary>
           <AddressActionForm submitLabel="Save address">
             <input type="hidden" name="intent" value="create" />
             <AddressFields idPrefix="new-address" values={EMPTY_ADDRESS} />
