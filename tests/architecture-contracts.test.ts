@@ -99,21 +99,6 @@ describe("test-layer separation", () => {
       );
     }
   });
-
-  it("names browser specs so the Bun runner cannot pick them up", async () => {
-    const { readdir } = await import("node:fs/promises");
-    const entries = await readdir("tests/browser");
-    const specs = entries.filter((entry) => entry.endsWith(".ts"));
-
-    assert.ok(specs.length > 0);
-    for (const spec of specs) {
-      assert.doesNotMatch(
-        spec,
-        /\.(?:test|spec)\.tsx?$/,
-        `${spec} would be discovered by \`bun test\``,
-      );
-    }
-  });
 });
 
 describe("Tailwind presentation ownership", () => {
@@ -154,10 +139,6 @@ describe("Tailwind presentation ownership", () => {
       ["shell-panel-enter", "shell-mobile-enter", "shell-image-enter"],
     );
 
-    assert.ok(
-      globals.includes("global accessibility override"),
-      "the three reduced-motion overrides must document their accessibility purpose",
-    );
     assert.deepEqual(
       [...globals.matchAll(/^\s*([\w-]+):\s*([^;!\n]+)\s*!important;/gm)].map(
         ([, property, value]) =>

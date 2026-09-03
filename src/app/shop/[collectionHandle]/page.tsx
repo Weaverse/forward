@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 
 import { ProductCard } from "@/components/product-card";
 import {
-  controlTransition,
+  cta,
   eyebrow,
   sectionHeading,
   textLink,
@@ -81,7 +81,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
             {collection.description}
           </p>
           <Link
-            className={`inline-flex min-h-12 self-start items-center justify-center gap-2.5 border border-signal bg-signal px-5.5 py-3 font-body text-ui font-bold text-ink tracking-button uppercase shadow-button ${controlTransition} hover:translate-0.5 hover:border-ink hover:bg-ink hover:text-signal hover:shadow-button-hover active:translate-1 active:shadow-none focus-visible:outline-3 focus-visible:outline-ink focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0`}
+            className={`${cta({ intent: "signal" })} self-start`}
             href="/shop"
           >
             Shop the complete index
@@ -144,10 +144,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
                 A focused kit for a full day out.
               </h2>
             </div>
-            <Link
-              className={`inline-flex min-h-12 items-center justify-center gap-2.5 border border-text-inverse bg-transparent px-5.5 py-3 font-body text-ui font-bold tracking-button uppercase shadow-button-inverse ${controlTransition} hover:translate-0.5 hover:bg-text-inverse hover:text-ink hover:shadow-button-inverse-hover active:translate-1 active:shadow-none focus-visible:outline-3 focus-visible:outline-text-inverse focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0`}
-              href="/shop"
-            >
+            <Link className={cta({ intent: "light" })} href="/shop">
               View all equipment
             </Link>
           </div>

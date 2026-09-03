@@ -26,20 +26,20 @@ export type MatrixId =
   | "live-account-enabled";
 
 /** Selects Shopify catalog/cart mode; both are required for live matrices. */
-export const CATALOG_CART_REQUIRED_KEYS = [
+const CATALOG_CART_REQUIRED_KEYS = [
   "PUBLIC_STORE_DOMAIN",
   "PRIVATE_STOREFRONT_API_TOKEN",
 ] as const;
 
 /** Catalog/cart inputs that are optional live but must be empty in static. */
-export const CATALOG_CART_OPTIONAL_KEYS = [
+const CATALOG_CART_OPTIONAL_KEYS = [
   "PUBLIC_STOREFRONT_API_TOKEN",
   "PUBLIC_STOREFRONT_ID",
   "PUBLIC_MAIN_MENU_HANDLE",
 ] as const;
 
 /** The all-or-none Customer Account tuple. */
-export const ACCOUNT_KEYS = [
+const ACCOUNT_KEYS = [
   "SHOP_ID",
   "PUBLIC_CUSTOMER_ACCOUNT_API_CLIENT_ID",
   "CUSTOMER_ACCOUNT_SESSION_SECRET",
@@ -82,8 +82,6 @@ export interface ChildEnvironment {
   /** Human-readable matrix description for gate output. */
   description: string;
   env: NodeJS.ProcessEnv;
-  accountEnabled: boolean;
-  shopifyMode: boolean;
 }
 
 const DESCRIPTIONS: Readonly<Record<MatrixId, string>> = {
@@ -114,8 +112,6 @@ export function buildChildEnvironment(
       matrix,
       description: DESCRIPTIONS[matrix],
       env,
-      accountEnabled: false,
-      shopifyMode: false,
     };
   }
 
@@ -129,8 +125,6 @@ export function buildChildEnvironment(
       matrix,
       description: DESCRIPTIONS[matrix],
       env,
-      accountEnabled: false,
-      shopifyMode: true,
     };
   }
 
@@ -139,8 +133,6 @@ export function buildChildEnvironment(
     matrix,
     description: DESCRIPTIONS[matrix],
     env,
-    accountEnabled: true,
-    shopifyMode: true,
   };
 }
 
@@ -177,9 +169,7 @@ export async function runInChildEnvironment(
       env: { ...child.env, ...extraEnv },
     });
     proc.on("error", reject);
-    proc.on("exit", (exitCode, signal) =>
-      resolve(exitCode ?? (signal === null ? 1 : 1)),
-    );
+    proc.on("exit", (exitCode) => resolve(exitCode ?? 1));
   });
   if (code !== 0) {
     throw new Error(`${label} failed with exit code ${code}`);

@@ -68,8 +68,3 @@ export function stubAccountStatus(signedIn: boolean | null): AccountStatusStub {
 export function visibleText(element: Element | null): string {
   return (element?.textContent ?? "").replace(/\s+/g, " ").trim();
 }
-
-/** Accessible names of a list of elements, in DOM order. */
-export function names(elements: readonly HTMLElement[]): string[] {
-  return elements.map((element) => visibleText(element));
-}
