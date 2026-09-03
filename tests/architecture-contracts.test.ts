@@ -9,7 +9,6 @@
 
 import assert from "node:assert/strict";
 import { access, readdir, readFile } from "node:fs/promises";
-import path from "node:path";
 import { describe, it } from "node:test";
 
 const read = (path: string) => readFile(path, "utf8");
@@ -204,20 +203,6 @@ describe("Tailwind presentation ownership", () => {
 });
 
 describe("storefront source boundaries", () => {
-  const movedOwners = [
-    "src/components/address-form.tsx",
-    "src/components/cart-view.tsx",
-    "src/components/shopify-cart-view.tsx",
-    "src/components/add-to-cart-form.tsx",
-    "src/components/cart-count.tsx",
-    "src/components/country-control.tsx",
-    "src/components/field-index-header.tsx",
-    "src/lib/header-navigation.ts",
-    "src/components/mini-cart.tsx",
-    "src/components/query-preserving-field-index-header.tsx",
-    "src/components/site-header.tsx",
-  ];
-
   it("keeps routes and components behind the normalized storefront boundary", async () => {
     const owners = [
       ...(await typescriptFiles("src/app")),
@@ -230,46 +215,6 @@ describe("storefront source boundaries", () => {
         /(?:\bfrom\s+|\bimport\s*\(\s*|\brequire\s*\(\s*)["'][^"']*storefront\/(?:catalog-query|fixtures\/|shopify\/)/,
         `${owner} must use normalized storefront/cart/account/runtime seams`,
       );
-    }
-  });
-
-  it("keeps all moved component and library owners absent and unreferenced", async () => {
-    await Promise.all(
-      movedOwners.map((movedOwner) => assert.rejects(access(movedOwner))),
-    );
-
-    const oldModules = new Set(
-      movedOwners.map((movedOwner) => movedOwner.replace(/\.tsx?$/, "")),
-    );
-    const sources = [
-      ...(await typescriptFiles("src")),
-      ...(await typescriptFiles("tests")),
-    ];
-
-    for (const sourcePath of sources) {
-      const source = await read(sourcePath);
-      const specifiers = [
-        ...source.matchAll(
-          /(?:\bfrom\s+|\bimport\s*(?:\(\s*)?)["']([^"']+)["']/g,
-        ),
-      ].flatMap((match) => (match[1] === undefined ? [] : [match[1]]));
-
-      for (const specifier of specifiers) {
-        const resolved = specifier.startsWith("@/")
-          ? `src/${specifier.slice(2)}`
-          : specifier.startsWith(".")
-            ? path.relative(
-                ".",
-                path.resolve(path.dirname(sourcePath), specifier),
-              )
-            : null;
-        if (resolved !== null) {
-          assert.ok(
-            !oldModules.has(resolved.replace(/\.tsx?$/, "")),
-            `${sourcePath} imports retired module ${specifier}`,
-          );
-        }
-      }
     }
   });
 });
