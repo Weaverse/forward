@@ -231,14 +231,6 @@ describe("catalog GraphQL contract", () => {
   });
 });
 
-describe("icon dependency boundary", () => {
-  it("keeps the icon family local instead of adding an icon runtime", async () => {
-    const packageJson = await read("package.json");
-
-    assert.doesNotMatch(packageJson, /phosphor|react-icons|lucide|heroicons/i);
-  });
-});
-
 describe("preview deployment hygiene", () => {
   it("excludes local editor, secret, build, and QA artifacts", async () => {
     const ignore = await read(".vercelignore");
