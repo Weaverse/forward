@@ -193,6 +193,22 @@ describe("Shopify content structural HTML parser", () => {
     assertRejectsHtml('<a hr<!--hidden-->ef="/shop">Shop</a>');
   });
 
+  it("accepts a recovered character reference but no other recovery", () => {
+    /* Merchant prose legitimately contains `&copy` without a semicolon.
+     * Browsers and parse5 recover that to `©` as ordinary content, so it is
+     * the one tokenizer diagnostic the parser tolerates. */
+    assert.deepEqual(parseArticleHtml("<p>A &copy B</p>", "entity content"), [
+      {
+        type: "paragraph",
+        text: "A © B",
+        runs: [{ text: "A © B" }],
+      },
+    ]);
+
+    assertRejectsHtml("<p>A &copy B<strong>unclosed</p>", "malformed HTML");
+    assertRejectsHtml("<p>A &copy B<em/>still recovered</em></p>");
+  });
+
   it("rejects browser-recovered malformed structures even without parse errors", () => {
     for (const html of [
       "<p><strong>unclosed</p>",

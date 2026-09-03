@@ -81,6 +81,48 @@ test.describe("Cart presentation", () => {
       expect(itemBox.y).toBeLessThan(summaryBox.y);
       expect(Math.abs(image.width - 92)).toBeLessThanOrEqual(1);
     }
+
+    // Empty the demo cart so the primary CTA's actual Tailwind cascade is
+    // exercised. Class-order assertions cannot prove which box shadow wins.
+    while ((await items.getByRole("article").count()) > 0) {
+      await items
+        .getByRole("article")
+        .first()
+        .getByRole("button", { name: /^Remove/ })
+        .click();
+    }
+    const emptyCartCta = page.getByRole("link", {
+      name: "Explore all gear",
+    });
+    await expect(emptyCartCta).toBeVisible();
+    const primaryStyles = await emptyCartCta.evaluate((node) => {
+      const style = getComputedStyle(node);
+      return {
+        boxShadow: style.boxShadow,
+        outlineColor: style.outlineColor,
+      };
+    });
+    expect(primaryStyles.boxShadow).toContain("rgb(217, 255, 87)");
+    expect(primaryStyles.boxShadow).not.toContain("rgb(17, 19, 15)");
+
+    // Enter through the real keyboard tab order; programmatic `.focus()` does
+    // not necessarily activate the browser's `:focus-visible` heuristic, and
+    // the number of Header controls differs by viewport.
+    await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
+    for (let step = 0; step < 20; step += 1) {
+      await page.keyboard.press("Tab");
+      if (
+        await emptyCartCta.evaluate((node) => document.activeElement === node)
+      ) {
+        break;
+      }
+    }
+    await expect(emptyCartCta).toBeFocused();
+    await expect
+      .poll(() =>
+        emptyCartCta.evaluate((node) => getComputedStyle(node).outlineColor),
+      )
+      .toBe("rgb(217, 255, 87)");
   });
 });
 

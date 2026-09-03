@@ -25,19 +25,19 @@ export default async function MaterialsCustomPage() {
   );
   return (
     <div>
-      <section className="mt-[22px] mr-7 ml-7 grid min-h-[82svh] grid-cols-[0.9fr_1.1fr] bg-ink text-text-inverse max-md:mx-2.5 max-md:mt-2.5 max-md:min-h-0 max-md:grid-cols-1">
-        <div className="order-2 flex flex-col justify-center p-[clamp(45px,6vw,95px)] max-md:order-1 max-md:px-page-gutter max-md:py-[55px]">
+      <section className="mt-5.5 mr-7 ml-7 grid min-h-page-min grid-cols-split-90 bg-ink text-text-inverse max-md:mx-2.5 max-md:mt-2.5 max-md:min-h-0 max-md:grid-cols-1">
+        <div className="order-2 flex flex-col justify-center p-panel-wide max-md:order-1 max-md:px-page-gutter max-md:py-13.75">
           <p className={eyebrow()}>Custom page / Material library</p>
-          <h1 className="mt-5 mb-[30px] text-balance font-heading text-[clamp(58px,7vw,112px)] leading-[0.9] tracking-[-0.06em] max-md:text-[clamp(50px,15vw,76px)]">
+          <h1 className="mt-5 mb-7.5 text-balance font-heading text-display-wide leading-display-tightest tracking-display-tight max-md:text-display-mobile">
             Performance begins with what a product is made from.
           </h1>
-          <p className="max-w-[670px] text-[clamp(17px,1.45vw,22px)] leading-[1.55] text-text-muted">
+          <p className="max-w-lede text-lede leading-lede text-text-muted">
             We use a short material vocabulary, document what each element is
             for, and design care around extending its useful life.
           </p>
         </div>
         <Image
-          className="order-1 h-full object-cover saturate-[0.72] max-md:order-2 max-md:h-[60svh]"
+          className="order-1 h-full object-cover saturate-72 max-md:order-2 max-md:h-home-media-mobile"
           src={theme.standardBandImage.src}
           alt={theme.standardBandImage.alt}
           width={theme.standardBandImage.width}
@@ -46,7 +46,7 @@ export default async function MaterialsCustomPage() {
           priority
         />
       </section>
-      <section className="mx-auto grid w-[min(100%,var(--container-page))] grid-cols-3 gap-px bg-ink p-px max-md:grid-cols-1">
+      <section className="mx-auto grid w-full max-w-page grid-cols-3 gap-px bg-ink p-px max-md:grid-cols-1">
         {[
           [
             "01",
@@ -66,10 +66,10 @@ export default async function MaterialsCustomPage() {
         ].map(([number, title, copy]) => (
           <article
             key={number}
-            className="min-h-[420px] bg-text-inverse p-[45px] max-md:min-h-0"
+            className="min-h-105 bg-text-inverse p-11.25 max-md:min-h-0"
           >
             <span className="font-field-meta text-signal-strong">{number}</span>
-            <h2 className="mt-20 text-balance font-heading text-[38px] max-md:mt-[35px]">
+            <h2 className="mt-20 text-balance font-heading text-material-title max-md:mt-8.75">
               {title}
             </h2>
             <p>{copy}</p>
@@ -79,19 +79,19 @@ export default async function MaterialsCustomPage() {
       <section className="grid grid-cols-3 bg-ink max-md:grid-cols-1">
         {representatives.map(({ product, image }) => (
           <Link
-            className="relative min-h-[650px] text-text-inverse max-md:min-h-[600px]"
+            className="relative min-h-162.5 text-text-inverse max-md:min-h-150"
             href={`/products/${product.handle}`}
             key={product.handle}
           >
             <Image
-              className="h-full object-cover saturate-[0.65]"
+              className="h-full object-cover saturate-65"
               src={image.src}
               alt={image.alt}
               width={image.width}
               height={image.height}
               sizes="(min-width: 820px) 34vw, 100vw"
             />
-            <div className="absolute right-5 bottom-5 left-5 grid gap-[7px] bg-ink/92 p-5">
+            <div className="absolute right-5 bottom-5 left-5 grid gap-1.75 bg-ink/92 p-5">
               <span>{product.category}</span>
               <strong>{product.title}</strong>
               <span>Inspect product →</span>
@@ -99,7 +99,7 @@ export default async function MaterialsCustomPage() {
           </Link>
         ))}
       </section>
-      <section className="mx-auto grid w-[min(100%,var(--container-page))] grid-cols-[1fr_0.7fr_auto] items-end gap-[45px] px-page-gutter py-[clamp(70px,9vw,140px)] max-md:grid-cols-1">
+      <section className="mx-auto grid w-full max-w-page grid-cols-spec-row items-end gap-11.25 px-page-gutter py-section-block max-md:grid-cols-1">
         <div>
           <p className={eyebrow()}>Care + repair</p>
           <h2 className={sectionHeading()}>

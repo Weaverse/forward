@@ -82,7 +82,7 @@ export function CartView({ seedLines }: CartViewProps) {
   const itemCount = totalQuantity(lines);
 
   return (
-    <div className="mx-auto w-[min(100%,var(--container-page))] px-page-gutter pt-[105px] pb-[clamp(56px,8vw,110px)]">
+    <div className="mx-auto w-full max-w-page px-page-gutter pt-26.25 pb-section-block-bottom">
       {/* Cart status changes are announced without stealing focus. */}
       <p aria-live="polite" role="status" className="sr-only">
         {announcement}
@@ -97,12 +97,12 @@ export function CartView({ seedLines }: CartViewProps) {
 
       {!hydrated ? (
         <div className={cartEmptyState}>
-          <div className="max-w-[500px]">
+          <div className="max-w-form">
             <p className={cartEyebrow}>Opening the cart…</p>
           </div>
         </div>
       ) : lines.length > 0 ? (
-        <div className="grid grid-cols-[minmax(0,1.45fr)_minmax(320px,0.55fr)] gap-[clamp(40px,8vw,110px)] py-[clamp(42px,6vw,84px)] max-md:grid-cols-1">
+        <div className="grid grid-cols-cart gap-feature-gap py-section-block-compact max-md:grid-cols-1">
           <section
             className="border-border-subtle border-t"
             aria-label="Cart items"
@@ -216,7 +216,7 @@ export function CartView({ seedLines }: CartViewProps) {
         </div>
       ) : (
         <div className={cartEmptyState}>
-          <div className="max-w-[500px]">
+          <div className="max-w-form">
             <h2 className={cartEmptyHeading}>Nothing packed yet.</h2>
             <p className="text-text-muted">
               Build a field system around the weather and miles ahead.

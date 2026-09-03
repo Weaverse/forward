@@ -13,7 +13,7 @@ import {
 } from "@/lib/storefront/integrations";
 
 const FOOTER_COLUMN_CLASS =
-  "[&>a]:flex [&>a]:min-h-9 [&>a]:items-center [&>a]:text-[12px] [&>a:hover]:text-signal [&>h2]:mt-0 [&>h2]:mb-[15px] [&>h2]:font-body [&>h2]:text-[10px] [&>h2]:text-text-dark-muted [&>h2]:tracking-field-meta [&>h2]:uppercase";
+  "[&>a]:flex [&>a]:min-h-9 [&>a]:items-center [&>a]:text-caption [&>a:hover]:text-signal [&>h2]:mt-0 [&>h2]:mb-3.75 [&>h2]:font-body [&>h2]:text-field-meta [&>h2]:text-text-dark-muted [&>h2]:tracking-field-meta [&>h2]:uppercase";
 
 /**
  * Shopify owns the menu columns; theme-owned custom pages get their own
@@ -39,16 +39,16 @@ export async function SiteFooter() {
 
   return (
     <footer
-      className="relative bg-ink px-page-gutter pt-[100px] pb-6 text-text-inverse"
+      className="relative bg-ink px-page-gutter pt-25 pb-6 text-text-inverse"
       data-shell-background
     >
       <div
-        className="mx-auto grid w-[min(100%,var(--container-page))] grid-cols-[1.5fr_repeat(4,0.45fr)] gap-[50px] max-lg:grid-cols-[1.2fr_repeat(2,minmax(0,1fr))] max-md:grid-cols-2 max-sm:grid-cols-1"
+        className="mx-auto grid w-full max-w-page grid-cols-[1.5fr_repeat(4,0.45fr)] gap-12.5 max-lg:grid-cols-[1.2fr_repeat(2,minmax(0,1fr))] max-md:grid-cols-2 max-sm:grid-cols-1"
         data-footer-grid
       >
         <div className="max-md:col-span-full max-sm:col-auto">
           <Wordmark variant="footer" />
-          <p className="mt-[30px] mb-[1em] max-w-[380px] text-text-dark-muted">
+          <p className="mt-7.5 mb-prose-paragraph max-w-95 text-text-dark-muted">
             {themeContent.footerTagline}
           </p>
         </div>
@@ -79,8 +79,8 @@ export async function SiteFooter() {
         </nav>
       </div>
       {VERIFIED_SOCIAL_LINKS.length > 0 ? (
-        <div className="mx-auto mt-11 flex w-[min(100%,var(--container-page))] items-center justify-between gap-6 border-white/20 border-t pt-[22px] max-sm:flex-col max-sm:items-start">
-          <h2 className="m-0 text-[11px] font-ui text-text-dark-muted tracking-field-meta uppercase">
+        <div className="mx-auto mt-11 flex w-full max-w-page items-center justify-between gap-6 border-white/20 border-t pt-5.5 max-sm:flex-col max-sm:items-start">
+          <h2 className="m-0 text-ui font-ui text-text-dark-muted tracking-field-meta uppercase">
             {SOCIAL_SECTION_HEADING}
           </h2>
           <ul className="m-0 flex list-none gap-2.5 p-0">
@@ -100,8 +100,8 @@ export async function SiteFooter() {
       ) : null}
       <div
         className={cn(
-          "mx-auto flex w-[min(100%,var(--container-page))] justify-between border-white/20 border-t pt-5 font-body text-[10px] text-text-dark-muted tracking-[0.1em] uppercase max-sm:flex-col max-sm:items-start max-sm:gap-2 max-sm:pb-[38px]",
-          VERIFIED_SOCIAL_LINKS.length > 0 ? "mt-6" : "mt-[60px]",
+          "mx-auto flex w-full max-w-page justify-between border-white/20 border-t pt-5 font-body text-field-meta text-text-dark-muted tracking-label uppercase max-sm:flex-col max-sm:items-start max-sm:gap-2 max-sm:pb-9.5",
+          VERIFIED_SOCIAL_LINKS.length > 0 ? "mt-6" : "mt-15",
         )}
       >
         {themeContent.footerStatus.length > 0 ? (

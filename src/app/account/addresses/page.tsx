@@ -46,14 +46,12 @@ interface AddressFieldsProps {
   values: AddressFormValues;
 }
 
-const FIELD_CLASS = "my-[22px]";
-const LABEL_CLASS =
-  "mb-2 block text-[11px] font-bold tracking-[0.09em] uppercase";
+const FIELD_CLASS = "my-5.5";
+const LABEL_CLASS = "mb-2 block text-ui font-bold tracking-button uppercase";
 const INPUT_CLASS =
-  "min-h-[52px] w-full rounded-none border border-[#686b63] bg-transparent p-3 text-text-inverse focus:border-surface-dark focus:outline-[3px] focus:outline-[rgba(23,61,45,0.18)]";
-const FORM_NOTE_CLASS = "text-[12px] text-text-dark-muted";
-const ACCOUNT_BLOCK_CLASS =
-  "min-h-[280px] border border-ink bg-transparent p-7";
+  "min-h-13 w-full rounded-none border border-border-field bg-transparent p-3 text-text-inverse focus:border-surface-dark focus:outline-3 focus:outline-focus-field";
+const FORM_NOTE_CLASS = "text-caption text-text-dark-muted";
+const ACCOUNT_BLOCK_CLASS = "min-h-70 border border-ink bg-transparent p-7";
 
 /**
  * The bounded `CustomerAddressInput` subset Forward writes, as plain inputs.
@@ -257,12 +255,12 @@ export default async function AddressesPage({
       lede="Add, edit, or retire the addresses we ship your kit to."
       signedIn
     >
-      <div className="mb-[52px]">
+      <div className="mb-13">
         <p className={eyebrow()}>Saved trailheads</p>
         <h2 className={sectionHeading()}>Addresses</h2>
       </div>
       {addresses.length > 0 ? (
-        <div className="mt-[50px] grid grid-cols-2 gap-3 max-sm:grid-cols-1">
+        <div className="mt-12.5 grid grid-cols-2 gap-3 max-sm:grid-cols-1">
           {addresses.map((address) => (
             <article key={address.id} className={ACCOUNT_BLOCK_CLASS}>
               <p className={eyebrow()}>
@@ -319,9 +317,9 @@ export default async function AddressesPage({
           <AddressActionForm submitLabel="Save address">
             <input type="hidden" name="intent" value="create" />
             <AddressFields idPrefix="new-address" values={EMPTY_ADDRESS} />
-            <div className="flex min-h-10 items-center gap-2.5 font-body text-[9px] text-text-muted">
+            <div className="flex min-h-10 items-center gap-2.5 font-body text-micro text-text-muted">
               <input
-                className="size-[17px] accent-signal-strong"
+                className="size-4.25 accent-signal-strong"
                 id="new-address-default"
                 type="checkbox"
                 name="defaultAddress"

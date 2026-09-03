@@ -29,7 +29,7 @@ interface ProductDetailProps {
 }
 
 const optionChip = cva(
-  "relative inline-flex min-h-touch min-w-12 items-center justify-center gap-2 border px-3.5 py-2 font-body text-[12px] font-bold",
+  "relative inline-flex min-h-touch min-w-12 items-center justify-center gap-2 border px-3.5 py-2 font-body text-caption font-bold",
   {
     variants: {
       interactive: {
@@ -41,7 +41,7 @@ const optionChip = cva(
         false: "border-border-dark-strong bg-transparent",
       },
       soldOut: {
-        true: "line-through after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(to_top_right,transparent_calc(50%_-_1px),currentColor_calc(50%_-_1px),currentColor_calc(50%_+_1px),transparent_calc(50%_+_1px))] after:content-['']",
+        true: "line-through after:pointer-events-none after:absolute after:inset-0 after:bg-diagonal-strike after:content-['']",
         false: null,
       },
     },
@@ -165,7 +165,7 @@ function GalleryModal({
   return (
     <dialog
       ref={dialogRef}
-      className="m-0 h-svh max-h-none w-screen max-w-none border-0 bg-ink p-0 text-text-inverse backdrop:bg-black/[0.94]"
+      className="m-0 h-svh max-h-none w-screen max-w-none border-0 bg-ink p-0 text-text-inverse backdrop:bg-black/94"
       aria-label={`${product.title} image gallery`}
       onClose={onClose}
       onCancel={(event) => {
@@ -173,7 +173,7 @@ function GalleryModal({
         dialogRef.current?.close();
       }}
     >
-      <div className="grid h-[58px] grid-cols-[1fr_auto_auto] items-center gap-[30px] border-border-dark border-b px-5 font-field-meta text-[9px] uppercase max-md:grid-cols-[1fr_auto]">
+      <div className="grid h-14.5 grid-cols-[1fr_auto_auto] items-center gap-7.5 border-border-dark border-b px-5 font-field-meta text-micro uppercase max-md:grid-cols-lead-trailing">
         <span>
           {product.title} / {colorway.name}
         </span>
@@ -190,7 +190,7 @@ function GalleryModal({
           Close ×
         </button>
       </div>
-      <div className="relative grid h-[calc(100svh-148px)] place-items-center px-20 py-[18px] max-md:h-[calc(100svh-138px)] max-md:px-[50px] max-md:py-3">
+      <div className="relative grid h-[calc(100svh-148px)] place-items-center px-20 py-4.5 max-md:h-[calc(100svh-138px)] max-md:px-12.5 max-md:py-3">
         <Image
           className="h-full w-auto max-w-full object-contain"
           key={image.src}
@@ -202,7 +202,7 @@ function GalleryModal({
           priority
         />
         <button
-          className="absolute top-1/2 left-4 h-14 w-12 bg-signal text-[24px] text-ink"
+          className="absolute top-1/2 left-4 h-14 w-12 bg-signal text-product-price text-ink"
           type="button"
           onClick={() =>
             setIndex((current) => (current - 1 + images.length) % images.length)
@@ -212,7 +212,7 @@ function GalleryModal({
           ←
         </button>
         <button
-          className="absolute top-1/2 right-4 h-14 w-12 bg-signal text-[24px] text-ink"
+          className="absolute top-1/2 right-4 h-14 w-12 bg-signal text-product-price text-ink"
           type="button"
           onClick={() => setIndex((current) => (current + 1) % images.length)}
           aria-label="Next image"
@@ -220,7 +220,7 @@ function GalleryModal({
           →
         </button>
       </div>
-      <fieldset className="flex h-[90px] justify-center gap-2 border-border-dark border-t p-[9px] max-md:h-20">
+      <fieldset className="flex h-22.5 justify-center gap-2 border-border-dark border-t p-2.25 max-md:h-20">
         <legend className="sr-only">Choose gallery image</legend>
         {images.map((entry, entryIndex) => (
           <button
@@ -230,7 +230,7 @@ function GalleryModal({
               "w-14 border p-0",
               entryIndex === index
                 ? "border-signal opacity-100"
-                : "border-transparent opacity-[0.55]",
+                : "border-transparent opacity-55",
             )}
             aria-label={`View image ${entryIndex + 1}: ${entry.alt}`}
             aria-pressed={entryIndex === index}
@@ -290,11 +290,11 @@ function ProductGallery({
           >
             <Image
               className={cn(
-                "w-full saturate-[0.72]",
+                "w-full saturate-72",
                 index >= 3
                   ? "h-auto min-h-0 aspect-auto object-contain"
                   : "aspect-4/5 h-auto object-cover md:h-full",
-                index === 0 && "md:aspect-auto md:min-h-[940px]",
+                index === 0 && "md:aspect-auto md:min-h-235",
               )}
               src={image.src}
               alt={image.alt}
@@ -309,7 +309,7 @@ function ProductGallery({
               loading={index === 0 ? undefined : "lazy"}
             />
             <span
-              className="absolute right-3 bottom-3 bg-black/[0.88] px-2.5 py-[7px] font-body text-[9px] text-text-inverse uppercase"
+              className="absolute right-3 bottom-3 bg-black/88 px-2.5 py-1.75 font-body text-micro text-text-inverse uppercase"
               aria-hidden="true"
             >
               Zoom +
@@ -351,25 +351,25 @@ function ProductDetailView({
         className="relative col-start-1 row-start-2 border-border-dark border-t text-text-inverse md:row-start-1 md:border-t-0 md:border-r"
         aria-label="Purchase panel"
       >
-        <div className="bg-ink px-page-gutter pt-11 pb-[70px] md:sticky md:top-[calc(var(--spacing-header)+30px)] md:p-[34px] lg:p-[clamp(36px,5vw,80px)]">
-          <p className="mb-7 font-field-meta text-[11px] font-medium text-text-dark-muted tracking-field-meta uppercase">
+        <div className="bg-ink px-page-gutter pt-11 pb-17.5 md:sticky md:top-[calc(var(--spacing-header)+30px)] md:p-8.5 lg:p-[clamp(36px,5vw,80px)]">
+          <p className="mb-7 font-field-meta text-ui font-medium text-text-dark-muted tracking-field-meta uppercase">
             <Link href="/shop">Shop</Link> /{" "}
             <Link href={`/shop?category=${product.category}`}>
               {product.category}
             </Link>
           </p>
-          <div className="mb-[22px] flex justify-between gap-5">
+          <div className="mb-5.5 flex justify-between gap-5">
             <span className={eyebrow({ tone: "signal" })}>
               Forward equipment
             </span>
-            <span className="font-field-meta text-[12px] font-medium text-text-dark-muted tracking-field-meta uppercase">
+            <span className="font-field-meta text-caption font-medium text-text-dark-muted tracking-field-meta uppercase">
               {specBadge}
             </span>
           </div>
-          <h1 className="mt-0 mb-3 text-balance font-heading text-[clamp(44px,3.7vw,66px)] leading-[0.96] font-medium tracking-heading [overflow-wrap:anywhere]">
+          <h1 className="mt-0 mb-3 text-balance font-heading text-product-title leading-product-title font-medium tracking-heading wrap-anywhere">
             {product.title}
           </h1>
-          <p className="m-0 flex flex-wrap items-baseline gap-2.5 text-[13px] whitespace-nowrap">
+          <p className="m-0 flex flex-wrap items-baseline gap-2.5 text-label whitespace-nowrap">
             <strong>
               <span className="sr-only">
                 {compareAt !== null ? "Sale price " : "Price "}
@@ -382,23 +382,23 @@ function ProductDetailView({
                   <span className="sr-only">Regular price </span>
                   {formatMoney(compareAt)}
                 </del>
-                <span className="bg-signal px-2 py-1 font-body text-[11px] font-extrabold text-ink tracking-[0.08em] uppercase">
+                <span className="bg-signal px-2 py-1 font-body text-ui font-extrabold text-ink tracking-control uppercase">
                   On sale
                 </span>
               </>
             ) : null}
           </p>
-          <p className="mt-[25px] mb-[30px] text-[16px] text-text-dark-muted">
+          <p className="mt-6.25 mb-7.5 text-base text-text-dark-muted">
             {product.description}
           </p>
 
           <fieldset className="my-6">
             <legend className="sr-only">Color</legend>
-            <div className="mb-2.5 flex justify-between font-body text-[9px] font-medium tracking-[0.08em] uppercase">
+            <div className="mb-2.5 flex justify-between font-body text-micro font-medium tracking-control uppercase">
               <span>Color</span>
               <span>{colorway.name}</span>
             </div>
-            <div className="flex flex-wrap gap-[7px]">
+            <div className="flex flex-wrap gap-1.75">
               {product.colorways.map((entry) => {
                 const next = resolveProductSelection(
                   product,
@@ -440,11 +440,11 @@ function ProductDetailView({
           {product.options.map((option) => (
             <fieldset className="my-6" key={option.name}>
               <legend className="sr-only">{option.name}</legend>
-              <div className="mb-2.5 flex justify-between font-body text-[9px] font-medium tracking-[0.08em] uppercase">
+              <div className="mb-2.5 flex justify-between font-body text-micro font-medium tracking-control uppercase">
                 <span>{option.name}</span>
                 <span>{selection.selectedOptions[option.name]}</span>
               </div>
-              <div className="flex flex-wrap gap-[7px]">
+              <div className="flex flex-wrap gap-1.75">
                 {option.values.map((value) => {
                   const nextOptions = {
                     ...selection.selectedOptions,

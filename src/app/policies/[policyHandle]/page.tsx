@@ -42,23 +42,23 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
 
   return (
     <>
-      <header className="flex min-h-[560px] items-end border-border-subtle border-b bg-ink px-page-gutter pt-[100px] pb-[75px] text-text-inverse max-md:min-h-[520px] max-sm:min-h-[430px] max-sm:pt-[70px]">
-        <div className="mx-auto grid w-full grid-cols-[1.35fr_0.65fr] items-end gap-[50px] max-md:grid-cols-[minmax(0,1fr)] max-md:gap-7">
+      <header className="flex min-h-140 items-end border-border-subtle border-b bg-ink px-page-gutter pt-25 pb-18.75 text-text-inverse max-md:min-h-130 max-sm:min-h-107.5 max-sm:pt-17.5">
+        <div className="mx-auto grid w-full grid-cols-page-header items-end gap-12.5 max-md:grid-cols-1 max-md:gap-7">
           <div>
             <p className={eyebrow({ tone: "signal" })}>Support / Policy</p>
-            <h1 className="m-0 max-w-[1050px] text-balance font-heading text-display leading-[0.94] font-medium tracking-heading max-sm:text-[clamp(53px,17vw,80px)]">
+            <h1 className="m-0 max-w-feature text-balance font-heading text-display leading-display font-medium tracking-heading max-sm:text-index-display-mobile">
               {policy.title}
             </h1>
           </div>
-          <p className="m-0 max-w-[670px] justify-self-end text-[clamp(17px,1.45vw,22px)] leading-[1.55] text-[#b5b8ae] max-md:max-w-full max-md:justify-self-start">
+          <p className="m-0 max-w-lede justify-self-end text-lede leading-lede text-text-dark-lede max-md:max-w-full max-md:justify-self-start">
             {policy.summary}
           </p>
         </div>
       </header>
 
       <article>
-        <div className="mx-auto grid w-[min(100%,var(--container-page))] grid-cols-[180px_minmax(0,720px)] justify-center gap-[clamp(40px,8vw,120px)] px-page-gutter py-[clamp(70px,9vw,130px)] max-md:grid-cols-1">
-          <aside className="text-[12px] text-text-muted max-md:border-border-subtle max-md:border-b max-md:pb-5">
+        <div className="mx-auto grid w-full max-w-page grid-cols-article-body justify-center gap-article-gap px-page-gutter py-section-block-short max-md:grid-cols-1">
+          <aside className="text-caption text-text-muted max-md:border-border-subtle max-md:border-b max-md:pb-5">
             <p className={eyebrow()}>Store policies</p>
             <nav aria-label="Store policies">
               {allPolicies.map((entry) => (
@@ -75,18 +75,18 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
               ))}
             </nav>
             {policy.updatedAt ? (
-              <p className="font-field-meta text-[12px] font-medium text-text-muted tracking-field-meta uppercase">
+              <p className="font-field-meta text-caption font-medium text-text-muted tracking-field-meta uppercase">
                 Updated {formatDate(policy.updatedAt)}
               </p>
             ) : null}
           </aside>
-          <div className="font-heading text-[clamp(21px,2vw,27px)] leading-[1.7]">
-            <p className="mb-[1.4em] max-w-[670px] text-[clamp(17px,1.45vw,22px)] leading-[1.55] text-text-muted">
+          <div className="font-heading text-article-subheading leading-rich-copy">
+            <p className="mb-prose-block max-w-lede text-lede leading-lede text-text-muted">
               {policy.summary}
             </p>
             {policy.sections.map((section) => (
               <section key={section.heading}>
-                <h2 className="mt-[2.5em] mb-[0.8em] text-balance text-[clamp(34px,4vw,52px)] leading-[1.05] font-medium">
+                <h2 className="mt-prose-section mb-prose-subhead text-balance text-article-heading leading-copy-tight font-medium">
                   {section.heading}
                 </h2>
                 {section.paragraphs.map((paragraph) => {
@@ -96,7 +96,7 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
                   return (
                     <p
                       key={`${section.heading}:${paragraphKey}`}
-                      className="mb-[1.4em]"
+                      className="mb-prose-block"
                     >
                       {paragraph.map((run) => {
                         const runKey = `${run.href ?? "text"}:${run.text}`;
@@ -117,7 +117,7 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
                 })}
               </section>
             ))}
-            <p className="mb-[1.4em] text-text-muted">
+            <p className="mb-prose-block text-text-muted">
               Questions about this policy? Visit the{" "}
               <Link href="/pages/contact">contact page</Link>.
             </p>

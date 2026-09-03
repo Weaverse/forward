@@ -17,14 +17,14 @@ export default function ErrorPage({
 }) {
   return (
     <div className={emptyState({ size: "page" })}>
-      <div className="max-w-[560px]" role="alert">
+      <div className="max-w-state" role="alert">
         <p className={eyebrow()}>Field report / Error</p>
         <h1 className={sectionHeading()}>Weather moved in.</h1>
-        <p className="max-w-[670px] text-[clamp(17px,1.45vw,22px)] leading-[1.55] text-text-muted">
+        <p className="max-w-lede text-lede leading-lede text-text-muted">
           An unexpected error interrupted this page.
         </p>
         {error.digest ? (
-          <p className="font-field-meta text-[12px] font-medium text-text-muted tracking-field-meta uppercase">
+          <p className="font-field-meta text-caption font-medium text-text-muted tracking-field-meta uppercase">
             Reference / {error.digest}
           </p>
         ) : null}

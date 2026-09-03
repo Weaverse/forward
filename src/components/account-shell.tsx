@@ -43,22 +43,22 @@ export function AccountShell({
 }: AccountShellProps) {
   return (
     <>
-      <header className="flex min-h-[560px] items-end bg-ink px-page-gutter pt-[100px] pb-[75px] text-text-inverse max-md:min-h-[520px] max-sm:min-h-[430px] max-sm:pt-[70px]">
-        <div className="mx-auto grid w-full grid-cols-[1.35fr_0.65fr] items-end gap-[50px] max-md:grid-cols-[minmax(0,1fr)] max-md:gap-7">
+      <header className="flex min-h-140 items-end bg-ink px-page-gutter pt-25 pb-18.75 text-text-inverse max-md:min-h-130 max-sm:min-h-107.5 max-sm:pt-17.5">
+        <div className="mx-auto grid w-full grid-cols-page-header items-end gap-12.5 max-md:grid-cols-1 max-md:gap-7">
           <div>
             <p className={eyebrowClass({ tone: "signal" })}>{eyebrow}</p>
-            <h1 className="m-0 max-w-[1050px] text-balance font-heading text-display leading-[0.94] font-medium tracking-heading max-sm:text-[clamp(53px,17vw,80px)]">
+            <h1 className="m-0 max-w-feature text-balance font-heading text-display leading-display font-medium tracking-heading max-sm:text-index-display-mobile">
               {title}
             </h1>
           </div>
           {heroAside ?? (
-            <p className="m-0 max-w-[670px] justify-self-end text-[clamp(17px,1.45vw,22px)] leading-[1.55] text-[#b5b8ae] max-md:max-w-full max-md:justify-self-start">
+            <p className="m-0 max-w-lede justify-self-end text-lede leading-lede text-text-dark-lede max-md:max-w-full max-md:justify-self-start">
               {lede}
             </p>
           )}
         </div>
       </header>
-      <div className="mx-auto grid w-[min(100%,var(--container-page))] grid-cols-[190px_1fr] gap-[clamp(42px,8vw,120px)] px-page-gutter pt-[70px] pb-[120px] max-md:grid-cols-1">
+      <div className="mx-auto grid w-full max-w-page grid-cols-media-row gap-[clamp(42px,8vw,120px)] px-page-gutter pt-17.5 pb-30 max-md:grid-cols-1">
         <nav
           className="self-start border-border-subtle border-t font-body max-md:flex max-md:overflow-x-auto"
           aria-label="Account navigation"
@@ -71,7 +71,7 @@ export function AccountShell({
                 href={item.href}
                 aria-current={selected ? "page" : undefined}
                 className={cn(
-                  "flex min-h-[50px] items-center border-border-subtle border-b text-[9px] font-bold uppercase max-md:min-w-[120px] max-md:pr-5",
+                  "flex min-h-12.5 items-center border-border-subtle border-b text-micro font-bold uppercase max-md:min-w-30 max-md:pr-5",
                   selected && "text-signal-strong",
                 )}
               >

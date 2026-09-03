@@ -12,7 +12,16 @@ import { access, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, it } from "node:test";
 
+import {
+  arbitraryValues,
+  classNameLiterals,
+  classNameSites,
+  classNameSource,
+  standardEquivalent,
+} from "../scripts/classname-source.mts";
+import { canonicalCssValue, THEME_TOKENS } from "../scripts/theme-tokens.mts";
 import { RETIRED_PRESENTATION_CLASSES } from "./retired-presentation-classes";
+import { REVIEWED_ARBITRARY_VALUES } from "./reviewed-arbitrary-values";
 
 const read = (path: string) => readFile(path, "utf8");
 
@@ -49,26 +58,6 @@ async function presentationOwners(): Promise<string[]> {
         source.includes('from "class-variance-authority"'),
     )
     .map(([file]) => file);
-}
-
-function classNameSource(source: string): string {
-  const attributes = [
-    ...source.matchAll(/className\s*=\s*(?:"[^"]*"|'[^']*'|{[\s\S]*?})/g),
-  ].map(([match]) => match);
-  const properties = [
-    ...source.matchAll(
-      /className\s*:\s*(?:cn\(\s*)?(?:"[^"]*"|'[^']*'|`[^`]*`)/g,
-    ),
-  ].map(([match]) => match);
-  const recipes = [
-    ...source.matchAll(
-      /(?:export\s+)?const\s+[A-Za-z_$][\w$]*\s*=\s*(?:"([^"]*)"|'([^']*)'|`([^`]*)`)/g,
-    ),
-  ].map((match) => match.slice(1).find(Boolean) ?? "");
-  const cvaRecipes = [...source.matchAll(/\bcva\([\s\S]*?\n\s*\}?\);/g)].map(
-    ([match]) => match,
-  );
-  return [...attributes, ...properties, ...recipes, ...cvaRecipes].join("\n");
 }
 
 describe("test-layer separation", () => {
@@ -149,15 +138,304 @@ describe("Tailwind presentation ownership", () => {
   ];
 
   it("extracts simple and configured cva recipes for architecture checks", () => {
-    const simpleRecipe = `export const simple = cva(
-  "text-link",
+    const simpleRecipe = `const base = "text-link";
+export const simple = cva(
+  base,
 );`;
-    const configuredRecipe = `export const configured = cva("", {
+    const configuredRecipe = `const defaultVariants = {
+  tone: "not-a-class-default",
+};
+const compoundVariants = [
+  { tone: "not-a-class-selector", class: "border-[#abc]" },
+];
+export const configured = cva("", {
   variants: { tone: { retired: "eyebrow" } },
+  defaultVariants,
+  compoundVariants,
 });`;
 
     assert.match(classNameSource(simpleRecipe), /text-link/);
-    assert.match(classNameSource(configuredRecipe), /eyebrow/);
+    const configuredClasses = classNameSource(configuredRecipe);
+    assert.match(configuredClasses, /eyebrow/);
+    assert.match(configuredClasses, /border-\[#abc\]/);
+    assert.doesNotMatch(configuredClasses, /not-a-class-default/);
+    assert.doesNotMatch(configuredClasses, /not-a-class-selector/);
+  });
+
+  it("extracts a whole className template literal past its interpolations", () => {
+    const owner = [
+      "export function NotFound() {",
+      "  return (",
+      "    <a",
+      `      href={\`/\${locale}/shop\`}`,
+      `      className={\`\${cta()} max-sm:w-full retired-after-interpolation!\`}`,
+      "    >",
+      "      Shop",
+      "    </a>",
+      "  );",
+      "}",
+    ].join("\n");
+
+    const extracted = classNameSource(owner);
+
+    assert.match(extracted, /max-sm:w-full/);
+    assert.match(extracted, /retired-after-interpolation!/);
+  });
+
+  it("follows only className-reachable identifiers, composition, and spreads", () => {
+    const owner = `
+const marketingCopy = "text-lede";
+const localStyles = { root: "border-[#111]!" };
+const className = "ring-offset-[#333]!";
+const classes = cn(
+  "bg-[#fff]",
+  active && "legacy-card!",
+  { "ring-[#222]": active },
+  localStyles.root,
+);
+const spreadProps = { ["className"]: "outline-[#000]!" };
+const shorthandProps = { className };
+export function Card() {
+  return (
+    <div className={classes} {...spreadProps} {...shorthandProps}>
+      {marketingCopy}
+    </div>
+  );
+}`;
+
+    const extracted = classNameSource(owner);
+
+    assert.match(extracted, /bg-\[#fff\]/);
+    assert.match(extracted, /legacy-card!/);
+    assert.match(extracted, /ring-\[#222\]/);
+    assert.match(extracted, /border-\[#111\]!/);
+    assert.match(extracted, /outline-\[#000\]!/);
+    assert.match(extracted, /ring-offset-\[#333\]!/);
+    assert.doesNotMatch(extracted, /text-lede/);
+  });
+
+  it("resolves identifiers against their own lexical scope", () => {
+    /* Two functions may each declare `classes`. A name-keyed declaration index
+     * answers with whichever it saw first, so both the shadowed value and the
+     * shadowing one have to come from the binding that is actually in scope. */
+    const owner = `
+const copy = "text-lede";
+function Outer() {
+  const classes = "w-[137px]";
+  return <div className={classes} />;
+}
+function Inner() {
+  const classes = "bg-[#fff] legacy-card!";
+  return <span className={classes} />;
+}
+function Caption({ copy }) {
+  return <p className={copy} />;
+}`;
+
+    const extracted = classNameSource(owner);
+
+    assert.match(extracted, /w-\[137px\]/);
+    assert.match(extracted, /bg-\[#fff\]/);
+    assert.match(extracted, /legacy-card!/);
+    assert.doesNotMatch(
+      extracted,
+      /text-lede/,
+      "a parameter must shadow the module constant of the same name",
+    );
+  });
+
+  it("counts every class owner call site separately", () => {
+    const owner = `
+const shared = "w-[123px]";
+export function Pair() {
+  return (
+    <div>
+      <span className={shared} />
+      <span className={shared} />
+    </div>
+  );
+}`;
+
+    const sites = classNameSites(owner);
+    const widths = sites.filter((site) => site.classes.includes("w-[123px]"));
+
+    assert.equal(widths.length, 2);
+    assert.notEqual(widths[0]?.line, widths[1]?.line);
+  });
+
+  it("follows nested property access, dynamic keys, and aliased composers", () => {
+    const owner = `
+import { cn as cx } from "@/lib/cn";
+const RETIRED_KEY = "legacy-card";
+const styles = { button: { root: "border-[#111]" } };
+const WORDMARKS = {
+  header: { className: "w-[155px] max-sm:w-[117px]", src: "/header.svg" },
+  footer: { className: "w-[clamp(280px,31vw,480px)]", src: "/footer.svg" },
+};
+export function Wordmark({ variant, tone }) {
+  const wordmark = WORDMARKS[variant];
+  return (
+    <a
+      className={cx("bg-canvas", { [RETIRED_KEY]: tone }, styles.button.root)}
+      data-src={wordmark.src}
+    >
+      <img className={wordmark.className} />
+    </a>
+  );
+}`;
+
+    const extracted = classNameSource(owner);
+
+    assert.match(extracted, /border-\[#111\]/);
+    assert.match(extracted, /legacy-card/);
+    assert.match(extracted, /bg-canvas/);
+    assert.match(extracted, /w-\[155px\]/);
+    assert.match(extracted, /max-sm:w-\[117px\]/);
+    assert.match(extracted, /w-\[clamp\(280px,31vw,480px\)\]/);
+    assert.doesNotMatch(extracted, /header\.svg|footer\.svg/);
+  });
+
+  it("reads className out of logical and nested JSX spreads", () => {
+    const owner = `
+const extra = { className: "outline-[#000]" };
+const KEY = "className";
+export function Card({ on }) {
+  return (
+    <div
+      {...(on && extra)}
+      {...{ ...extra, className: "ring-[#222]" }}
+      {...{ [KEY]: "shadow-[#333]" }}
+    />
+  );
+}`;
+
+    const extracted = classNameSource(owner);
+
+    assert.match(extracted, /outline-\[#000\]/);
+    assert.match(extracted, /ring-\[#222\]/);
+    assert.match(extracted, /shadow-\[#333\]/);
+  });
+
+  it("keeps unresolved helper calls from donating unrelated strings", () => {
+    const owner = `
+const marketingCopy = "text-lede";
+export function Card() {
+  return <div className={renderCopy(marketingCopy)} />;
+}`;
+
+    assert.equal(classNameSource(owner).trim(), "");
+  });
+
+  it("respects helper import identity and lexical shadowing", () => {
+    assert.equal(
+      classNameSource(`
+const cn = (copy: string) => copy;
+export function Card() { return <div className={cn("not a class sentence")} />; }`),
+      "",
+    );
+    assert.equal(
+      classNameSource(`
+export function Card({ cn }) { return <div className={cn("not a class sentence")} />; }`),
+      "",
+    );
+    assert.equal(
+      classNameSource(`
+import { cn as cx } from "copy-library";
+export function Card() { return <div className={cx("not a class sentence")} />; }`),
+      "",
+    );
+    assert.equal(
+      classNameSource(`
+import { cn as cx } from "copy-library/cn";
+export function Card() { return <div className={cx("not a class sentence")} />; }`),
+      "",
+    );
+    assert.match(
+      classNameSource(`
+import { cva as cv } from "class-variance-authority";
+export const recipe = cv("bg-[#abc]");`),
+      /bg-\[#abc\]/,
+    );
+    assert.match(
+      classNameSource(`
+import * as styles from "clsx";
+export function Card() { return <div className={styles.default("bg-[#abc]")} />; }`),
+      /bg-\[#abc\]/,
+    );
+  });
+
+  it("resolves static destructuring and computed template class keys", () => {
+    const extracted = classNameSource(`
+const styles = { root: "bg-[#abc]" };
+const { root } = styles;
+const kind = "legacy";
+export function Card({ on }) {
+  return <div className={cn(root, { [\`\${kind}-card\`]: on })} />;
+}`);
+
+    assert.match(extracted, /bg-\[#abc\]/);
+    assert.match(extracted, /legacy-card/);
+  });
+
+  it("extracts compound-variant class shorthand from a cva recipe", () => {
+    const className = [
+      'const className = "border-[#abc]";',
+      'const compoundVariants = [{ tone: "selector-only", className }];',
+      'export const badge = cva("bg-canvas", { compoundVariants });',
+    ].join("\n");
+
+    const extracted = classNameSource(className, "src/lib/badge.ts");
+
+    assert.match(extracted, /border-\[#abc\]/);
+    assert.doesNotMatch(extracted, /selector-only/);
+  });
+
+  it("groups an arbitrary value across its variant prefixes", () => {
+    assert.deepEqual(arbitraryValues("gap-[5px]"), ["gap-[5px]"]);
+    assert.deepEqual(arbitraryValues("max-xl:gap-[5px]"), ["gap-[5px]"]);
+    assert.deepEqual(arbitraryValues("md:p-[34px]"), ["p-[34px]"]);
+    assert.deepEqual(
+      arbitraryValues("data-[open=true]:ps-[calc(var(--a)+10px)]"),
+      ["data-[open=true]", "ps-[calc(var(--a)+10px)]"],
+    );
+    assert.deepEqual(arbitraryValues("group-aria-[current=page]:text-ink"), [
+      "aria-[current=page]",
+    ]);
+    assert.deepEqual(arbitraryValues("[&::-webkit-details-marker]:hidden"), [
+      "[&::-webkit-details-marker]",
+    ]);
+    assert.deepEqual(arbitraryValues("group-open:after:content-['x']"), [
+      "content-['x']",
+    ]);
+    assert.deepEqual(arbitraryValues("text-ui"), []);
+  });
+
+  it("recognizes standard fraction and CSS-variable shorthand", () => {
+    assert.equal(standardEquivalent("-translate-y-[150%]"), "-translate-y-3/2");
+    assert.equal(standardEquivalent("top-[40%]"), "top-2/5");
+    assert.equal(
+      standardEquivalent("py-[var(--home-viewport-pad)]"),
+      "py-(--home-viewport-pad)",
+    );
+    assert.equal(
+      standardEquivalent("h-[var(--home-viewport-media)]"),
+      "h-(--home-viewport-media)",
+    );
+  });
+
+  it("includes exported recipes only in dedicated presentation modules", () => {
+    const source = [
+      'const marketingCopy = "text-lede";',
+      'export const cartLine = "grid bg-[#fff]";',
+      `export const cartSummary = \`\${cartLine} legacy-card!\`;`,
+    ].join("\n");
+
+    const extracted = classNameSource(source, "src/app/cart/presentation.ts");
+
+    assert.match(extracted, /bg-\[#fff\]/);
+    assert.match(extracted, /legacy-card!/);
+    assert.doesNotMatch(extracted, /text-lede/);
+    assert.equal(classNameSource(source, "src/app/cart/copy.ts"), "");
   });
 
   it("keeps retired presentation stylesheets absent", async () => {
@@ -217,7 +495,7 @@ describe("Tailwind presentation ownership", () => {
 
     for (const owner of await presentationOwners()) {
       assert.doesNotMatch(
-        classNameSource(await read(owner)),
+        classNameSource(await read(owner), owner),
         importantModifier,
         owner,
       );
@@ -232,18 +510,190 @@ describe("Tailwind presentation ownership", () => {
     const owners = sources.filter(([owner, source]) =>
       owner.endsWith(".tsx")
         ? source.includes("className")
-        : classNameSource(source).trim().length > 0,
+        : classNameSource(source, owner).trim().length > 0,
     );
     const tailwindUtility =
       /(?:^|[\s"'`])(?:(?:hover|focus|focus-visible|active|disabled|group-hover|motion-reduce|max-(?:xs|sm|md|lg|xl)|min-\[[^\]]+\]):)*(?:sr-only|block|inline-block|inline|flex|inline-flex|grid|contents|hidden|relative|absolute|fixed|sticky|isolate|m-0|[mp][trblxy]?-[^\s"'`}]+|(?:w|h|min-w|min-h|max-w|max-h|size|gap|inset|top|right|bottom|left|z|order|grid-cols|col-start|row-start)-[^\s"'`}]+|(?:text|font|leading|tracking|bg|border|shadow|opacity|overflow|object|place|items|justify|self|whitespace|underline|uppercase|lowercase|antialiased)-?[^\s"'`}]*)(?=$|[\s"'`}])/;
 
     assert.ok(owners.length > 0);
     for (const [owner, source] of owners) {
-      const classes = classNameSource(source);
+      const classes = classNameSource(source, owner);
       assert.match(
         classes,
         tailwindUtility,
         `${owner} className source must contain a Tailwind utility`,
+      );
+    }
+  });
+
+  it("keeps raw hex colours out of presentation class lists", async () => {
+    /* Colour is a theme contract. An arbitrary hex utility sits outside
+     * `@theme` entirely, so it cannot be renamed, audited, or reused. */
+    const rawHexColour = /-\[#[0-9a-fA-F]{3,8}\]/;
+
+    for (const owner of await presentationOwners()) {
+      assert.doesNotMatch(
+        classNameSource(await read(owner), owner),
+        rawHexColour,
+        owner,
+      );
+    }
+  });
+
+  it("keeps repeated semantic scales in named tokens", async () => {
+    /* The spec allows arbitrary values only for one-off geometry. These values
+     * are shared editorial/UI scales, not isolated route geometry. */
+    const repeatedSemanticValues =
+      /(?:text-\[11px\]|leading-\[1\.55\]|max-w-\[670px\]|text-\[clamp\(\s*17px\s*,\s*1\.45vw\s*,\s*22px\s*\)\])/;
+
+    for (const owner of await presentationOwners()) {
+      assert.doesNotMatch(
+        classNameSource(await read(owner), owner),
+        repeatedSemanticValues,
+        owner,
+      );
+    }
+  });
+
+  it("holds every theme token to its exact canonical value", async () => {
+    /* Renames such as `text-ui` for `text-[11px]` are only safe while the token
+     * still computes to the value it stood in for, so the theme is pinned by
+     * value, not by name. `scripts/check-tailwind-theme.mts` proves the same
+     * map reaches the production CSS. */
+    const globals = await read("src/app/globals.css");
+    const theme = globals.slice(
+      globals.indexOf("@theme static {"),
+      globals.indexOf("@layer base"),
+    );
+    const declared = Object.fromEntries(
+      [...theme.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map(([, name, value]) => [
+        name ?? "",
+        (value ?? "").split(/\s+/).join(" ").trim(),
+      ]),
+    );
+
+    assert.deepEqual(declared, THEME_TOKENS);
+    assert.equal(THEME_TOKENS["--text-ui"], "0.6875rem");
+    assert.equal(THEME_TOKENS["--leading-lede"], "1.55");
+    assert.equal(THEME_TOKENS["--container-lede"], "670px");
+    assert.equal(
+      canonicalCssValue("rgba(23, 61, 45, 0.18) 260ms 0.6875rem"),
+      canonicalCssValue("#173d2d2e .26s .6875rem"),
+    );
+    assert.notEqual(
+      canonicalCssValue("rgba(23, 61, 45, 0.19)"),
+      canonicalCssValue("#173d2d2e"),
+    );
+  });
+
+  it("keeps repeated typography and container primitives in named tokens", async () => {
+    const repeatedTokenCandidate =
+      /(?:^|:)(?:text|leading|tracking|max-w|w)-\[[^\]]+\]/;
+    const occurrencesByToken = new Map<string, number>();
+
+    for (const owner of await presentationOwners()) {
+      const tokens = classNameSource(await read(owner), owner)
+        .split(/\s+/)
+        .filter((token) => repeatedTokenCandidate.test(token));
+      for (const token of tokens) {
+        occurrencesByToken.set(token, (occurrencesByToken.get(token) ?? 0) + 1);
+      }
+    }
+
+    assert.deepEqual(
+      [...occurrencesByToken]
+        .filter(([, occurrences]) => occurrences > 1)
+        .sort(([left], [right]) => left.localeCompare(right)),
+      [],
+    );
+  });
+
+  /**
+   * Every arbitrary value the presentation authors, keyed by the underlying
+   * arbitrary segment so `gap-[5px]` and `max-xl:gap-[5px]` are one value, and
+   * pinned to the exact authored location. A reusable constant is one authored
+   * location even when several JSX owners consume it; moving or duplicating it
+   * anywhere (including within the same file) changes the inventory.
+   */
+  async function arbitraryInventory(): Promise<Record<string, string[]>> {
+    const byValue = new Map<string, Set<string>>();
+
+    for (const owner of (await presentationOwners()).sort()) {
+      for (const literal of classNameLiterals(await read(owner), owner)) {
+        const seen = new Set<string>();
+        for (const token of literal.classes.split(/\s+/)) {
+          for (const value of arbitraryValues(token)) {
+            if (seen.has(value)) continue;
+            seen.add(value);
+            const locations = byValue.get(value) ?? new Set<string>();
+            locations.add(`${literal.file}:${literal.line}:${literal.column}`);
+            byValue.set(value, locations);
+          }
+        }
+      }
+    }
+
+    return Object.fromEntries(
+      [...byValue]
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([value, locations]) => [
+          value,
+          [...locations].sort((left, right) => left.localeCompare(right)),
+        ]),
+    );
+  }
+
+  it("accounts for every arbitrary value, one-off ones included", async () => {
+    /* No singleton is filtered out before comparison: an unreviewed one-off is
+     * exactly the case the spec asks to justify, and moving an occurrence
+     * between call sites changes this inventory even when the total does not. */
+    assert.deepEqual(await arbitraryInventory(), REVIEWED_ARBITRARY_VALUES);
+  });
+
+  it("keeps every repeated arbitrary value to CSS syntax with nothing to name", async () => {
+    /* Tailwind has no theme namespace for an attribute-selector variant, a
+     * pseudo-element selector, or a `content` string, so these may repeat.
+     * Every repeatable *value* — spacing, grids, transitions — must be a named
+     * token or a shared recipe instead. */
+    const REPEATED_SYNTAX_ONLY = [
+      "[&::-webkit-details-marker]",
+      "aria-[current=page]",
+      "content-['']",
+      "content-['+']",
+      "content-['\u2192']",
+      "content-['\u2212']",
+      "content-[attr(data-label)_':_']",
+      "data-[active=true]",
+    ];
+    const inventory = await arbitraryInventory();
+    const repeated = Object.entries(inventory)
+      .filter(([, locations]) => locations.length > 1)
+      .map(([value]) => value);
+
+    assert.deepEqual(repeated.sort(), REPEATED_SYNTAX_ONLY);
+  });
+
+  it("keeps arbitrary values out of utilities Tailwind already names", async () => {
+    for (const [value] of Object.entries(await arbitraryInventory())) {
+      assert.equal(
+        standardEquivalent(value),
+        undefined,
+        `${value} must use its standard utility`,
+      );
+    }
+  });
+
+  it("keeps raw colours out of presentation class lists", async () => {
+    /* Colour is a theme contract. An arbitrary colour sits outside `@theme`
+     * entirely, so it cannot be renamed, audited, or reused. */
+    const rawColour =
+      /-\[(?:#[0-9a-fA-F]{3,8}|(?:rgba?|hsla?|oklch|oklab|lab|lch)\([^)]*\))\]/;
+
+    for (const owner of await presentationOwners()) {
+      assert.doesNotMatch(
+        classNameSource(await read(owner), owner),
+        rawColour,
+        owner,
       );
     }
   });
@@ -258,7 +708,7 @@ describe("Tailwind presentation ownership", () => {
 
     for (const owner of await presentationOwners()) {
       assert.doesNotMatch(
-        classNameSource(await read(owner)),
+        classNameSource(await read(owner), owner),
         retiredLegacyClass,
         owner,
       );

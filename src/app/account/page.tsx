@@ -27,14 +27,13 @@ interface AccountPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-const ACCOUNT_BLOCK_CLASS =
-  "min-h-[280px] border border-ink bg-transparent p-7";
+const ACCOUNT_BLOCK_CLASS = "min-h-70 border border-ink bg-transparent p-7";
 const ORDER_ROW_CLASS =
-  "max-sm:block max-sm:border-border-subtle max-sm:border-b max-sm:py-[15px]";
+  "max-sm:block max-sm:border-border-subtle max-sm:border-b max-sm:py-3.75";
 const ORDER_CELL_CLASS =
-  "border-border-subtle border-b px-3 py-[18px] text-left max-sm:block max-sm:border-0 max-sm:px-0 max-sm:py-[3px] max-sm:before:text-[10px] max-sm:before:text-text-muted max-sm:before:uppercase max-sm:before:content-[attr(data-label)_':_']";
+  "border-border-subtle border-b px-3 py-4.5 text-left max-sm:block max-sm:border-0 max-sm:px-0 max-sm:py-0.75 max-sm:before:text-field-meta max-sm:before:text-text-muted max-sm:before:uppercase max-sm:before:content-[attr(data-label)_':_']";
 const ORDER_HEADING_CLASS =
-  "border-border-subtle border-b px-3 pt-0 pb-[18px] text-left text-[10px] text-text-muted tracking-[0.1em] uppercase";
+  "border-border-subtle border-b px-3 pt-0 pb-4.5 text-left text-field-meta text-text-muted tracking-label uppercase";
 
 /**
  * Account overview — the accepted order history and bordered account blocks,
@@ -73,7 +72,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
       lede="Recent orders, where they ship, and the standing repairs offer — in one quiet place."
       signedIn
     >
-      <div className="mb-[52px]">
+      <div className="mb-13">
         <p className={eyebrow()}>{profile.displayName}</p>
         <h2 className={sectionHeading()}>Recent orders</h2>
       </div>
@@ -114,10 +113,10 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
         <p className="text-text-muted">No orders on record yet.</p>
       )}
 
-      <div className="mt-[50px] grid grid-cols-2 gap-3 max-sm:grid-cols-1">
+      <div className="mt-12.5 grid grid-cols-2 gap-3 max-sm:grid-cols-1">
         <article className={ACCOUNT_BLOCK_CLASS}>
           <p className={eyebrow()}>Repair desk</p>
-          <h3 className="text-balance font-heading text-[26px] font-medium">
+          <h3 className="text-balance font-heading text-account-title font-medium">
             Keep good gear moving.
           </h3>
           <p className="text-text-muted">
@@ -135,7 +134,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
           <p className={eyebrow()}>Default trailhead</p>
           {defaultAddress !== undefined ? (
             <>
-              <h3 className="text-balance font-heading text-[26px] font-medium">
+              <h3 className="text-balance font-heading text-account-title font-medium">
                 {profile.displayName}
               </h3>
               <address>

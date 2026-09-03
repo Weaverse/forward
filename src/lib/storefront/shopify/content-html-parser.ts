@@ -32,6 +32,17 @@ interface SourceSpan {
 
 const LIQUID_PATTERN = /\{\{|\}\}|\{%|%\}/;
 
+/**
+ * The only parse5 diagnostic that is a content recovery rather than a
+ * structural one: `&copy` without its semicolon decodes to `©` in every
+ * browser, and merchant prose contains it. Every other diagnostic still fails
+ * the whole document closed, and the source-span tiling check below still
+ * rejects any recovered markup that parse5 reports no error for.
+ */
+const RECOVERABLE_PARSE_ERRORS = new Set([
+  "missing-semicolon-after-character-reference",
+]);
+
 const ALLOWED_TAGS = new Set([
   "a",
   "article",
@@ -231,7 +242,11 @@ function parseHtmlFragment(
   const parseErrors: string[] = [];
   const fragment = parseFragment(trimmed, {
     sourceCodeLocationInfo: true,
-    onParseError: (error) => parseErrors.push(error.code),
+    onParseError: (error) => {
+      if (!RECOVERABLE_PARSE_ERRORS.has(error.code)) {
+        parseErrors.push(error.code);
+      }
+    },
   });
   if (parseErrors.length > 0) {
     fail(`${context} contains malformed HTML.`);

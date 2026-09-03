@@ -31,9 +31,8 @@ interface OrderPageProps {
 }
 
 const CART_LINE_CLASS =
-  "grid grid-cols-[190px_1fr_auto] gap-6 border-border-subtle border-b py-[22px] max-sm:grid-cols-[92px_1fr] max-sm:gap-3.5";
-const ACCOUNT_BLOCK_CLASS =
-  "min-h-[280px] border border-ink bg-transparent p-7";
+  "grid grid-cols-line-item gap-6 border-border-subtle border-b py-5.5 max-sm:grid-cols-line-item-compact max-sm:gap-3.5";
+const ACCOUNT_BLOCK_CLASS = "min-h-70 border border-ink bg-transparent p-7";
 const SUMMARY_ROW_CLASS =
   "flex justify-between gap-5 border-border-subtle border-b py-2.5";
 
@@ -78,7 +77,7 @@ export default async function OrderPage({
       heroAside={
         <div>
           <span className="font-bold text-signal-strong">{order.status}</span>
-          <p className="m-0 max-w-[670px] justify-self-end text-[clamp(17px,1.45vw,22px)] leading-[1.55] text-[#b5b8ae] max-md:max-w-full max-md:justify-self-start">
+          <p className="m-0 max-w-lede justify-self-end text-lede leading-lede text-text-dark-lede max-md:max-w-full max-md:justify-self-start">
             Placed {formatDate(order.processedAt.slice(0, 10))}
           </p>
         </div>
@@ -88,11 +87,11 @@ export default async function OrderPage({
         Back to orders
       </Link>
 
-      <div className="border-border-subtle border-t py-[clamp(42px,6vw,84px)]">
+      <div className="border-border-subtle border-t py-section-block-compact">
         {order.lines.map((line) => (
           <article key={line.id} className={CART_LINE_CLASS}>
             <div>
-              <h2 className="m-0 mb-1 text-balance font-heading text-[31px] font-medium">
+              <h2 className="m-0 mb-1 text-balance font-heading text-heading-3-fixed font-medium">
                 {line.title}
               </h2>
               <p className="text-text-muted">
@@ -107,7 +106,7 @@ export default async function OrderPage({
         ))}
       </div>
 
-      <div className="mt-[50px] grid grid-cols-2 gap-3 py-[clamp(42px,6vw,84px)] max-sm:grid-cols-1">
+      <div className="mt-12.5 grid grid-cols-2 gap-3 py-section-block-compact max-sm:grid-cols-1">
         <article className={ACCOUNT_BLOCK_CLASS}>
           <p className={eyebrow()}>Delivery address</p>
           {order.shippingAddress === null ? (
@@ -145,7 +144,9 @@ export default async function OrderPage({
               <span>{order.tax}</span>
             </div>
           )}
-          <div className={`${SUMMARY_ROW_CLASS} py-5 font-heading text-[27px]`}>
+          <div
+            className={`${SUMMARY_ROW_CLASS} py-5 font-heading text-heading-4`}
+          >
             <span>Total</span>
             <strong>{order.total}</strong>
           </div>

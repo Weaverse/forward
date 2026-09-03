@@ -4,7 +4,7 @@ import { emptyState, eyebrow } from "@/lib/presentation/variants";
 export default function Loading() {
   return (
     <div className={emptyState({ size: "page" })}>
-      <div className="max-w-[560px]">
+      <div className="max-w-state">
         <p className={eyebrow()} role="status">
           Forward field report / Loading…
         </p>

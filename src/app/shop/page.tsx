@@ -103,19 +103,19 @@ function FilterSidebar({
           className="group/filter border-border-subtle border-b"
           open
         >
-          <summary className="flex min-h-[52px] list-none items-center justify-between font-body text-[9px] font-medium tracking-[0.1em] uppercase after:text-lg after:font-normal after:content-['+'] group-open/filter:after:content-['−'] [&::-webkit-details-marker]:hidden">
+          <summary className="flex min-h-13 list-none items-center justify-between font-body text-micro font-medium tracking-label uppercase after:text-lg after:font-normal after:content-['+'] group-open/filter:after:content-['−'] [&::-webkit-details-marker]:hidden">
             {group.heading}
           </summary>
-          <div className="pb-[18px]">
+          <div className="pb-4.5">
             {group.links.map((link) => (
               <Link
                 key={link.key}
-                className="group/check flex min-h-10 items-center gap-2.5 font-body text-[9px] text-text-muted tracking-[0.08em] uppercase hover:text-ink aria-[current=page]:text-ink"
+                className="group/check flex min-h-10 items-center gap-2.5 font-body text-micro text-text-muted tracking-control uppercase hover:text-ink aria-[current=page]:text-ink"
                 href={link.href}
                 aria-current={link.selected ? "page" : undefined}
               >
                 <span
-                  className="size-[13px] flex-none rounded-full border border-border-subtle group-aria-[current=page]/check:border-ink group-aria-[current=page]/check:bg-signal"
+                  className="size-3.25 flex-none rounded-full border border-border-subtle group-aria-[current=page]/check:border-ink group-aria-[current=page]/check:bg-signal"
                   aria-hidden="true"
                 />
                 {link.label}
@@ -183,29 +183,29 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
   return (
     <>
-      <header className="flex min-h-[560px] items-end border-border-subtle border-b bg-ink px-page-gutter pt-[100px] pb-[75px] text-text-inverse max-md:min-h-[520px] max-sm:min-h-[430px] max-sm:pt-[70px]">
-        <div className="mx-auto grid w-full grid-cols-[1.35fr_0.65fr] items-end gap-[50px] max-md:grid-cols-[minmax(0,1fr)] max-md:gap-7">
+      <header className="flex min-h-140 items-end border-border-subtle border-b bg-ink px-page-gutter pt-25 pb-18.75 text-text-inverse max-md:min-h-130 max-sm:min-h-107.5 max-sm:pt-17.5">
+        <div className="mx-auto grid w-full grid-cols-page-header items-end gap-12.5 max-md:grid-cols-1 max-md:gap-7">
           <div>
-            <p className="mb-7 font-field-meta text-[11px] font-medium text-signal tracking-field-meta uppercase">
+            <p className="mb-7 font-field-meta text-ui font-medium text-signal tracking-field-meta uppercase">
               <Link href="/">Home</Link> / Shop
             </p>
             <p className={eyebrow({ tone: "signal" })}>
               Explore / All equipment
             </p>
-            <h1 className="m-0 max-w-[1050px] text-balance font-heading text-display leading-[0.94] font-medium tracking-heading max-sm:text-[clamp(53px,17vw,80px)]">
+            <h1 className="m-0 max-w-feature text-balance font-heading text-display leading-display font-medium tracking-heading max-sm:text-index-display-mobile">
               Field goods for moving outside.
             </h1>
           </div>
-          <p className="m-0 max-w-[670px] justify-self-end text-[clamp(17px,1.45vw,22px)] leading-[1.55] text-[#b5b8ae] max-md:max-w-full max-md:justify-self-start">
+          <p className="m-0 max-w-lede justify-self-end text-lede leading-lede text-text-dark-lede max-md:max-w-full max-md:justify-self-start">
             A compact system of weather protection, carry, and footwear.
             Designed to work hard together and age well apart.
           </p>
         </div>
       </header>
 
-      <div className="sticky top-header z-30 flex min-h-[72px] items-center justify-between border-ink border-y bg-signal px-page-gutter py-2 max-md:top-header-compact max-sm:flex-col max-sm:items-start max-sm:gap-2.5 max-sm:py-3">
+      <div className="sticky top-header z-30 flex min-h-18 items-center justify-between border-ink border-y bg-signal px-page-gutter py-2 max-md:top-header-compact max-sm:flex-col max-sm:items-start max-sm:gap-2.5 max-sm:py-3">
         <div className="flex items-center gap-4 max-sm:w-full max-sm:justify-between">
-          <span className="max-sm:text-[11px]" aria-live="polite">
+          <span className="max-sm:text-ui" aria-live="polite">
             {products.length} {products.length === 1 ? "product" : "products"}
             {category !== undefined ? ` · ${category}` : ""}
             {activity !== undefined ? ` · ${activity}` : ""}
@@ -224,13 +224,13 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             <input type="hidden" name="activity" value={activity} />
           ) : null}
           <label
-            className="font-field-meta text-[12px] font-medium text-text-muted tracking-field-meta uppercase"
+            className="font-field-meta text-caption font-medium text-text-muted tracking-field-meta uppercase"
             htmlFor="sort-products"
           >
             Sort
           </label>
           <select
-            className="min-h-touch rounded-none border border-ink bg-transparent py-0 pr-[38px] pl-[14px] font-body text-[9px] font-bold uppercase max-sm:flex-1"
+            className="min-h-touch rounded-none border border-ink bg-transparent py-0 pr-9.5 pl-3.5 font-body text-micro font-bold uppercase max-sm:flex-1"
             id="sort-products"
             name="sort"
             defaultValue={sort}
@@ -242,7 +242,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             ))}
           </select>
           <button
-            className="min-h-touch border border-ink bg-transparent px-[14px] font-body text-[9px] font-extrabold tracking-[0.1em] uppercase hover:bg-surface-subtle"
+            className="min-h-touch border border-ink bg-transparent px-3.5 font-body text-micro font-extrabold tracking-label uppercase hover:bg-surface-subtle"
             type="submit"
           >
             Apply
@@ -250,20 +250,20 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         </form>
       </div>
 
-      <div className="mx-auto grid w-[min(100%,var(--container-page))] grid-cols-[190px_1fr] gap-9 px-page-gutter pt-[62px] pb-[100px] max-md:grid-cols-1">
+      <div className="mx-auto grid w-full max-w-page grid-cols-media-row gap-9 px-page-gutter pt-15.5 pb-25 max-md:grid-cols-1">
         <FilterSidebar groups={filterGroups} idPrefix="desktop" />
         <section aria-label="Products">
           <h2 className="sr-only">Products</h2>
           {/* Mobile filters: the canonical drawer is a JS prototype, so
               Forward uses a no-JavaScript disclosure instead. */}
-          <details className="group/disclosure mb-[26px] hidden border border-ink max-md:block">
-            <summary className="flex min-h-12 list-none items-center justify-between px-4 font-body text-[9px] font-medium tracking-[0.1em] uppercase after:text-lg after:content-['+'] group-open/disclosure:after:content-['−'] [&::-webkit-details-marker]:hidden">
+          <details className="group/disclosure mb-6.5 hidden border border-ink max-md:block">
+            <summary className="flex min-h-12 list-none items-center justify-between px-4 font-body text-micro font-medium tracking-label uppercase after:text-lg after:content-['+'] group-open/disclosure:after:content-['−'] [&::-webkit-details-marker]:hidden">
               Filters
             </summary>
             <FilterSidebar groups={filterGroups} idPrefix="mobile" />
           </details>
           {products.length > 0 ? (
-            <div className="grid grid-cols-3 gap-x-[18px] gap-y-14 max-lg:grid-cols-2 max-sm:gap-x-2.5 max-sm:gap-y-[35px]">
+            <div className="grid grid-cols-3 gap-x-4.5 gap-y-14 max-lg:grid-cols-2 max-sm:gap-x-2.5 max-sm:gap-y-8.75">
               {products.map((product, index) => (
                 <ProductCard
                   key={product.handle}
@@ -274,7 +274,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             </div>
           ) : (
             <div className={emptyState()}>
-              <div className="max-w-[500px]">
+              <div className="max-w-form">
                 <p className={eyebrow()}>No matching products</p>
                 <h2 className={sectionHeading({ size: "subsectionSpaced" })}>
                   Nothing in this drawer.

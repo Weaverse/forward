@@ -62,10 +62,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           />
         ) : null}
       </head>
-      <body className="m-0 max-w-full overflow-x-clip bg-canvas font-body text-[14px] leading-[1.6] text-ink antialiased">
+      <body className="m-0 max-w-full overflow-x-clip bg-canvas font-body text-copy-sm leading-body text-ink antialiased">
         <ShopifyCartRuntime enabled={shopifyCartEnabled}>
           <a
-            className="fixed top-[10px] left-[10px] z-[1000] -translate-y-[150%] bg-ink px-4 py-[11px] text-text-inverse focus:translate-y-0"
+            className="fixed top-2.5 left-2.5 z-1000 -translate-y-3/2 bg-ink px-4 py-2.75 text-text-inverse focus:translate-y-0"
             data-shell-background
             href="#main-content"
           >

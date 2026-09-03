@@ -27,7 +27,7 @@ export function AccountAccessPanel({
   const needsRefresh = session.status === "needs-refresh";
 
   return (
-    <div className="min-h-[280px] border border-ink bg-transparent p-7">
+    <div className="min-h-70 border border-ink bg-transparent p-7">
       <p className={eyebrow()}>Field account</p>
       <h2 className={sectionHeading()}>
         {needsRefresh ? "Continue your session." : "Sign in to continue."}
@@ -38,7 +38,7 @@ export function AccountAccessPanel({
           : "Orders, addresses, and repair records are only shown to a signed-in customer."}
       </p>
       {loginFailed ? (
-        <p className="text-[12px] text-text-dark-muted">
+        <p className="text-caption text-text-dark-muted">
           Sign-in did not complete. Please try again.
         </p>
       ) : null}

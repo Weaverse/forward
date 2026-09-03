@@ -5,6 +5,10 @@ import Link from "next/link";
 import { cta, eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
 
+/** One numbered sequence step: index column, then the step description. */
+const SEQUENCE_STEP_CLASS =
+  "grid grid-cols-[65px_1fr] gap-5 border-border-subtle border-b py-7";
+
 export const metadata: Metadata = {
   title: "Field Testing",
   description: "How Forward evaluates products before they enter the catalog.",
@@ -26,7 +30,7 @@ export default async function FieldTestingCustomPage() {
   );
   return (
     <div>
-      <section className="relative mt-[22px] mr-7 ml-7 min-h-[90svh] overflow-hidden text-text-inverse after:absolute after:inset-0 after:bg-[linear-gradient(90deg,rgba(10,12,9,0.9),rgba(10,12,9,0.08))] after:content-[''] max-md:mx-2.5 max-md:mt-2.5 max-md:min-h-0">
+      <section className="relative mt-5.5 mr-7 ml-7 min-h-[90svh] overflow-hidden text-text-inverse after:absolute after:inset-0 after:bg-field-testing-overlay after:content-[''] max-md:mx-2.5 max-md:mt-2.5 max-md:min-h-0">
         <Image
           className="absolute inset-0 h-full object-cover"
           src={theme.homeHeroImage.src}
@@ -36,18 +40,18 @@ export default async function FieldTestingCustomPage() {
           sizes="100vw"
           priority
         />
-        <div className="relative z-[1] max-w-[820px] p-[clamp(70px,9vw,150px)] max-md:px-page-gutter max-md:py-[65px]">
+        <div className="relative z-1 max-w-205 p-[clamp(70px,9vw,150px)] max-md:px-page-gutter max-md:py-16.25">
           <p className={eyebrow()}>Custom page / Field testing</p>
-          <h1 className="mt-5 mb-[30px] text-balance font-heading text-[clamp(58px,7vw,112px)] leading-[0.9] tracking-[-0.06em] max-md:text-[clamp(50px,15vw,76px)]">
+          <h1 className="mt-5 mb-7.5 text-balance font-heading text-display-wide leading-display-tightest tracking-display-tight max-md:text-display-mobile">
             Test the system, not the claim.
           </h1>
-          <p className="max-w-[560px] text-[20px]">
+          <p className="max-w-state text-control-lg">
             Wind, rain, abrasion, repeated packing, and long movement reveal
             more than an isolated specification ever will.
           </p>
         </div>
       </section>
-      <section className="mx-auto grid w-[min(100%,var(--container-page))] grid-cols-[0.7fr_1.3fr] gap-20 px-page-gutter py-[clamp(70px,9vw,140px)] max-md:grid-cols-1">
+      <section className="mx-auto grid w-full max-w-page grid-cols-split-70 gap-20 px-page-gutter py-section-block max-md:grid-cols-1">
         <header>
           <p className={eyebrow()}>The sequence</p>
           <h2 className={sectionHeading()}>
@@ -55,10 +59,10 @@ export default async function FieldTestingCustomPage() {
           </h2>
         </header>
         <ol className="m-0 list-none border-border-subtle border-t p-0">
-          <li className="grid grid-cols-[65px_1fr] gap-5 border-border-subtle border-b py-7">
+          <li className={SEQUENCE_STEP_CLASS}>
             <span className="font-field-meta">01</span>
             <div>
-              <h3 className="m-0 text-balance font-heading text-[30px]">
+              <h3 className="m-0 text-balance font-heading text-feature-stat">
                 Baseline
               </h3>
               <p>
@@ -67,10 +71,10 @@ export default async function FieldTestingCustomPage() {
               </p>
             </div>
           </li>
-          <li className="grid grid-cols-[65px_1fr] gap-5 border-border-subtle border-b py-7">
+          <li className={SEQUENCE_STEP_CLASS}>
             <span className="font-field-meta">02</span>
             <div>
-              <h3 className="m-0 text-balance font-heading text-[30px]">
+              <h3 className="m-0 text-balance font-heading text-feature-stat">
                 Exposure
               </h3>
               <p>
@@ -79,10 +83,10 @@ export default async function FieldTestingCustomPage() {
               </p>
             </div>
           </li>
-          <li className="grid grid-cols-[65px_1fr] gap-5 border-border-subtle border-b py-7">
+          <li className={SEQUENCE_STEP_CLASS}>
             <span className="font-field-meta">03</span>
             <div>
-              <h3 className="m-0 text-balance font-heading text-[30px]">
+              <h3 className="m-0 text-balance font-heading text-feature-stat">
                 Repetition
               </h3>
               <p>
@@ -91,10 +95,10 @@ export default async function FieldTestingCustomPage() {
               </p>
             </div>
           </li>
-          <li className="grid grid-cols-[65px_1fr] gap-5 border-border-subtle border-b py-7">
+          <li className={SEQUENCE_STEP_CLASS}>
             <span className="font-field-meta">04</span>
             <div>
-              <h3 className="m-0 text-balance font-heading text-[30px]">
+              <h3 className="m-0 text-balance font-heading text-feature-stat">
                 Repair review
               </h3>
               <p>
@@ -106,18 +110,18 @@ export default async function FieldTestingCustomPage() {
         </ol>
       </section>
       {shell !== undefined && shellImage !== undefined ? (
-        <section className="grid grid-cols-[0.75fr_1.25fr] bg-ink text-text-inverse max-md:grid-cols-1">
+        <section className="grid grid-cols-split-75 bg-ink text-text-inverse max-md:grid-cols-1">
           <div className="self-center p-[clamp(50px,7vw,110px)] max-md:order-2">
             <p className={eyebrow()}>Case study / Weatherline</p>
-            <h2 className="text-balance font-heading text-[clamp(50px,6vw,94px)] leading-[0.92]">
+            <h2 className="text-balance font-heading text-field-case-title leading-field-case">
               {shell.title}
             </h2>
             <p>{shell.description}</p>
-            <dl className="my-[35px] border-border-dark border-t">
+            <dl className="my-8.75 border-border-dark border-t">
               {shell.specs.map((spec) => (
                 <div
                   key={spec.label}
-                  className="flex justify-between border-border-dark border-b py-[13px]"
+                  className="flex justify-between border-border-dark border-b py-3.25"
                 >
                   <dt>{spec.label}</dt>
                   <dd>{spec.value}</dd>
@@ -132,7 +136,7 @@ export default async function FieldTestingCustomPage() {
             </Link>
           </div>
           <Image
-            className="h-[760px] object-cover max-md:h-[62svh]"
+            className="h-190 object-cover max-md:h-[62svh]"
             src={shellImage.src}
             alt={shellImage.alt}
             width={shellImage.width}
@@ -142,7 +146,7 @@ export default async function FieldTestingCustomPage() {
         </section>
       ) : null}
       {testingArticle !== undefined ? (
-        <section className="mx-auto grid w-[min(100%,var(--container-page))] grid-cols-[1fr_0.7fr_auto] items-end gap-[45px] px-page-gutter py-[clamp(70px,9vw,140px)] max-md:grid-cols-1">
+        <section className="mx-auto grid w-full max-w-page grid-cols-spec-row items-end gap-11.25 px-page-gutter py-section-block max-md:grid-cols-1">
           <div>
             <p className={eyebrow()}>Field note</p>
             <h2 className={sectionHeading()}>

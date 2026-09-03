@@ -29,13 +29,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const hasQuery = query.length > 0;
 
   return (
-    <div className="mx-auto w-[min(100%,var(--container-page))] px-page-gutter pt-[105px] pb-[clamp(56px,8vw,110px)]">
+    <div className="mx-auto w-full max-w-page px-page-gutter pt-26.25 pb-section-block-bottom">
       <p className={eyebrow()}>Search the field catalog</p>
       <h1 className={sectionHeading({ size: "display" })}>
         What are you looking for?
       </h1>
       <form
-        className="mt-[70px] mb-[60px] grid grid-cols-[1fr_auto] border-ink border-b-[3px] max-sm:grid-cols-1"
+        className="mt-17.5 mb-15 grid grid-cols-lead-trailing border-ink border-b-3 max-sm:grid-cols-1"
         method="get"
         action="/search"
       >
@@ -46,12 +46,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           id="search-input"
           name="q"
           type="search"
-          className="h-[110px] min-w-0 border-0 bg-transparent font-heading text-[clamp(45px,7vw,100px)] focus:outline-0 max-sm:h-16"
+          className="h-27.5 min-w-0 border-0 bg-transparent font-heading text-search-display focus:outline-0 max-sm:h-16"
           defaultValue={rawQuery}
           placeholder="Try “trail”, “shell”, or “camp”"
         />
         <button
-          className="min-w-[100px] bg-transparent font-body text-[12px] font-extrabold tracking-[0.1em] uppercase max-sm:min-h-12 max-sm:justify-self-start"
+          className="min-w-25 bg-transparent font-body text-caption font-extrabold tracking-label uppercase max-sm:min-h-12 max-sm:justify-self-start"
           type="submit"
         >
           Search →
@@ -60,7 +60,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
       {!hasQuery ? (
         <section className={emptyState()}>
-          <div className="max-w-[500px]">
+          <div className="max-w-form">
             <p className={eyebrow()}>Start here</p>
             <h2 className={sectionHeading({ size: "subsectionSpaced" })}>
               Search by product, activity, or material.
@@ -75,18 +75,18 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         </section>
       ) : results.length > 0 ? (
         <section aria-label="Search results">
-          <div className="mb-[30px] flex justify-between gap-5">
+          <div className="mb-7.5 flex justify-between gap-5">
             <h2 className={sectionHeading({ size: "subsection" })}>
               Results for “{query}”
             </h2>
             <span
-              className="font-field-meta text-[12px] font-medium text-text-muted tracking-field-meta uppercase"
+              className="font-field-meta text-caption font-medium text-text-muted tracking-field-meta uppercase"
               aria-live="polite"
             >
               {results.length} found
             </span>
           </div>
-          <div className="grid grid-cols-4 gap-[18px] max-lg:grid-cols-2 max-sm:grid-cols-2 max-sm:gap-2.5">
+          <div className="grid grid-cols-4 gap-4.5 max-lg:grid-cols-2 max-sm:grid-cols-2 max-sm:gap-2.5">
             {results.map((product, index) => (
               <ProductCard
                 key={product.handle}
@@ -98,7 +98,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         </section>
       ) : (
         <section className={emptyState()}>
-          <div className="max-w-[500px]">
+          <div className="max-w-form">
             <p className={eyebrow()}>No exact match</p>
             <h2 className={sectionHeading({ size: "subsectionSpaced" })}>
               Nothing turned up for “{query}”.

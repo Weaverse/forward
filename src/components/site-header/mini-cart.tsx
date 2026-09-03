@@ -14,12 +14,13 @@ import {
 } from "@/lib/cart/shopify-cart-react";
 import { subtotal } from "@/lib/demo-cart/cart-logic";
 import { useDemoCartLines } from "@/lib/demo-cart/use-demo-cart";
+import { controlTransition } from "@/lib/presentation/variants";
 import { formatMoney } from "@/lib/storefront/format";
 
 /** Long enough to read, short enough not to sit over the page. */
 const AUTO_DISMISS_MS = 8000;
 const miniCartAction = cva(
-  "inline-flex min-h-touch w-full items-center justify-center gap-2.5 border px-[22px] py-3 text-[12px] font-ui-strong text-ink tracking-[0.09em] uppercase shadow-button [transition:background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),border-color_var(--duration-fast)_var(--ease-standard),box-shadow_120ms_var(--ease-standard),transform_120ms_var(--ease-standard)] hover:translate-[2px] hover:border-ink hover:bg-ink hover:text-text-inverse hover:shadow-button-hover active:translate-[4px] active:shadow-none focus-visible:outline-ink focus-visible:outline-3 focus-visible:outline-offset-4 motion-reduce:hover:translate-none motion-reduce:active:translate-none",
+  `inline-flex min-h-touch w-full items-center justify-center gap-2.5 border px-5.5 py-3 text-caption font-ui-strong text-ink tracking-button uppercase shadow-button ${controlTransition} hover:translate-0.5 hover:border-ink hover:bg-ink hover:text-text-inverse hover:shadow-button-hover active:translate-1 active:shadow-none focus-visible:outline-ink focus-visible:outline-3 focus-visible:outline-offset-4 motion-reduce:hover:translate-none motion-reduce:active:translate-none`,
   {
     variants: {
       intent: {
@@ -60,7 +61,7 @@ function MiniCartBody({ checkoutUrl, line, subtotalLabel }: MiniCartBodyProps) {
   return (
     <>
       {line === null ? (
-        <p className="mt-1 mb-0 text-[12px] text-text-muted">
+        <p className="mt-1 mb-0 text-caption text-text-muted">
           Your cart was updated.
         </p>
       ) : (
@@ -69,7 +70,7 @@ function MiniCartBody({ checkoutUrl, line, subtotalLabel }: MiniCartBodyProps) {
             <Image
               alt={line.image.alt}
               height={line.image.height}
-              className="aspect-[4/5] object-cover"
+              className="aspect-4/5 object-cover"
               sizes="64px"
               src={line.image.src}
               width={line.image.width}
@@ -77,23 +78,23 @@ function MiniCartBody({ checkoutUrl, line, subtotalLabel }: MiniCartBodyProps) {
           )}
           <div>
             <Link
-              className="font-heading text-[15px] [font-weight:var(--font-weight-heading)] tracking-[-0.02em]"
+              className="font-heading text-copy font-title tracking-mini-cart-title"
               href={line.href}
             >
               {line.title}
             </Link>
             {line.options.length === 0 ? null : (
-              <p className="mt-1 mb-0 text-[12px] text-text-muted">
+              <p className="mt-1 mb-0 text-caption text-text-muted">
                 {line.options}
               </p>
             )}
-            <p className="mt-1 mb-0 text-[12px] text-text-muted">
+            <p className="mt-1 mb-0 text-caption text-text-muted">
               Qty {line.quantity}
             </p>
           </div>
         </article>
       )}
-      <p className="m-0 flex items-baseline justify-between gap-3 border-border-subtle border-t pt-3 font-body text-[12px] tracking-[0.06em] uppercase">
+      <p className="m-0 flex items-baseline justify-between gap-3 border-border-subtle border-t pt-3 font-body text-caption tracking-link uppercase">
         <span>Subtotal</span>
         <strong>{subtotalLabel}</strong>
       </p>
@@ -285,10 +286,10 @@ export function MiniCart() {
       {presentation === null ? null : (
         <div
           aria-label="Cart updated"
-          className="absolute top-[calc(100%+12px)] right-0 z-[130] grid w-[min(340px,calc(100vw-28px))] gap-3 border border-ink bg-canvas p-[18px] text-start shadow-[6px_6px_0_var(--color-ink)]"
+          className="absolute top-[calc(100%+12px)] right-0 z-130 grid w-[min(340px,calc(100vw-28px))] gap-3 border border-ink bg-canvas p-4.5 text-start shadow-mini-cart"
           role="dialog"
         >
-          <p className="m-0 flex items-center gap-2 font-body text-[11px] font-ui-strong tracking-[0.1em] uppercase">
+          <p className="m-0 flex items-center gap-2 font-body text-ui font-ui-strong tracking-label uppercase">
             <Icon name="check-circle" size={16} />
             Added to cart
           </p>

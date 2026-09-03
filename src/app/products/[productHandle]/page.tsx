@@ -49,14 +49,14 @@ async function relatedProducts(product: Product) {
 
 function ProductFieldRecord({ product }: { product: Product }) {
   return (
-    <div className="mt-[30px] border-border-dark border-t">
+    <div className="mt-7.5 border-border-dark border-t">
       <details className="group border-border-dark border-b" open>
-        <summary className="flex min-h-[54px] list-none items-center justify-between font-body text-[9px] font-medium tracking-[0.08em] uppercase after:text-[18px] after:content-['+'] group-open:after:content-['−'] [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-13.5 list-none items-center justify-between font-body text-micro font-medium tracking-control uppercase after:text-copy-lg after:content-['+'] group-open:after:content-['−'] [&::-webkit-details-marker]:hidden">
           Why it works
         </summary>
         {product.detailParagraphs.map((paragraph) => (
           <p
-            className="text-[13px] text-text-dark-muted"
+            className="text-label text-text-dark-muted"
             key={paragraph.slice(0, 32)}
           >
             {paragraph}
@@ -64,16 +64,16 @@ function ProductFieldRecord({ product }: { product: Product }) {
         ))}
       </details>
       <details className="group border-border-dark border-b">
-        <summary className="flex min-h-[54px] list-none items-center justify-between font-body text-[9px] font-medium tracking-[0.08em] uppercase after:text-[18px] after:content-['+'] group-open:after:content-['−'] [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-13.5 list-none items-center justify-between font-body text-micro font-medium tracking-control uppercase after:text-copy-lg after:content-['+'] group-open:after:content-['−'] [&::-webkit-details-marker]:hidden">
           Specifications
         </summary>
         <dl>
           {product.specs.map((row) => (
             <div
               key={row.label}
-              className="flex justify-between gap-5 border-border-dark border-b py-[9px] text-[12px] last:border-b-0"
+              className="flex justify-between gap-5 border-border-dark border-b py-2.25 text-caption last:border-b-0"
             >
-              <dt className="font-body text-[9px] text-text-dark-muted tracking-[0.1em] uppercase">
+              <dt className="font-body text-micro text-text-dark-muted tracking-label uppercase">
                 {row.label}
               </dt>
               <dd className="m-0 text-right text-text-inverse">{row.value}</dd>
@@ -82,28 +82,25 @@ function ProductFieldRecord({ product }: { product: Product }) {
         </dl>
       </details>
       <details className="group border-border-dark border-b">
-        <summary className="flex min-h-[54px] list-none items-center justify-between font-body text-[9px] font-medium tracking-[0.08em] uppercase after:text-[18px] after:content-['+'] group-open:after:content-['−'] [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-13.5 list-none items-center justify-between font-body text-micro font-medium tracking-control uppercase after:text-copy-lg after:content-['+'] group-open:after:content-['−'] [&::-webkit-details-marker]:hidden">
           Materials + care
         </summary>
-        <ul className="mt-0 mb-[1.4em] pl-[1.2em]">
+        <ul className="mt-0 mb-prose-block pl-[1.2em]">
           {product.care.map((entry) => (
-            <li
-              className="text-[13px] text-text-muted"
-              key={entry.slice(0, 32)}
-            >
+            <li className="text-label text-text-muted" key={entry.slice(0, 32)}>
               {entry}
             </li>
           ))}
         </ul>
       </details>
       <details className="group border-border-dark border-b">
-        <summary className="flex min-h-[54px] list-none items-center justify-between font-body text-[9px] font-medium tracking-[0.08em] uppercase after:text-[18px] after:content-['+'] group-open:after:content-['−'] [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-13.5 list-none items-center justify-between font-body text-micro font-medium tracking-control uppercase after:text-copy-lg after:content-['+'] group-open:after:content-['−'] [&::-webkit-details-marker]:hidden">
           Repair
         </summary>
-        <p className="text-[13px] text-text-dark-muted">{product.repair}</p>
+        <p className="text-label text-text-dark-muted">{product.repair}</p>
         <p>
           <Link
-            className="inline-flex min-h-touch items-center gap-[14px] border-text-inverse border-b font-body text-[11px] font-medium tracking-[0.06em] uppercase after:text-[20px] after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-[5px]"
+            className="inline-flex min-h-touch items-center gap-3.5 border-text-inverse border-b font-body text-ui font-medium tracking-link uppercase after:text-control-lg after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-1.25"
             href="/pages/field-repair"
           >
             The repairs programme
@@ -134,14 +131,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </Suspense>
 
       {related.length > 0 ? (
-        <section className="mx-auto w-[min(100%,var(--container-page))] px-page-gutter py-[clamp(70px,9vw,140px)]">
-          <div className="mb-11 flex items-end justify-between gap-[30px] max-sm:flex-col max-sm:items-start">
+        <section className="mx-auto w-full max-w-page px-page-gutter py-section-block">
+          <div className="mb-11 flex items-end justify-between gap-7.5 max-sm:flex-col max-sm:items-start">
             <div>
               <p className={eyebrow()}>Works well with</p>
               <h2 className={sectionHeading()}>Complete the field system.</h2>
             </div>
           </div>
-          <div className="grid grid-cols-4 gap-[18px] max-lg:grid-cols-2 max-sm:grid-cols-2 max-sm:gap-2.5">
+          <div className="grid grid-cols-4 gap-4.5 max-lg:grid-cols-2 max-sm:grid-cols-2 max-sm:gap-2.5">
             {related.map((entry) => (
               <ProductCard key={entry.handle} product={entry} />
             ))}

@@ -128,7 +128,7 @@ export function ShopifyCartView() {
   ];
 
   return (
-    <div className="mx-auto w-[min(100%,var(--container-page))] px-page-gutter pt-[105px] pb-[clamp(56px,8vw,110px)]">
+    <div className="mx-auto w-full max-w-page px-page-gutter pt-26.25 pb-section-block-bottom">
       <p aria-live="polite" className="sr-only" role="status">
         {errorMessages.join(" ")}
       </p>
@@ -139,7 +139,7 @@ export function ShopifyCartView() {
       </h1>
 
       {lines.length > 0 ? (
-        <div className="grid grid-cols-[minmax(0,1.45fr)_minmax(320px,0.55fr)] gap-[clamp(40px,8vw,110px)] py-[clamp(42px,6vw,84px)] max-md:grid-cols-1">
+        <div className="grid grid-cols-cart gap-feature-gap py-section-block-compact max-md:grid-cols-1">
           <section
             aria-label="Cart items"
             className="border-border-subtle border-t"
@@ -197,7 +197,7 @@ export function ShopifyCartView() {
         </div>
       ) : (
         <div className={cartEmptyState}>
-          <div className="max-w-[500px]">
+          <div className="max-w-form">
             <h2 className={cartEmptyHeading}>Nothing packed yet.</h2>
             <p className="text-text-muted">
               Build a field system around the weather and miles ahead.

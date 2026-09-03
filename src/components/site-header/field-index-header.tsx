@@ -21,14 +21,18 @@ import { MiniCart } from "./mini-cart";
 import type { NavItem } from "@/lib/storefront/types";
 
 /** Utility destinations Shopify owns; Forward only supplies their glyphs. */
+/** The row highlight the Field Index shares between its two nav layers. */
+const indexRowTransition =
+  "[transition:background-color_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),padding-inline_220ms_var(--ease-standard)]";
+
 const UTILITY_ICONS: Readonly<Record<string, IconName>> = {
   "/account": "user",
 };
 
 const PRIMARY_NAV_ITEM_CLASS =
-  "group inline-flex min-w-[122px] items-center justify-center gap-2.5 border-0 border-s border-border-subtle px-5 font-body text-[12px] font-ui-strong tracking-[0.06em] uppercase hover:bg-ink hover:text-text-inverse aria-[current=page]:bg-ink aria-[current=page]:text-text-inverse last:border-e max-xl:min-w-[102px] max-xl:px-3.5";
+  "group inline-flex min-w-30.5 items-center justify-center gap-2.5 border-0 border-s border-border-subtle px-5 font-body text-caption font-ui-strong tracking-link uppercase hover:bg-ink hover:text-text-inverse aria-[current=page]:bg-ink aria-[current=page]:text-text-inverse last:border-e max-xl:min-w-25.5 max-xl:px-3.5";
 const HEADER_CONTROL_CLASS =
-  "min-h-touch min-w-touch items-center justify-center gap-2 bg-transparent font-body text-[12px] font-ui tracking-[0.06em] uppercase hover:bg-surface-subtle";
+  "min-h-touch min-w-touch items-center justify-center gap-2 bg-transparent font-body text-caption font-ui tracking-link uppercase hover:bg-surface-subtle";
 
 export interface FieldIndexHeaderProps {
   announcement: string;
@@ -90,15 +94,15 @@ function FieldIndexPanel({
 
   return (
     <section
-      className="absolute inset-x-0 top-full z-[-1] animate-[shell-panel-enter_var(--duration-panel)_var(--ease-enter)_both] border-ink border-b bg-canvas shadow-panel motion-reduce:animate-none max-lg:hidden"
+      className="absolute inset-x-0 top-full -z-1 animate-shell-panel border-ink border-b bg-canvas shadow-panel motion-reduce:animate-none max-lg:hidden"
       id={id}
       aria-label="Shop field index"
     >
-      <div className="flex min-h-[42px] items-center justify-between border-border-subtle border-b px-page-gutter font-body text-[9px] text-text-muted tracking-field-meta uppercase">
+      <div className="flex min-h-10.5 items-center justify-between border-border-subtle border-b px-page-gutter font-body text-micro text-text-muted tracking-field-meta uppercase">
         <span>Shop / Field index</span>
         <span>{String(collections.length).padStart(2, "0")} systems</span>
       </div>
-      <div className="grid min-h-[368px] grid-cols-[minmax(0,1.18fr)_minmax(360px,0.82fr)]">
+      <div className="grid min-h-92 grid-cols-[minmax(0,1.18fr)_minmax(360px,0.82fr)]">
         <nav
           className="grid grid-rows-[repeat(3,1fr)]"
           aria-label="Shop collections"
@@ -107,42 +111,44 @@ function FieldIndexPanel({
             <Link
               key={collection.id}
               href={createHeaderNavigationHref(collection.href, queryString)}
-              className="group grid grid-cols-[52px_minmax(0,1fr)_40px] items-center gap-[18px] border-border-subtle border-b px-page-gutter py-5 [transition:background-color_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),padding-inline_220ms_var(--ease-standard)] last:border-b-0 hover:bg-ink hover:ps-[calc(var(--spacing-page-gutter)+10px)] hover:text-text-inverse focus-visible:bg-ink focus-visible:ps-[calc(var(--spacing-page-gutter)+10px)] focus-visible:text-text-inverse data-[active=true]:bg-ink data-[active=true]:ps-[calc(var(--spacing-page-gutter)+10px)] data-[active=true]:text-text-inverse motion-reduce:transition-none"
+              className={`group grid grid-cols-[52px_minmax(0,1fr)_40px] items-center gap-4.5 border-border-subtle border-b px-page-gutter py-5 ${indexRowTransition} last:border-b-0 hover:bg-ink hover:ps-field-index-indent hover:text-text-inverse focus-visible:bg-ink focus-visible:ps-field-index-indent focus-visible:text-text-inverse data-[active=true]:bg-ink data-[active=true]:ps-field-index-indent data-[active=true]:text-text-inverse motion-reduce:transition-none`}
               aria-current={currentIndex === index ? "page" : undefined}
               data-active={activeIndex === index ? "true" : undefined}
               onFocus={() => onSelect(index)}
               onMouseEnter={() => onSelect(index)}
               onClick={onClose}
             >
-              <span className="font-body text-[10px]">{collection.index}</span>
-              <span className="grid grid-cols-[minmax(180px,0.55fr)_minmax(220px,1fr)] items-baseline gap-[26px] max-xl:grid-cols-1 max-xl:gap-[5px]">
-                <strong className="font-heading text-[clamp(25px,2.5vw,40px)] [font-weight:var(--font-weight-heading)] tracking-heading">
+              <span className="font-body text-field-meta">
+                {collection.index}
+              </span>
+              <span className="grid grid-cols-[minmax(180px,0.55fr)_minmax(220px,1fr)] items-baseline gap-6.5 max-xl:grid-cols-1 max-xl:gap-1.25">
+                <strong className="font-heading text-field-index-title font-title tracking-heading">
                   {collection.label}
                 </strong>
-                <small className="max-w-[340px] text-[11px] text-text-muted leading-[1.65] group-hover:text-text-dark-muted group-data-[active=true]:text-text-dark-muted">
+                <small className="max-w-85 text-ui text-text-muted leading-field-index-copy group-hover:text-text-dark-muted group-data-[active=true]:text-text-dark-muted">
                   {collection.description}
                 </small>
               </span>
-              <span className="font-body text-[15px]" aria-hidden="true">
+              <span className="font-body text-copy" aria-hidden="true">
                 <Icon name="arrow-up-right" size={16} />
               </span>
             </Link>
           ))}
         </nav>
-        <figure className="relative min-h-[368px] overflow-hidden bg-ink after:absolute after:inset-0 after:bg-[linear-gradient(180deg,transparent_48%,rgba(5,16,11,0.74))] after:content-['']">
+        <figure className="relative min-h-92 overflow-hidden bg-ink after:absolute after:inset-0 after:bg-field-index-overlay after:content-['']">
           <Image
             key={active.id}
             src={active.image.src}
             alt={active.image.alt}
             fill
-            className="animate-[shell-image-enter_var(--duration-media)_var(--ease-standard)_both] object-cover motion-reduce:animate-none"
+            className="animate-shell-image object-cover motion-reduce:animate-none"
             sizes="42vw"
           />
-          <figcaption className="absolute right-7 bottom-6 left-7 z-[1] flex items-end justify-between gap-6 text-text-inverse">
-            <span className="font-body text-[9px] tracking-[0.1em]">
+          <figcaption className="absolute right-7 bottom-6 left-7 z-1 flex items-end justify-between gap-6 text-text-inverse">
+            <span className="font-body text-micro tracking-label">
               {active.coordinate}
             </span>
-            <p className="m-0 max-w-[260px] text-right font-heading text-[19px] leading-[1.2]">
+            <p className="m-0 max-w-65 text-right font-heading text-card-title leading-copy">
               {active.fieldNote}
             </p>
           </figcaption>
@@ -161,13 +167,13 @@ function AboutIndexPanel({
 }: AboutIndexPanelProps) {
   return (
     <section
-      className="absolute inset-x-0 top-full z-[-1] animate-[shell-panel-enter_var(--duration-panel)_var(--ease-enter)_both] border-ink border-b bg-canvas shadow-panel motion-reduce:animate-none max-lg:hidden"
+      className="absolute inset-x-0 top-full -z-1 animate-shell-panel border-ink border-b bg-canvas shadow-panel motion-reduce:animate-none max-lg:hidden"
       id={id}
       aria-label="About Forward pages"
     >
-      <div className="flex min-h-[42px] items-center justify-between border-border-subtle border-b px-page-gutter font-body text-[9px] text-text-muted tracking-field-meta uppercase">
+      <div className="flex min-h-10.5 items-center justify-between border-border-subtle border-b px-page-gutter font-body text-micro text-text-muted tracking-field-meta uppercase">
         <span>About / Field manual</span>
-        <span className="inline-flex gap-[18px]">
+        <span className="inline-flex gap-4.5">
           <Link
             href={createHeaderNavigationHref(item.href, queryString)}
             className="text-ink"
@@ -187,18 +193,18 @@ function AboutIndexPanel({
           <Link
             key={child.href}
             href={createHeaderNavigationHref(child.href, queryString)}
-            className="grid min-h-[132px] grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-4 border-border-subtle border-r border-b px-page-gutter py-6 [transition:background-color_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),padding-inline_220ms_var(--ease-standard)] hover:bg-ink hover:ps-[calc(var(--spacing-page-gutter)+10px)] hover:text-text-inverse focus-visible:bg-ink focus-visible:ps-[calc(var(--spacing-page-gutter)+10px)] focus-visible:text-text-inverse aria-[current=page]:bg-ink aria-[current=page]:ps-[calc(var(--spacing-page-gutter)+10px)] aria-[current=page]:text-text-inverse [&:nth-child(3n)]:border-r-0 [&:nth-last-child(-n+3)]:border-b-0"
+            className={`grid min-h-33 grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-4 border-border-subtle border-r border-b px-page-gutter py-6 ${indexRowTransition} hover:bg-ink hover:ps-field-index-indent hover:text-text-inverse focus-visible:bg-ink focus-visible:ps-field-index-indent focus-visible:text-text-inverse aria-[current=page]:bg-ink aria-[current=page]:ps-field-index-indent aria-[current=page]:text-text-inverse [&:nth-child(3n)]:border-r-0 [&:nth-last-child(-n+3)]:border-b-0`}
             aria-current={isActive(pathname, child.href) ? "page" : undefined}
             onClick={onClose}
           >
-            <span className="font-body text-[9px] text-text-muted">
+            <span className="font-body text-micro text-text-muted">
               {String(index + 1).padStart(2, "0")}
             </span>
-            <strong className="font-heading text-[clamp(22px,2vw,32px)] [font-weight:var(--font-weight-heading)] tracking-[-0.03em]">
+            <strong className="font-heading text-about-index-title font-title tracking-about-index-title">
               {child.label}
             </strong>
             <i
-              className="font-body text-[9px] text-text-muted not-italic"
+              className="font-body text-micro text-text-muted not-italic"
               aria-hidden="true"
             >
               <Icon name="arrow-up-right" size={13} />
@@ -226,7 +232,7 @@ function MobileFieldIndex({
   const currentIndex = currentCollectionIndex(pathname, collections);
   return (
     <div>
-      <div className="flex min-h-12 items-center justify-between border-white/22 border-b font-body text-[9px] text-text-dark-muted tracking-field-meta uppercase">
+      <div className="flex min-h-12 items-center justify-between border-white/22 border-b font-body text-micro text-text-dark-muted tracking-field-meta uppercase">
         <span>Shop / Field index</span>
         <span>{String(collections.length).padStart(2, "0")} systems</span>
       </div>
@@ -235,23 +241,23 @@ function MobileFieldIndex({
           <Link
             key={collection.id}
             href={createHeaderNavigationHref(collection.href, queryString)}
-            className="grid min-h-[104px] grid-cols-[38px_1fr] content-center gap-x-3 gap-y-1.5 border-white/22 border-b max-xs:min-h-24"
+            className="grid min-h-26 grid-cols-[38px_1fr] content-center gap-x-3 gap-y-1.5 border-white/22 border-b max-xs:min-h-24"
             aria-current={currentIndex === index ? "page" : undefined}
             onClick={onNavigate}
           >
-            <span className="row-span-2 font-body text-[9px] text-text-dark-muted">
+            <span className="row-span-2 font-body text-micro text-text-dark-muted">
               {collection.index}
             </span>
-            <strong className="font-heading text-[clamp(25px,8vw,36px)] [font-weight:var(--font-weight-heading)]">
+            <strong className="font-heading text-mobile-index-title font-title">
               {collection.label}
             </strong>
-            <small className="text-[10px] text-text-dark-muted leading-[1.5]">
+            <small className="text-field-meta text-text-dark-muted leading-mobile-index">
               {collection.description}
             </small>
           </Link>
         ))}
       </nav>
-      <p className="mt-[22px] mb-0 font-body text-[8px] text-text-dark-muted tracking-[0.1em] uppercase">
+      <p className="mt-5.5 mb-0 font-body text-nano text-text-dark-muted tracking-label uppercase">
         Designed for weather, miles, and repeat use.
       </p>
     </div>
@@ -489,7 +495,7 @@ export function FieldIndexHeader({
   return (
     <div ref={rootRef} className="contents">
       <aside
-        className="flex min-h-announcement items-center justify-between bg-signal px-page-gutter py-1.5 text-center font-body text-[9px] font-ui text-ink tracking-[0.13em] uppercase max-md:justify-center"
+        className="flex min-h-announcement items-center justify-between bg-signal px-page-gutter py-1.5 text-center font-body text-micro font-ui text-ink tracking-announcement uppercase max-md:justify-center"
         data-shell-background
         aria-label="Store announcement"
       >
@@ -498,7 +504,7 @@ export function FieldIndexHeader({
         <CountryControl />
       </aside>
       <header
-        className="sticky top-0 z-[80] isolate grid h-header grid-cols-[minmax(155px,1fr)_auto_minmax(230px,1fr)] items-center border-ink border-b bg-canvas/96 px-page-gutter max-lg:grid-cols-[1fr_auto] max-md:h-header-compact"
+        className="sticky top-0 z-80 isolate grid h-header grid-cols-[minmax(155px,1fr)_auto_minmax(230px,1fr)] items-center border-ink border-b bg-canvas/96 px-page-gutter max-lg:grid-cols-lead-trailing max-md:h-header-compact"
         data-shell-background
       >
         <Wordmark href={createHeaderNavigationHref("/", queryString)} />
@@ -514,7 +520,7 @@ export function FieldIndexHeader({
                 isActive(pathname, shopItem.href) ? "page" : undefined
               }
             >
-              <i className="text-[11px] text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
+              <i className="text-ui text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
                 01
               </i>
               {shopItem.label}
@@ -531,12 +537,12 @@ export function FieldIndexHeader({
               aria-controls={desktopOpen ? desktopPanelId : undefined}
               onClick={toggleDesktop}
             >
-              <i className="text-[11px] text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
+              <i className="text-ui text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
                 01
               </i>
               {shopItem.label}
               <span
-                className="inline-flex min-w-[10px] items-center text-[13px] text-signal-strong"
+                className="inline-flex min-w-2.5 items-center text-label text-signal-strong"
                 aria-hidden="true"
               >
                 <Icon
@@ -560,12 +566,12 @@ export function FieldIndexHeader({
                 aria-controls={aboutOpen ? aboutPanelId : undefined}
                 onClick={toggleAbout}
               >
-                <i className="text-[11px] text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
+                <i className="text-ui text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
                   {String(index + 2).padStart(2, "0")}
                 </i>
                 {item.label}
                 <span
-                  className="inline-flex min-w-[10px] items-center text-[13px] text-signal-strong"
+                  className="inline-flex min-w-2.5 items-center text-label text-signal-strong"
                   aria-hidden="true"
                 >
                   <Icon
@@ -587,7 +593,7 @@ export function FieldIndexHeader({
                   setAboutOpen(false);
                 }}
               >
-                <i className="text-[11px] text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
+                <i className="text-ui text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
                   {String(index + 2).padStart(2, "0")}
                 </i>
                 {item.label}
@@ -682,13 +688,13 @@ export function FieldIndexHeader({
       {mobileOpen ? (
         <aside
           ref={mobilePanelRef}
-          className="fixed inset-0 z-[120] animate-[shell-mobile-enter_260ms_var(--ease-enter)_both] overflow-auto bg-ink px-page-gutter pb-10 text-text-inverse motion-reduce:animate-none max-md:px-5"
+          className="fixed inset-0 z-120 animate-shell-mobile overflow-auto bg-ink px-page-gutter pb-10 text-text-inverse motion-reduce:animate-none max-md:px-5"
           id={mobilePanelId}
           role="dialog"
           aria-modal="true"
           aria-label="Site menu"
         >
-          <div className="sticky top-0 z-[2] flex h-[72px] items-center justify-between gap-3.5 border-white/25 border-b bg-inherit">
+          <div className="sticky top-0 z-2 flex h-18 items-center justify-between gap-3.5 border-white/25 border-b bg-inherit">
             <Wordmark
               href={createHeaderNavigationHref("/", queryString)}
               variant="mobile"
@@ -712,17 +718,17 @@ export function FieldIndexHeader({
             />
           )}
           <nav
-            className="mt-[30px] border-white/22 border-t"
+            className="mt-7.5 border-white/22 border-t"
             aria-label="Mobile primary navigation"
           >
             {mobileLinks.map(({ item, child }, index) => (
               <Link
                 key={`${child ? "child" : "item"}:${item.href}`}
                 className={cn(
-                  "grid grid-cols-[34px_1fr_auto] items-center gap-2.5 border-white/18 border-b font-body uppercase",
+                  "grid grid-cols-index-row items-center gap-2.5 border-white/18 border-b font-body uppercase",
                   child
-                    ? "min-h-12 ps-[34px] text-[11px] text-text-dark-muted"
-                    : "min-h-[62px] text-[14px]",
+                    ? "min-h-12 ps-8.5 text-ui text-text-dark-muted"
+                    : "min-h-15.5 text-copy-sm",
                 )}
                 href={createHeaderNavigationHref(item.href, queryString)}
                 aria-current={
@@ -730,12 +736,12 @@ export function FieldIndexHeader({
                 }
                 onClick={closeMobile}
               >
-                <span className="font-body text-[8px] text-text-dark-muted">
+                <span className="font-body text-nano text-text-dark-muted">
                   {String(index + 4).padStart(2, "0")}
                 </span>
                 {accountNavigationLabel(item, accountSignedIn)}
                 <i
-                  className="font-body text-[8px] text-text-dark-muted not-italic"
+                  className="font-body text-nano text-text-dark-muted not-italic"
                   aria-hidden="true"
                 >
                   <Icon name="arrow-up-right" size={13} />
@@ -743,19 +749,19 @@ export function FieldIndexHeader({
               </Link>
             ))}
             <Link
-              className="grid min-h-[62px] grid-cols-[34px_1fr_auto] items-center gap-2.5 border-white/18 border-b font-body text-[14px] uppercase"
+              className="grid min-h-15.5 grid-cols-index-row items-center gap-2.5 border-white/18 border-b font-body text-copy-sm uppercase"
               href={createHeaderNavigationHref("/cart", queryString)}
               aria-current={isActive(pathname, "/cart") ? "page" : undefined}
               onClick={closeMobile}
             >
-              <span className="font-body text-[8px] text-text-dark-muted">
+              <span className="font-body text-nano text-text-dark-muted">
                 {String(mobileLinks.length + 4).padStart(2, "0")}
               </span>
               Cart
               <CartCount />
             </Link>
           </nav>
-          <p className="mt-[45px] mb-0 text-[11px] text-text-inverse-subtle leading-[1.8] tracking-[0.1em] uppercase">
+          <p className="mt-11.25 mb-0 text-ui text-text-inverse-subtle leading-mobile-rail tracking-label uppercase">
             FOR / WARD · Field index
             <br />
             Shopify menu structure · Forward field system
