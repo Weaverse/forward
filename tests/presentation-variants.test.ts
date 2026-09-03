@@ -2,21 +2,19 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  cartDisabledCta,
   cartEmptyHeading,
   cartEmptyState,
   cartImage,
   cartLine,
   cartLineControls,
   cartLineHeading,
+  cartPrimaryCta,
   cartQuantity,
   cartQuantityButton,
   cartRemoveButton,
   cartSummaryNote,
   cartSummaryRow,
-  demoCartDisabledCta,
-  demoCartPrimaryCta,
-  shopifyCartDisabledCta,
-  shopifyCartPrimaryCta,
 } from "@/app/cart/presentation";
 import {
   controlTransition,
@@ -83,23 +81,13 @@ describe("shared presentation recipes", () => {
       cta({ intent: "outline" }),
       `${base} border-ink bg-transparent px-5.5 py-3 font-body text-ui font-bold text-ink tracking-button uppercase shadow-button hover:translate-0.5 hover:bg-ink hover:text-text-inverse hover:shadow-button-hover active:translate-1 active:shadow-none focus-visible:outline-3 focus-visible:outline-ink focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0`,
     );
-    assert.equal(
-      cta({ intent: "demoCartPrimary" }),
-      `${base} px-5.5 py-3 font-body text-ui font-bold tracking-button uppercase hover:translate-0.5 hover:border-ink hover:bg-ink hover:text-text-inverse active:translate-1 active:shadow-none focus-visible:outline-3 focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0 border-ink bg-ink text-text-inverse shadow-button-signal hover:shadow-button-signal-hover focus-visible:outline-signal`,
-    );
   });
 
   it("declares one shadow, hover shadow, and focus outline colour per CTA intent", () => {
     /* `cn()` is a plain join, so a second shadow or outline colour in the same
      * class list is resolved by Tailwind's emission order, not authoring
      * order. Every intent must state its winner exactly once. */
-    const intents = [
-      "primary",
-      "signal",
-      "light",
-      "outline",
-      "demoCartPrimary",
-    ] as const;
+    const intents = ["primary", "signal", "light", "outline"] as const;
 
     for (const intent of intents) {
       const classes = cta({ intent }).split(" ");
@@ -114,14 +102,6 @@ describe("shared presentation recipes", () => {
         intent,
       );
     }
-
-    const staticCartCta = cta({ intent: "demoCartPrimary" }).split(" ");
-    assert.ok(
-      staticCartCta.includes("shadow-button-signal"),
-      "the static cart CTA keeps the signal hard shadow of the ink primary CTA",
-    );
-    assert.ok(staticCartCta.includes("hover:shadow-button-signal-hover"));
-    assert.ok(staticCartCta.includes("focus-visible:outline-signal"));
   });
 
   it("keeps text-arrow link variants exact", () => {
@@ -179,15 +159,10 @@ describe("cart presentation recipes", () => {
       "flex justify-between gap-5 border-border-subtle border-b py-2.5",
     );
     assert.equal(cartSummaryNote, "mt-3.5 mb-5 text-caption text-text-muted");
-    assert.equal(demoCartPrimaryCta, cta({ intent: "demoCartPrimary" }));
-    assert.equal(shopifyCartPrimaryCta, cta());
+    assert.equal(cartPrimaryCta, cta());
     assert.equal(
-      demoCartDisabledCta,
-      `${demoCartPrimaryCta} w-full cursor-not-allowed opacity-46 shadow-none`,
-    );
-    assert.equal(
-      shopifyCartDisabledCta,
-      `${shopifyCartPrimaryCta} w-full cursor-not-allowed opacity-46 shadow-none`,
+      cartDisabledCta,
+      `${cartPrimaryCta} w-full cursor-not-allowed opacity-46 shadow-none`,
     );
     assert.equal(cartEmptyState, emptyState());
     assert.equal(

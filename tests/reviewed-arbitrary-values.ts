@@ -52,7 +52,7 @@ export const REVIEWED_ARBITRARY_VALUES: Record<string, string[]> = {
   "content-['→']": [
     "src/app/journal/page.tsx:61:29",
     "src/app/products/[productHandle]/page.tsx:103:23",
-    "src/lib/presentation/variants.ts:65:3",
+    "src/lib/presentation/variants.ts:61:3",
   ],
   "content-['+']": [
     "src/app/products/[productHandle]/page.tsx:54:28",
@@ -193,7 +193,7 @@ export const REVIEWED_ARBITRARY_VALUES: Record<string, string[]> = {
   "px-[clamp(28px,4vw,60px)]": ["src/app/page.tsx:226:26"],
   "py-[clamp(24px,4svh,48px)]": ["src/app/page.tsx:226:26"],
   "py-[clamp(3px,1svh,6px)]": ["src/app/page.tsx:244:29"],
-  "py-[clamp(60px,10vw,140px)]": ["src/lib/presentation/variants.ts:75:13"],
+  "py-[clamp(60px,10vw,140px)]": ["src/lib/presentation/variants.ts:71:13"],
   "py-[clamp(8px,1.7svh,14px)]": ["src/app/page.tsx:244:29"],
 
   "top-[calc(100%+12px)]": ["src/components/site-header/mini-cart.tsx:289:21"],

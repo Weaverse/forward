@@ -51,10 +51,6 @@ export const cta = cva(
           "border-text-inverse bg-transparent px-5.5 py-3 font-body text-ui font-bold text-text-inverse tracking-button uppercase shadow-button-inverse hover:translate-0.5 hover:bg-text-inverse hover:text-ink hover:shadow-button-inverse-hover active:translate-1 active:shadow-none focus-visible:outline-3 focus-visible:outline-text-inverse focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0",
         outline:
           "border-ink bg-transparent px-5.5 py-3 font-body text-ui font-bold text-ink tracking-button uppercase shadow-button hover:translate-0.5 hover:bg-ink hover:text-text-inverse hover:shadow-button-hover active:translate-1 active:shadow-none focus-visible:outline-3 focus-visible:outline-ink focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0",
-        // `cn()` does not merge Tailwind classes, so this intent may declare
-        // its shadow and focus outline colour only once.
-        demoCartPrimary:
-          "px-5.5 py-3 font-body text-ui font-bold tracking-button uppercase hover:translate-0.5 hover:border-ink hover:bg-ink hover:text-text-inverse active:translate-1 active:shadow-none focus-visible:outline-3 focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0 border-ink bg-ink text-text-inverse shadow-button-signal hover:shadow-button-signal-hover focus-visible:outline-signal",
       },
     },
     defaultVariants: { intent: "primary" },

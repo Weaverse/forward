@@ -21,8 +21,7 @@ import { useDemoCartLines } from "@/lib/demo-cart/use-demo-cart";
 import { formatMoney } from "@/lib/storefront/format";
 
 import {
-  demoCartDisabledCta,
-  demoCartPrimaryCta,
+  cartDisabledCta,
   cartEmptyHeading,
   cartEmptyState,
   cartEyebrow,
@@ -31,6 +30,7 @@ import {
   cartLineControls,
   cartLineHeading,
   cartPageHeading,
+  cartPrimaryCta,
   cartQuantity,
   cartQuantityButton,
   cartRemoveButton,
@@ -204,7 +204,7 @@ export function CartView({ seedLines }: CartViewProps) {
                   })} away from free ground delivery.`
                 : "Ground delivery is included on this order."}
             </p>
-            <p className={demoCartDisabledCta} aria-disabled>
+            <p className={cartDisabledCta} aria-disabled>
               Checkout — not connected
             </p>
             <p className={cartSummaryNote}>
@@ -221,7 +221,7 @@ export function CartView({ seedLines }: CartViewProps) {
             <p className="text-text-muted">
               Build a field system around the weather and miles ahead.
             </p>
-            <Link className={demoCartPrimaryCta} href="/shop">
+            <Link className={cartPrimaryCta} href="/shop">
               Explore all gear
             </Link>
           </div>

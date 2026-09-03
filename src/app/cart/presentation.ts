@@ -25,10 +25,8 @@ export const cartSummaryRow =
   "flex justify-between gap-5 border-border-subtle border-b py-2.5";
 export const cartSummaryTotal = `${cartSummaryRow} py-5 font-heading text-heading-4`;
 export const cartSummaryNote = "mt-3.5 mb-5 text-caption text-text-muted";
-export const demoCartPrimaryCta = cta({ intent: "demoCartPrimary" });
-export const shopifyCartPrimaryCta = cta();
-export const demoCartDisabledCta = `${demoCartPrimaryCta} w-full cursor-not-allowed opacity-46 shadow-none`;
-export const shopifyCartDisabledCta = `${shopifyCartPrimaryCta} w-full cursor-not-allowed opacity-46 shadow-none`;
+export const cartPrimaryCta = cta();
+export const cartDisabledCta = `${cartPrimaryCta} w-full cursor-not-allowed opacity-46 shadow-none`;
 export const cartEmptyState = emptyState();
 export const cartEmptyHeading =
   "m-0 mb-4.5 text-balance font-heading text-heading-3 leading-subheading font-medium tracking-heading";

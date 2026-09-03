@@ -11,8 +11,7 @@ import {
 } from "@/lib/cart/shopify-cart-react";
 
 import {
-  shopifyCartDisabledCta,
-  shopifyCartPrimaryCta,
+  cartDisabledCta,
   cartEmptyHeading,
   cartEmptyState,
   cartEyebrow,
@@ -21,6 +20,7 @@ import {
   cartLineControls,
   cartLineHeading,
   cartPageHeading,
+  cartPrimaryCta,
   cartQuantity,
   cartQuantityButton,
   cartRemoveButton,
@@ -170,12 +170,12 @@ export function ShopifyCartView() {
               <strong>{money(cart.cost.totalAmount)}</strong>
             </div>
             {cart.checkoutUrl === null || cart.checkoutUrl === undefined ? (
-              <p aria-disabled className={shopifyCartDisabledCta}>
+              <p aria-disabled className={cartDisabledCta}>
                 Checkout unavailable
               </p>
             ) : (
               <a
-                className={`${shopifyCartPrimaryCta} w-full`}
+                className={`${cartPrimaryCta} w-full`}
                 href={cart.checkoutUrl}
                 rel="external nofollow"
               >
@@ -202,7 +202,7 @@ export function ShopifyCartView() {
             <p className="text-text-muted">
               Build a field system around the weather and miles ahead.
             </p>
-            <Link className={shopifyCartPrimaryCta} href="/shop">
+            <Link className={cartPrimaryCta} href="/shop">
               Explore all gear
             </Link>
           </div>
