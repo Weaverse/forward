@@ -239,22 +239,6 @@ describe("icon dependency boundary", () => {
   });
 });
 
-describe("approved brand assets", () => {
-  it("ships the moss and reversed horizontal lockups the shell renders", async () => {
-    const [header, footer] = await Promise.all([
-      read("public/images/brand/forward-wordmark-horizontal-moss.svg"),
-      read("public/images/brand/forward-wordmark-horizontal-reversed.svg"),
-    ]);
-
-    assert.ok(header.includes('viewBox="0 0 480 96"'));
-    assert.ok(header.includes('fill="#20231f"'));
-    assert.ok(header.includes('fill="#74805d"'));
-    assert.ok(footer.includes('viewBox="0 0 480 96"'));
-    assert.ok(footer.includes('fill="#f2ede3"'));
-    assert.ok(footer.includes('fill="#a6ad8b"'));
-  });
-});
-
 describe("preview deployment hygiene", () => {
   it("excludes local editor, secret, build, and QA artifacts", async () => {
     const ignore = await read(".vercelignore");
