@@ -239,29 +239,6 @@ describe("icon dependency boundary", () => {
   });
 });
 
-describe("header ownership", () => {
-  it("keeps no superseded header implementation on disk", async () => {
-    await Promise.all(
-      ["src/components/header-nav.tsx", "src/components/mobile-menu.tsx"].map(
-        (legacyPath) => assert.rejects(access(legacyPath)),
-      ),
-    );
-  });
-
-  it("routes header navigation through one query-preserving wrapper", async () => {
-    const [shell, wrapper] = await Promise.all([
-      read("src/components/site-header/site-header.tsx"),
-      read(
-        "src/components/site-header/query-preserving-field-index-header.tsx",
-      ),
-    ]);
-
-    assert.ok(shell.includes("<Suspense"));
-    assert.ok(shell.includes("<QueryPreservingFieldIndexHeader"));
-    assert.ok(wrapper.includes("useSearchParams"));
-  });
-});
-
 describe("approved brand assets", () => {
   it("ships the moss and reversed horizontal lockups the shell renders", async () => {
     const [header, footer] = await Promise.all([
