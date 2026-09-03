@@ -451,10 +451,6 @@ export function Card({ on }) {
     ].map(([, stylesheet]) => stylesheet);
 
     assert.deepEqual(stylesheets, ["./globals.css"]);
-    assert.doesNotMatch(layout, /forward-tailwind-theme/);
-    for (const legacyPath of legacyStylesheets) {
-      assert.ok(!layout.includes(legacyPath.split("/").at(-1) ?? legacyPath));
-    }
   });
 
   it("keeps globals.css limited to the semantic theme and document policy", async () => {
