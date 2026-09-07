@@ -9,17 +9,16 @@ import {
   createCustomerSession,
 } from "@shopify/hydrogen/customer-account";
 import { NextRequest } from "next/server";
-
-import type { CustomerAccountConfig } from "../src/lib/account/env.ts";
 import {
   ACCOUNT_PATH,
-  createCustomerAccountRuntime,
   CUSTOMER_ACCOUNT_PROTOCOL_PATHS,
+  createCustomerAccountRuntime,
   loginHref,
   MAX_RETURN_TO_BYTES,
-  refreshHref,
   REFRESH_MARKER_PARAM,
+  refreshHref,
 } from "../src/lib/account/customer-account.ts";
+import type { CustomerAccountConfig } from "../src/lib/account/env.ts";
 import { createCustomerAccountSessionManager } from "../src/lib/account/session-manager.ts";
 import { ACCOUNT_PROTOCOL_PATHS } from "../src/lib/routes/route-contract.ts";
 import { proxy } from "../src/proxy.ts";

@@ -4,8 +4,8 @@ import path from "node:path";
 import { describe, it } from "node:test";
 
 import {
-  CATALOG_PRESENTATION_PROFILES,
   CANONICAL_PRODUCT_HANDLES,
+  CATALOG_PRESENTATION_PROFILES,
 } from "../src/lib/storefront/catalog-presentation.ts";
 import {
   createStorefrontDataSource,
@@ -36,8 +36,8 @@ import {
 import { mapCatalogResult } from "../src/lib/storefront/shopify/mapper.ts";
 import type { Product } from "../src/lib/storefront/types.ts";
 import {
-  catalogResponse,
   type CatalogResponse,
+  catalogResponse,
   catalogResponseWith,
   syntheticMediaIds,
 } from "./fixtures/shopify-catalog-response.ts";

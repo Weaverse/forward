@@ -1,6 +1,6 @@
 import {
-  COLLECTION_PRESENTATION_PROFILES,
   type CanonicalCollectionHandle,
+  COLLECTION_PRESENTATION_PROFILES,
 } from "@/lib/storefront/collection-presentation";
 import type { NavItem, StorefrontImage } from "@/lib/storefront/types";
 

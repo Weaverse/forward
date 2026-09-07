@@ -1,8 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-
-import { cta, sectionHeading } from "@/lib/presentation/variants";
 import { cn } from "@/lib/cn";
+import { cta, sectionHeading } from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
 
 /** Shared accessible 404 for the root and every unknown dynamic handle. */

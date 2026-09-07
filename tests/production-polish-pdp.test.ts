@@ -20,8 +20,8 @@ import {
 import { mapCatalogResult } from "../src/lib/storefront/shopify/mapper.ts";
 import type { Money, Product } from "../src/lib/storefront/types.ts";
 import {
-  catalogResponse,
   type CatalogResponse,
+  catalogResponse,
   catalogResponseWith,
 } from "./fixtures/shopify-catalog-response.ts";
 

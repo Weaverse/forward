@@ -7,8 +7,8 @@
  * than waited out.
  */
 
-import assert from "node:assert/strict";
 import { afterEach, beforeEach, describe, it, jest } from "bun:test";
+import assert from "node:assert/strict";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 

@@ -1,9 +1,8 @@
 import { Suspense } from "react";
-
-import { FieldIndexHeader } from "./field-index-header";
-import { QueryPreservingFieldIndexHeader } from "./query-preserving-field-index-header";
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
 import { storefront } from "@/lib/storefront/data-source";
+import { FieldIndexHeader } from "./field-index-header";
+import { QueryPreservingFieldIndexHeader } from "./query-preserving-field-index-header";
 
 /**
  * Canonical Field Index header. Navigation remains behind the normalized

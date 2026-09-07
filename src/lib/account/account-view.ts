@@ -18,9 +18,9 @@ import { notFound } from "next/navigation";
 
 import {
   getCustomerAccountRuntime,
-  refreshHref,
   REFRESH_MARKER_PARAM,
   REFRESH_MARKER_VALUE,
+  refreshHref,
 } from "./customer-account";
 import {
   ACCOUNT_ADDRESS_LIMIT,

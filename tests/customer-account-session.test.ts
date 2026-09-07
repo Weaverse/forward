@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import type { CustomerAccountConfig } from "../src/lib/account/env.ts";
-import { createCustomerAccountSessionManager } from "../src/lib/account/session-manager.ts";
 import {
   CUSTOMER_ACCOUNT_COOKIE_NAME,
   CustomerAccountSessionError,
@@ -10,10 +9,11 @@ import {
   MAX_COOKIE_VALUE_BYTES,
   openSession,
   readSessionCookie,
-  sealSession,
   SESSION_MAX_AGE_IN_SECONDS,
+  sealSession,
   serializeSessionCookie,
 } from "../src/lib/account/session-cookie.ts";
+import { createCustomerAccountSessionManager } from "../src/lib/account/session-manager.ts";
 
 const CONFIG: CustomerAccountConfig = {
   shopId: "97847574828",

@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-import { cn } from "@/lib/cn";
 import { announceCartAdd } from "@/lib/cart/mini-cart-signal";
 import {
   ShopifyProductProvider,
@@ -11,13 +9,14 @@ import {
   useShopifyCartMode,
   useShopifyProductForm,
 } from "@/lib/cart/shopify-cart-react";
+import { cn } from "@/lib/cn";
 import { lineKey, MAX_LINE_QUANTITY } from "@/lib/demo-cart/cart-logic";
 import { addCartLine } from "@/lib/demo-cart/store";
 import { CONTROL_TRANSITION } from "@/lib/presentation/variants";
 import { formatMoney } from "@/lib/storefront/format";
 import {
-  productSelectionHref,
   type ProductSelection,
+  productSelectionHref,
 } from "@/lib/storefront/product-state";
 import type { Product } from "@/lib/storefront/types";
 

@@ -18,10 +18,10 @@
  */
 
 import {
-  type ShopifyRequestContext,
-  type StorefrontClient,
   createShopifyRequestContext,
   handleShopifyRoutes,
+  type ShopifyRequestContext,
+  type StorefrontClient,
 } from "@shopify/hydrogen";
 import { type NextRequest, NextResponse } from "next/server";
 

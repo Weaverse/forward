@@ -11,8 +11,8 @@ import {
 
 import {
   hardenCartResponseHeaders,
-  readTrustedBuyerIp,
   type RuntimeEnvironment,
+  readTrustedBuyerIp,
   sanitizeCartHandlerResult,
 } from "./shopify-cart-server";
 

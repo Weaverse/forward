@@ -6,14 +6,14 @@ import { unstable_cache } from "next/cache";
 
 import { CATALOG_REVALIDATE_SECONDS, CONTENT_CACHE_KEY } from "./cache-policy";
 import type { CatalogQueryExecutorOptions } from "./client";
-import type { ShopifyCatalogConfig } from "./env";
-import { safeErrorLabel, ShopifyCatalogError } from "./errors";
-import { mapContentResult, type MappedContentResult } from "./content-mapper";
+import { type MappedContentResult, mapContentResult } from "./content-mapper";
 import {
   CONTENT_ARTICLE_LIMIT,
   CONTENT_BLOG_HANDLE,
   CONTENT_QUERY,
 } from "./content-query";
+import type { ShopifyCatalogConfig } from "./env";
+import { ShopifyCatalogError, safeErrorLabel } from "./errors";
 
 export interface ContentQueryResult {
   data?: unknown;

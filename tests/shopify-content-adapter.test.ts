@@ -6,15 +6,15 @@ import {
   createStorefrontDataSource,
   StaticStorefrontDataSource,
 } from "../src/lib/storefront/data-source.ts";
-import { ShopifyCatalogDataSource } from "../src/lib/storefront/shopify/data-source.ts";
-import { DEFAULT_MAIN_MENU_HANDLE } from "../src/lib/storefront/shopify/env.ts";
-import { ShopifyCatalogError } from "../src/lib/storefront/shopify/errors.ts";
 import {
   parseArticleHtml,
   parsePageHtml,
   parsePolicyHtml,
 } from "../src/lib/storefront/shopify/content-html-parser.ts";
 import { mapContentResult } from "../src/lib/storefront/shopify/content-mapper.ts";
+import { ShopifyCatalogDataSource } from "../src/lib/storefront/shopify/data-source.ts";
+import { DEFAULT_MAIN_MENU_HANDLE } from "../src/lib/storefront/shopify/env.ts";
+import { ShopifyCatalogError } from "../src/lib/storefront/shopify/errors.ts";
 import { catalogResponse } from "./fixtures/shopify-catalog-response.ts";
 import {
   contentResponse,
