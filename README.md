@@ -50,12 +50,12 @@ context, checkout, and Customer Account remain explicit future work.
 | `bun run start` | Serve the production build. |
 | `bun run typecheck` | Strict TypeScript check (`tsc --noEmit`). |
 | `bun run lint` | Biome lint (`biome lint .`). |
-| `bun run format` | Format the repository with Biome (writes). |
-| `bun run format:check` | Verify formatting without writing. |
+| `bun run format` | Format the repository and sort imports with Biome (writes). |
+| `bun run format:check` | Verify formatting and import order without writing. |
 | `bun test` | Unit tests (route contract, static data source, colorway/gallery helpers, demo-cart logic) via Bun's test runner. |
 | `bun run check:routes` | Verify the route contract against actual build output (`.next` manifests). Requires a prior `bun run build`. |
 | `bun run smoke:routes` | Start the production server, verify every contract path and redirect over HTTP, then stop the server. Requires a prior `bun run build`. |
-| `bun run check` | Composed static gates: typecheck → lint → format:check → test → build → check:routes. Leaves no server running. |
+| `bun run check` | Composed static gates: typecheck → lint → format:check → test → check:graphql → build → check:theme → check:routes. Leaves no server running. |
 
 ## Storefront data architecture
 
