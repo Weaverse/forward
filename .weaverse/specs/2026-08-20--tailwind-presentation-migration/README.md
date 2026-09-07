@@ -1,10 +1,13 @@
 # Tailwind presentation migration
 
-Updated: 2026-08-21 07:07 +07
-Status: `SPEC_READY`
-Issue: [Weaverse/forward#61](https://github.com/Weaverse/forward/issues/61)
+Updated: 2026-09-07
+Status: `completed`
+Issue: [Weaverse/forward#61](https://github.com/Weaverse/forward/issues/61) (closed)
+Pull request: [Weaverse/forward#62](https://github.com/Weaverse/forward/pull/62) (merged)
 Branch: `refactor/tailwind-presentation-layer`
 Baseline: `main@8fa94b727cc7977d75dc2400bcddf8b2d492e83f`
+Merged as: `main@eb2df4c`
+Implementation head: `3050934`
 
 ## Objective
 

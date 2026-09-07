@@ -5,14 +5,24 @@
 Forward is a fresh Next.js App Router storefront theme using
 `@shopify/hydrogen@preview`, powered by Weaverse.
 
-The current milestone is the issue [#61](https://github.com/Weaverse/forward/issues/61)
-**Tailwind presentation migration**
-(`.weaverse/specs/2026-08-20--tailwind-presentation-migration/README.md`).
-Production polish Phase 1 is complete on `main@8fa94b7`. Migrate in the locked
-order: behavior-level UI coverage → effective Tailwind v4 tokens → global shell
-→ complete route inventory → ownership/runtime hardening → legacy CSS removal.
-This is an architecture migration, not a visual redesign. Preserve the accepted
-Production storefront and its live Shopify contracts.
+The Tailwind presentation migration, issue
+[#61](https://github.com/Weaverse/forward/issues/61)
+(`.weaverse/specs/2026-08-20--tailwind-presentation-migration/README.md`), is
+complete and merged as `main@eb2df4c`. Presentation now lives in Tailwind
+utilities owned by components and routes; there is no active migration in
+flight. Preserve the accepted Production storefront and its live Shopify
+contracts.
+
+Known follow-up work, none of it blocking:
+
+- `src/components/site-header/field-index-header.tsx` is 793 lines of client
+  code for navigation that is mostly static (issue #61 finding 7). Deferred.
+- Biome's `assist/source/organizeImports` reports 34 files, and neither
+  `bun run lint` nor `bun run format:check` currently enforces assist actions.
+- The Phase 5 proofs that no consumer references a retired presentation class,
+  and that Tailwind utilities span the presentation inventory, were deleted
+  with their guard scripts. The retired stylesheets themselves are still
+  guarded, so a stale class string is inert rather than harmful.
 
 ## Architecture constraints
 
