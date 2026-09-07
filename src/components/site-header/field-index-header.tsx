@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import { Icon, type IconName } from "@/components/icon";
 import { Wordmark } from "@/components/wordmark";
@@ -22,7 +22,7 @@ import type { NavItem } from "@/lib/storefront/types";
 
 /** Utility destinations Shopify owns; Forward only supplies their glyphs. */
 /** The row highlight the Field Index shares between its two nav layers. */
-const indexRowTransition =
+const INDEX_ROW_TRANSITION =
   "[transition:background-color_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),padding-inline_220ms_var(--ease-standard)]";
 
 const UTILITY_ICONS: Readonly<Record<string, IconName>> = {
@@ -77,6 +77,23 @@ function activeCollectionIndex(
   return Math.max(currentCollectionIndex(pathname, collections), 0);
 }
 
+/**
+ * The Shop mega panel is an enhancement on merchant-owned navigation: drifted
+ * or missing data yields no panel instead of a failed render.
+ */
+function fieldIndexCollections(
+  shopItem: NavItem | undefined,
+): readonly FieldIndexCollection[] | null {
+  if (shopItem === undefined) {
+    return null;
+  }
+  try {
+    return createFieldIndexCollections(shopItem);
+  } catch {
+    return null;
+  }
+}
+
 function FieldIndexPanel({
   activeIndex,
   collections,
@@ -87,8 +104,10 @@ function FieldIndexPanel({
   queryString,
 }: FieldIndexPanelProps) {
   const active = collections[activeIndex] ?? collections[0];
+  /* The panel is an enhancement on merchant-owned navigation: with nothing to
+   * show it degrades to no panel instead of taking down the root layout. */
   if (active === undefined) {
-    throw new Error("Header 01 requires at least one Shop collection.");
+    return null;
   }
   const currentIndex = currentCollectionIndex(pathname, collections);
 
@@ -111,7 +130,11 @@ function FieldIndexPanel({
             <Link
               key={collection.id}
               href={createHeaderNavigationHref(collection.href, queryString)}
-              className={`group grid grid-cols-[52px_minmax(0,1fr)_40px] items-center gap-4.5 border-border-subtle border-b px-page-gutter py-5 ${indexRowTransition} last:border-b-0 hover:bg-ink hover:ps-field-index-indent hover:text-text-inverse focus-visible:bg-ink focus-visible:ps-field-index-indent focus-visible:text-text-inverse data-[active=true]:bg-ink data-[active=true]:ps-field-index-indent data-[active=true]:text-text-inverse motion-reduce:transition-none`}
+              className={cn(
+                "group grid grid-cols-[52px_minmax(0,1fr)_40px] items-center gap-4.5 border-border-subtle border-b px-page-gutter py-5",
+                INDEX_ROW_TRANSITION,
+                "last:border-b-0 hover:bg-ink hover:ps-field-index-indent hover:text-text-inverse focus-visible:bg-ink focus-visible:ps-field-index-indent focus-visible:text-text-inverse data-[active=true]:bg-ink data-[active=true]:ps-field-index-indent data-[active=true]:text-text-inverse motion-reduce:transition-none",
+              )}
               aria-current={currentIndex === index ? "page" : undefined}
               data-active={activeIndex === index ? "true" : undefined}
               onFocus={() => onSelect(index)}
@@ -193,7 +216,11 @@ function AboutIndexPanel({
           <Link
             key={child.href}
             href={createHeaderNavigationHref(child.href, queryString)}
-            className={`grid min-h-33 grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-4 border-border-subtle border-r border-b px-page-gutter py-6 ${indexRowTransition} hover:bg-ink hover:ps-field-index-indent hover:text-text-inverse focus-visible:bg-ink focus-visible:ps-field-index-indent focus-visible:text-text-inverse aria-[current=page]:bg-ink aria-[current=page]:ps-field-index-indent aria-[current=page]:text-text-inverse [&:nth-child(3n)]:border-r-0 [&:nth-last-child(-n+3)]:border-b-0`}
+            className={cn(
+              "grid min-h-33 grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-4 border-border-subtle border-r border-b px-page-gutter py-6",
+              INDEX_ROW_TRANSITION,
+              "hover:bg-ink hover:ps-field-index-indent hover:text-text-inverse focus-visible:bg-ink focus-visible:ps-field-index-indent focus-visible:text-text-inverse aria-[current=page]:bg-ink aria-[current=page]:ps-field-index-indent aria-[current=page]:text-text-inverse [&:nth-child(3n)]:border-r-0 [&:nth-last-child(-n+3)]:border-b-0",
+            )}
             aria-current={isActive(pathname, child.href) ? "page" : undefined}
             onClick={onClose}
           >
@@ -275,16 +302,7 @@ export function FieldIndexHeader({
   const aboutItem = primary.find(
     (item) => item.href === "/pages/about-forward",
   );
-  const collections = useMemo(() => {
-    if (shopItem === undefined) {
-      return null;
-    }
-    try {
-      return createFieldIndexCollections(shopItem);
-    } catch {
-      return null;
-    }
-  }, [shopItem]);
+  const collections = fieldIndexCollections(shopItem);
   const aboutHasPanel = (aboutItem?.children?.length ?? 0) > 0;
   const [desktopOpen, setDesktopOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -356,8 +374,10 @@ export function FieldIndexHeader({
     setDesktopOpen(false);
     setAboutOpen(false);
     setMobileOpen(false);
-    setActiveIndex(activeCollectionIndex(pathname, collections ?? []));
-  }, [pathname, collections]);
+    setActiveIndex(
+      activeCollectionIndex(pathname, fieldIndexCollections(shopItem) ?? []),
+    );
+  }, [pathname, shopItem]);
 
   useEffect(() => {
     if (!desktopOpen && !aboutOpen) {
