@@ -16,8 +16,8 @@ import {
   deriveSessionKey,
   openSession,
   readSessionCookie,
-  sealSession,
   type SessionData,
+  sealSession,
   serializeSessionCookie,
   serializeSessionDeletion,
 } from "./session-cookie";

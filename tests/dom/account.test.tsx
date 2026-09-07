@@ -1,7 +1,7 @@
 /** Account affordances rendered without crossing an OAuth or mutation boundary. */
 
-import assert from "node:assert/strict";
 import { describe, it } from "bun:test";
+import assert from "node:assert/strict";
 import { render, screen, within } from "@testing-library/react";
 
 import { AccountAccessPanel } from "@/components/account-access";

@@ -20,12 +20,11 @@ import {
   createShopifyRequestContext,
   createStorefrontClient,
 } from "@shopify/hydrogen";
-
-import { createStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
 import {
   CANONICAL_PRODUCT_HANDLES,
   getCatalogPresentationProfile,
 } from "../src/lib/storefront/catalog-presentation.ts";
+import { createStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
 import { isShopifyProductImageUrl } from "../src/lib/storefront/image-source.ts";
 import {
   CONTENT_ARTICLE_HANDLES,

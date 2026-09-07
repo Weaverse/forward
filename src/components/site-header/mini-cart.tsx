@@ -6,13 +6,13 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { Icon } from "@/components/icon";
-import { cn } from "@/lib/cn";
 import { subscribeToCartAdd } from "@/lib/cart/mini-cart-signal";
 import {
   formatShopifyMoney,
   useShopifyCart,
   useShopifyCartMode,
 } from "@/lib/cart/shopify-cart-react";
+import { cn } from "@/lib/cn";
 import { subtotal } from "@/lib/demo-cart/cart-logic";
 import { useDemoCartLines } from "@/lib/demo-cart/use-demo-cart";
 import { CONTROL_TRANSITION } from "@/lib/presentation/variants";

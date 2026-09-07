@@ -10,8 +10,8 @@
  * browser global exists.
  */
 
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { afterEach, mock } from "bun:test";
+import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { createElement, type ReactNode } from "react";
 
 GlobalRegistrator.register({ url: "http://localhost/" });

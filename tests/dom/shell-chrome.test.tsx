@@ -3,11 +3,11 @@
  * wordmarks, and the announced cart count, proved by rendering them.
  */
 
-import assert from "node:assert/strict";
 import { describe, it } from "bun:test";
+import assert from "node:assert/strict";
 import { act, render, screen, within } from "@testing-library/react";
 
-import { Icon, ICON_PATHS } from "@/components/icon";
+import { ICON_PATHS, Icon } from "@/components/icon";
 import { CartCount } from "@/components/site-header/cart-count";
 import { CountryControl } from "@/components/site-header/country-control";
 import { Wordmark } from "@/components/wordmark";

@@ -4,7 +4,7 @@ import {
   getPolicyPresentationProfile,
 } from "../content-presentation";
 import type { JournalArticle, Policy, StorePage } from "../types";
-import { ShopifyCatalogError } from "./errors";
+import type { ContentQueryResult } from "./content-client";
 import {
   parseArticleHtml,
   parsePageHtml,
@@ -16,7 +16,7 @@ import {
   CONTENT_PAGE_HANDLES,
   CONTENT_POLICY_HANDLES,
 } from "./content-query";
-import type { ContentQueryResult } from "./content-client";
+import { ShopifyCatalogError } from "./errors";
 
 export interface MappedContentResult {
   articles: readonly JournalArticle[];

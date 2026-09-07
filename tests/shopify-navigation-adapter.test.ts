@@ -10,19 +10,19 @@ import { COLLECTION_PRESENTATION_PROFILES } from "../src/lib/storefront/collecti
 import { StaticStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
 import { createNavigationQueryExecutor } from "../src/lib/storefront/shopify/client.ts";
 import { ShopifyCatalogDataSource } from "../src/lib/storefront/shopify/data-source.ts";
-import { ShopifyCatalogError } from "../src/lib/storefront/shopify/errors.ts";
 import { DEFAULT_MAIN_MENU_HANDLE } from "../src/lib/storefront/shopify/env.ts";
+import { ShopifyCatalogError } from "../src/lib/storefront/shopify/errors.ts";
 import {
   mapFooterMenuResult,
   mapNavigationResult,
 } from "../src/lib/storefront/shopify/navigation-mapper.ts";
 import { FOOTER_MENU_HANDLE } from "../src/lib/storefront/shopify/navigation-query.ts";
+import { catalogResponse } from "./fixtures/shopify-catalog-response.ts";
 import {
   navigationResponse,
   navigationResponseWith,
   type ShopifyMenuItemFixture,
 } from "./fixtures/shopify-navigation-response.ts";
-import { catalogResponse } from "./fixtures/shopify-catalog-response.ts";
 
 const SYNTHETIC_STORE_DOMAIN = "forward-test-shop.myshopify.com";
 const SYNTHETIC_STORE_ORIGIN = `https://${SYNTHETIC_STORE_DOMAIN}`;

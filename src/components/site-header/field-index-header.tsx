@@ -8,17 +8,17 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Icon, type IconName } from "@/components/icon";
 import { Wordmark } from "@/components/wordmark";
 import { cn } from "@/lib/cn";
+import type { NavItem } from "@/lib/storefront/types";
+import { CartCount } from "./cart-count";
+import { CountryControl } from "./country-control";
 import {
-  createHeaderNavigationHref,
   createFieldIndexCollections,
+  createHeaderNavigationHref,
   currentCollectionIndex,
   type FieldIndexCollection,
   isActive,
 } from "./header-navigation";
-import { CartCount } from "./cart-count";
-import { CountryControl } from "./country-control";
 import { MiniCart } from "./mini-cart";
-import type { NavItem } from "@/lib/storefront/types";
 
 /** Utility destinations Shopify owns; Forward only supplies their glyphs. */
 /** The row highlight the Field Index shares between its two nav layers. */

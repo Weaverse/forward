@@ -15,10 +15,10 @@ import {
   findExactVariant,
   galleryImages,
   optionParamKey,
+  type ProductSelection,
   productSelectionHref,
   resolveProductSelection,
   saleCompareAtPrice,
-  type ProductSelection,
 } from "@/lib/storefront/product-state";
 import type { Product, ProductColorway } from "@/lib/storefront/types";
 import { AddToCartForm } from "./add-to-cart-form";

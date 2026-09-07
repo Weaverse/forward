@@ -7,8 +7,8 @@
  * `tests/browser/`, not here.
  */
 
-import assert from "node:assert/strict";
 import { afterEach, describe, it } from "bun:test";
+import assert from "node:assert/strict";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -17,7 +17,6 @@ import { FieldIndexHeader } from "@/components/site-header/field-index-header";
 import { createFieldIndexCollections } from "@/components/site-header/header-navigation";
 import { THEME_CONTENT_FIXTURE } from "@/lib/storefront/fixtures/navigation";
 import type { NavItem } from "@/lib/storefront/types";
-import { currentRoute, setRoute } from "./preload";
 import {
   type AccountStatusStub,
   PRIMARY_NAV,
@@ -26,6 +25,7 @@ import {
   UTILITY_NAV_WITH_ACCOUNT,
   visibleText,
 } from "./harness";
+import { currentRoute, setRoute } from "./preload";
 
 const SHOP_CHILDREN = [
   { label: "Shop all", href: "/shop" },

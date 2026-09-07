@@ -12,8 +12,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
-  createHeaderNavigationHref,
   createFieldIndexCollections,
+  createHeaderNavigationHref,
   currentCollectionIndex,
   FIELD_INDEX_PRESENTATION,
 } from "../src/components/site-header/header-navigation.ts";

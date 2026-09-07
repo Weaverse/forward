@@ -11,11 +11,11 @@ import {
   ROUTE_CONTRACT,
   SMOKE_FIXTURES,
 } from "../src/lib/routes/route-contract.ts";
-import { JOURNAL_FIXTURES } from "../src/lib/storefront/fixtures/journal.ts";
 import {
   formatRouteSegment,
   safeDecodeRouteSegment,
 } from "../src/lib/routes/segments.ts";
+import { JOURNAL_FIXTURES } from "../src/lib/storefront/fixtures/journal.ts";
 
 describe("normalizeAppRoutePattern", () => {
   it("normalizes page manifest keys to route patterns", () => {

@@ -22,16 +22,15 @@ import {
   CATALOG_REVALIDATE_SECONDS,
   NAVIGATION_CACHE_KEY,
 } from "./cache-policy";
-import { safeErrorLabel, ShopifyCatalogError } from "./errors";
+import type { ShopifyCatalogConfig } from "./env";
+import { ShopifyCatalogError, safeErrorLabel } from "./errors";
 import { mapCatalogResult } from "./mapper";
-
 import {
   FOOTER_MENU_HANDLE,
   NAVIGATION_COLLECTION_LIMIT,
   NAVIGATION_COLLECTION_PRODUCT_LIMIT,
   NAVIGATION_QUERY,
 } from "./navigation-query";
-import type { ShopifyCatalogConfig } from "./env";
 import {
   CATALOG_MEDIA_LIMIT,
   CATALOG_PRODUCT_FILTER,

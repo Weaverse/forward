@@ -13,12 +13,11 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-
-import type { AddressActionState } from "./address-action-state";
 import { readAccountSession } from "./account-view";
+import type { AddressActionState } from "./address-action-state";
 import {
-  ADDRESSES_PATH,
   ADDRESS_ERROR_FAILED,
+  ADDRESSES_PATH,
   performAddressAction,
 } from "./addresses";
 import { getCustomerAccountRuntime } from "./customer-account";
