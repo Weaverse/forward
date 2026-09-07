@@ -9,24 +9,25 @@ import {
   useShopifyCart,
   useShopifyCartForm,
 } from "@/lib/cart/shopify-cart-react";
+import { cn } from "@/lib/cn";
 
 import {
-  cartDisabledCta,
-  cartEmptyHeading,
-  cartEmptyState,
-  cartEyebrow,
-  cartImage,
-  cartLine,
-  cartLineControls,
-  cartLineHeading,
-  cartPageHeading,
-  cartPrimaryCta,
-  cartQuantity,
-  cartQuantityButton,
-  cartRemoveButton,
-  cartSummaryNote,
-  cartSummaryRow,
-  cartSummaryTotal,
+  CART_DISABLED_CTA,
+  CART_EMPTY_HEADING,
+  CART_EMPTY_STATE,
+  CART_EYEBROW,
+  CART_IMAGE,
+  CART_LINE,
+  CART_LINE_CONTROLS,
+  CART_LINE_HEADING,
+  CART_PAGE_HEADING,
+  CART_PRIMARY_CTA,
+  CART_QUANTITY,
+  CART_QUANTITY_BUTTON,
+  CART_REMOVE_BUTTON,
+  CART_SUMMARY_NOTE,
+  CART_SUMMARY_ROW,
+  CART_SUMMARY_TOTAL,
 } from "./presentation";
 
 function ShopifyCartLine({
@@ -46,12 +47,12 @@ function ShopifyCartLine({
   const image = line.merchandise?.image;
 
   return (
-    <article className={cartLine}>
+    <article className={CART_LINE}>
       <Link href={href}>
         {image === null || image === undefined ? null : (
           <Image
             alt={image.altText ?? title}
-            className={cartImage}
+            className={CART_IMAGE}
             height={image.height ?? 240}
             sizes="190px"
             src={image.url}
@@ -60,19 +61,19 @@ function ShopifyCartLine({
         )}
       </Link>
       <div>
-        <h2 className={cartLineHeading}>
+        <h2 className={CART_LINE_HEADING}>
           <Link href={href}>{title}</Link>
         </h2>
         {details === undefined || details.length === 0 ? null : (
           <p className="text-text-muted">{details}</p>
         )}
-        <form {...formProps()} className={cartLineControls}>
+        <form {...formProps()} className={CART_LINE_CONTROLS}>
           <input type="hidden" {...register("lineId", { value: line.id })} />
-          <div className={cartQuantity}>
+          <div className={CART_QUANTITY}>
             <button
               {...register("decrease")}
               aria-label={`Decrease quantity of ${title}`}
-              className={cartQuantityButton}
+              className={CART_QUANTITY_BUTTON}
               disabled={pending}
               type="submit"
             >
@@ -87,7 +88,7 @@ function ShopifyCartLine({
             <button
               {...register("increase")}
               aria-label={`Increase quantity of ${title}`}
-              className={cartQuantityButton}
+              className={CART_QUANTITY_BUTTON}
               disabled={pending}
               type="submit"
             >
@@ -96,7 +97,7 @@ function ShopifyCartLine({
           </div>
           <button
             {...register("remove")}
-            className={cartRemoveButton}
+            className={CART_REMOVE_BUTTON}
             disabled={pending}
             type="submit"
           >
@@ -132,8 +133,8 @@ export function ShopifyCartView() {
       <p aria-live="polite" className="sr-only" role="status">
         {errorMessages.join(" ")}
       </p>
-      <p className={cartEyebrow}>Your field bag · live Shopify cart</p>
-      <h1 className={cartPageHeading}>
+      <p className={CART_EYEBROW}>Your field bag · live Shopify cart</p>
+      <h1 className={CART_PAGE_HEADING}>
         Cart · {cart.totalQuantity}{" "}
         {cart.totalQuantity === 1 ? "item" : "items"}
       </h1>
@@ -156,38 +157,38 @@ export function ShopifyCartView() {
             aria-label="Order summary"
             className="self-start bg-signal p-7 text-ink"
           >
-            <p className={cartEyebrow}>Order summary</p>
-            <div className={cartSummaryRow}>
+            <p className={CART_EYEBROW}>Order summary</p>
+            <div className={CART_SUMMARY_ROW}>
               <span>Subtotal</span>
               <strong>{money(cart.cost.subtotalAmount)}</strong>
             </div>
-            <div className={cartSummaryRow}>
+            <div className={CART_SUMMARY_ROW}>
               <span>Delivery</span>
               <span>Calculated by Shopify at checkout</span>
             </div>
-            <div className={cartSummaryTotal}>
+            <div className={CART_SUMMARY_TOTAL}>
               <span>Total</span>
               <strong>{money(cart.cost.totalAmount)}</strong>
             </div>
             {cart.checkoutUrl === null || cart.checkoutUrl === undefined ? (
-              <p aria-disabled className={cartDisabledCta}>
+              <p aria-disabled className={CART_DISABLED_CTA}>
                 Checkout unavailable
               </p>
             ) : (
               <a
-                className={`${cartPrimaryCta} w-full`}
+                className={cn(CART_PRIMARY_CTA, "w-full")}
                 href={cart.checkoutUrl}
                 rel="external nofollow"
               >
                 Checkout securely with Shopify
               </a>
             )}
-            <p className={cartSummaryNote}>
+            <p className={CART_SUMMARY_NOTE}>
               Checkout is a validated handoff to Shopify. Forward does not
               collect payment details on this page.
             </p>
             {errorMessages.length === 0 ? null : (
-              <div className={cartSummaryNote} role="alert">
+              <div className={CART_SUMMARY_NOTE} role="alert">
                 {errorMessages.map((message) => (
                   <p key={message}>{message}</p>
                 ))}
@@ -196,13 +197,13 @@ export function ShopifyCartView() {
           </aside>
         </div>
       ) : (
-        <div className={cartEmptyState}>
+        <div className={CART_EMPTY_STATE}>
           <div className="max-w-form">
-            <h2 className={cartEmptyHeading}>Nothing packed yet.</h2>
+            <h2 className={CART_EMPTY_HEADING}>Nothing packed yet.</h2>
             <p className="text-text-muted">
               Build a field system around the weather and miles ahead.
             </p>
-            <Link className={cartPrimaryCta} href="/shop">
+            <Link className={CART_PRIMARY_CTA} href="/shop">
               Explore all gear
             </Link>
           </div>

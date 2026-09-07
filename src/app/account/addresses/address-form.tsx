@@ -8,9 +8,13 @@ import {
   IDLE_ADDRESS_ACTION_STATE,
 } from "@/lib/account/address-action-state";
 import { saveAddress } from "@/lib/account/address-actions";
+import { cn } from "@/lib/cn";
 import { cta } from "@/lib/presentation/variants";
 
-const PRIMARY_BUTTON_CLASS = `${cta()} disabled:translate-0 disabled:cursor-not-allowed disabled:opacity-46 disabled:shadow-none`;
+const PRIMARY_BUTTON_CLASS = cn(
+  cta(),
+  "disabled:translate-0 disabled:cursor-not-allowed disabled:opacity-46 disabled:shadow-none",
+);
 
 interface AddressActionFormProps {
   /** Hidden intent/id inputs and any visible fields, rendered on the server. */

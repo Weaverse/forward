@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProductCard } from "@/components/product-card";
+import { cn } from "@/lib/cn";
 import {
   cta,
   eyebrow,
@@ -81,7 +82,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
             {collection.description}
           </p>
           <Link
-            className={`${cta({ intent: "signal" })} self-start`}
+            className={cn(cta({ intent: "signal" }), "self-start")}
             href="/shop"
           >
             Shop the complete index

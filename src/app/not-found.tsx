@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { cta, sectionHeading } from "@/lib/presentation/variants";
+import { cn } from "@/lib/cn";
 import { storefront } from "@/lib/storefront/data-source";
 
 /** Shared accessible 404 for the root and every unknown dynamic handle. */
@@ -26,11 +27,11 @@ export default async function NotFound() {
           familiar ground and choose another direction.
         </p>
         <div className="flex flex-wrap gap-3 max-sm:flex-col max-sm:items-stretch">
-          <Link className={`${cta()} max-sm:w-full`} href="/">
+          <Link className={cn(cta(), "max-sm:w-full")} href="/">
             Return home
           </Link>
           <Link
-            className={`${cta({ intent: "outline" })} max-sm:w-full`}
+            className={cn(cta({ intent: "outline" }), "max-sm:w-full")}
             href="/shop"
           >
             Explore gear

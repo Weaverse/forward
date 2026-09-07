@@ -21,22 +21,22 @@ import { useDemoCartLines } from "@/lib/demo-cart/use-demo-cart";
 import { formatMoney } from "@/lib/storefront/format";
 
 import {
-  cartDisabledCta,
-  cartEmptyHeading,
-  cartEmptyState,
-  cartEyebrow,
-  cartImage,
-  cartLine,
-  cartLineControls,
-  cartLineHeading,
-  cartPageHeading,
-  cartPrimaryCta,
-  cartQuantity,
-  cartQuantityButton,
-  cartRemoveButton,
-  cartSummaryNote,
-  cartSummaryRow,
-  cartSummaryTotal,
+  CART_DISABLED_CTA,
+  CART_EMPTY_HEADING,
+  CART_EMPTY_STATE,
+  CART_EYEBROW,
+  CART_IMAGE,
+  CART_LINE,
+  CART_LINE_CONTROLS,
+  CART_LINE_HEADING,
+  CART_PAGE_HEADING,
+  CART_PRIMARY_CTA,
+  CART_QUANTITY,
+  CART_QUANTITY_BUTTON,
+  CART_REMOVE_BUTTON,
+  CART_SUMMARY_NOTE,
+  CART_SUMMARY_ROW,
+  CART_SUMMARY_TOTAL,
 } from "./presentation";
 
 interface CartViewProps {
@@ -87,8 +87,8 @@ export function CartView({ seedLines }: CartViewProps) {
       <p aria-live="polite" role="status" className="sr-only">
         {announcement}
       </p>
-      <p className={cartEyebrow}>Your field bag · demo only</p>
-      <h1 className={cartPageHeading}>
+      <p className={CART_EYEBROW}>Your field bag · demo only</p>
+      <h1 className={CART_PAGE_HEADING}>
         Cart
         {hydrated
           ? ` · ${itemCount} ${itemCount === 1 ? "item" : "items"}`
@@ -96,9 +96,9 @@ export function CartView({ seedLines }: CartViewProps) {
       </h1>
 
       {!hydrated ? (
-        <div className={cartEmptyState}>
+        <div className={CART_EMPTY_STATE}>
           <div className="max-w-form">
-            <p className={cartEyebrow}>Opening the cart…</p>
+            <p className={CART_EYEBROW}>Opening the cart…</p>
           </div>
         </div>
       ) : lines.length > 0 ? (
@@ -108,10 +108,10 @@ export function CartView({ seedLines }: CartViewProps) {
             aria-label="Cart items"
           >
             {lines.map((line) => (
-              <article key={line.key} className={cartLine}>
+              <article key={line.key} className={CART_LINE}>
                 <Link href={line.href}>
                   <Image
-                    className={cartImage}
+                    className={CART_IMAGE}
                     src={line.image.src}
                     alt={line.image.alt}
                     width={line.image.width}
@@ -120,7 +120,7 @@ export function CartView({ seedLines }: CartViewProps) {
                   />
                 </Link>
                 <div>
-                  <h2 className={cartLineHeading}>
+                  <h2 className={CART_LINE_HEADING}>
                     <Link href={line.href}>{line.title}</Link>
                   </h2>
                   <p className="text-text-muted">
@@ -129,12 +129,12 @@ export function CartView({ seedLines }: CartViewProps) {
                       ...Object.values(line.selectedOptions),
                     ].join(" · ")}
                   </p>
-                  <div className={cartLineControls}>
+                  <div className={CART_LINE_CONTROLS}>
                     {/* Each control names its own line, so the quantity group
                         needs no wrapper role. */}
-                    <div className={cartQuantity}>
+                    <div className={CART_QUANTITY}>
                       <button
-                        className={cartQuantityButton}
+                        className={CART_QUANTITY_BUTTON}
                         type="button"
                         aria-label={`Decrease quantity of ${line.title}`}
                         onClick={() => updateQuantity(line, line.quantity - 1)}
@@ -148,7 +148,7 @@ export function CartView({ seedLines }: CartViewProps) {
                         {line.quantity}
                       </output>
                       <button
-                        className={cartQuantityButton}
+                        className={CART_QUANTITY_BUTTON}
                         type="button"
                         aria-label={`Increase quantity of ${line.title}`}
                         onClick={() => updateQuantity(line, line.quantity + 1)}
@@ -157,7 +157,7 @@ export function CartView({ seedLines }: CartViewProps) {
                       </button>
                     </div>
                     <button
-                      className={cartRemoveButton}
+                      className={CART_REMOVE_BUTTON}
                       type="button"
                       onClick={() => remove(line)}
                     >
@@ -179,12 +179,12 @@ export function CartView({ seedLines }: CartViewProps) {
             className="self-start bg-signal p-7 text-ink"
             aria-label="Order summary"
           >
-            <p className={cartEyebrow}>Order summary</p>
-            <div className={cartSummaryRow}>
+            <p className={CART_EYEBROW}>Order summary</p>
+            <div className={CART_SUMMARY_ROW}>
               <span>Subtotal</span>
               <strong>{formatMoney(cartSubtotal)}</strong>
             </div>
-            <div className={cartSummaryRow}>
+            <div className={CART_SUMMARY_ROW}>
               <span>Ground delivery</span>
               <span>
                 {cartShipping.amount === 0
@@ -192,11 +192,11 @@ export function CartView({ seedLines }: CartViewProps) {
                   : formatMoney(cartShipping)}
               </span>
             </div>
-            <div className={cartSummaryTotal}>
+            <div className={CART_SUMMARY_TOTAL}>
               <span>Total</span>
               <strong>{formatMoney(cartTotal)}</strong>
             </div>
-            <p className={cartSummaryNote}>
+            <p className={CART_SUMMARY_NOTE}>
               {cartSubtotal.amount < FREE_SHIPPING_THRESHOLD
                 ? `${formatMoney({
                     amount: FREE_SHIPPING_THRESHOLD - cartSubtotal.amount,
@@ -204,10 +204,10 @@ export function CartView({ seedLines }: CartViewProps) {
                   })} away from free ground delivery.`
                 : "Ground delivery is included on this order."}
             </p>
-            <p className={cartDisabledCta} aria-disabled>
+            <p className={CART_DISABLED_CTA} aria-disabled>
               Checkout — not connected
             </p>
-            <p className={cartSummaryNote}>
+            <p className={CART_SUMMARY_NOTE}>
               This is a demonstration cart held in your browser. No live store,
               payment, or checkout is connected, and nothing here is sent
               anywhere.
@@ -215,13 +215,13 @@ export function CartView({ seedLines }: CartViewProps) {
           </aside>
         </div>
       ) : (
-        <div className={cartEmptyState}>
+        <div className={CART_EMPTY_STATE}>
           <div className="max-w-form">
-            <h2 className={cartEmptyHeading}>Nothing packed yet.</h2>
+            <h2 className={CART_EMPTY_HEADING}>Nothing packed yet.</h2>
             <p className="text-text-muted">
               Build a field system around the weather and miles ahead.
             </p>
-            <Link className={cartPrimaryCta} href="/shop">
+            <Link className={CART_PRIMARY_CTA} href="/shop">
               Explore all gear
             </Link>
           </div>

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { AccountAccessPanel } from "@/components/account-access";
 import { AccountShell } from "@/components/account-shell";
+import { cn } from "@/lib/cn";
 import {
   hasRefreshMarker,
   readAccountOrder,
@@ -145,7 +146,10 @@ export default async function OrderPage({
             </div>
           )}
           <div
-            className={`${SUMMARY_ROW_CLASS} py-5 font-heading text-heading-4`}
+            className={cn(
+              SUMMARY_ROW_CLASS,
+              "py-5 font-heading text-heading-4",
+            )}
           >
             <span>Total</span>
             <strong>{order.total}</strong>

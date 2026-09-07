@@ -1,11 +1,12 @@
 import { cva } from "class-variance-authority";
+import { cn } from "@/lib/cn";
 
 /**
  * The transition every button-like control animates with. It has no scalar
  * theme namespace, so one exported constant keeps it authored once instead of
  * repeated per intent and per owner.
  */
-export const controlTransition =
+export const CONTROL_TRANSITION =
   "[transition:background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),border-color_var(--duration-fast)_var(--ease-standard),box-shadow_120ms_var(--ease-standard),transform_120ms_var(--ease-standard)]";
 
 export const eyebrow = cva(
@@ -39,7 +40,10 @@ export const sectionHeading = cva("", {
 });
 
 export const cta = cva(
-  `inline-flex min-h-12 items-center justify-center gap-2.5 border ${controlTransition}`,
+  cn(
+    "inline-flex min-h-12 items-center justify-center gap-2.5 border",
+    CONTROL_TRANSITION,
+  ),
   {
     variants: {
       intent: {

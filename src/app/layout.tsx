@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header/site-header";
 import { ShopifyCartRuntime } from "@/lib/cart/shopify-cart-react";
+import { cn } from "@/lib/cn";
 import { storefrontRuntimeMode } from "@/lib/storefront/data-source";
 
 import "./globals.css";
@@ -50,7 +51,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${archivo.variable} ${manrope.variable} ${plexMono.variable} max-w-full scroll-smooth overflow-x-clip motion-reduce:scroll-auto`}
+      className={cn(
+        archivo.variable,
+        manrope.variable,
+        plexMono.variable,
+        "max-w-full scroll-smooth overflow-x-clip motion-reduce:scroll-auto",
+      )}
     >
       <head>
         {shopifyCartEnabled ? (

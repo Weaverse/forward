@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
+import { cn } from "@/lib/cn";
 import {
   cta,
   eyebrow,
@@ -74,7 +75,7 @@ export default async function HomePage() {
           >
             Equipment for weather that changes the plan.
           </h1>
-          <p className={`${LEDE_CLASS} max-w-142.5 text-text-dark-subtle`}>
+          <p className={cn(LEDE_CLASS, "max-w-142.5 text-text-dark-subtle")}>
             Layerable apparel, precise footwear, and low-profile carry systems
             made to move together.
           </p>
@@ -211,7 +212,11 @@ export default async function HomePage() {
 
       {spotlight !== undefined && spotlightImage !== undefined ? (
         <section
-          className={`${SHELL_SECTION_CLASS} grid grid-cols-[minmax(0,1.25fr)_minmax(380px,0.75fr)] gap-0 max-md:grid-cols-1 ${VIEWPORT_SECTION_CLASS}`}
+          className={cn(
+            SHELL_SECTION_CLASS,
+            "grid grid-cols-[minmax(0,1.25fr)_minmax(380px,0.75fr)] gap-0 max-md:grid-cols-1",
+            VIEWPORT_SECTION_CLASS,
+          )}
         >
           <div>
             <Image
@@ -224,16 +229,22 @@ export default async function HomePage() {
             />
           </div>
           <div className="flex flex-col justify-center bg-surface-subtle p-[clamp(42px,6vw,92px)] md-up:px-[clamp(28px,4vw,60px)] md-up:py-[clamp(24px,4svh,48px)] short-desktop:px-[clamp(20px,3vw,36px)] short-desktop:py-2">
-            <p className={`${eyebrow()} short-desktop:mb-1`}>
+            <p className={cn(eyebrow(), "short-desktop:mb-1")}>
               Layer focus / {spotlight.category}
             </p>
             <h2
-              className={`${sectionHeading()} md-up:text-spotlight-title short-desktop:mb-1 short-desktop:text-spotlight-title-short short-desktop:leading-display-relaxed`}
+              className={cn(
+                sectionHeading(),
+                "md-up:text-spotlight-title short-desktop:mb-1 short-desktop:text-spotlight-title-short short-desktop:leading-display-relaxed",
+              )}
             >
               {spotlight.title}
             </h2>
             <p
-              className={`${LEDE_CLASS} md-up:mb-[clamp(10px,2svh,18px)] md-up:text-spotlight-copy md-up:leading-spotlight-copy short-desktop:mb-1 short-desktop:text-spotlight-copy-short short-desktop:leading-spotlight-copy-short`}
+              className={cn(
+                LEDE_CLASS,
+                "md-up:mb-[clamp(10px,2svh,18px)] md-up:text-spotlight-copy md-up:leading-spotlight-copy short-desktop:mb-1 short-desktop:text-spotlight-copy-short short-desktop:leading-spotlight-copy-short",
+              )}
             >
               {spotlight.subtitle}
             </p>
@@ -249,7 +260,10 @@ export default async function HomePage() {
               ))}
             </ul>
             <Link
-              className={`${cta()} self-start short-desktop:min-h-10 short-desktop:py-2`}
+              className={cn(
+                cta(),
+                "self-start short-desktop:min-h-10 short-desktop:py-2",
+              )}
               href={`/products/${spotlight.handle}`}
             >
               Explore the layer
@@ -289,7 +303,11 @@ export default async function HomePage() {
 
       {pack !== undefined ? (
         <section
-          className={`${SHELL_SECTION_CLASS} grid grid-cols-[0.55fr_1.45fr] items-end gap-15 max-md:grid-cols-1 ${VIEWPORT_SECTION_CLASS}`}
+          className={cn(
+            SHELL_SECTION_CLASS,
+            "grid grid-cols-[0.55fr_1.45fr] items-end gap-15 max-md:grid-cols-1",
+            VIEWPORT_SECTION_CLASS,
+          )}
         >
           <div className="pb-7.5">
             <p className={eyebrow()}>One-day kit</p>
@@ -320,7 +338,10 @@ export default async function HomePage() {
       ) : null}
 
       <section
-        className={`${SHELL_SECTION_CLASS} grid grid-cols-split-70 gap-3 max-md:grid-cols-1`}
+        className={cn(
+          SHELL_SECTION_CLASS,
+          "grid grid-cols-split-70 gap-3 max-md:grid-cols-1",
+        )}
       >
         <article className="min-h-140 bg-signal p-[clamp(35px,5vw,70px)] max-md:min-h-0">
           <p className={eyebrow()}>Repair, not replace</p>
