@@ -88,15 +88,28 @@ bun run format:check
 bun test
 bun run check:graphql
 bun run build
+bun run check:theme
 bun run check:routes
 bun run smoke:routes
 bun run check
 ```
 
 (`bun run check` composes typecheck → lint → format:check → test →
-check:graphql → build → check:routes; `smoke:routes` needs the production build
-and is run separately. `bun run verify:shopify` is the opt-in live read-only
-catalog verification and requires credentials, so it is never part of `check`.)
+check:graphql → build → check:theme → check:routes; `smoke:routes` needs the
+production build and is run separately.)
+
+Credential-dependent gates are never part of `check`:
+
+- `bun run verify:static` builds and runs the route/smoke contract with every
+  Shopify credential removed in a script-owned child environment.
+- `bun run verify:live` requires the complete live Shopify configuration and
+  runs the live build/route/read-only gates for both account-disabled and
+  account-enabled states.
+- `bun run verify:shopify` is the opt-in live read-only catalog verification.
+- `bun run test:browser` aggregates `test:browser:static`,
+  `test:browser:live-account-disabled`, and `test:browser:live-account-enabled`
+  against fresh production builds. It fails when a required credential matrix
+  cannot be established rather than skipping it.
 
 Inspect the final git diff and keep generated/build output untracked.
 
