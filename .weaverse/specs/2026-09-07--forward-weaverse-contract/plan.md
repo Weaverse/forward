@@ -76,9 +76,11 @@ free-form rich text in Studio; the merchant edits the article in Shopify.
 `/pages/[pageHandle]` is Shopify-owned body content and behaves like
 `article-body`: composable chrome around verbatim page blocks.
 
-`/about`, `/materials`, `/field-testing` each render four sections today and are
-theme-owned routes with editorial copy. They are the best first candidates for
-full Weaverse composition because they carry no commerce state.
+`/about`, `/materials`, `/field-testing` each render four sections today.
+**Decided 2026-09-08 (Leo): Studio owns their content, not just their layout.**
+Their copy and imagery are section settings, so the routes stay in the repo as
+thin `PAGE` shells and no route is converted into a Shopify page. They are also
+the first composition target because they carry no commerce state.
 
 | Section | Used by | Settings |
 |---|---|---|
@@ -101,17 +103,17 @@ content that must render verbatim.
 
 ## Theme settings
 
-| Setting | Source | Note |
-|---|---|---|
-| `announcement` | `ThemeContent.announcement` | shown in the announcement bar |
-| `footerTagline` | `ThemeContent.footerTagline` | |
-| `demoNotice` | `ThemeContent.demoNotice` | must stay truthful about integration state |
-| `footerStatus` | `ThemeContent.footerStatus` | must stay truthful about integration state |
-| `homeHeroImage` | `ThemeContent.homeHeroImage` | consumed by `hero` |
-| `standardBandImage` | `ThemeContent.standardBandImage` | consumed by `material-standard` |
+Grouped by global surface, because Header and Footer are settings-owned rather
+than section-owned. The full table lives in the README; the summary is:
 
-Header and Footer structure stay theme-owned. Only the copy fields above are
-editable.
+| Group | Settings |
+|---|---|
+| Header | `announcement`, menu handle, wordmark, country-selector visibility |
+| Footer | `footerTagline`, `footerStatus`, `demoNotice`, footer menu handle |
+| Editorial imagery | `homeHeroImage`, `standardBandImage` — move to `hero` and `material-standard` section settings once `INDEX` is composed |
+
+Header and Footer structure, geometry, ordering, and accessibility behavior stay
+theme-owned code. Only the settings above are editable.
 
 ## Selector contract
 
@@ -176,14 +178,17 @@ Automated coverage cannot prove authenticated Studio behavior. Leo runs:
 
 ## Open questions
 
-1. **Header/Footer as global sections.** This contract keeps them theme-owned.
-   If Studio must own them, that needs its own slice with coverage for the
-   keyboard, focus-trap, inert, and fail-soft contracts first.
-2. **`/pages/[pageHandle]` versus theme-owned editorial routes.** Both map to
-   `PAGE`. If Studio should own the editorial routes' *content* rather than
-   only their layout, the three routes may need to become Shopify pages.
-3. **Shared Contract version.** builder#2660 references `0.12-draft`; epic
-   #2663 references `0.14-accepted`. The accepted version bounds this registry.
+1. ~~**Header/Footer as global sections.**~~ **Resolved 2026-09-08 (Leo):**
+   never global sections. Theme-owned components configured by theme settings,
+   permanently — not a deferral. See the README's Global surfaces section.
+2. ~~**`/pages/[pageHandle]` versus theme-owned editorial routes.**~~
+   **Resolved 2026-09-08 (Leo):** Studio owns the editorial routes' content as
+   sections. The routes stay in the repo; none becomes a Shopify page.
+3. ~~**Shared Contract version.**~~ **Waived 2026-09-08 (Leo):** the
+   `0.12-draft` reference in builder#2660 versus `0.14-accepted` in epic #2663
+   is a stale citation in #2660, not a scope difference. This registry is not
+   re-derived against the document. If a later Shared Contract revision does
+   change ownership or registry scope, that is a new slice.
 
 ## Files and folders touched
 

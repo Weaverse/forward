@@ -1,6 +1,6 @@
 # Forward Weaverse contract
 
-Updated: 2026-09-07
+Updated: 2026-09-08
 Status: `draft`
 Owner: @hta218
 Issue: [Weaverse/forward#65](https://github.com/Weaverse/forward/issues/65)
@@ -75,7 +75,7 @@ surfaces; functional, stateful, and security-owned surfaces stay theme-owned.
 | `/shop/[collectionHandle]` | `COLLECTION` | Weaverse-composed around a theme-owned product grid |
 | `/journal/[articleHandle]` | `ARTICLE` | Weaverse-composed |
 | `/pages/[pageHandle]` | `PAGE` | Weaverse-composed |
-| `/about`, `/materials`, `/field-testing` | `PAGE` | Weaverse-composed, theme-owned routes |
+| `/about`, `/materials`, `/field-testing` | `PAGE` | Weaverse-composed, content included (decided 2026-09-08) |
 | `/shop`, `/journal` | — | theme-owned index routes |
 | `/search` | — | theme-owned; query state and result ranking are not editable |
 | `/cart` | — | theme-owned; server cart identity and checkout handoff |
@@ -85,29 +85,52 @@ surfaces; functional, stateful, and security-owned surfaces stay theme-owned.
 
 ### Global surfaces
 
-Header, Footer, announcement bar, and mini-cart stay **theme-owned components
-reading Shopify navigation through the existing data source**. They are not
-Weaverse global sections in this slice.
+**Decided 2026-09-08 (Leo): Header and Footer are never Weaverse global
+sections.** They stay theme-owned components reading Shopify navigation through
+the existing data source, and everything a merchant may change about them is
+exposed as **theme settings**. This is the same ownership split the existing
+Weaverse Hydrogen starter uses; it is an ownership decision only, taken from
+the shipped Weaverse settings model, and no Pilot source is read, copied, or
+ported (`AGENTS.md`).
 
-The Header already carries keyboard, focus-trap, inert-background, body-lock,
-active-state, and fail-soft contracts, plus a Shopify `main-menu` adapter with
-its own deterministic safeguards. Moving that into Studio composition would put
-those contracts behind merchant-editable data before there is any coverage for
-the failure modes. Global-section ownership is a candidate for a later slice
-and must be argued on its own.
-
-Editable global copy is exposed as **theme settings**, not sections.
+This is not a deferral. The Header carries keyboard, focus-trap,
+inert-background, body-lock, active-state, and fail-soft contracts plus a
+Shopify `main-menu` adapter with its own deterministic safeguards. Those
+contracts stay in code, under test, and out of merchant-editable composition
+permanently. The announcement bar and mini-cart follow the same rule.
 
 ### Theme settings
 
-The six `ThemeContent` fields are the initial theme-setting surface, because
-they are already the theme's own editable copy and imagery:
+Because Header and Footer are settings-owned rather than section-owned, theme
+settings are grouped by global surface. Every entry below already exists in
+Forward's rendered output; nothing is invented.
 
-`announcement`, `footerTagline`, `demoNotice`, `footerStatus`, `homeHeroImage`,
-`standardBandImage`.
+**Header**
 
-`demoNotice` and `footerStatus` must remain honest about the deployment's real
-integration state; they are not free marketing copy.
+| Setting | Source today | Note |
+|---|---|---|
+| `announcement` | `ThemeContent.announcement` | announcement-bar copy |
+| menu handle | Shopify `main-menu` adapter | which menu feeds `primary` + `utility`; structure and fail-soft safeguards stay in code |
+| wordmark | `src/components/wordmark.tsx` | logo asset/label only |
+| country selector | `CountryControl` | visibility toggle; Markets behavior stays its own slice |
+
+**Footer**
+
+| Setting | Source today | Note |
+|---|---|---|
+| `footerTagline` | `ThemeContent.footerTagline` | |
+| `footerStatus` | `ThemeContent.footerStatus` | must stay truthful about integration state |
+| `demoNotice` | `ThemeContent.demoNotice` | must stay truthful about integration state |
+| footer menu handle | `SiteNavigation.footerColumns` | which Shopify menu feeds the columns |
+
+**Editorial imagery**
+
+`homeHeroImage` and `standardBandImage` stay theme settings only until `INDEX`
+is composed; they then become section settings on `hero` and `material-standard`
+and leave this table.
+
+No layout, geometry, ordering, or accessibility behavior of Header or Footer is
+a setting.
 
 ### Editable Shopify-resource selectors
 
