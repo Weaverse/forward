@@ -288,14 +288,34 @@ states, so consolidating it would change rendered output.
   `next-env.d.ts` SHA-256
   `1862ac4bbbc5192d4bf562161df66ea547ed3e67173100656ab606ae9797db2b`
   byte-for-byte.
-- **Not re-run in this entry:** `verify:static`, `verify:live`,
-  `test:browser:live-account-disabled`, `test:browser:live-account-enabled`, and
-  `bun audit --production`. The live matrices need Shopify credentials that were
-  not established for this session, so their last passing evidence remains the
-  entry above and does not cover these changes.
+- The remaining pre-merge gates were then run against this same commit
+  (`be30c6fadd7eb39b33ed00f91d95628c5e6fd4bd`), completing the spec's
+  verification contract for the current head:
+  - `bun install --frozen-lockfile` resolved `118` installs across `182`
+    packages with no changes.
+  - `bun audit --production` reported no vulnerabilities across `66` packages.
+  - `bun run verify:static` built the credential-free storefront and passed
+    route contract `20 + 4` plus `35` HTTP smokes on port 4973.
+  - `bun run verify:live` passed the live read-only catalog verification and
+    built and served the route contract for both the account-disabled and
+    account-enabled configurations.
+  - `bun run test:browser:live-account-disabled` passed `146 / 10 intentional
+    skips / 0 failures` on port 4992, and
+    `bun run test:browser:live-account-enabled` passed `149 / 7 intentional
+    skips / 0 failures` on port 4993.
+  - Browser aggregate across all three matrices: `441 / 27 intentional skips /
+    0 failures`, matching the recorded baseline exactly.
+  - The five internal `NoFallbackError` stderr lines appeared during each
+    route-smoke run as before, while every check passed and each server stopped
+    cleanly. Matrix cleanup again left `tsconfig.json` and `next-env.d.ts` at
+    their recorded SHA-256 values byte-for-byte, and `git status` stayed clean.
+- Committed as `68b142a`, `032b58b`, `525715e`, and `be30c6f`, and pushed to
+  `origin/refactor/tailwind-presentation-layer`; PR #62 now heads at `be30c6f`.
+  This work-log entry itself is a later amendment recording the completed gate
+  run.
 - No Shopify/account/address/order/checkout/payment write, deployment, merge,
   force-push, GitHub mutation, Weaverse mutation, or Production mutation
-  occurred. The corrections remain local and uncommitted for review.
+  occurred. Merge and Production deployment still require separate approval.
 
 ## Phase log template
 
