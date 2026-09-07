@@ -187,6 +187,116 @@
 - Production route verification passed static and live account-disabled/account-enabled builds, all route smokes, and the read-only Shopify contract. Browser aggregate passed `441 / 27 intentional skips / 0 failures`: static `146/10`, live account-disabled `146/10`, live account-enabled `149/7`. After the final standard-utility substitutions, the affected static matrix passed again at `146/10`.
 - No write-side Shopify/account/address/order/checkout/payment action, deployment, merge, force-push, Weaverse mutation, or Production mutation occurred. The corrected candidate remains local for frozen install/audit, exact staging, and fresh independent review before commit/push; merge and Production deployment still require separate approval.
 
+## 2026-09-07 — Log reconciliation and standards-review corrections
+
+- Starting SHA: `ec37b3586636b3b7f4f6da16b98138969d1ce7be` (pushed PR #62 head).
+
+### Reconciliation of the previously unlogged cleanup range
+
+The entries above stop at candidate tree `f99f819`. Eleven commits,
+`307c439..ec37b35`, landed afterwards and were never logged, so the numbers
+recorded above no longer describe this tree. Corrected against the current
+tree:
+
+- Test counts: `338` node + `66` DOM = **`404`** total (the entry above claims
+  `372/372` node; that count predates `e1ce3d8` and `ec37b35`).
+- `check:theme` verifies `1` CSS artifact, **`4`** semantic utilities, and
+  **`194`** theme tokens (the entry above claims `71` production-consumed
+  utilities and `202` exact token values, measured before `307c439` and
+  `1014dce`).
+- The arbitrary-value and retired-selector machinery described above no longer
+  exists. `1014dce` deleted `scripts/classname-source.mts` (709 lines),
+  `scripts/theme-tokens.mts` (262), `tests/retired-presentation-classes.ts`
+  (264), and `tests/reviewed-arbitrary-values.ts` (208), trimmed
+  `scripts/check-tailwind-theme.mts`, and reduced
+  `tests/architecture-contracts.test.ts` by 535 lines. `984bbd5`, `fd82d7e`,
+  `27ae3a9`, `1506c54`, `2be35ab`, and `ec37b35` removed further guards;
+  `e1ce3d8` replaced the presentation snapshots. The suite now holds `19`
+  architecture contracts.
+- Statements above of the form "any new repeat, added call site, removed
+  exception, or changed count fails architecture tests" and the `90`
+  exception / `119` location inventory are **superseded** and no longer true
+  of this tree.
+
+**Open risk:** the spec's Phase 5 gates require proving that no production
+consumer uses legacy component classes and that Tailwind utilities are present
+across the presentation inventory. Both proofs were deleted with the guard
+machinery. Runtime risk is low — the three legacy stylesheets no longer exist,
+so a stale selector resolves to nothing — but the required evidence is absent
+and was not restored in this entry.
+
+### Standards-review corrections
+
+An independent two-axis review of `ec37b35` returned four documented-standard
+breaches plus one latent runtime trap; all five were fixed in this working
+tree:
+
+- Replaced every class-composition template literal with the existing `cn()`
+  helper (`AGENTS.md`: "use `cn()` for conditions"; global coding rules: "never
+  template strings"). Twenty-two call sites across `layout.tsx`, `page.tsx`,
+  `not-found.tsx`, `shop/[collectionHandle]/page.tsx`, `cart/presentation.ts`,
+  `cart/shopify-cart-view.tsx`, `account/orders/[orderId]/page.tsx`,
+  `account/addresses/address-form.tsx`, `products/[productHandle]/add-to-cart-form.tsx`,
+  `site-header/field-index-header.tsx`, `site-header/mini-cart.tsx`, and
+  `lib/presentation/variants.ts`. `cn()` joins on a single space, so every
+  emitted class list is unchanged.
+- Renamed string constants to `UPPER_SNAKE_CASE`: the sixteen `cart/presentation.ts`
+  exports, `controlTransition` → `CONTROL_TRANSITION`, and
+  `indexRowTransition` → `INDEX_ROW_TRANSITION`. `cva` factories stay camelCase
+  because they are functions, not constants.
+- Removed the reintroduced `useMemo` in `field-index-header.tsx`. A naive
+  removal would have regressed behaviour: `collections` was a dependency of the
+  route-change effect, so an unmemoized array identity would have re-run that
+  effect on every render and reset `activeIndex` out from under the mega
+  panel's hover/focus preview. The derivation moved to a module-level pure
+  `fieldIndexCollections(shopItem)` and the effect now depends on
+  `[pathname, shopItem]`, which reproduces the previous trigger exactly and
+  stays exhaustive under Biome's React domain. `src/` now contains no `useMemo`
+  or `useCallback`.
+- Corrected the `AGENTS.md` required-verification block, which omitted
+  `check:theme` (part of `check` since the theme gate landed) and never named
+  the credential-dependent gates. It now lists `verify:static`, `verify:live`,
+  `verify:shopify`, and the `test:browser` aggregate with its fail-rather-than-skip
+  contract.
+- Made the Shop mega panel fail soft. `FieldIndexPanel` still contained
+  `throw new Error("Header 01 requires at least one Shop collection.")` — a live
+  throw inside a client component rendered from the root layout, which the spec
+  forbids ("must not crash the root layout or ordinary navigation"). It now
+  returns `null`. The path is unreachable through `FieldIndexHeader` today
+  because the factory returns exactly four collections or throws into the
+  existing fail-soft catch, so this closes a latent regression trap rather than
+  an active defect; no new export or test was added to reach it.
+
+The reviewer's duplicated-presentation findings (the repeated account block and
+order-row class lists, `SUMMARY_ROW_CLASS` versus `CART_SUMMARY_ROW`, and
+`ADD_TO_CART_CLASS` re-authoring `cta({ intent: "signal" })`) were judgement
+calls, not standard breaches, and were left alone. `ADD_TO_CART_CLASS`
+deliberately differs from the `signal` CTA in shadow, hover, and disabled
+states, so consolidating it would change rendered output.
+
+### Verification
+
+- `bun run check` passed: typecheck, Biome lint, Biome format check, `338/338`
+  node tests, `66/66` DOM tests, GraphQL, a 42-page Production build,
+  `check:theme` (`1` CSS artifact, `4` semantic utilities, `194` theme tokens),
+  and route contract `20 + 4`.
+- `bun run test:browser:static` passed `146 / 10 intentional skips / 0 failures`
+  across desktop, short-desktop, and true-mobile against a fresh production
+  build on port 4991, matching the recorded static baseline exactly. Matrix
+  cleanup left `tsconfig.json` SHA-256
+  `42eed74e77020627f0861ef5671814ed53b6b613283e13352f244bfc11e00a49` and
+  `next-env.d.ts` SHA-256
+  `1862ac4bbbc5192d4bf562161df66ea547ed3e67173100656ab606ae9797db2b`
+  byte-for-byte.
+- **Not re-run in this entry:** `verify:static`, `verify:live`,
+  `test:browser:live-account-disabled`, `test:browser:live-account-enabled`, and
+  `bun audit --production`. The live matrices need Shopify credentials that were
+  not established for this session, so their last passing evidence remains the
+  entry above and does not cover these changes.
+- No Shopify/account/address/order/checkout/payment write, deployment, merge,
+  force-push, GitHub mutation, Weaverse mutation, or Production mutation
+  occurred. The corrections remain local and uncommitted for review.
+
 ## Phase log template
 
 ```text
