@@ -8,18 +8,15 @@ interface WordmarkProps {
 
 const WORDMARKS = {
   header: {
-    className: "brand",
-    imageClassName: "brand-image",
+    className: "block w-38.75 leading-none max-sm:w-29.25",
     src: "/images/brand/forward-wordmark-horizontal-moss.svg",
   },
   footer: {
-    className: "footer-brand",
-    imageClassName: "footer-brand-image",
+    className: "block w-[clamp(280px,31vw,480px)] leading-none",
     src: "/images/brand/forward-wordmark-horizontal-reversed.svg",
   },
   mobile: {
-    className: "mobile-brand",
-    imageClassName: "mobile-brand-image",
+    className: "block w-30.5 leading-none max-xs:w-26",
     src: "/images/brand/forward-wordmark-horizontal-reversed.svg",
   },
 } as const;
@@ -35,7 +32,7 @@ export function Wordmark({ href = "/", variant = "header" }: WordmarkProps) {
       aria-label="Forward — home"
     >
       <Image
-        className={wordmark.imageClassName}
+        className="block h-auto w-full bg-transparent"
         src={wordmark.src}
         alt=""
         width={480}

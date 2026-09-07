@@ -2,6 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
+import { cn } from "@/lib/cn";
+import {
+  cta,
+  eyebrow,
+  sectionHeading,
+  textLink,
+} from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
 import type { Collection, Product } from "@/lib/storefront/types";
 
@@ -15,6 +22,13 @@ const FEATURED_HANDLES = [
 ] as const;
 
 const CATEGORY_HANDLES = ["outerwear", "packs", "footwear"] as const;
+
+const LEDE_CLASS =
+  "mb-prose-paragraph max-w-lede text-lede leading-lede text-text-muted";
+const SHELL_SECTION_CLASS =
+  "mx-auto w-full max-w-page px-page-gutter py-section-block";
+const VIEWPORT_SECTION_CLASS =
+  "md-up:[--home-viewport-pad:clamp(48px,5vw,96px)] md-up:[--home-viewport-media:calc(100svh_-_2_*_var(--home-viewport-pad))] md-up:py-(--home-viewport-pad) short-desktop:[--home-viewport-pad:clamp(8px,2svh,16px)]";
 
 export default async function HomePage() {
   const [themeContent, products, collections, articles] = await Promise.all([
@@ -48,42 +62,59 @@ export default async function HomePage() {
   });
 
   return (
-    <div className="commerce-home">
-      <section className="commerce-hero">
-        <div className="commerce-hero-copy">
-          <p className="eyebrow">Forward / Field equipment 2026</p>
-          <h1 className="display">
+    <div className="bg-text-inverse">
+      <section
+        aria-labelledby="home-hero-title"
+        className="grid min-h-[calc(100svh_-_var(--spacing-header))] grid-cols-[minmax(390px,0.78fr)_minmax(0,1.22fr)] bg-ink text-text-inverse max-md:min-h-[calc(100svh_-_var(--spacing-header-compact))] max-md:grid-cols-1"
+      >
+        <div className="flex flex-col justify-center p-[clamp(48px,6vw,100px)] max-md:px-page-gutter max-md:py-13.75">
+          <p className={eyebrow()}>Forward / Field equipment 2026</p>
+          <h1
+            className="mt-5.5 mb-7 max-w-190 text-balance font-heading text-home-hero leading-home-hero font-medium tracking-home-hero max-md:text-home-hero-mobile"
+            id="home-hero-title"
+          >
             Equipment for weather that changes the plan.
           </h1>
-          <p className="lede">
+          <p className={cn(LEDE_CLASS, "max-w-142.5 text-text-dark-subtle")}>
             Layerable apparel, precise footwear, and low-profile carry systems
             made to move together.
           </p>
-          <div className="commerce-hero-actions">
-            <Link className="button button-signal" href="/shop">
+          <div className="mt-8.5 flex flex-wrap items-center gap-6">
+            <Link className={cta({ intent: "signal" })} href="/shop">
               Shop all equipment
             </Link>
-            <Link className="text-link" href="/field-testing">
+            <Link className={textLink()} href="/field-testing">
               How we test
             </Link>
           </div>
-          <dl className="commerce-hero-facts">
-            <div>
-              <dt>Systems</dt>
-              <dd>{categories.length}</dd>
+          <dl className="mt-auto grid grid-cols-3 border-border-dark-subtle border-t pt-9 max-md:mt-11.25">
+            <div className="grid gap-1.5">
+              <dt className="m-0 font-field-meta text-micro text-text-dark-meta uppercase">
+                Systems
+              </dt>
+              <dd className="m-0 font-heading text-heading-4">
+                {categories.length}
+              </dd>
             </div>
-            <div>
-              <dt>Core objects</dt>
-              <dd>{products.length}</dd>
+            <div className="grid gap-1.5">
+              <dt className="m-0 font-field-meta text-micro text-text-dark-meta uppercase">
+                Core objects
+              </dt>
+              <dd className="m-0 font-heading text-heading-4">
+                {products.length}
+              </dd>
             </div>
-            <div>
-              <dt>Repair</dt>
-              <dd>For life</dd>
+            <div className="grid gap-1.5">
+              <dt className="m-0 font-field-meta text-micro text-text-dark-meta uppercase">
+                Repair
+              </dt>
+              <dd className="m-0 font-heading text-heading-4">For life</dd>
             </div>
           </dl>
         </div>
-        <div className="commerce-hero-media">
+        <div className="relative m-5 min-h-190 overflow-hidden max-md:mx-2.5 max-md:mt-0 max-md:mb-2.5 max-md:min-h-[68svh]">
           <Image
+            className="absolute inset-0 h-full object-cover saturate-78 contrast-105"
             src={themeContent.homeHeroImage.src}
             alt={themeContent.homeHeroImage.alt}
             width={themeContent.homeHeroImage.width}
@@ -93,34 +124,43 @@ export default async function HomePage() {
           />
           {featured[0] !== undefined ? (
             <Link
-              className="commerce-hero-product"
+              className="absolute right-4.5 bottom-4.5 grid w-[min(330px,calc(100%_-_36px))] gap-2 bg-signal p-5 text-ink"
               href={`/products/${featured[0].handle}`}
             >
-              <span className="commerce-hero-product-meta">
+              <span className="font-field-meta text-micro uppercase">
                 Featured system
               </span>
-              <strong>{featured[0].title}</strong>
-              <span className="commerce-hero-product-meta">View product →</span>
+              <strong className="font-heading text-home-feature-title">
+                {featured[0].title}
+              </strong>
+              <span className="font-field-meta text-micro uppercase">
+                View product →
+              </span>
             </Link>
           ) : null}
         </div>
       </section>
 
-      <section className="home-shop-section section shell">
-        <header className="home-commerce-head">
+      <section
+        aria-labelledby="home-featured-title"
+        className={SHELL_SECTION_CLASS}
+      >
+        <header className="mb-11.25 grid grid-cols-feature-row items-end gap-10 max-md:grid-cols-1 max-md:gap-5">
           <div>
-            <p className="eyebrow">New field rotation</p>
-            <h2 className="h2">Start with the core four.</h2>
+            <p className={eyebrow()}>New field rotation</p>
+            <h2 className={sectionHeading()} id="home-featured-title">
+              Start with the core four.
+            </h2>
           </div>
-          <p>
+          <p className="m-0 max-w-copy-narrow">
             A weather layer, breathable midlayer, close-body carry, and trail
             shoe form the shortest route to a complete Forward system.
           </p>
-          <Link className="text-link" href="/shop">
+          <Link className={textLink()} href="/shop">
             Shop all {products.length}
           </Link>
         </header>
-        <div className="product-grid home-featured-grid">
+        <div className="grid grid-cols-4 gap-4.5 max-md:grid-cols-2 max-sm:gap-2.5">
           {featured.map((product, index) => (
             <ProductCard
               key={product.handle}
@@ -131,30 +171,39 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="home-system-section">
-        <header className="home-system-intro shell">
-          <p className="eyebrow">Shop by system</p>
-          <h2 className="h2">Built separately. Better together.</h2>
+      <section className="bg-ink pt-20 text-text-inverse">
+        <header className="mx-auto w-full max-w-page px-page-gutter pb-11">
+          <p className={eyebrow()}>Shop by system</p>
+          <h2 className={sectionHeading()}>
+            Built separately. Better together.
+          </h2>
         </header>
-        <div className="home-system-grid">
+        <div className="grid grid-cols-3 max-md:grid-cols-1">
           {categories.map((collection) => (
             <Link
-              className="home-system-card"
+              className="group relative min-h-177.5 overflow-hidden border-border-dark-divider border-r text-text-inverse after:absolute after:inset-x-0 after:top-2/5 after:bottom-0 after:bg-system-card-overlay after:content-[''] max-md:min-h-150"
               href={`/shop/${collection.handle}`}
               key={collection.handle}
             >
               <Image
+                className="h-full object-cover saturate-72 transition-transform duration-500 ease-standard group-hover:scale-102.5"
                 src={collection.heroImage.src}
                 alt={collection.heroImage.alt}
                 width={collection.heroImage.width}
                 height={collection.heroImage.height}
                 sizes="(min-width: 820px) 34vw, 100vw"
               />
-              <div>
-                <span className="eyebrow">{collection.fieldCode}</span>
-                <h3>{collection.title}</h3>
-                <p>{collection.description}</p>
-                <span>Shop system →</span>
+              <div className="absolute right-0 bottom-0 left-0 z-1 p-8.5">
+                <span className={eyebrow()}>{collection.fieldCode}</span>
+                <h3 className="mt-2 mb-4 font-heading text-system-title leading-display-relaxed">
+                  {collection.title}
+                </h3>
+                <p className="mb-prose-paragraph max-w-105 text-text-dark-subtle">
+                  {collection.description}
+                </p>
+                <span className="mt-6 block font-body text-ui uppercase">
+                  Shop system →
+                </span>
               </div>
             </Link>
           ))}
@@ -162,9 +211,16 @@ export default async function HomePage() {
       </section>
 
       {spotlight !== undefined && spotlightImage !== undefined ? (
-        <section className="home-spotlight shell section">
-          <div className="home-spotlight-media">
+        <section
+          className={cn(
+            SHELL_SECTION_CLASS,
+            "grid grid-cols-[minmax(0,1.25fr)_minmax(380px,0.75fr)] gap-0 max-md:grid-cols-1",
+            VIEWPORT_SECTION_CLASS,
+          )}
+        >
+          <div>
             <Image
+              className="min-h-0 aspect-4/5 object-cover md-up:h-(--home-viewport-media) md-up:aspect-auto"
               src={spotlightImage.src}
               alt={spotlightImage.alt}
               width={spotlightImage.width}
@@ -172,20 +228,42 @@ export default async function HomePage() {
               sizes="(min-width: 820px) 60vw, 100vw"
             />
           </div>
-          <div className="home-spotlight-copy">
-            <p className="eyebrow">Layer focus / {spotlight.category}</p>
-            <h2 className="h2">{spotlight.title}</h2>
-            <p className="lede">{spotlight.subtitle}</p>
-            <ul>
+          <div className="flex flex-col justify-center bg-surface-subtle p-[clamp(42px,6vw,92px)] md-up:px-[clamp(28px,4vw,60px)] md-up:py-[clamp(24px,4svh,48px)] short-desktop:px-[clamp(20px,3vw,36px)] short-desktop:py-2">
+            <p className={cn(eyebrow(), "short-desktop:mb-1")}>
+              Layer focus / {spotlight.category}
+            </p>
+            <h2
+              className={cn(
+                sectionHeading(),
+                "md-up:text-spotlight-title short-desktop:mb-1 short-desktop:text-spotlight-title-short short-desktop:leading-display-relaxed",
+              )}
+            >
+              {spotlight.title}
+            </h2>
+            <p
+              className={cn(
+                LEDE_CLASS,
+                "md-up:mb-[clamp(10px,2svh,18px)] md-up:text-spotlight-copy md-up:leading-spotlight-copy short-desktop:mb-1 short-desktop:text-spotlight-copy-short short-desktop:leading-spotlight-copy-short",
+              )}
+            >
+              {spotlight.subtitle}
+            </p>
+            <ul className="my-7.5 list-none border-border-subtle border-t p-0 md-up:my-[clamp(14px,2.5svh,24px)] short-desktop:my-1">
               {spotlight.specs.slice(0, 3).map((spec) => (
-                <li key={spec.label}>
+                <li
+                  key={spec.label}
+                  className="flex justify-between gap-5 border-border-subtle border-b py-3.5 text-caption md-up:py-[clamp(8px,1.7svh,14px)] short-desktop:py-[clamp(3px,1svh,6px)] short-desktop:text-ui"
+                >
                   <span>{spec.label}</span>
                   <strong>{spec.value}</strong>
                 </li>
               ))}
             </ul>
             <Link
-              className="button button-primary"
+              className={cn(
+                cta(),
+                "self-start short-desktop:min-h-10 short-desktop:py-2",
+              )}
               href={`/products/${spotlight.handle}`}
             >
               Explore the layer
@@ -194,24 +272,27 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      <section className="home-proof-band">
-        <div className="home-proof-copy">
-          <p className="eyebrow">Material standard</p>
-          <h2 className="h2">Fewer materials. Better understood.</h2>
-          <p>
+      <section className="grid grid-cols-split-85 bg-ink text-text-inverse max-md:grid-cols-1">
+        <div className="flex flex-col justify-center p-[clamp(48px,7vw,110px)]">
+          <p className={eyebrow()}>Material standard</p>
+          <h2 className={sectionHeading()}>
+            Fewer materials. Better understood.
+          </h2>
+          <p className="mb-prose-paragraph max-w-state text-copy-lg text-text-dark-subtle">
             Every fabric, foam, buckle, and compound is selected around useful
             life, field repair, and performance you can actually feel.
           </p>
-          <div className="home-proof-links">
-            <Link className="button button-light" href="/materials">
+          <div className="mt-8.5 flex flex-wrap items-center gap-6">
+            <Link className={cta({ intent: "light" })} href="/materials">
               Explore materials
             </Link>
-            <Link className="text-link" href="/about">
+            <Link className={textLink()} href="/about">
               About Forward
             </Link>
           </div>
         </div>
         <Image
+          className="h-175 object-cover saturate-70 max-md:h-[58svh]"
           src={themeContent.standardBandImage.src}
           alt={themeContent.standardBandImage.alt}
           width={themeContent.standardBandImage.width}
@@ -221,58 +302,77 @@ export default async function HomePage() {
       </section>
 
       {pack !== undefined ? (
-        <section className="home-kit shell section">
-          <div className="home-kit-copy">
-            <p className="eyebrow">One-day kit</p>
-            <h2 className="h2">Carry the day, not the doubt.</h2>
-            <p>{pack.subtitle}</p>
-            <Link className="text-link" href={`/products/${pack.handle}`}>
+        <section
+          className={cn(
+            SHELL_SECTION_CLASS,
+            "grid grid-cols-[0.55fr_1.45fr] items-end gap-15 max-md:grid-cols-1",
+            VIEWPORT_SECTION_CLASS,
+          )}
+        >
+          <div className="pb-7.5">
+            <p className={eyebrow()}>One-day kit</p>
+            <h2 className={sectionHeading()}>Carry the day, not the doubt.</h2>
+            <p className="mb-prose-paragraph">{pack.subtitle}</p>
+            <Link className={textLink()} href={`/products/${pack.handle}`}>
               View {pack.title}
             </Link>
           </div>
-          <div className="home-kit-products">
+          <div className="grid grid-cols-3 gap-3 max-md:gap-1.75">
             {kitProducts.map(({ product, image }) => (
               <Link href={`/products/${product.handle}`} key={product.handle}>
                 <Image
+                  className="aspect-4/5 object-cover md-up:max-h-[calc(var(--home-viewport-media)_-_44px)] short-desktop:max-h-[calc(var(--home-viewport-media)_-_32px)]"
                   src={image.src}
                   alt={image.alt}
                   width={image.width}
                   height={image.height}
                   sizes="(min-width: 820px) 20vw, 45vw"
                 />
-                <span className="home-kit-product-name">{product.title}</span>
+                <span className="mt-2.5 block text-caption font-bold short-desktop:mt-1 short-desktop:text-ui">
+                  {product.title}
+                </span>
               </Link>
             ))}
           </div>
         </section>
       ) : null}
 
-      <section className="home-service-grid shell section">
-        <article>
-          <p className="eyebrow">Repair, not replace</p>
-          <h2>Keep equipment in motion.</h2>
-          <p>
+      <section
+        className={cn(
+          SHELL_SECTION_CLASS,
+          "grid grid-cols-split-70 gap-3 max-md:grid-cols-1",
+        )}
+      >
+        <article className="min-h-140 bg-signal p-[clamp(35px,5vw,70px)] max-md:min-h-0">
+          <p className={eyebrow()}>Repair, not replace</p>
+          <h2 className="mb-home-copy text-balance font-heading text-home-display leading-display-relaxed">
+            Keep equipment in motion.
+          </h2>
+          <p className="mb-prose-paragraph">
             Product defects are repaired free. Wear, accidents, and hard-earned
             damage are assessed honestly before work begins.
           </p>
-          <Link className="text-link" href="/pages/field-repair">
+          <Link className={textLink()} href="/pages/field-repair">
             Visit the repair desk
           </Link>
         </article>
         {dispatch !== undefined ? (
-          <article className="home-dispatch-card">
+          <article className="grid min-h-140 grid-cols-split-90 bg-surface-subtle p-0 max-md:min-h-0 max-md:grid-cols-1">
             <Image
+              className="h-full object-cover max-md:max-h-[55svh]"
               src={dispatch.heroImage.src}
               alt={dispatch.heroImage.alt}
               width={dispatch.heroImage.width}
               height={dispatch.heroImage.height}
               sizes="(min-width: 820px) 45vw, 100vw"
             />
-            <div>
-              <p className="eyebrow">Latest field note</p>
-              <h2>{dispatch.title}</h2>
-              <p>{dispatch.excerpt}</p>
-              <Link className="text-link" href={`/journal/${dispatch.handle}`}>
+            <div className="self-center p-11.25">
+              <p className={eyebrow()}>Latest field note</p>
+              <h2 className="mb-home-copy text-balance font-heading text-home-display leading-display-relaxed">
+                {dispatch.title}
+              </h2>
+              <p className="mb-prose-paragraph">{dispatch.excerpt}</p>
+              <Link className={textLink()} href={`/journal/${dispatch.handle}`}>
                 Read the dispatch
               </Link>
             </div>

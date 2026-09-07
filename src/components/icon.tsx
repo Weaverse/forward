@@ -1,5 +1,7 @@
 import type { SVGProps } from "react";
 
+import { cn } from "@/lib/cn";
+
 /**
  * Forward's single icon family: Phosphor Icons (regular weight, MIT).
  *
@@ -49,9 +51,15 @@ interface IconProps extends Omit<SVGProps<SVGSVGElement>, "name"> {
   title?: string;
 }
 
-export function Icon({ name, size = 18, title, ...props }: IconProps) {
+export function Icon({
+  className,
+  name,
+  size = 18,
+  title,
+  ...props
+}: IconProps) {
   const shared: SVGProps<SVGSVGElement> = {
-    className: "icon",
+    className: cn("inline-block shrink-0 align-middle", className),
     fill: "currentColor",
     focusable: "false",
     height: size,

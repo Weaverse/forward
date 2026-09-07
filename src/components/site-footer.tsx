@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Icon } from "@/components/icon";
 import { Wordmark } from "@/components/wordmark";
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
+import { cn } from "@/lib/cn";
 import { THEME_CUSTOM_PAGE_LINKS } from "@/lib/routes/route-contract";
 import { storefront } from "@/lib/storefront/data-source";
 import {
@@ -11,11 +12,12 @@ import {
   VERIFIED_SOCIAL_LINKS,
 } from "@/lib/storefront/integrations";
 
+const FOOTER_COLUMN_CLASS =
+  "[&>a]:flex [&>a]:min-h-9 [&>a]:items-center [&>a]:text-caption [&>a:hover]:text-signal [&>h2]:mt-0 [&>h2]:mb-3.75 [&>h2]:font-body [&>h2]:text-field-meta [&>h2]:text-text-dark-muted [&>h2]:tracking-field-meta [&>h2]:uppercase";
+
 /**
- * Canonical footer. Source `app.js:162–176`: stacked wordmark, intro,
- * navigation columns, and the bottom rail. Shopify owns the menu columns; the
- * theme-owned custom pages get their own heading so they are discoverable
- * without being mistaken for `/pages/*`.
+ * Shopify owns the menu columns; theme-owned custom pages get their own
+ * heading so they are discoverable without being mistaken for `/pages/*`.
  *
  * Integrations render only when verified. Unverified social accounts, payment
  * marks, and the (currently unconfigured) newsletter provider render nothing
@@ -36,16 +38,24 @@ export async function SiteFooter() {
       }));
 
   return (
-    <footer className="site-footer">
-      <div className="footer-grid">
-        <div className="footer-brand-wrap">
+    <footer
+      className="relative bg-ink px-page-gutter pt-25 pb-6 text-text-inverse"
+      data-shell-background
+    >
+      <div
+        className="mx-auto grid w-full max-w-page grid-cols-[1.5fr_repeat(4,0.45fr)] gap-12.5 max-lg:grid-cols-[1.2fr_repeat(2,minmax(0,1fr))] max-md:grid-cols-2 max-sm:grid-cols-1"
+        data-footer-grid
+      >
+        <div className="max-md:col-span-full max-sm:col-auto">
           <Wordmark variant="footer" />
-          <p className="footer-intro">{themeContent.footerTagline}</p>
+          <p className="mt-7.5 mb-prose-paragraph max-w-95 text-text-dark-muted">
+            {themeContent.footerTagline}
+          </p>
         </div>
         {footerColumns.map((column) => (
           <nav
             key={column.heading}
-            className="footer-col"
+            className={FOOTER_COLUMN_CLASS}
             aria-label={`${column.heading} links`}
           >
             <h2>{column.heading}</h2>
@@ -56,7 +66,10 @@ export async function SiteFooter() {
             ))}
           </nav>
         ))}
-        <nav className="footer-col" aria-label="Forward field guide links">
+        <nav
+          className={FOOTER_COLUMN_CLASS}
+          aria-label="Forward field guide links"
+        >
           <h2>Field guide</h2>
           {THEME_CUSTOM_PAGE_LINKS.map((link) => (
             <Link key={link.href} href={link.href}>
@@ -66,12 +79,18 @@ export async function SiteFooter() {
         </nav>
       </div>
       {VERIFIED_SOCIAL_LINKS.length > 0 ? (
-        <div className="footer-social">
-          <h2>{SOCIAL_SECTION_HEADING}</h2>
-          <ul>
+        <div className="mx-auto mt-11 flex w-full max-w-page items-center justify-between gap-6 border-white/20 border-t pt-5.5 max-sm:flex-col max-sm:items-start">
+          <h2 className="m-0 text-ui font-ui text-text-dark-muted tracking-field-meta uppercase">
+            {SOCIAL_SECTION_HEADING}
+          </h2>
+          <ul className="m-0 flex list-none gap-2.5 p-0">
             {VERIFIED_SOCIAL_LINKS.map((link) => (
               <li key={link.href}>
-                <a href={link.href} rel="noopener noreferrer external">
+                <a
+                  className="inline-grid size-touch place-items-center border border-white/30 text-text-inverse [transition:border-color_var(--duration-fast)_var(--ease-standard),background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard)] hover:border-signal hover:bg-signal hover:text-ink focus-visible:outline-signal"
+                  href={link.href}
+                  rel="noopener noreferrer external"
+                >
                   <Icon name={link.icon} size={20} title={link.label} />
                 </a>
               </li>
@@ -79,15 +98,18 @@ export async function SiteFooter() {
           </ul>
         </div>
       ) : null}
-      <div className="footer-bottom">
+      <div
+        className={cn(
+          "mx-auto flex w-full max-w-page justify-between border-white/20 border-t pt-5 font-body text-field-meta text-text-dark-muted tracking-label uppercase max-sm:flex-col max-sm:items-start max-sm:gap-2 max-sm:pb-9.5",
+          VERIFIED_SOCIAL_LINKS.length > 0 ? "mt-6" : "mt-15",
+        )}
+      >
         {themeContent.footerStatus.length > 0 ? (
           <span>{themeContent.footerStatus}</span>
         ) : null}
         <span>FORWARD · Field office 54.4609° N / 3.0886° W</span>
         {VERIFIED_CHECKOUT_PAYMENT_MARKS.length > 0 ? (
-          <span className="footer-payments">
-            {VERIFIED_CHECKOUT_PAYMENT_MARKS.join(" · ")}
-          </span>
+          <span>{VERIFIED_CHECKOUT_PAYMENT_MARKS.join(" · ")}</span>
         ) : null}
       </div>
     </footer>

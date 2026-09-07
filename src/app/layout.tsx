@@ -3,14 +3,12 @@ import { Archivo, IBM_Plex_Mono, Manrope } from "next/font/google";
 import type { ReactNode } from "react";
 
 import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/site-header/site-header";
 import { ShopifyCartRuntime } from "@/lib/cart/shopify-cart-react";
+import { cn } from "@/lib/cn";
 import { storefrontRuntimeMode } from "@/lib/storefront/data-source";
 
 import "./globals.css";
-import "./canonical-source.css";
-import "./site-header.css";
-import "./production-polish.css";
 
 /* Premium type contract: Archivo for display, Manrope for body/UI, and
  * IBM Plex Mono only for compact field metadata. Next serves all three. */
@@ -53,7 +51,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${archivo.variable} ${manrope.variable} ${plexMono.variable}`}
+      className={cn(
+        archivo.variable,
+        manrope.variable,
+        plexMono.variable,
+        "max-w-full scroll-smooth overflow-x-clip motion-reduce:scroll-auto",
+      )}
     >
       <head>
         {shopifyCartEnabled ? (
@@ -65,13 +68,23 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           />
         ) : null}
       </head>
-      <body>
+      <body className="m-0 max-w-full overflow-x-clip bg-canvas font-body text-copy-sm leading-body text-ink antialiased">
         <ShopifyCartRuntime enabled={shopifyCartEnabled}>
-          <a className="skip-link" href="#main-content">
+          <a
+            className="fixed top-2.5 left-2.5 z-1000 -translate-y-3/2 bg-ink px-4 py-2.75 text-text-inverse focus:translate-y-0"
+            data-shell-background
+            href="#main-content"
+          >
             Skip to content
           </a>
           <SiteHeader />
-          <main id="main-content">{children}</main>
+          <main
+            className="min-h-[66vh]"
+            data-shell-background
+            id="main-content"
+          >
+            {children}
+          </main>
           <SiteFooter />
         </ShopifyCartRuntime>
       </body>

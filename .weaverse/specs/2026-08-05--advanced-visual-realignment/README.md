@@ -2,17 +2,11 @@
 
 ## Status
 
-Production polish Phase 1 was approved by Leo on 2026-08-18 against
-`main@29e1242263c576a0635427585873bd606c412aca`. The exact continuation scope,
-integration truth boundaries, TDD requirements, and release gates are in
-[`production-polish-phase-1-handoff.md`](./production-polish-phase-1-handoff.md).
-This supersedes the old visual-approval-pending state for the specific global
-shell, commerce correctness, PDP, typography, Footer, and bounded editorial
-findings listed there; deeper Home redesign remains a later approval phase.
+Production polish Phase 1 is complete. PR [#60](https://github.com/Weaverse/forward/pull/60) merged the exact reviewed candidate into `main@8fa94b727cc7977d75dc2400bcddf8b2d492e83f`; Production deployment `dpl_8PBjAYooDCyicPEW9oY1Sk4R2FBY` is `READY` at https://forward-sandy.vercel.app. The approved scope and protected contracts remain in [`production-polish-phase-1-handoff.md`](./production-polish-phase-1-handoff.md), and the final implementation/review/Production evidence is in [`work-logs.md`](./work-logs.md).
 
-The screenshot-reconstructed correction merged through PR #52 on 2026-08-06 but Leo rejected the result as still not matching the owned canonical POC. The prior rendered-evidence approach is superseded across the full storefront.
+The next local continuation is [`../2026-08-20--tailwind-presentation-migration/README.md`](../2026-08-20--tailwind-presentation-migration/README.md), implementing [issue #61](https://github.com/Weaverse/forward/issues/61). The migration replaces source-coupled UI tests first, establishes the Tailwind v4 token contract, then migrates the shell and complete route inventory without redesigning or weakening the accepted Production commerce behavior.
 
-The full canonical source-port specified in [`full-canonical-source-port-handoff.md`](./full-canonical-source-port-handoff.md) is implemented on `fix/full-canonical-source-port`: the pinned POC stylesheet is ported as `src/app/canonical-source.css` in true source order, the Literata/Manrope/IBM Plex Mono contract is served through `next/font`, and every canonical render function is translated into the matching Next route. All technical, route, interaction, and per-route visual gates pass; see [`work-logs.md`](./work-logs.md) for the source-to-target checklist, the intentional normalized-data adaptations, and the evidence paths. Leo visual approval remains pending.
+The screenshot-reconstructed Home correction and the earlier full-source-port implementation handoffs are historical evidence only. Do not resume their old branches, stale baselines, or rejected screenshot-first instructions as the Phase 2 execution plan.
 
 ## Original request
 

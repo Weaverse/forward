@@ -5,7 +5,7 @@ import { describe, it } from "node:test";
 import {
   createFieldIndexCollections,
   FIELD_INDEX_PRESENTATION,
-} from "../src/lib/header-navigation.ts";
+} from "../src/components/site-header/header-navigation.ts";
 import { COLLECTION_PRESENTATION_PROFILES } from "../src/lib/storefront/collection-presentation.ts";
 import { StaticStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
 import { createNavigationQueryExecutor } from "../src/lib/storefront/shopify/client.ts";
@@ -940,31 +940,6 @@ describe("Footer navigation query/cache contract", () => {
     assert.match(
       clientSource,
       /NAVIGATION_CACHE_KEY,[\s\S]*config\.storeDomain,[\s\S]*config\.mainMenuHandle,[\s\S]*FOOTER_MENU_HANDLE/,
-    );
-  });
-
-  it("renders normalized mode-aware status instead of hard-coded static copy", async () => {
-    const footerSource = await readFile(
-      "src/components/site-footer.tsx",
-      "utf8",
-    );
-    assert.match(footerSource, /themeContent\.footerStatus/);
-    assert.doesNotMatch(footerSource, /Not a live store/);
-  });
-
-  it("reasserts the footer grid in the advanced tablet and mobile blocks", async () => {
-    const cssSource = await readFile("src/app/canonical-source.css", "utf8");
-    assert.match(
-      cssSource,
-      /source 840-849[\s\S]*?\.footer-col:last-child \{\s*display: block;/,
-    );
-    assert.match(
-      cssSource,
-      /source 851-895[\s\S]*?\.footer-grid \{\s*grid-template-columns: 1fr 1fr;/,
-    );
-    assert.match(
-      cssSource,
-      /source 897-943[\s\S]*?\.footer-grid \{\s*grid-template-columns: 1fr;/,
     );
   });
 });

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { CUSTOMER_ACCOUNT_LOGOUT_PATH } from "@/lib/account/customer-account";
 import { cn } from "@/lib/cn";
+import { eyebrow as eyebrowClass, textLink } from "@/lib/presentation/variants";
 
 const ACCOUNT_NAV = [
   { href: "/account", label: "Overview" },
@@ -25,8 +26,8 @@ interface AccountShellProps {
 }
 
 /**
- * Canonical account frame. Source `app.js:316` and `app.js:320`: the dark
- * `.page-hero`, the 190px mono `.account-nav` rail, and the content column.
+ * Accepted account frame: the dark page hero, 190px mono navigation rail, and
+ * content column.
  *
  * Sign-out is a same-origin POST form, never a link: the pinned logout handler
  * requires POST plus an Origin/Referer match against the configured origin.
@@ -42,17 +43,26 @@ export function AccountShell({
 }: AccountShellProps) {
   return (
     <>
-      <header className="page-hero">
-        <div className="page-hero-inner">
+      <header className="flex min-h-140 items-end bg-ink px-page-gutter pt-25 pb-18.75 text-text-inverse max-md:min-h-130 max-sm:min-h-107.5 max-sm:pt-17.5">
+        <div className="mx-auto grid w-full grid-cols-page-header items-end gap-12.5 max-md:grid-cols-1 max-md:gap-7">
           <div>
-            <p className="eyebrow">{eyebrow}</p>
-            <h1 className="h1">{title}</h1>
+            <p className={eyebrowClass({ tone: "signal" })}>{eyebrow}</p>
+            <h1 className="m-0 max-w-feature text-balance font-heading text-display leading-display font-medium tracking-heading max-sm:text-index-display-mobile">
+              {title}
+            </h1>
           </div>
-          {heroAside ?? <p className="lede">{lede}</p>}
+          {heroAside ?? (
+            <p className="m-0 max-w-lede justify-self-end text-lede leading-lede text-text-dark-lede max-md:max-w-full max-md:justify-self-start">
+              {lede}
+            </p>
+          )}
         </div>
       </header>
-      <div className="shell account-layout">
-        <nav className="account-nav" aria-label="Account navigation">
+      <div className="mx-auto grid w-full max-w-page grid-cols-media-row gap-[clamp(42px,8vw,120px)] px-page-gutter pt-17.5 pb-30 max-md:grid-cols-1">
+        <nav
+          className="self-start border-border-subtle border-t font-body max-md:flex max-md:overflow-x-auto"
+          aria-label="Account navigation"
+        >
           {ACCOUNT_NAV.map((item) => {
             const selected = item.href === activePath;
             return (
@@ -60,7 +70,10 @@ export function AccountShell({
                 key={item.href}
                 href={item.href}
                 aria-current={selected ? "page" : undefined}
-                className={cn(selected && "active")}
+                className={cn(
+                  "flex min-h-12.5 items-center border-border-subtle border-b text-micro font-bold uppercase max-md:min-w-30 max-md:pr-5",
+                  selected && "text-signal-strong",
+                )}
               >
                 {item.label}
               </Link>
@@ -68,7 +81,7 @@ export function AccountShell({
           })}
           {signedIn ? (
             <form method="post" action={CUSTOMER_ACCOUNT_LOGOUT_PATH}>
-              <button type="submit" className="text-link">
+              <button type="submit" className={textLink({ kind: "control" })}>
                 Sign out
               </button>
             </form>

@@ -7,6 +7,12 @@ import {
 } from "./src/lib/storefront/image-source";
 
 const nextConfig: NextConfig = {
+  /*
+   * Browser verification builds each credential matrix into its own directory
+   * so a matrix run never clobbers the `.next` build that `check:routes` and
+   * `smoke:routes` consume. Unset, this is the ordinary `.next` build.
+   */
+  distDir: process.env.FORWARD_DIST_DIR ?? ".next",
   images: {
     /*
      * Only the exact owned Shopify CDN media path is allowed. Static mode keeps

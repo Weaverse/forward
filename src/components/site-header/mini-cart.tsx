@@ -1,10 +1,12 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { Icon } from "@/components/icon";
+import { cn } from "@/lib/cn";
 import { subscribeToCartAdd } from "@/lib/cart/mini-cart-signal";
 import {
   formatShopifyMoney,
@@ -13,10 +15,26 @@ import {
 } from "@/lib/cart/shopify-cart-react";
 import { subtotal } from "@/lib/demo-cart/cart-logic";
 import { useDemoCartLines } from "@/lib/demo-cart/use-demo-cart";
+import { CONTROL_TRANSITION } from "@/lib/presentation/variants";
 import { formatMoney } from "@/lib/storefront/format";
 
 /** Long enough to read, short enough not to sit over the page. */
 const AUTO_DISMISS_MS = 8000;
+const miniCartAction = cva(
+  cn(
+    "inline-flex min-h-touch w-full items-center justify-center gap-2.5 border px-5.5 py-3 text-caption font-ui-strong text-ink tracking-button uppercase shadow-button",
+    CONTROL_TRANSITION,
+    "hover:translate-0.5 hover:border-ink hover:bg-ink hover:text-text-inverse hover:shadow-button-hover active:translate-1 active:shadow-none focus-visible:outline-ink focus-visible:outline-3 focus-visible:outline-offset-4 motion-reduce:hover:translate-none motion-reduce:active:translate-none",
+  ),
+  {
+    variants: {
+      intent: {
+        cart: "border-ink",
+        checkout: "border-signal bg-signal",
+      },
+    },
+  },
+);
 
 interface MiniCartImage {
   src: string;
@@ -48,37 +66,49 @@ function MiniCartBody({ checkoutUrl, line, subtotalLabel }: MiniCartBodyProps) {
   return (
     <>
       {line === null ? (
-        <p className="mini-cart-empty">Your cart was updated.</p>
+        <p className="mt-1 mb-0 text-caption text-text-muted">
+          Your cart was updated.
+        </p>
       ) : (
-        <article className="mini-cart-line">
+        <article className="grid grid-cols-[64px_minmax(0,1fr)] items-start gap-3">
           {line.image === null ? null : (
             <Image
               alt={line.image.alt}
               height={line.image.height}
+              className="aspect-4/5 object-cover"
               sizes="64px"
               src={line.image.src}
               width={line.image.width}
             />
           )}
           <div>
-            <Link href={line.href}>{line.title}</Link>
+            <Link
+              className="font-heading text-copy font-title tracking-mini-cart-title"
+              href={line.href}
+            >
+              {line.title}
+            </Link>
             {line.options.length === 0 ? null : (
-              <p className="mini-cart-options">{line.options}</p>
+              <p className="mt-1 mb-0 text-caption text-text-muted">
+                {line.options}
+              </p>
             )}
-            <p className="mini-cart-quantity">Qty {line.quantity}</p>
+            <p className="mt-1 mb-0 text-caption text-text-muted">
+              Qty {line.quantity}
+            </p>
           </div>
         </article>
       )}
-      <p className="mini-cart-subtotal">
+      <p className="m-0 flex items-baseline justify-between gap-3 border-border-subtle border-t pt-3 font-body text-caption tracking-link uppercase">
         <span>Subtotal</span>
         <strong>{subtotalLabel}</strong>
       </p>
-      <Link className="button button-block" href="/cart">
+      <Link className={miniCartAction({ intent: "cart" })} href="/cart">
         View cart
       </Link>
       {checkoutUrl === null ? null : (
         <a
-          className="button button-signal button-block"
+          className={miniCartAction({ intent: "checkout" })}
           href={checkoutUrl}
           rel="external nofollow"
         >
@@ -257,15 +287,19 @@ export function MiniCart() {
   }, [presentation]);
 
   return (
-    <div ref={rootRef} className="mini-cart-mount">
+    <div ref={rootRef} className="contents" data-mini-cart-mount>
       {presentation === null ? null : (
-        <div aria-label="Cart updated" className="mini-cart" role="dialog">
-          <p className="mini-cart-head">
+        <div
+          aria-label="Cart updated"
+          className="absolute top-[calc(100%+12px)] right-0 z-130 grid w-[min(340px,calc(100vw-28px))] gap-3 border border-ink bg-canvas p-4.5 text-start shadow-mini-cart"
+          role="dialog"
+        >
+          <p className="m-0 flex items-center gap-2 font-body text-ui font-ui-strong tracking-label uppercase">
             <Icon name="check-circle" size={16} />
             Added to cart
           </p>
           <button
-            className="mini-cart-close"
+            className="absolute top-2.5 right-2.5 inline-grid size-8 place-items-center border-0 bg-transparent text-inherit"
             type="button"
             aria-label="Close cart preview"
             onClick={() => {

@@ -8,6 +8,13 @@ import {
   IDLE_ADDRESS_ACTION_STATE,
 } from "@/lib/account/address-action-state";
 import { saveAddress } from "@/lib/account/address-actions";
+import { cn } from "@/lib/cn";
+import { cta } from "@/lib/presentation/variants";
+
+const PRIMARY_BUTTON_CLASS = cn(
+  cta(),
+  "disabled:translate-0 disabled:cursor-not-allowed disabled:opacity-46 disabled:shadow-none",
+);
 
 interface AddressActionFormProps {
   /** Hidden intent/id inputs and any visible fields, rendered on the server. */
@@ -42,13 +49,13 @@ export function AddressActionForm({
       {children}
       <button
         type="submit"
-        className={submitClassName ?? "button button-primary"}
+        className={submitClassName ?? PRIMARY_BUTTON_CLASS}
         disabled={pending}
       >
         {submitLabel}
       </button>
       {state.message === null ? null : (
-        <p className="form-note" role="alert">
+        <p className="text-caption text-text-dark-muted" role="alert">
           {state.message}
         </p>
       )}

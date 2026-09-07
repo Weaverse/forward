@@ -1,10 +1,13 @@
 "use client";
 
-/**
- * Error state. The canonical POC has no error render function, so this uses
- * the canonical tokens, type scale, and system-state geometry rather than a
- * new art direction. Reset behavior and status semantics are unchanged.
- */
+import {
+  cta,
+  emptyState,
+  eyebrow,
+  sectionHeading,
+} from "@/lib/presentation/variants";
+
+/** Error state with the accepted geometry, reset behavior, and semantics. */
 export default function ErrorPage({
   error,
   reset,
@@ -13,15 +16,23 @@ export default function ErrorPage({
   reset: () => void;
 }) {
   return (
-    <div className="system-state">
-      <div className="system-state-inner" role="alert">
-        <p className="eyebrow">Field report / Error</p>
-        <h1 className="h2">Weather moved in.</h1>
-        <p className="lede">An unexpected error interrupted this page.</p>
+    <div className={emptyState({ size: "page" })}>
+      <div className="max-w-state" role="alert">
+        <p className={eyebrow()}>Field report / Error</p>
+        <h1 className={sectionHeading()}>Weather moved in.</h1>
+        <p className="max-w-lede text-lede leading-lede text-text-muted">
+          An unexpected error interrupted this page.
+        </p>
         {error.digest ? (
-          <p className="meta">Reference / {error.digest}</p>
+          <p className="font-field-meta text-caption font-medium text-text-muted tracking-field-meta uppercase">
+            Reference / {error.digest}
+          </p>
         ) : null}
-        <button className="button button-signal" type="button" onClick={reset}>
+        <button
+          className={cta({ intent: "signal" })}
+          type="button"
+          onClick={reset}
+        >
           Try again
         </button>
       </div>

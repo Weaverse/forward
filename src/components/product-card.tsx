@@ -17,13 +17,9 @@ interface ProductCardProps {
 }
 
 /**
- * Canonical product card. Source `app.js:87–107` — one card hierarchy shared
- * by Home, PLP, collection, search, and related-product grids. Parent surfaces
- * own grid geometry while the card keeps one consistent 4:5 image treatment.
- *
- * The canonical `.swatches` row is inert decoration. Forward's swatches are
- * real controls: native radios in 44×44 targets, a visible selected ring and
- * name, and a deep link that retargets to the selected colorway.
+ * Product card shared by Home, catalog, search, and related-product grids.
+ * Parent surfaces own grid geometry while the card keeps one consistent 4:5
+ * image treatment and real colorway controls.
  */
 export function ProductCard({ product, priority }: ProductCardProps) {
   const [activeColorwayId, setActiveColorwayId] = useState(
@@ -35,13 +31,14 @@ export function ProductCard({ product, priority }: ProductCardProps) {
   const badge = product.activities[0];
 
   return (
-    <article className="product-card">
+    <article className="relative min-w-0 bg-transparent">
       <Link
-        className="product-image-link"
+        className="group relative block overflow-hidden bg-media-card"
         href={href}
         aria-label={`View ${product.title}`}
       >
         <Image
+          className="aspect-4/5 object-cover saturate-76 transition-transform duration-450 ease-media group-hover:scale-102.5"
           src={activeColorway.images.primary.src}
           alt={activeColorway.images.primary.alt}
           width={activeColorway.images.primary.width}
@@ -50,24 +47,32 @@ export function ProductCard({ product, priority }: ProductCardProps) {
           priority={priority}
         />
         {badge !== undefined ? (
-          <span className="product-badge">{badge}</span>
+          <span className="absolute top-0 right-0 bg-signal px-2.25 py-1.75 font-body text-nano font-medium text-ink tracking-control uppercase">
+            {badge}
+          </span>
         ) : null}
       </Link>
-      <div className="product-info">
-        <div className="product-info-row">
-          <h3 className="product-name">
+      <div className="border-ink border-t px-0 pt-3.5 pb-5.5">
+        <div className="flex justify-between gap-4.5 max-sm:block">
+          <h3 className="m-0 font-heading text-card-title font-semibold max-sm:text-copy">
             <Link href={href}>{product.title}</Link>
           </h3>
-          <span className="product-price">{formatMoney(product.price)}</span>
+          <span className="whitespace-nowrap text-label max-sm:mt-0.75 max-sm:block">
+            {formatMoney(product.price)}
+          </span>
         </div>
-        <p className="product-detail">
+        <p className="mt-1.25 font-body text-micro font-semibold text-text-muted uppercase max-sm:hidden">
           {product.category} / {product.activities.join(" · ")}
         </p>
-        <fieldset className="swatches">
+        <fieldset className="mt-1 flex min-h-touch items-center gap-1.25">
           <legend className="sr-only">{product.title} colorway</legend>
           {product.colorways.map((entry) => (
-            <label key={entry.id} className="swatch-control">
+            <label
+              key={entry.id}
+              className="inline-flex size-touch flex-none items-center justify-center first-of-type:-ml-3"
+            >
               <input
+                className="peer sr-only"
                 type="radio"
                 name={swatchGroupName}
                 value={entry.id}
@@ -75,15 +80,18 @@ export function ProductCard({ product, priority }: ProductCardProps) {
                 onChange={() => setActiveColorwayId(entry.id)}
               />
               <span className="sr-only">{entry.name} colorway</span>
-              <span aria-hidden="true" className="swatch-ring">
+              <span
+                aria-hidden="true"
+                className="inline-flex size-5.5 items-center justify-center border border-transparent transition-colors duration-fast ease-standard peer-checked:border-ink peer-focus-visible:outline-3 peer-focus-visible:outline-focus peer-focus-visible:outline-offset-2"
+              >
                 <span
-                  className="swatch"
+                  className="size-3 border border-black/25"
                   style={{ backgroundColor: entry.swatchColor }}
                 />
               </span>
             </label>
           ))}
-          <span className="swatch-name">
+          <span className="ml-auto pl-2.5 font-body text-nano text-text-muted tracking-label uppercase">
             {activeColorway.name} ·{" "}
             {String(product.colorways.length).padStart(2, "0")} colorways
           </span>

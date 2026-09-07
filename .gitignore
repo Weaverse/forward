@@ -12,6 +12,11 @@ out/
 dist/
 coverage/
 
+# Browser verification output (Playwright + isolated production builds)
+test-results/
+playwright-report/
+.forward-browser/
+
 # Deployment
 .vercel/
 

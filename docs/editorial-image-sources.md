@@ -2,9 +2,8 @@
 
 Repository-owned record for every non-product editorial image used by the
 Forward static demo. All images are Unsplash photos from the approved source
-set (the same set rendered by the Advanced POC), downloaded once, optimized to
-WebP, and served locally from `public/images/editorial/`. Nothing is
-production-hotlinked.
+set, downloaded once, optimized to WebP, and served locally from
+`public/images/editorial/`. Nothing is production-hotlinked.
 
 ## License
 

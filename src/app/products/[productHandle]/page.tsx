@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { ProductCard } from "@/components/product-card";
+import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
 import type { Product } from "@/lib/storefront/types";
 
@@ -46,43 +47,62 @@ async function relatedProducts(product: Product) {
   return related.filter((entry): entry is Product => entry !== null);
 }
 
-/**
- * Canonical `.accordion-list` (source `app.js:286`), filled with the
- * normalized field record: details, specs, care, and the repair commitment.
- */
 function ProductFieldRecord({ product }: { product: Product }) {
   return (
-    <div className="accordion-list">
-      <details open>
-        <summary>Why it works</summary>
+    <div className="mt-7.5 border-border-dark border-t">
+      <details className="group border-border-dark border-b" open>
+        <summary className="flex min-h-13.5 list-none items-center justify-between font-body text-micro font-medium tracking-control uppercase after:text-copy-lg after:content-['+'] group-open:after:content-['−'] [&::-webkit-details-marker]:hidden">
+          Why it works
+        </summary>
         {product.detailParagraphs.map((paragraph) => (
-          <p key={paragraph.slice(0, 32)}>{paragraph}</p>
+          <p
+            className="text-label text-text-dark-muted"
+            key={paragraph.slice(0, 32)}
+          >
+            {paragraph}
+          </p>
         ))}
       </details>
-      <details>
-        <summary>Specifications</summary>
+      <details className="group border-border-dark border-b">
+        <summary className="flex min-h-13.5 list-none items-center justify-between font-body text-micro font-medium tracking-control uppercase after:text-copy-lg after:content-['+'] group-open:after:content-['−'] [&::-webkit-details-marker]:hidden">
+          Specifications
+        </summary>
         <dl>
           {product.specs.map((row) => (
-            <div key={row.label} className="spec-row">
-              <dt>{row.label}</dt>
-              <dd>{row.value}</dd>
+            <div
+              key={row.label}
+              className="flex justify-between gap-5 border-border-dark border-b py-2.25 text-caption last:border-b-0"
+            >
+              <dt className="font-body text-micro text-text-dark-muted tracking-label uppercase">
+                {row.label}
+              </dt>
+              <dd className="m-0 text-right text-text-inverse">{row.value}</dd>
             </div>
           ))}
         </dl>
       </details>
-      <details>
-        <summary>Materials + care</summary>
-        <ul>
+      <details className="group border-border-dark border-b">
+        <summary className="flex min-h-13.5 list-none items-center justify-between font-body text-micro font-medium tracking-control uppercase after:text-copy-lg after:content-['+'] group-open:after:content-['−'] [&::-webkit-details-marker]:hidden">
+          Materials + care
+        </summary>
+        <ul className="mt-0 mb-prose-block pl-[1.2em]">
           {product.care.map((entry) => (
-            <li key={entry.slice(0, 32)}>{entry}</li>
+            <li className="text-label text-text-muted" key={entry.slice(0, 32)}>
+              {entry}
+            </li>
           ))}
         </ul>
       </details>
-      <details>
-        <summary>Repair</summary>
-        <p>{product.repair}</p>
+      <details className="group border-border-dark border-b">
+        <summary className="flex min-h-13.5 list-none items-center justify-between font-body text-micro font-medium tracking-control uppercase after:text-copy-lg after:content-['+'] group-open:after:content-['−'] [&::-webkit-details-marker]:hidden">
+          Repair
+        </summary>
+        <p className="text-label text-text-dark-muted">{product.repair}</p>
         <p>
-          <Link className="text-link" href="/pages/field-repair">
+          <Link
+            className="inline-flex min-h-touch items-center gap-3.5 border-text-inverse border-b font-body text-ui font-medium tracking-link uppercase after:text-control-lg after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-1.25"
+            href="/pages/field-repair"
+          >
             The repairs programme
           </Link>
         </p>
@@ -91,11 +111,6 @@ function ProductFieldRecord({ product }: { product: Product }) {
   );
 }
 
-/**
- * PDP — port of the canonical `productPage()` (source `app.js:275–291`):
- * near-black product stage, multi-frame gallery, sticky purchase panel, and
- * the cream related-products close.
- */
 export default async function ProductPage({ params }: ProductPageProps) {
   const { productHandle } = await params;
   const product = await storefront.getProduct(productHandle);
@@ -116,14 +131,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </Suspense>
 
       {related.length > 0 ? (
-        <section className="section shell">
-          <div className="section-head">
+        <section className="mx-auto w-full max-w-page px-page-gutter py-section-block">
+          <div className="mb-11 flex items-end justify-between gap-7.5 max-sm:flex-col max-sm:items-start">
             <div>
-              <p className="eyebrow">Works well with</p>
-              <h2 className="h2">Complete the field system.</h2>
+              <p className={eyebrow()}>Works well with</p>
+              <h2 className={sectionHeading()}>Complete the field system.</h2>
             </div>
           </div>
-          <div className="product-grid">
+          <div className="grid grid-cols-4 gap-4.5 max-lg:grid-cols-2 max-sm:grid-cols-2 max-sm:gap-2.5">
             {related.map((entry) => (
               <ProductCard key={entry.handle} product={entry} />
             ))}

@@ -1,5 +1,12 @@
 # Work log
 
+## 2026-08-20 — Production polish Phase 1 Production closeout
+
+- PR [#60](https://github.com/Weaverse/forward/pull/60) merged the exact reviewed head `60c295f7e4e28a72eeff24f04418bcb0b2e606c2` into `main@8fa94b727cc7977d75dc2400bcddf8b2d492e83f`. Local `main` and `origin/main` are synchronized and clean at the merge SHA.
+- Git-triggered Vercel deployment `dpl_8PBjAYooDCyicPEW9oY1Sk4R2FBY` is `READY`, `target=production`, carries the exact merge SHA, and owns https://forward-sandy.vercel.app. The prior Production deployment was replaced only after the reviewed Preview and merge gates passed.
+- Production reran the exact hosted regression probes: true mobile `390x844`; short desktop `1280x400`; canonical four-child Shop menu; exact Claystone/Charcoal L add twice to quantity two; mini-cart lifecycle/focus dismissal; 12px PDP option values; sale/sold-out/gallery/query behavior; route/asset smoke; and clean browser console. All passed. No checkout/payment was performed.
+- Phase 1 is closed. The next local continuation is the issue #61 Tailwind architecture migration at [`../2026-08-20--tailwind-presentation-migration/README.md`](../2026-08-20--tailwind-presentation-migration/README.md): behavior tests first, effective tokens second, then shell and full route migration while preserving the accepted Production contract.
+
 ## 2026-08-18 — Production polish Phase 1 local acceptance
 
 - Implemented the approved shell and commerce corrections: shared Phosphor SVG

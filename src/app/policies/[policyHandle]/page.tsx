@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
+import { cta, eyebrow } from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
 import { formatDate } from "@/lib/storefront/format";
 
@@ -28,11 +29,6 @@ export async function generateMetadata({
   return { title: policy.title, description: policy.summary };
 }
 
-/**
- * Policy — port of the canonical `policyPage()` (source `app.js:324`): dark
- * page hero, the route-note aside, the editorial article measure with its
- * heading rhythm, and the closing call to action.
- */
 export default async function PolicyPage({ params }: PolicyPageProps) {
   const { policyHandle } = await params;
   const [policy, allPolicies] = await Promise.all([
@@ -46,20 +42,24 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
 
   return (
     <>
-      <header className="page-hero">
-        <div className="page-hero-inner">
+      <header className="flex min-h-140 items-end border-border-subtle border-b bg-ink px-page-gutter pt-25 pb-18.75 text-text-inverse max-md:min-h-130 max-sm:min-h-107.5 max-sm:pt-17.5">
+        <div className="mx-auto grid w-full grid-cols-page-header items-end gap-12.5 max-md:grid-cols-1 max-md:gap-7">
           <div>
-            <p className="eyebrow">Support / Policy</p>
-            <h1 className="h1">{policy.title}</h1>
+            <p className={eyebrow({ tone: "signal" })}>Support / Policy</p>
+            <h1 className="m-0 max-w-feature text-balance font-heading text-display leading-display font-medium tracking-heading max-sm:text-index-display-mobile">
+              {policy.title}
+            </h1>
           </div>
-          <p className="lede">{policy.summary}</p>
+          <p className="m-0 max-w-lede justify-self-end text-lede leading-lede text-text-dark-lede max-md:max-w-full max-md:justify-self-start">
+            {policy.summary}
+          </p>
         </div>
       </header>
 
       <article>
-        <div className="shell article-body">
-          <aside className="article-aside">
-            <p className="eyebrow">Store policies</p>
+        <div className="mx-auto grid w-full max-w-page grid-cols-article-body justify-center gap-article-gap px-page-gutter py-section-block-short max-md:grid-cols-1">
+          <aside className="text-caption text-text-muted max-md:border-border-subtle max-md:border-b max-md:pb-5">
+            <p className={eyebrow()}>Store policies</p>
             <nav aria-label="Store policies">
               {allPolicies.map((entry) => (
                 <p key={entry.handle}>
@@ -75,20 +75,29 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
               ))}
             </nav>
             {policy.updatedAt ? (
-              <p className="meta">Updated {formatDate(policy.updatedAt)}</p>
+              <p className="font-field-meta text-caption font-medium text-text-muted tracking-field-meta uppercase">
+                Updated {formatDate(policy.updatedAt)}
+              </p>
             ) : null}
           </aside>
-          <div className="article-content">
-            <p className="lede">{policy.summary}</p>
+          <div className="font-heading text-article-subheading leading-rich-copy">
+            <p className="mb-prose-block max-w-lede text-lede leading-lede text-text-muted">
+              {policy.summary}
+            </p>
             {policy.sections.map((section) => (
               <section key={section.heading}>
-                <h2>{section.heading}</h2>
+                <h2 className="mt-prose-section mb-prose-subhead text-balance text-article-heading leading-copy-tight font-medium">
+                  {section.heading}
+                </h2>
                 {section.paragraphs.map((paragraph) => {
                   const paragraphKey = paragraph
                     .map((run) => `${run.href ?? "text"}:${run.text}`)
                     .join("|");
                   return (
-                    <p key={`${section.heading}:${paragraphKey}`}>
+                    <p
+                      key={`${section.heading}:${paragraphKey}`}
+                      className="mb-prose-block"
+                    >
                       {paragraph.map((run) => {
                         const runKey = `${run.href ?? "text"}:${run.text}`;
                         return run.href?.startsWith("/") ? (
@@ -108,12 +117,12 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
                 })}
               </section>
             ))}
-            <p className="muted">
+            <p className="mb-prose-block text-text-muted">
               Questions about this policy? Visit the{" "}
               <Link href="/pages/contact">contact page</Link>.
             </p>
             {accountEnabled ? (
-              <Link className="button button-primary" href="/account">
+              <Link className={cta()} href="/account">
                 Open the field account
               </Link>
             ) : null}

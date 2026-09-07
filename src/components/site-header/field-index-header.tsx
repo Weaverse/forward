@@ -3,26 +3,36 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
-import { CartCount } from "@/components/cart-count";
-import { CountryControl } from "@/components/country-control";
 import { Icon, type IconName } from "@/components/icon";
-import { MiniCart } from "@/components/mini-cart";
 import { Wordmark } from "@/components/wordmark";
+import { cn } from "@/lib/cn";
 import {
   createHeaderNavigationHref,
   createFieldIndexCollections,
   currentCollectionIndex,
   type FieldIndexCollection,
   isActive,
-} from "@/lib/header-navigation";
+} from "./header-navigation";
+import { CartCount } from "./cart-count";
+import { CountryControl } from "./country-control";
+import { MiniCart } from "./mini-cart";
 import type { NavItem } from "@/lib/storefront/types";
 
 /** Utility destinations Shopify owns; Forward only supplies their glyphs. */
+/** The row highlight the Field Index shares between its two nav layers. */
+const INDEX_ROW_TRANSITION =
+  "[transition:background-color_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),padding-inline_220ms_var(--ease-standard)]";
+
 const UTILITY_ICONS: Readonly<Record<string, IconName>> = {
   "/account": "user",
 };
+
+const PRIMARY_NAV_ITEM_CLASS =
+  "group inline-flex min-w-30.5 items-center justify-center gap-2.5 border-0 border-s border-border-subtle px-5 font-body text-caption font-ui-strong tracking-link uppercase hover:bg-ink hover:text-text-inverse aria-[current=page]:bg-ink aria-[current=page]:text-text-inverse last:border-e max-xl:min-w-25.5 max-xl:px-3.5";
+const HEADER_CONTROL_CLASS =
+  "min-h-touch min-w-touch items-center justify-center gap-2 bg-transparent font-body text-caption font-ui tracking-link uppercase hover:bg-surface-subtle";
 
 export interface FieldIndexHeaderProps {
   announcement: string;
@@ -67,6 +77,23 @@ function activeCollectionIndex(
   return Math.max(currentCollectionIndex(pathname, collections), 0);
 }
 
+/**
+ * The Shop mega panel is an enhancement on merchant-owned navigation: drifted
+ * or missing data yields no panel instead of a failed render.
+ */
+function fieldIndexCollections(
+  shopItem: NavItem | undefined,
+): readonly FieldIndexCollection[] | null {
+  if (shopItem === undefined) {
+    return null;
+  }
+  try {
+    return createFieldIndexCollections(shopItem);
+  } catch {
+    return null;
+  }
+}
+
 function FieldIndexPanel({
   activeIndex,
   collections,
@@ -77,55 +104,76 @@ function FieldIndexPanel({
   queryString,
 }: FieldIndexPanelProps) {
   const active = collections[activeIndex] ?? collections[0];
+  /* The panel is an enhancement on merchant-owned navigation: with nothing to
+   * show it degrades to no panel instead of taking down the root layout. */
   if (active === undefined) {
-    throw new Error("Header 01 requires at least one Shop collection.");
+    return null;
   }
   const currentIndex = currentCollectionIndex(pathname, collections);
 
   return (
     <section
-      className="field-index-panel"
+      className="absolute inset-x-0 top-full -z-1 animate-shell-panel border-ink border-b bg-canvas shadow-panel motion-reduce:animate-none max-lg:hidden"
       id={id}
       aria-label="Shop field index"
     >
-      <div className="field-index-kicker">
+      <div className="flex min-h-10.5 items-center justify-between border-border-subtle border-b px-page-gutter font-body text-micro text-text-muted tracking-field-meta uppercase">
         <span>Shop / Field index</span>
         <span>{String(collections.length).padStart(2, "0")} systems</span>
       </div>
-      <div className="field-index-grid">
-        <nav className="field-index-list" aria-label="Shop collections">
+      <div className="grid min-h-92 grid-cols-[minmax(0,1.18fr)_minmax(360px,0.82fr)]">
+        <nav
+          className="grid grid-rows-[repeat(3,1fr)]"
+          aria-label="Shop collections"
+        >
           {collections.map((collection, index) => (
             <Link
               key={collection.id}
               href={createHeaderNavigationHref(collection.href, queryString)}
+              className={cn(
+                "group grid grid-cols-[52px_minmax(0,1fr)_40px] items-center gap-4.5 border-border-subtle border-b px-page-gutter py-5",
+                INDEX_ROW_TRANSITION,
+                "last:border-b-0 hover:bg-ink hover:ps-field-index-indent hover:text-text-inverse focus-visible:bg-ink focus-visible:ps-field-index-indent focus-visible:text-text-inverse data-[active=true]:bg-ink data-[active=true]:ps-field-index-indent data-[active=true]:text-text-inverse motion-reduce:transition-none",
+              )}
               aria-current={currentIndex === index ? "page" : undefined}
               data-active={activeIndex === index ? "true" : undefined}
               onFocus={() => onSelect(index)}
               onMouseEnter={() => onSelect(index)}
               onClick={onClose}
             >
-              <span className="field-index-number">{collection.index}</span>
-              <span className="field-index-copy">
-                <strong>{collection.label}</strong>
-                <small>{collection.description}</small>
+              <span className="font-body text-field-meta">
+                {collection.index}
               </span>
-              <span className="field-index-arrow" aria-hidden="true">
+              <span className="grid grid-cols-[minmax(180px,0.55fr)_minmax(220px,1fr)] items-baseline gap-6.5 max-xl:grid-cols-1 max-xl:gap-1.25">
+                <strong className="font-heading text-field-index-title font-title tracking-heading">
+                  {collection.label}
+                </strong>
+                <small className="max-w-85 text-ui text-text-muted leading-field-index-copy group-hover:text-text-dark-muted group-data-[active=true]:text-text-dark-muted">
+                  {collection.description}
+                </small>
+              </span>
+              <span className="font-body text-copy" aria-hidden="true">
                 <Icon name="arrow-up-right" size={16} />
               </span>
             </Link>
           ))}
         </nav>
-        <figure className="field-index-visual">
+        <figure className="relative min-h-92 overflow-hidden bg-ink after:absolute after:inset-0 after:bg-field-index-overlay after:content-['']">
           <Image
             key={active.id}
             src={active.image.src}
             alt={active.image.alt}
             fill
+            className="animate-shell-image object-cover motion-reduce:animate-none"
             sizes="42vw"
           />
-          <figcaption>
-            <span>{active.coordinate}</span>
-            <p className="field-index-note">{active.fieldNote}</p>
+          <figcaption className="absolute right-7 bottom-6 left-7 z-1 flex items-end justify-between gap-6 text-text-inverse">
+            <span className="font-body text-micro tracking-label">
+              {active.coordinate}
+            </span>
+            <p className="m-0 max-w-65 text-right font-heading text-card-title leading-copy">
+              {active.fieldNote}
+            </p>
           </figcaption>
         </figure>
       </div>
@@ -142,15 +190,16 @@ function AboutIndexPanel({
 }: AboutIndexPanelProps) {
   return (
     <section
-      className="field-index-panel field-about-panel"
+      className="absolute inset-x-0 top-full -z-1 animate-shell-panel border-ink border-b bg-canvas shadow-panel motion-reduce:animate-none max-lg:hidden"
       id={id}
       aria-label="About Forward pages"
     >
-      <div className="field-index-kicker">
+      <div className="flex min-h-10.5 items-center justify-between border-border-subtle border-b px-page-gutter font-body text-micro text-text-muted tracking-field-meta uppercase">
         <span>About / Field manual</span>
-        <span className="field-about-kicker-links">
+        <span className="inline-flex gap-4.5">
           <Link
             href={createHeaderNavigationHref(item.href, queryString)}
+            className="text-ink"
             aria-current={isActive(pathname, item.href) ? "page" : undefined}
             onClick={onClose}
           >
@@ -159,17 +208,32 @@ function AboutIndexPanel({
           {String(item.children?.length ?? 0).padStart(2, "0")} pages
         </span>
       </div>
-      <nav className="field-about-grid" aria-label="About Forward">
+      <nav
+        className="col-span-full grid grid-cols-3"
+        aria-label="About Forward"
+      >
         {item.children?.map((child, index) => (
           <Link
             key={child.href}
             href={createHeaderNavigationHref(child.href, queryString)}
+            className={cn(
+              "grid min-h-33 grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-4 border-border-subtle border-r border-b px-page-gutter py-6",
+              INDEX_ROW_TRANSITION,
+              "hover:bg-ink hover:ps-field-index-indent hover:text-text-inverse focus-visible:bg-ink focus-visible:ps-field-index-indent focus-visible:text-text-inverse aria-[current=page]:bg-ink aria-[current=page]:ps-field-index-indent aria-[current=page]:text-text-inverse [&:nth-child(3n)]:border-r-0 [&:nth-last-child(-n+3)]:border-b-0",
+            )}
             aria-current={isActive(pathname, child.href) ? "page" : undefined}
             onClick={onClose}
           >
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            <strong>{child.label}</strong>
-            <i aria-hidden="true">
+            <span className="font-body text-micro text-text-muted">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <strong className="font-heading text-about-index-title font-title tracking-about-index-title">
+              {child.label}
+            </strong>
+            <i
+              className="font-body text-micro text-text-muted not-italic"
+              aria-hidden="true"
+            >
               <Icon name="arrow-up-right" size={13} />
             </i>
           </Link>
@@ -194,8 +258,8 @@ function MobileFieldIndex({
 }: MobileFieldIndexProps) {
   const currentIndex = currentCollectionIndex(pathname, collections);
   return (
-    <div className="field-mobile-index">
-      <div className="field-mobile-section-label">
+    <div>
+      <div className="flex min-h-12 items-center justify-between border-white/22 border-b font-body text-micro text-text-dark-muted tracking-field-meta uppercase">
         <span>Shop / Field index</span>
         <span>{String(collections.length).padStart(2, "0")} systems</span>
       </div>
@@ -204,16 +268,23 @@ function MobileFieldIndex({
           <Link
             key={collection.id}
             href={createHeaderNavigationHref(collection.href, queryString)}
+            className="grid min-h-26 grid-cols-[38px_1fr] content-center gap-x-3 gap-y-1.5 border-white/22 border-b max-xs:min-h-24"
             aria-current={currentIndex === index ? "page" : undefined}
             onClick={onNavigate}
           >
-            <span>{collection.index}</span>
-            <strong>{collection.label}</strong>
-            <small>{collection.description}</small>
+            <span className="row-span-2 font-body text-micro text-text-dark-muted">
+              {collection.index}
+            </span>
+            <strong className="font-heading text-mobile-index-title font-title">
+              {collection.label}
+            </strong>
+            <small className="text-field-meta text-text-dark-muted leading-mobile-index">
+              {collection.description}
+            </small>
           </Link>
         ))}
       </nav>
-      <p className="field-mobile-note">
+      <p className="mt-5.5 mb-0 font-body text-nano text-text-dark-muted tracking-label uppercase">
         Designed for weather, miles, and repeat use.
       </p>
     </div>
@@ -228,27 +299,17 @@ export function FieldIndexHeader({
 }: FieldIndexHeaderProps) {
   const pathname = usePathname();
   const shopItem = primary.find((item) => item.href === "/shop");
-  if (shopItem === undefined) {
-    throw new Error("Header 01 requires a Shop navigation item.");
-  }
   const aboutItem = primary.find(
     (item) => item.href === "/pages/about-forward",
   );
-  if (aboutItem?.children === undefined || aboutItem.children.length === 0) {
-    throw new Error(
-      "Header 01 requires the canonical About navigation branch.",
-    );
-  }
-  const collections = useMemo(
-    () => createFieldIndexCollections(shopItem),
-    [shopItem],
-  );
+  const collections = fieldIndexCollections(shopItem);
+  const aboutHasPanel = (aboutItem?.children?.length ?? 0) > 0;
   const [desktopOpen, setDesktopOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountSignedIn, setAccountSignedIn] = useState(false);
   const [activeIndex, setActiveIndex] = useState(() =>
-    activeCollectionIndex(pathname, collections),
+    activeCollectionIndex(pathname, collections ?? []),
   );
   const rootRef = useRef<HTMLDivElement>(null);
   const desktopTriggerRef = useRef<HTMLButtonElement>(null);
@@ -267,9 +328,12 @@ export function FieldIndexHeader({
     (item) => item.href !== "/shop" && item.href !== "/search",
   );
   const utilityLinks = utility.filter((item) => item.href !== "/cart");
+  const accountAvailable = utilityLinks.some(
+    (item) => item.href === "/account",
+  );
   const mobileLinks = [
     ...primary
-      .filter((item) => item.href !== "/shop")
+      .filter((item) => item.href !== "/shop" || collections === null)
       .flatMap((item) => [
         { item, child: false },
         ...(item.children ?? []).map((child) => ({ item: child, child: true })),
@@ -278,6 +342,10 @@ export function FieldIndexHeader({
   ];
 
   useEffect(() => {
+    if (!accountAvailable) {
+      setAccountSignedIn(false);
+      return;
+    }
     const controller = new AbortController();
     fetch("/account/status", {
       cache: "no-store",
@@ -296,7 +364,7 @@ export function FieldIndexHeader({
       })
       .catch(() => undefined);
     return () => controller.abort();
-  }, []);
+  }, [accountAvailable]);
 
   useEffect(() => {
     if (mobileOpenRef.current) {
@@ -306,8 +374,10 @@ export function FieldIndexHeader({
     setDesktopOpen(false);
     setAboutOpen(false);
     setMobileOpen(false);
-    setActiveIndex(activeCollectionIndex(pathname, collections));
-  }, [pathname, collections]);
+    setActiveIndex(
+      activeCollectionIndex(pathname, fieldIndexCollections(shopItem) ?? []),
+    );
+  }, [pathname, shopItem]);
 
   useEffect(() => {
     if (!desktopOpen && !aboutOpen) {
@@ -360,9 +430,7 @@ export function FieldIndexHeader({
         panel.querySelectorAll<HTMLElement>("a[href], button:not([disabled])"),
       );
     const backgroundElements = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        ".skip-link, .announcement, .field-header, #main-content, footer",
-      ),
+      document.querySelectorAll<HTMLElement>("[data-shell-background]"),
     );
     const previousInertStates = backgroundElements.map((element) => ({
       element,
@@ -399,10 +467,10 @@ export function FieldIndexHeader({
     }
 
     document.addEventListener("keydown", handleKeyDown);
-    document.body.classList.add("locked");
+    document.body.classList.add("overflow-hidden");
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      document.body.classList.remove("locked");
+      document.body.classList.remove("overflow-hidden");
       for (const { element, inert } of previousInertStates) {
         element.inert = inert;
       }
@@ -445,41 +513,72 @@ export function FieldIndexHeader({
   }
 
   return (
-    <div ref={rootRef} className="field-header-root">
-      <aside className="announcement" aria-label="Store announcement">
-        <span>Forward field report / 01</span>
+    <div ref={rootRef} className="contents">
+      <aside
+        className="flex min-h-announcement items-center justify-between bg-signal px-page-gutter py-1.5 text-center font-body text-micro font-ui text-ink tracking-announcement uppercase max-md:justify-center"
+        data-shell-background
+        aria-label="Store announcement"
+      >
+        <span className="max-md:hidden">Forward field report / 01</span>
         <span>{announcement}</span>
         <CountryControl />
       </aside>
-      <header className="site-header field-header">
+      <header
+        className="sticky top-0 z-80 isolate grid h-header grid-cols-[minmax(155px,1fr)_auto_minmax(230px,1fr)] items-center border-ink border-b bg-canvas/96 px-page-gutter max-lg:grid-cols-lead-trailing max-md:h-header-compact"
+        data-shell-background
+      >
         <Wordmark href={createHeaderNavigationHref("/", queryString)} />
-        <nav className="field-header-primary" aria-label="Primary navigation">
-          <button
-            ref={desktopTriggerRef}
-            type="button"
-            className={isActive(pathname, shopItem.href) ? "active" : undefined}
-            aria-current={
-              isActive(pathname, shopItem.href) ? "page" : undefined
-            }
-            aria-expanded={desktopOpen}
-            aria-controls={desktopOpen ? desktopPanelId : undefined}
-            onClick={toggleDesktop}
-          >
-            <i>01</i>
-            {shopItem.label}
-            <span className="field-header-toggle" aria-hidden="true">
-              <Icon name={desktopOpen ? "caret-up" : "caret-down"} size={12} />
-            </span>
-          </button>
+        <nav
+          className="flex self-stretch justify-center max-lg:hidden"
+          aria-label="Primary navigation"
+        >
+          {shopItem === undefined ? null : collections === null ? (
+            <Link
+              href={createHeaderNavigationHref(shopItem.href, queryString)}
+              className={PRIMARY_NAV_ITEM_CLASS}
+              aria-current={
+                isActive(pathname, shopItem.href) ? "page" : undefined
+              }
+            >
+              <i className="text-ui text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
+                01
+              </i>
+              {shopItem.label}
+            </Link>
+          ) : (
+            <button
+              ref={desktopTriggerRef}
+              type="button"
+              className={PRIMARY_NAV_ITEM_CLASS}
+              aria-current={
+                isActive(pathname, shopItem.href) ? "page" : undefined
+              }
+              aria-expanded={desktopOpen}
+              aria-controls={desktopOpen ? desktopPanelId : undefined}
+              onClick={toggleDesktop}
+            >
+              <i className="text-ui text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
+                01
+              </i>
+              {shopItem.label}
+              <span
+                className="inline-flex min-w-2.5 items-center text-label text-signal-strong"
+                aria-hidden="true"
+              >
+                <Icon
+                  name={desktopOpen ? "caret-up" : "caret-down"}
+                  size={12}
+                />
+              </span>
+            </button>
+          )}
           {primaryLinks.map((item, index) =>
-            item.href === aboutItem.href ? (
+            item === aboutItem && aboutHasPanel ? (
               <button
                 key={item.href}
                 ref={aboutTriggerRef}
                 type="button"
-                className={
-                  isBranchActive(pathname, item) ? "active" : undefined
-                }
+                className={PRIMARY_NAV_ITEM_CLASS}
                 aria-current={
                   isBranchActive(pathname, item) ? "page" : undefined
                 }
@@ -487,9 +586,14 @@ export function FieldIndexHeader({
                 aria-controls={aboutOpen ? aboutPanelId : undefined}
                 onClick={toggleAbout}
               >
-                <i>{String(index + 2).padStart(2, "0")}</i>
+                <i className="text-ui text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
+                  {String(index + 2).padStart(2, "0")}
+                </i>
                 {item.label}
-                <span className="field-header-toggle" aria-hidden="true">
+                <span
+                  className="inline-flex min-w-2.5 items-center text-label text-signal-strong"
+                  aria-hidden="true"
+                >
                   <Icon
                     name={aboutOpen ? "caret-up" : "caret-down"}
                     size={12}
@@ -500,7 +604,7 @@ export function FieldIndexHeader({
               <Link
                 key={item.href}
                 href={createHeaderNavigationHref(item.href, queryString)}
-                className={isActive(pathname, item.href) ? "active" : undefined}
+                className={PRIMARY_NAV_ITEM_CLASS}
                 aria-current={
                   isActive(pathname, item.href) ? "page" : undefined
                 }
@@ -509,23 +613,28 @@ export function FieldIndexHeader({
                   setAboutOpen(false);
                 }}
               >
-                <i>{String(index + 2).padStart(2, "0")}</i>
+                <i className="text-ui text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
+                  {String(index + 2).padStart(2, "0")}
+                </i>
                 {item.label}
               </Link>
             ),
           )}
         </nav>
-        <div className="header-actions field-header-actions">
+        <div className="relative flex items-center justify-self-end gap-3">
           {searchItem ? (
             <Link
-              className="header-link field-header-search"
+              className={cn(
+                HEADER_CONTROL_CLASS,
+                "inline-flex max-xl:hidden max-lg:inline-flex max-md:hidden",
+              )}
               href={createHeaderNavigationHref(searchItem.href, queryString)}
               aria-current={
                 isActive(pathname, searchItem.href) ? "page" : undefined
               }
             >
               <Icon name="magnifying-glass" />
-              <span className="header-link-label">Search</span>
+              <span>Search</span>
             </Link>
           ) : null}
           {utilityLinks.map((item) => {
@@ -533,42 +642,49 @@ export function FieldIndexHeader({
             return (
               <Link
                 key={item.href}
-                className="header-link account-hide"
+                className={cn(
+                  HEADER_CONTROL_CLASS,
+                  "inline-flex max-lg:hidden",
+                )}
                 href={createHeaderNavigationHref(item.href, queryString)}
                 aria-current={
                   isActive(pathname, item.href) ? "page" : undefined
                 }
               >
                 {icon === undefined ? null : <Icon name={icon} />}
-                <span className="header-link-label">
-                  {accountNavigationLabel(item, accountSignedIn)}
-                </span>
+                <span>{accountNavigationLabel(item, accountSignedIn)}</span>
               </Link>
             );
           })}
           <Link
-            className="icon-button cart-button"
+            className={cn(
+              HEADER_CONTROL_CLASS,
+              "inline-flex px-3 max-sm:px-1.5",
+            )}
             href={createHeaderNavigationHref("/cart", queryString)}
             aria-current={isActive(pathname, "/cart") ? "page" : undefined}
           >
             <Icon name="shopping-bag" />
-            <span className="cart-label">Cart</span>
+            <span className="max-md:sr-only">Cart</span>
             <CartCount />
           </Link>
           <button
             ref={mobileTriggerRef}
             type="button"
-            className="icon-button menu-button field-header-menu-trigger"
+            className={cn(
+              HEADER_CONTROL_CLASS,
+              "hidden px-2 max-lg:inline-flex",
+            )}
             aria-expanded={mobileOpen}
             aria-controls={mobileOpen ? mobilePanelId : undefined}
             onClick={openMobile}
           >
             <Icon name="list" />
-            <span className="header-link-label">Menu</span>
+            <span className="max-md:sr-only">Menu</span>
           </button>
           <MiniCart />
         </div>
-        {desktopOpen ? (
+        {desktopOpen && collections !== null ? (
           <FieldIndexPanel
             activeIndex={activeIndex}
             collections={collections}
@@ -579,7 +695,7 @@ export function FieldIndexHeader({
             queryString={queryString}
           />
         ) : null}
-        {aboutOpen ? (
+        {aboutOpen && aboutItem !== undefined && aboutHasPanel ? (
           <AboutIndexPanel
             item={aboutItem}
             id={aboutPanelId}
@@ -592,13 +708,13 @@ export function FieldIndexHeader({
       {mobileOpen ? (
         <aside
           ref={mobilePanelRef}
-          className="mobile-menu field-mobile-menu"
+          className="fixed inset-0 z-120 animate-shell-mobile overflow-auto bg-ink px-page-gutter pb-10 text-text-inverse motion-reduce:animate-none max-md:px-5"
           id={mobilePanelId}
           role="dialog"
           aria-modal="true"
           aria-label="Site menu"
         >
-          <div className="mobile-menu-head field-mobile-head">
+          <div className="sticky top-0 z-2 flex h-18 items-center justify-between gap-3.5 border-white/25 border-b bg-inherit">
             <Wordmark
               href={createHeaderNavigationHref("/", queryString)}
               variant="mobile"
@@ -606,51 +722,66 @@ export function FieldIndexHeader({
             <button
               ref={closeButtonRef}
               type="button"
-              className="icon-button"
+              className={cn(HEADER_CONTROL_CLASS, "inline-flex")}
               onClick={closeMobile}
               aria-label="Close menu"
             >
               <Icon name="x" size={20} />
             </button>
           </div>
-          <MobileFieldIndex
-            collections={collections}
-            onNavigate={closeMobile}
-            pathname={pathname}
-            queryString={queryString}
-          />
+          {collections === null ? null : (
+            <MobileFieldIndex
+              collections={collections}
+              onNavigate={closeMobile}
+              pathname={pathname}
+              queryString={queryString}
+            />
+          )}
           <nav
-            className="field-mobile-secondary"
+            className="mt-7.5 border-white/22 border-t"
             aria-label="Mobile primary navigation"
           >
             {mobileLinks.map(({ item, child }, index) => (
               <Link
-                key={item.href}
-                className={child ? "field-mobile-secondary-child" : undefined}
+                key={`${child ? "child" : "item"}:${item.href}`}
+                className={cn(
+                  "grid grid-cols-index-row items-center gap-2.5 border-white/18 border-b font-body uppercase",
+                  child
+                    ? "min-h-12 ps-8.5 text-ui text-text-dark-muted"
+                    : "min-h-15.5 text-copy-sm",
+                )}
                 href={createHeaderNavigationHref(item.href, queryString)}
                 aria-current={
                   isActive(pathname, item.href) ? "page" : undefined
                 }
                 onClick={closeMobile}
               >
-                <span>{String(index + 4).padStart(2, "0")}</span>
+                <span className="font-body text-nano text-text-dark-muted">
+                  {String(index + 4).padStart(2, "0")}
+                </span>
                 {accountNavigationLabel(item, accountSignedIn)}
-                <i aria-hidden="true">
+                <i
+                  className="font-body text-nano text-text-dark-muted not-italic"
+                  aria-hidden="true"
+                >
                   <Icon name="arrow-up-right" size={13} />
                 </i>
               </Link>
             ))}
             <Link
+              className="grid min-h-15.5 grid-cols-index-row items-center gap-2.5 border-white/18 border-b font-body text-copy-sm uppercase"
               href={createHeaderNavigationHref("/cart", queryString)}
               aria-current={isActive(pathname, "/cart") ? "page" : undefined}
               onClick={closeMobile}
             >
-              <span>{String(mobileLinks.length + 4).padStart(2, "0")}</span>
+              <span className="font-body text-nano text-text-dark-muted">
+                {String(mobileLinks.length + 4).padStart(2, "0")}
+              </span>
               Cart
               <CartCount />
             </Link>
           </nav>
-          <p className="mobile-menu-meta">
+          <p className="mt-11.25 mb-0 text-ui text-text-inverse-subtle leading-mobile-rail tracking-label uppercase">
             FOR / WARD · Field index
             <br />
             Shopify menu structure · Forward field system
