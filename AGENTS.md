@@ -5,15 +5,6 @@
 Forward is a fresh Next.js App Router storefront theme using
 `@shopify/hydrogen@preview`, powered by Weaverse.
 
-The current milestone is the issue [#61](https://github.com/Weaverse/forward/issues/61)
-**Tailwind presentation migration**
-(`.weaverse/specs/2026-08-20--tailwind-presentation-migration/README.md`).
-Production polish Phase 1 is complete on `main@8fa94b7`. Migrate in the locked
-order: behavior-level UI coverage → effective Tailwind v4 tokens → global shell
-→ complete route inventory → ownership/runtime hardening → legacy CSS removal.
-This is an architecture migration, not a visual redesign. Preserve the accepted
-Production storefront and its live Shopify contracts.
-
 ## Architecture constraints
 
 - Implement from scratch in this repository.
