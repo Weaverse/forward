@@ -109,3 +109,48 @@ describe("section loaders", () => {
     }
   });
 });
+
+describe("Studio integration surface", () => {
+  /* Every one of these is a file or export the Studio bridge needs and the
+   * storefront never touches, so nothing storefront-facing notices it going
+   * missing. They are asserted here rather than added to the route contract
+   * because that contract tracks no API routes at all — `/api/cart` is absent
+   * too — and widening it would change the `20 + 4` counts other suites pin. */
+
+  it("mounts the per-item revalidation route", async () => {
+    const source = await read("src/app/api/weaverse/revalidate/route.ts");
+
+    assert.match(
+      source,
+      /createWeaverseNextRevalidateHandler/,
+      "without this route a Studio edit shows stale loader data until a full reload",
+    );
+    assert.match(source, /export const \{ POST \}/);
+  });
+
+  it("mounts the Studio bridge script in the document body", async () => {
+    const layout = await read("src/app/layout.tsx");
+
+    assert.match(layout, /<StudioConnect \/>/);
+    const bodyIndex = layout.indexOf("<body");
+    const connectIndex = layout.indexOf("<StudioConnect />");
+    assert.ok(
+      bodyIndex !== -1 && connectIndex > bodyIndex,
+      "StudioConnect is a Client Component and must render inside <body>",
+    );
+  });
+
+  it("forwards searchParams from every composed route", async () => {
+    /* Design mode is detected from the query Studio puts on the iframe URL. A
+     * route that does not forward it silently renders published mode. */
+    for (const route of ["about", "materials", "field-testing"]) {
+      const source = await read(`src/app/${route}/page.tsx`);
+
+      assert.match(
+        source,
+        /searchParams: await props\.searchParams/,
+        `${route} does not forward searchParams, so design mode is undetectable`,
+      );
+    }
+  });
+});

@@ -636,3 +636,36 @@ defects, zero caught by automation, all found by Leo opening a page. A
 design-mode gate that asserts a real request carries `requestInfo` with `i18n`,
 `pageType`, and `handle`, one `data-wv-id` per authored section, and a mounted
 Studio script would have caught all six.
+
+## 2026-09-08 (closing the Studio blind spot) — @hta218
+
+Six Studio defects shipped today and none was caught by automation. Rather than
+build a heavyweight design-mode gate, the failures were sorted by what actually
+catches each one; five of the six turned out to be cheap.
+
+- **Extracted two pure modules from `server.ts`.** `page-payload.ts` owns
+  "does this payload have content", `request-info.ts` owns "what is this
+  route's identity". Both were previously inline in a file that imports
+  `server-only` and calls `headers()`, so neither could be tested outside Next.
+  The split is honest rather than test-driven convenience: neither piece of
+  logic needs to know anything about a request. `server.ts` dropped to 190
+  lines.
+- `tests/weaverse-request.test.ts` covers exactly the shipped defects: the
+  Builder's shared default template with a childless root (the payload that
+  rendered blank), a missing `i18n` (the crash on `i18n.language`), missing
+  `pageType`/`handle` (the `pageId` crash), and a bare pathname instead of an
+  absolute url. Plus forwarded-host resolution and repeated query values.
+- Three guards in `tests/weaverse-registry.test.ts` for the file-level gaps:
+  the revalidation route is mounted and exports `POST`, `StudioConnect` renders
+  inside `<body>`, and every composed route forwards `searchParams`.
+  Sabotage-proven — removing the route, moving the script to `<head>`, and
+  dropping one route's `searchParams` turns exactly three red.
+- **The revalidation route was deliberately not added to the route contract.**
+  That contract tracks no API routes at all — `/api/cart` is absent too — and
+  widening it would change the `20 + 4` counts other suites pin. A targeted
+  assertion is the smaller change.
+- Coverage of today's six: five now caught by `bun run check`. The sixth —
+  requesting `PAGE` where the project holds a `CUSTOM` page — can only be
+  caught against the live API, and is the case for the opt-in
+  `verify:weaverse` script that remains unwritten.
+- Gates: `370` node + `96` DOM tests, build, theme, route contract `20 + 4`.

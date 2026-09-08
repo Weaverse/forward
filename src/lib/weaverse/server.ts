@@ -27,21 +27,19 @@ import type {
 import { createWeaverseNextServerClient } from "@weaverse/next/server";
 import { headers } from "next/headers";
 import { cache } from "react";
-import { CATALOG_I18N } from "@/lib/storefront/shopify/client";
 import { readWeaverseConfig } from "./env";
+import { hasAuthoredSections } from "./page-payload";
+import {
+  buildRequestContext,
+  type SearchParams,
+  toSearchParams,
+  type WeaversePageType,
+} from "./request-info";
 import { WEAVERSE_SERVER_COMPONENTS } from "./server-components";
+
+export type { SearchParams, WeaversePageType } from "./request-info";
+
 import { themeSchema } from "./theme-schema";
-
-/** Weaverse page roles this theme composes. See the contract in the spec. */
-export type WeaversePageType =
-  | "INDEX"
-  | "PRODUCT"
-  | "COLLECTION"
-  | "ARTICLE"
-  | "PAGE"
-  | "CUSTOM";
-
-export type SearchParams = Record<string, string | string[] | undefined>;
 
 export interface LoadWeaversePageOptions {
   type: WeaversePageType;
@@ -58,18 +56,6 @@ export interface LoadWeaversePageOptions {
   searchParams?: SearchParams;
 }
 
-function toSearchParams(input: SearchParams | undefined): URLSearchParams {
-  const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(input ?? {})) {
-    if (Array.isArray(value)) {
-      for (const entry of value) params.append(key, entry);
-    } else if (value !== undefined) {
-      params.set(key, value);
-    }
-  }
-  return params;
-}
-
 /**
  * Builds the server client, or `null` when Weaverse is not configured.
  *
@@ -77,20 +63,6 @@ function toSearchParams(input: SearchParams | undefined): URLSearchParams {
  * `readWeaverseConfig`, never `process.env` — see the note in `./env.ts` for
  * why that distinction is load-bearing.
  */
-/**
- * The market identity every Weaverse request carries.
- *
- * Studio reads `i18n.language` when it binds its runtime; leaving `i18n`
- * undefined crashes the bridge rather than degrading it. Markets are a
- * deferred slice, so this mirrors the one market the catalog client already
- * queries instead of inventing a second source of truth.
- */
-const WEAVERSE_I18N = {
-  country: CATALOG_I18N.country,
-  language: CATALOG_I18N.language,
-  locale: `${CATALOG_I18N.language.toLowerCase()}-${CATALOG_I18N.country.toLowerCase()}`,
-} as const;
-
 async function createServerClient(
   pathname: string,
   searchParams: SearchParams | undefined,
@@ -102,14 +74,6 @@ async function createServerClient(
   }
 
   const headerList = await headers();
-  /* Prefer a full URL built from the real request host: Studio matches the
-   * page it is previewing by URL, and a bare pathname resolves against
-   * `http://localhost`, which never matches a deployed preview. */
-  const search = toSearchParams(searchParams);
-  const host = headerList.get("x-forwarded-host") ?? headerList.get("host");
-  const proto = headerList.get("x-forwarded-proto") ?? "http";
-  const origin = host === null ? "" : `${proto}://${host}`;
-  const url = `${origin}${pathname}${search.size > 0 ? `?${search}` : ""}`;
 
   return createWeaverseNextServerClient({
     components: WEAVERSE_SERVER_COMPONENTS,
@@ -119,35 +83,12 @@ async function createServerClient(
     ...(config.weaverseHost === undefined
       ? {}
       : { weaverseHost: config.weaverseHost }),
-    requestContext: {
+    requestContext: buildRequestContext({
       headers: new Headers(Object.fromEntries(headerList.entries())),
-      i18n: WEAVERSE_I18N,
+      page,
       pathname,
-      searchParams: search,
-      url,
-      ...(page === undefined
-        ? {}
-        : {
-            pageType: page.type,
-            ...(page.handle === undefined ? {} : { handle: page.handle }),
-          }),
-    },
-  });
-}
-
-/**
- * `true` when a page carries at least one authored section.
- *
- * The root item always exists; what makes a page real is a child under it.
- */
-function hasAuthoredSections(page: WeaverseNextLoaderData): boolean {
-  const items = page.page?.items;
-  if (!Array.isArray(items) || items.length === 0) {
-    return false;
-  }
-  return items.some((item) => {
-    const children = (item as { children?: unknown }).children;
-    return Array.isArray(children) && children.length > 0;
+      searchParams,
+    }),
   });
 }
 
