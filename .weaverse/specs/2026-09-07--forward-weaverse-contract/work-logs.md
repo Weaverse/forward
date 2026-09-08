@@ -357,3 +357,57 @@
   one per registry entry.
 - Four route files moved to default imports. Gates stayed green: `bun run
   check` at `350` node + `66` DOM, 42-page build, route contract `20 + 4`.
+
+## 2026-09-08 (composition slice) — @hta218
+
+- **Resource pickers replace handle textareas.** Builder stores `{ id, handle }`
+  only; per-section server loaders resolve those handles through the
+  `storefront` data source. The POC queries `commerce.storefront` GraphQL
+  directly, which Forward deliberately does not copy: that would open a second
+  Shopify seam, return raw shapes, and break static mode. `pickerHandle`
+  tolerates a cleared or malformed value, and an unresolvable handle degrades to
+  the section's empty state rather than a failed page.
+- **Scope narrowed from the paper plan, and the reason is measurable.** Only the
+  ten editorial sections are composable. Home's seven stay Server Components:
+  composing them would ship their JavaScript to the browser on the
+  highest-traffic page and buy nothing a shopper can see. Their schemas and
+  default exports were reverted rather than left registered-but-unused, and
+  `scripts/weaverse-seed/index.json` was deleted for the same reason — seeding a
+  page nothing renders is a lie in the data.
+- **Two registries, forced by Next rather than chosen.** The renderer is a
+  Client Component and cannot import Server Components, so `components.ts` is
+  the client registry and `server-components.ts` carries schemas plus loaders.
+  Schemas moved into their own `schema.ts` beside each component so the server
+  registry never reaches a Client Component module. `section-types.ts` derives
+  the type list from schemas alone, with no server or client dependency, so the
+  seed script can import it outside Next.
+- **`@weaverse/next@0.1.0-alpha.16` cannot render server-side.** Its renderer
+  holds context and subscribes to a store, its README documents only the
+  `"use client"` boundary, and `provider.d.ts` states the payload is "not
+  serializable across a Server Component → Client Component boundary". The
+  POC's `() => null` stub is the shape of that constraint, not a shortcut.
+  Revisit this whole split if the SDK gains server rendering.
+- **Composition makes a route dynamic**, because `headers()` opts a route out of
+  static generation. Verified both directions: with a project configured
+  `/about`, `/materials`, `/field-testing` build as `ƒ`; with the project blank
+  they build as `○` exactly as before. `readWeaverseConfig` runs before
+  `headers()`, which is what keeps the unconfigured path static.
+- **A real regression, found by the browser matrix and fixed at the cause.**
+  The first run dropped to `140 passed / 6 failed` and took 7.6 minutes, all six
+  failures on the editorial routes. Cause: `scripts/env-matrix.mts` never
+  blanked the Weaverse keys, so the "static" matrix still had a live project,
+  turned those routes dynamic, and called the Weaverse API on every request.
+  Added `WEAVERSE_KEYS` to `ALL_CREDENTIAL_KEYS`; the matrix returned to
+  `146 passed / 10 intentional skips / 0 failures` in 1.5 minutes. The matrix
+  earned its keep here — no other gate caught this.
+- `tests/weaverse-registry.test.ts` asserts the split holds: the client registry
+  never imports `server-only`, the server registry never imports a component
+  module, both sides carry the same type count, no type is declared twice, and
+  no loader reaches Shopify outside the data source. Two of its own regexes were
+  wrong on the first run and were fixed before the suite was trusted.
+- Production bundle scan: `.next/static` contains zero references to
+  `getThemeContent`, `listProducts`, `PRIVATE_STOREFRONT`, `resolveProducts`, or
+  `server-only`.
+- Gates: `bun run check` green at `354` node + `66` DOM, 42-page build, route
+  contract `20 + 4`, 35 route smokes, and the static browser matrix at
+  `146 / 10 / 0`.
