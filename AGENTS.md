@@ -8,10 +8,24 @@ Forward is a fresh Next.js App Router storefront theme using
 ## Architecture constraints
 
 - Implement from scratch in this repository.
-- Do not inspect, fork, import, copy, or emulate Pilot code, architecture, sections, or conventions.
+- Do not inspect, fork, import, copy, or emulate Pilot code, architecture,
+  sections, or conventions. Adopting a documented Weaverse platform pattern —
+  such as configuring Header and Footer through theme settings rather than
+  global sections — is a platform decision, not Pilot emulation, and does not
+  license reading Pilot source.
 - The existing static Forward POC is a visual reference only; do not copy its implementation wholesale.
 - Storefront completeness is defined by `.weaverse/specs/2026-08-05--static-demo-productionization/README.md` and the Shopify route contract.
 - Build the theme before making deployment or demo-integration decisions.
+- Routes compose named sections from `src/sections/`; they do not inline
+  section markup. A section is pure presentation: every piece of content and
+  data arrives as props, and the page owns the `storefront` reads. Sections
+  never import the data source, and a section reused by more than one route
+  takes its variations as props rather than forking into a near-copy.
+- Functional, stateful, and security-owned surfaces are not sections and stay
+  theme-owned: the PDP buy block and its `colorway`/`size` query state, the
+  collection and Shop grid behavior, Cart, and `/account/**`. Header and
+  Footer are theme-owned components configured through theme settings, never
+  Weaverse global sections.
 - `src/app/globals.css` is the only target global stylesheet: Tailwind import,
   one semantic `@theme` token set, and minimal document-level base rules only.
   Components/routes own presentation through utilities; use `cn()` for
@@ -51,8 +65,11 @@ Forward is a fresh Next.js App Router storefront theme using
 
 ## Tooling
 
-- Package manager and script runner: **Bun** (`bun.lock` is committed; there is
-  no `package-lock.json`).
+- Package manager and script runner: **Bun**, pinned by `packageManager` in
+  `package.json` (`bun.lock` is committed; there is no `package-lock.json`).
+  Match that version. An older Bun silently ignores the node suite's
+  `--path-ignore-patterns`, so DOM tests run without their preload and report
+  failures the pinned version does not have.
 - Lint + format: **Biome 2.5.7** (`biome.json`). ESLint has been removed.
 - Framework: Next.js App Router with strict TypeScript. Bun is a tooling
   decision only; the application stays Node-compatible.
@@ -61,11 +78,17 @@ Forward is a fresh Next.js App Router storefront theme using
   `.agents/skills/` guidance for Hydrogen wiring in this Next.js app.
 - Use Server Components by default; add Client Components only for real interactivity.
 - Keep route definitions and route-check fixtures centralized rather than duplicating path strings.
-- Storefront Content/Cart credentials and Customer Account setup are approved
-  for the current ordered slices under the spec's guarded Store-operation
-  protocol. Weaverse, public-token browser use, analytics, payment activation,
-  and uncontrolled customer/order data remain outside that approval. Never add
-  a `.env` file to a repository or worktree.
+- Storefront Content/Cart credentials, Customer Account setup, and the
+  Weaverse connection are approved for the current ordered slices under the
+  spec's guarded Store-operation protocol. Public-token browser use, payment
+  activation, and uncontrolled customer/order data remain outside that
+  approval. Never add a `.env` file to a repository or worktree.
+- Install only an exact registry-verified `@weaverse/next` version. The npm
+  `latest` tag is stale and must never be installed. Keep the Shopify data
+  seam and the Weaverse composition seam separate: no Shopify credential,
+  private token, or raw API payload may reach a Studio payload. Analytics
+  pageview transport and deduplication are owned by the SDK; the theme must
+  not reimplement them.
 
 ## Required verification
 
@@ -76,7 +99,7 @@ bun install --frozen-lockfile
 bun run typecheck
 bun run lint
 bun run format:check
-bun test
+bun run test
 bun run check:graphql
 bun run build
 bun run check:theme
