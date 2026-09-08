@@ -10,7 +10,13 @@
         "eyebrowLabel": "Custom page / Material library",
         "heading": "Performance begins with what a product is made from.",
         "lede": "We use a short material vocabulary, document what each element is for, and design care around extending its useful life.",
-        "imageSide": "left"
+        "imageSide": "left",
+        "image": {
+          "url": "/images/editorial/mountain-ridges.webp",
+          "altText": "Layered mountain ridges fading into evening haze",
+          "width": 1800,
+          "height": 1200
+        }
       }
     },
     {

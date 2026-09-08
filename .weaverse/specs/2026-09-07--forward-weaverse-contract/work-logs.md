@@ -484,3 +484,35 @@ so the routes take their static fallback. `bun run check` green at `354` node +
   `/materials` and `/field-testing` both return 200 with product references.
 - Live page state: `CUSTOM` pages `about`, `materials`, `field-testing`, each
   five items with four sections under the Builder's own root.
+
+## 2026-09-08 (composed pages crashed; fixed at the class, not the instance) — @hta218
+
+- Leo opened `/about` and got "An unexpected error interrupted this page":
+  `EditorialHero` read `.src` of `undefined`. Two defects, one root cause.
+- **Shape mismatch.** Builder stores an image as `{ url, altText, width,
+  height }`; the theme renders `StorefrontImage` (`{ src, alt, width,
+  height }`). The two look interchangeable and are not, so `.src` was
+  `undefined` and `next/image` threw. Added `weaverseImage()` to normalize
+  either shape, or return `null` when the value is unusable — including a
+  Builder image with no dimensions, which `next/image` also rejects.
+- **The seeded data had no image at all.** The three payloads carried copy but
+  never the `image` setting the schema declares, so even a correct shape would
+  have rendered nothing. Images added and reseeded.
+- **The root cause is broader than images.** A composed section is fed
+  merchant-editable data, and a merchant can clear any field in Studio, so
+  "every setting missing" is an ordinary state — the same fail-soft contract
+  the Header already carries. I made ten sections composable without auditing
+  their required props, which is the actual mistake; the image crash was just
+  the first symptom to surface.
+- Fixed at that level: `tests/dom/composed-sections.test.tsx` renders all
+  fourteen composed components — the ten sections and the four shared elements —
+  with no props at all, plus two cases for Builder's image shape and a
+  dimensionless image. Sabotage-proven: restoring the unnormalized read turns
+  three of them red, exactly the failure Leo hit.
+- The audit found only the two hero sections actually crashed. The list-shaped
+  sections were already safe because `parseLines`/`parseRows` reject non-strings,
+  and the three product sections already defaulted their `loaderData`. That is
+  luck rather than design, which is why the test now covers all fourteen.
+- Verified on a production build at the exact URL that failed: `/about`,
+  `/materials`, and `/field-testing` all return 200 with an editorial image and
+  no error page. Gates green at `354` node + `82` DOM.

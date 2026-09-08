@@ -4,12 +4,14 @@ import Image from "next/image";
 import { cn } from "@/lib/cn";
 import { eyebrow } from "@/lib/presentation/variants";
 import type { StorefrontImage } from "@/lib/storefront/types";
+import { weaverseImage } from "@/lib/weaverse/image";
 
 interface EditorialHeroProps {
   eyebrowLabel: string;
   heading: string;
   lede: string;
-  image: StorefrontImage;
+  /** A Builder image value, a StorefrontImage, or nothing. */
+  image?: StorefrontImage | unknown;
   /** Which column the image occupies on desktop. Defaults to `right`. */
   imageSide?: "left" | "right";
 }
@@ -26,6 +28,10 @@ function EditorialHero({
   imageSide = "right",
 }: EditorialHeroProps) {
   const imageFirst = imageSide === "left";
+  /* A merchant can clear the image in Studio, so absent is an ordinary state.
+   * The copy column still carries the page; a missing image drops to one
+   * column rather than taking the route down. */
+  const resolved = weaverseImage(image);
   return (
     <section className="mt-5.5 mr-7 ml-7 grid min-h-page-min grid-cols-split-90 bg-ink text-text-inverse max-md:mx-2.5 max-md:mt-2.5 max-md:min-h-0 max-md:grid-cols-1">
       <div
@@ -42,18 +48,20 @@ function EditorialHero({
           {lede}
         </p>
       </div>
-      <Image
-        className={cn(
-          "h-full object-cover saturate-72 max-md:h-home-media-mobile",
-          imageFirst && "order-1 max-md:order-2",
-        )}
-        src={image.src}
-        alt={image.alt}
-        width={image.width}
-        height={image.height}
-        sizes="(min-width: 820px) 55vw, 100vw"
-        priority
-      />
+      {resolved === null ? null : (
+        <Image
+          className={cn(
+            "h-full object-cover saturate-72 max-md:h-home-media-mobile",
+            imageFirst && "order-1 max-md:order-2",
+          )}
+          src={resolved.src}
+          alt={resolved.alt}
+          width={resolved.width}
+          height={resolved.height}
+          sizes="(min-width: 820px) 55vw, 100vw"
+          priority
+        />
+      )}
     </section>
   );
 }

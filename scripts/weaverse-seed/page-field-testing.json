@@ -9,7 +9,13 @@
       "data": {
         "eyebrowLabel": "Custom page / Field testing",
         "heading": "Test the system, not the claim.",
-        "lede": "Wind, rain, abrasion, repeated packing, and long movement reveal more than an isolated specification ever will."
+        "lede": "Wind, rain, abrasion, repeated packing, and long movement reveal more than an isolated specification ever will.",
+        "image": {
+          "url": "/images/editorial/hero-open-sky.webp",
+          "altText": "Climber on an open granite face under a wide pale sky",
+          "width": 2000,
+          "height": 1445
+        }
       }
     },
     {
