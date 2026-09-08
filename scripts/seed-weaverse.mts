@@ -17,8 +17,15 @@
  *
  * Usage:
  *
- *   bun run seed:weaverse            # dry run, prints the plan
- *   bun run seed:weaverse --apply    # writes to the project
+ *   bun run seed:weaverse                  # dry run, prints the plan
+ *   bun run seed:weaverse --apply          # writes the pages
+ *   bun run seed:weaverse --apply --with-theme
+ *
+ * Theme settings are skipped unless `--with-theme` is passed. Nothing in the
+ * storefront reads them yet — the Header and Footer still take their copy from
+ * the storefront data source — so writing them would put values in Studio that
+ * a merchant can edit with no visible effect. Seed them in the slice that wires
+ * them up.
  *
  * Requires `WEAVERSE_PROJECT_ID` and, for `--apply`, `WEAVERSE_API_KEY`.
  */
@@ -57,7 +64,8 @@ interface SeedTheme {
 
 interface PageItem {
   id: string;
-  type: string;
+  /** Omitted for the existing root, which must not be retyped. */
+  type?: string;
   data: Record<string, unknown>;
   children?: { id: string }[];
 }
@@ -103,9 +111,15 @@ async function readJson<T>(file: string): Promise<T> {
   }
 }
 
-/** Builds the flat item list the Content API expects, root first. */
-function buildItems(page: SeedPage): PageItem[] {
-  const rootId = itemId(page.handle, "root");
+/**
+ * Builds the flat item list the Content API expects.
+ *
+ * `rootId` must be the root the Builder already created for this page. Sending
+ * an invented root id creates a second, orphaned root: the page keeps pointing
+ * at its original one, which still has no children, so the storefront renders
+ * an empty page while the Content API shows the sections as present.
+ */
+function buildItems(page: SeedPage, rootId: string): PageItem[] {
   const sections = page.sections.map((section) => ({
     id: itemId(page.handle, section.key),
     type: section.type,
@@ -113,12 +127,7 @@ function buildItems(page: SeedPage): PageItem[] {
   }));
 
   return [
-    {
-      id: rootId,
-      type: "root",
-      data: {},
-      children: sections.map((section) => ({ id: section.id })),
-    },
+    { id: rootId, data: {}, children: sections.map(({ id }) => ({ id })) },
     ...sections,
   ];
 }
@@ -191,6 +200,36 @@ async function request(
  * been seeded has neither page. `409` on create means the page is already
  * there, which is the normal second-run case and not an error.
  */
+/** Reads the id of the root item the Builder created for this page. */
+async function fetchRootId(
+  apiKey: string,
+  projectId: string,
+  page: SeedPage,
+): Promise<string> {
+  const response = await fetch(
+    `${CONTENT_API_BASE}/projects/${projectId}/pages/${page.pageType}/${page.handle}`,
+    { headers: { authorization: `Bearer ${apiKey}` } },
+  );
+  if (!response.ok) {
+    fail(
+      `reading ${page.pageType}/${page.handle} responded ${response.status}`,
+    );
+  }
+
+  const body = (await response.json()) as {
+    rootId?: string;
+    items?: { id: string; type?: string }[];
+  };
+  const fromItems = body.items?.find(
+    (item) => item.type === "main" || item.type === "root",
+  );
+  const rootId = body.rootId ?? fromItems?.id;
+  if (typeof rootId !== "string" || rootId.length === 0) {
+    fail(`${page.pageType}/${page.handle} has no root item to attach to`);
+  }
+  return rootId;
+}
+
 async function seedPage(
   apiKey: string,
   projectId: string,
@@ -212,11 +251,12 @@ async function seedPage(
     );
   }
 
+  const rootId = await fetchRootId(apiKey, projectId, page);
   const updated = await request(
     apiKey,
     "PATCH",
     `/projects/${projectId}/pages/${page.pageType}/${page.handle}`,
-    { items: buildItems(page) },
+    { items: buildItems(page, rootId) },
   );
   if (!updated.ok) {
     fail(
@@ -230,6 +270,7 @@ async function seedPage(
 
 async function main(): Promise<void> {
   const apply = process.argv.includes("--apply");
+  const withTheme = process.argv.includes("--with-theme");
 
   const projectId = readEnv("WEAVERSE_PROJECT_ID");
   if (projectId === undefined) {
@@ -250,16 +291,17 @@ async function main(): Promise<void> {
     `seed:weaverse: ${apply ? "APPLYING to" : "dry run against"} project ${projectId}`,
   );
   for (const page of pages) {
-    const items = buildItems(page);
     console.log(
-      `  ${page.pageType}/${page.handle}: ${page.sections.length} sections (${items.length} items)`,
+      `  ${page.pageType}/${page.handle}: ${page.sections.length} sections (+1 root)`,
     );
     for (const section of page.sections) {
       console.log(`    - ${section.type}`);
     }
   }
   console.log(
-    `  theme settings: ${Object.keys(theme.theme).length} top-level keys`,
+    withTheme
+      ? `  theme settings: ${Object.keys(theme.theme).length} top-level keys`
+      : "  theme settings: skipped (nothing reads them yet; pass --with-theme to include)",
   );
 
   if (!apply) {
@@ -280,16 +322,18 @@ async function main(): Promise<void> {
     await seedPage(apiKey, projectId, page);
   }
 
-  const themeWrite = await request(
-    apiKey,
-    "PATCH",
-    `/projects/${projectId}/theme-settings`,
-    { theme: theme.theme },
-  );
-  if (!themeWrite.ok) {
-    fail(`writing theme settings responded ${themeWrite.status}`);
+  if (withTheme) {
+    const themeWrite = await request(
+      apiKey,
+      "PATCH",
+      `/projects/${projectId}/theme-settings`,
+      { theme: theme.theme },
+    );
+    if (!themeWrite.ok) {
+      fail(`writing theme settings responded ${themeWrite.status}`);
+    }
+    console.log("  wrote theme settings");
   }
-  console.log("  wrote theme settings");
   console.log("seed:weaverse: done.");
 }
 

@@ -459,3 +459,28 @@ implying all `PAGE` routes are composed.
 Verified after the fixes: `CUSTOM` lookups for all three routes return no page,
 so the routes take their static fallback. `bun run check` green at `354` node +
 `66` DOM, and with the project blank the three routes still build as `○` static.
+
+## 2026-09-08 (first real seed) — @hta218
+
+- Seeded the three `CUSTOM` pages only. Theme settings were deliberately left
+  out and now need `--with-theme`: nothing in the storefront reads them yet —
+  the Footer still takes its copy from the storefront data source — so writing
+  them would put values in Studio that a merchant can edit to no visible
+  effect. That is the same "data that lies" problem that removed `index.json`.
+- **The first apply reported success and produced empty pages.** Both requests
+  returned ok, but the public API still rendered one childless item. Cause: the
+  Builder creates a page with its own root (`main`), and the script invented a
+  deterministic `root` id of its own. The page kept pointing at the original
+  root, which had no children, so the Content API showed four sections present
+  while the storefront showed nothing. The script now reads the page's real
+  root id and attaches the sections to it.
+- That defect is only visible by comparing two sources: the Content API showed
+  six items and looked correct, the public render showed one. Exit codes agreed
+  with neither.
+- End-to-end verification on a production build: `/about` returns 77,933 bytes
+  containing the seeded heading and all four sections, and `product-strip`
+  renders Weatherline, Traverse, and Drift — so the resource picker, the server
+  loader, and the storefront data source resolve a handle to a real product.
+  `/materials` and `/field-testing` both return 200 with product references.
+- Live page state: `CUSTOM` pages `about`, `materials`, `field-testing`, each
+  five items with four sections under the Builder's own root.
