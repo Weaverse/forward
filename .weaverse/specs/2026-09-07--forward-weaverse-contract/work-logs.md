@@ -176,3 +176,35 @@
   source or a fixture, and every section is a Server Component.
 - `bun run check` passed in full: `338/338` node, `66/66` DOM, GraphQL,
   42-page build, compiled theme, route contract `20 + 4`.
+
+## 2026-09-08 (Phase 4 start) — @hta218
+
+- Leo approved Phase 3 and directed that Phase 4 continue in this spec rather
+  than a follow-up folder. The Weaverse project already exists, so the
+  environment is a fill-in rather than a creation step.
+- Added `.env.example`. `.gitignore` already carried `!.env.example`, so the
+  template is tracked while every real `.env*` stays ignored.
+- **Source note.** The request was to reference Pilot. `AGENTS.md` forbids
+  inspecting Pilot, and the 2026-09-08 clarification is explicit that adopting
+  a Weaverse platform pattern "does not license reading Pilot source". Pilot is
+  also the wrong reference here: it is a Hydrogen theme on
+  `@weaverse/hydrogen`, while Forward is Next on `@weaverse/next`. The template
+  was instead derived from Forward's own env modules
+  (`src/lib/storefront/shopify/env.ts`, `src/lib/account/env.ts`), the
+  `@weaverse/next` source in the SDK monorepo, and the Next POC — the last of
+  which this spec already names as permitted reference evidence. No Pilot
+  source was read.
+- The template documents the fail-closed semantics each group already has:
+  the Shopify catalog pair is both-or-neither, the Customer Account tuple is
+  all-or-none, and a partial group raises a sanitized error naming only keys.
+- **Security finding recorded in the template.** `@weaverse/next` builds a
+  `publicEnv` payload from `PUBLIC_STORE_DOMAIN` and
+  `PUBLIC_STOREFRONT_API_TOKEN`, so once composition is wired the public token
+  would reach the browser. `AGENTS.md` places public-token browser use outside
+  the current approval, so `PUBLIC_STOREFRONT_API_TOKEN` is documented as a
+  deliberate decision rather than a default. Both keys remain unread by the
+  storefront today; only the opt-in verification scripts consume them.
+- Key coverage checked against the real local `.env`: every key it holds is
+  present in the template. The template adds `PUBLIC_MAIN_MENU_HANDLE`, which
+  is optional and defaults to `main-menu`, and the three Weaverse keys.
+- No dependency installed and no composition wired yet.

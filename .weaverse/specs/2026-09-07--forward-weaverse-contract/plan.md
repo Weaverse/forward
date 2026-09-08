@@ -231,7 +231,9 @@ Per-item revalidation must preserve route context (builder#2737).
    the theme.
 8. **Run the full matrix** and hand Leo the manual Studio QA checklist.
 
-Steps 3 onward belong to follow-up specs, one per slice.
+Steps 3 onward stay in this spec (decided 2026-09-08) rather than moving to a
+follow-up folder, so the contract and its first connection slice share one
+history.
 
 ## Manual Studio QA checklist (for step 8)
 

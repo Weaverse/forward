@@ -246,11 +246,12 @@ The connection must preserve, unchanged:
   by the extraction where the paper inventory disagreed with the real markup.
 - **Phase 2 — extraction.** ✅ 35 sections in `src/sections/`, every route
   composing them, no dependency and no Studio composition. Pure refactor.
-- **Phase 3 — review.** Ownership, cache, and security boundaries approved by
-  Leo, plus the manual Studio QA scope.
-- **Phase 4 — first connection slice.** Only after approval, and specified in
-  its own follow-up spec: install the exact registry-verified version, add the
-  Weaverse environment, then wire the composition seam.
+- **Phase 3 — review.** ✅ Ownership, cache, and security boundaries approved
+  by Leo on 2026-09-08.
+- **Phase 4 — first connection slice.** In progress, under this spec rather
+  than a follow-up folder (decided 2026-09-08). The Weaverse project already
+  exists. Install the exact registry-verified version, add the Weaverse
+  environment, then wire the composition seam beside the storefront seam.
 
 ## Verification
 
