@@ -1,6 +1,18 @@
 import { cva } from "class-variance-authority";
 import { cn } from "@/lib/cn";
 
+/** Lede paragraph beneath a section heading. */
+export const LEDE_CLASS =
+  "mb-prose-paragraph max-w-lede text-lede leading-lede text-text-muted";
+
+/** Page-width section shell: centered, guttered, vertically blocked. */
+export const SHELL_SECTION_CLASS =
+  "mx-auto w-full max-w-page px-page-gutter py-section-block";
+
+/** Opt a section into the viewport-height media sizing used on Home. */
+export const VIEWPORT_SECTION_CLASS =
+  "md-up:[--home-viewport-pad:clamp(48px,5vw,96px)] md-up:[--home-viewport-media:calc(100svh_-_2_*_var(--home-viewport-pad))] md-up:py-(--home-viewport-pad) short-desktop:[--home-viewport-pad:clamp(8px,2svh,16px)]";
+
 /**
  * The transition every button-like control animates with. It has no scalar
  * theme namespace, so one exported constant keeps it authored once instead of

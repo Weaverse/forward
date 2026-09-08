@@ -20,7 +20,6 @@ const TOUR = [
   "/search?q=shell",
   "/journal",
   "/cart",
-  "/about",
   "/policies/privacy-policy",
 ] as const;
 

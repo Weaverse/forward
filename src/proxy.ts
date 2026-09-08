@@ -24,7 +24,6 @@ import {
   type StorefrontClient,
 } from "@shopify/hydrogen";
 import { type NextRequest, NextResponse } from "next/server";
-
 import {
   CUSTOMER_ACCOUNT_AUTHORIZE_PATH,
   CUSTOMER_ACCOUNT_LOGIN_PATH,

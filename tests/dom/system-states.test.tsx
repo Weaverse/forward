@@ -4,18 +4,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import ErrorPage from "@/app/error";
-import Loading from "@/app/loading";
 
 describe("system states", () => {
-  it("announces the loading boundary", () => {
-    render(<Loading />);
-
-    assert.equal(
-      screen.getByRole("status").textContent?.trim(),
-      "Forward field report / Loading…",
-    );
-  });
-
   it("announces an error and retries through the supplied boundary reset", async () => {
     let resets = 0;
     const reset = () => {

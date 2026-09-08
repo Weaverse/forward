@@ -3,10 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-import { ProductCard } from "@/components/product-card";
-import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
 import type { Product } from "@/lib/storefront/types";
+import { RelatedProducts } from "@/sections/related-products";
 
 import { ProductDetail, ProductDetailFallback } from "./product-detail";
 
@@ -131,19 +130,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </Suspense>
 
       {related.length > 0 ? (
-        <section className="mx-auto w-full max-w-page px-page-gutter py-section-block">
-          <div className="mb-11 flex items-end justify-between gap-7.5 max-sm:flex-col max-sm:items-start">
-            <div>
-              <p className={eyebrow()}>Works well with</p>
-              <h2 className={sectionHeading()}>Complete the field system.</h2>
-            </div>
-          </div>
-          <div className="grid grid-cols-4 gap-4.5 max-lg:grid-cols-2 max-sm:grid-cols-2 max-sm:gap-2.5">
-            {related.map((entry) => (
-              <ProductCard key={entry.handle} product={entry} />
-            ))}
-          </div>
-        </section>
+        <RelatedProducts
+          eyebrowLabel="Works well with"
+          heading="Complete the field system."
+          products={related}
+        />
       ) : null}
     </>
   );

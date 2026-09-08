@@ -1,0 +1,42 @@
+/**
+ * The props the Weaverse runtime attaches to every rendered item.
+ *
+ * Studio identifies an item by the `data-wv-*` attributes the runtime passes
+ * as props. A component that does not spread them onto its root element
+ * renders correctly and is still invisible to Studio: no outline entry, no
+ * click target, nothing to select or reorder. The page looks composed and
+ * cannot be edited.
+ *
+ * So every registered component takes `WeaverseElementProps` and spreads the
+ * rest onto its outermost DOM node. `tests/dom/composed-sections.test.tsx`
+ * asserts that, because the failure is silent in the storefront and only shows
+ * up inside Studio.
+ */
+export interface WeaverseElementProps {
+  "data-wv-id"?: string;
+  "data-wv-type"?: string;
+  id?: string;
+  className?: string;
+  /** Anything else the runtime chooses to pass through. */
+  [key: string]: unknown;
+}
+
+/**
+ * Narrows the runtime rest props to what is safe to spread onto a DOM element.
+ *
+ * The runtime's prop bag also carries authored settings, which are not DOM
+ * attributes; passing those to React logs unknown-prop warnings. Only the
+ * identity attributes and `id` are forwarded.
+ */
+export function elementAttributes(
+  props: WeaverseElementProps,
+): Record<string, string> {
+  const attributes: Record<string, string> = {};
+  for (const key of ["data-wv-id", "data-wv-type", "id"] as const) {
+    const value = props[key];
+    if (typeof value === "string" && value.length > 0) {
+      attributes[key] = value;
+    }
+  }
+  return attributes;
+}

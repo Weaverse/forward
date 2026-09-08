@@ -1,0 +1,58 @@
+{
+  "pageType": "CUSTOM",
+  "handle": "materials",
+  "description": "Theme-owned editorial route (Weaverse CUSTOM page at that exact path) /materials. Values are the ones src/app/materials/page.tsx renders today.",
+  "sections": [
+    {
+      "key": "editorial-hero",
+      "type": "editorial-hero",
+      "data": {
+        "eyebrowLabel": "Custom page / Material library",
+        "heading": "Performance begins with what a product is made from.",
+        "lede": "We use a short material vocabulary, document what each element is for, and design care around extending its useful life.",
+        "imageSide": "left",
+        "image": {
+          "url": "/images/editorial/mountain-ridges.webp",
+          "altText": "Layered mountain ridges fading into evening haze",
+          "width": 1800,
+          "height": 1200
+        }
+      }
+    },
+    {
+      "key": "principle-grid",
+      "type": "principle-grid",
+      "data": {
+        "principles": "01 | Protect without excess | Shell fabrics and insulation are tuned around weather protection, movement, and packability\u2014not maximum numbers in isolation.\n02 | Carry without distraction | Foams, webbing, and hardware are selected to stabilize a load while keeping adjustment and repair straightforward.\n03 | Grip with feedback | Footwear compounds balance traction, ground feel, and controlled wear across mixed trail and rock."
+      }
+    },
+    {
+      "key": "product-tiles",
+      "type": "product-tiles",
+      "data": {
+        "products": [
+          {
+            "handle": "weatherline-shell"
+          },
+          {
+            "handle": "talus-trail-shoe"
+          },
+          {
+            "handle": "approach-18-day-pack"
+          }
+        ]
+      }
+    },
+    {
+      "key": "editorial-callout",
+      "type": "editorial-callout",
+      "data": {
+        "eyebrowLabel": "Care + repair",
+        "heading": "Maintenance is part of performance.",
+        "body": "Clean only when needed, restore water repellency before replacing a shell, and send structural damage to the repair desk.",
+        "ctaLabel": "Repair programme",
+        "ctaHref": "/pages/field-repair"
+      }
+    }
+  ]
+}

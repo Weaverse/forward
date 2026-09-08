@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
-import { ProductCard } from "@/components/product-card";
-import {
-  cta,
-  emptyState,
-  eyebrow,
-  sectionHeading,
-} from "@/lib/presentation/variants";
+import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
+import { SearchEmptyState } from "@/sections/search-empty-state";
+import { SearchResults } from "@/sections/search-results";
 
 export const metadata: Metadata = {
   title: "Search",
@@ -59,58 +54,24 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       </form>
 
       {!hasQuery ? (
-        <section className={emptyState()}>
-          <div className="max-w-form">
-            <p className={eyebrow()}>Start here</p>
-            <h2 className={sectionHeading({ size: "subsectionSpaced" })}>
-              Search by product, activity, or material.
-            </h2>
-            <p className="text-text-muted">
-              Try trail, alpine, shell, pack, camp, or charcoal.
-            </p>
-            <Link className={cta()} href="/shop">
-              Browse all gear
-            </Link>
-          </div>
-        </section>
+        <SearchEmptyState
+          eyebrowLabel="Start here"
+          heading="Search by product, activity, or material."
+          body="Try trail, alpine, shell, pack, camp, or charcoal."
+          ctaLabel="Browse all gear"
+          ctaHref="/shop"
+        />
       ) : results.length > 0 ? (
-        <section aria-label="Search results">
-          <div className="mb-7.5 flex justify-between gap-5">
-            <h2 className={sectionHeading({ size: "subsection" })}>
-              Results for “{query}”
-            </h2>
-            <span
-              className="font-field-meta text-caption font-medium text-text-muted tracking-field-meta uppercase"
-              aria-live="polite"
-            >
-              {results.length} found
-            </span>
-          </div>
-          <div className="grid grid-cols-4 gap-4.5 max-lg:grid-cols-2 max-sm:grid-cols-2 max-sm:gap-2.5">
-            {results.map((product, index) => (
-              <ProductCard
-                key={product.handle}
-                product={product}
-                priority={index < 2}
-              />
-            ))}
-          </div>
-        </section>
+        <SearchResults query={query} products={results} />
       ) : (
-        <section className={emptyState()}>
-          <div className="max-w-form">
-            <p className={eyebrow()}>No exact match</p>
-            <h2 className={sectionHeading({ size: "subsectionSpaced" })}>
-              Nothing turned up for “{query}”.
-            </h2>
-            <p className="text-text-muted" aria-live="polite">
-              0 found. Try a broader term, or explore the full field system.
-            </p>
-            <Link className={cta()} href="/shop">
-              View all gear
-            </Link>
-          </div>
-        </section>
+        <SearchEmptyState
+          eyebrowLabel="No exact match"
+          heading={<>Nothing turned up for “{query}”.</>}
+          body="0 found. Try a broader term, or explore the full field system."
+          ctaLabel="View all gear"
+          ctaHref="/shop"
+          announce
+        />
       )}
     </div>
   );

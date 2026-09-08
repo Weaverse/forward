@@ -1,20 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { ProductCard } from "@/components/product-card";
-import { cn } from "@/lib/cn";
-import {
-  cta,
-  emptyState,
-  eyebrow,
-  sectionHeading,
-} from "@/lib/presentation/variants";
+import type { FilterGroup } from "@/components/filter-sidebar";
+import { FilterSidebar } from "@/components/filter-sidebar";
 import { storefront } from "@/lib/storefront/data-source";
 import type {
   ProductCategory,
   ProductListFilter,
   ProductSort,
 } from "@/lib/storefront/types";
+import { IndexHeader } from "@/sections/index-header";
+import { ProductResults } from "@/sections/product-results";
 
 export const metadata: Metadata = {
   title: "Shop",
@@ -68,64 +64,6 @@ function shopHref(
   }
   const query = params.toString();
   return query.length > 0 ? `/shop?${query}` : "/shop";
-}
-
-interface FilterLink {
-  key: string;
-  label: string;
-  href: string;
-  selected: boolean;
-}
-
-interface FilterGroup {
-  heading: string;
-  links: readonly FilterLink[];
-}
-
-/** Each filter row links to validated query state without requiring JavaScript. */
-function FilterSidebar({
-  groups,
-  idPrefix,
-}: {
-  groups: readonly FilterGroup[];
-  idPrefix: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "border-border-subtle border-t",
-        idPrefix === "desktop" && "max-md:hidden",
-      )}
-    >
-      {groups.map((group) => (
-        <details
-          key={`${idPrefix}-${group.heading}`}
-          className="group/filter border-border-subtle border-b"
-          open
-        >
-          <summary className="flex min-h-13 list-none items-center justify-between font-body text-micro font-medium tracking-label uppercase after:text-lg after:font-normal after:content-['+'] group-open/filter:after:content-['−'] [&::-webkit-details-marker]:hidden">
-            {group.heading}
-          </summary>
-          <div className="pb-4.5">
-            {group.links.map((link) => (
-              <Link
-                key={link.key}
-                className="group/check flex min-h-10 items-center gap-2.5 font-body text-micro text-text-muted tracking-control uppercase hover:text-ink aria-[current=page]:text-ink"
-                href={link.href}
-                aria-current={link.selected ? "page" : undefined}
-              >
-                <span
-                  className="size-3.25 flex-none rounded-full border border-border-subtle group-aria-[current=page]/check:border-ink group-aria-[current=page]/check:bg-signal"
-                  aria-hidden="true"
-                />
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        </details>
-      ))}
-    </div>
-  );
 }
 
 interface ShopPageProps {
@@ -183,25 +121,16 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
   return (
     <>
-      <header className="flex min-h-140 items-end border-border-subtle border-b bg-ink px-page-gutter pt-25 pb-18.75 text-text-inverse max-md:min-h-130 max-sm:min-h-107.5 max-sm:pt-17.5">
-        <div className="mx-auto grid w-full grid-cols-page-header items-end gap-12.5 max-md:grid-cols-1 max-md:gap-7">
-          <div>
-            <p className="mb-7 font-field-meta text-ui font-medium text-signal tracking-field-meta uppercase">
-              <Link href="/">Home</Link> / Shop
-            </p>
-            <p className={eyebrow({ tone: "signal" })}>
-              Explore / All equipment
-            </p>
-            <h1 className="m-0 max-w-feature text-balance font-heading text-display leading-display font-medium tracking-heading max-sm:text-index-display-mobile">
-              Field goods for moving outside.
-            </h1>
-          </div>
-          <p className="m-0 max-w-lede justify-self-end text-lede leading-lede text-text-dark-lede max-md:max-w-full max-md:justify-self-start">
-            A compact system of weather protection, carry, and footwear.
-            Designed to work hard together and age well apart.
-          </p>
-        </div>
-      </header>
+      <IndexHeader
+        breadcrumb={
+          <>
+            <Link href="/">Home</Link> / Shop
+          </>
+        }
+        eyebrowLabel="Explore / All equipment"
+        heading="Field goods for moving outside."
+        lede="A compact system of weather protection, carry, and footwear. Designed to work hard together and age well apart."
+      />
 
       <div className="sticky top-header z-30 flex min-h-18 items-center justify-between border-ink border-y bg-signal px-page-gutter py-2 max-md:top-header-compact max-sm:flex-col max-sm:items-start max-sm:gap-2.5 max-sm:py-3">
         <div className="flex items-center gap-4 max-sm:w-full max-sm:justify-between">
@@ -252,44 +181,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
       <div className="mx-auto grid w-full max-w-page grid-cols-media-row gap-9 px-page-gutter pt-15.5 pb-25 max-md:grid-cols-1">
         <FilterSidebar groups={filterGroups} idPrefix="desktop" />
-        <section aria-label="Products">
-          <h2 className="sr-only">Products</h2>
-          {/* Mobile filters: the canonical drawer is a JS prototype, so
-              Forward uses a no-JavaScript disclosure instead. */}
-          <details className="group/disclosure mb-6.5 hidden border border-ink max-md:block">
-            <summary className="flex min-h-12 list-none items-center justify-between px-4 font-body text-micro font-medium tracking-label uppercase after:text-lg after:content-['+'] group-open/disclosure:after:content-['−'] [&::-webkit-details-marker]:hidden">
-              Filters
-            </summary>
-            <FilterSidebar groups={filterGroups} idPrefix="mobile" />
-          </details>
-          {products.length > 0 ? (
-            <div className="grid grid-cols-3 gap-x-4.5 gap-y-14 max-lg:grid-cols-2 max-sm:gap-x-2.5 max-sm:gap-y-8.75">
-              {products.map((product, index) => (
-                <ProductCard
-                  key={product.handle}
-                  product={product}
-                  priority={index < 2}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className={emptyState()}>
-              <div className="max-w-form">
-                <p className={eyebrow()}>No matching products</p>
-                <h2 className={sectionHeading({ size: "subsectionSpaced" })}>
-                  Nothing in this drawer.
-                </h2>
-                <p className="text-text-muted">
-                  No products match this filter. The full catalog is nine
-                  products deep — try widening the view.
-                </p>
-                <Link className={cta()} href="/shop">
-                  View all products
-                </Link>
-              </div>
-            </div>
-          )}
-        </section>
+        <ProductResults filterGroups={filterGroups} products={products} />
       </div>
     </>
   );

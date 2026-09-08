@@ -170,9 +170,11 @@ describe("verified footer integrations", () => {
   });
 
   it("keeps the theme-owned custom pages distinct from Shopify routes", () => {
-    const contentPatterns = new Set(
+    /* Custom pages share one renderer route, so the guaranteed pathnames live
+     * on each entry's smoke path rather than on its pattern. */
+    const contentPaths = new Set(
       CANONICAL_ROUTES.filter((entry) => entry.category === "content").map(
-        (entry) => entry.pattern,
+        (entry) => entry.smoke?.path,
       ),
     );
 
@@ -182,7 +184,7 @@ describe("verified footer integrations", () => {
     );
     for (const link of THEME_CUSTOM_PAGE_LINKS) {
       assert.ok(
-        contentPatterns.has(link.href),
+        contentPaths.has(link.href),
         `${link.href} is not an owned content route`,
       );
       assert.doesNotMatch(link.href, /^\/pages\/|^\/journal\//);

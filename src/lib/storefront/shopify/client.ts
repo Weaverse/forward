@@ -91,7 +91,12 @@ export interface CatalogQueryExecutorOptions {
   useNextCache?: boolean;
 }
 
-const CATALOG_I18N = { country: "US", language: "EN" } as const;
+/**
+ * The single market this storefront serves. Locale/market routing is a
+ * separate deferred slice; until then every surface uses this one, so it is
+ * exported rather than redeclared per consumer.
+ */
+export const CATALOG_I18N = { country: "US", language: "EN" } as const;
 
 function readGraphQLErrors(
   errors: unknown,

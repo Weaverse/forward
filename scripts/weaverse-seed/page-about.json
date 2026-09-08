@@ -1,0 +1,60 @@
+{
+  "pageType": "CUSTOM",
+  "handle": "about",
+  "description": "Theme-owned editorial route (Weaverse CUSTOM page at that exact path) /about. Values are the ones src/app/about/page.tsx renders today.",
+  "sections": [
+    {
+      "key": "editorial-hero",
+      "type": "editorial-hero",
+      "data": {
+        "eyebrowLabel": "Custom page / About Forward",
+        "heading": "Make less equipment. Make every piece matter.",
+        "lede": "Forward is built around complete movement systems rather than seasonal noise: fewer products, clearer jobs, longer useful lives.",
+        "imageSide": "right",
+        "image": {
+          "url": "/images/editorial/hero-open-sky.webp",
+          "altText": "Climber on an open granite face under a wide pale sky",
+          "width": 2000,
+          "height": 1445
+        }
+      }
+    },
+    {
+      "key": "standard-statement",
+      "type": "standard-statement",
+      "data": {
+        "eyebrowLabel": "The Forward standard",
+        "statement": "Useful over novel. Repairable over disposable. Quiet over loud.",
+        "columns": "We begin with the work a product must do, then remove anything that does not improve movement, protection, carry, or recovery.\nMaterials are selected for known performance and honest aging. A worn product should carry evidence of use\u2014not become obsolete.\nEvery core object belongs to a system, so layers and equipment earn their place together instead of competing for attention."
+      }
+    },
+    {
+      "key": "stat-band",
+      "type": "stat-band",
+      "data": {
+        "stats": "9 | core objects\n3 | movement systems\n01 | repair commitment"
+      }
+    },
+    {
+      "key": "product-strip",
+      "type": "product-strip",
+      "data": {
+        "eyebrowLabel": "Representative equipment",
+        "heading": "The standard, made physical.",
+        "linkLabel": "Complete catalog",
+        "linkHref": "/shop",
+        "products": [
+          {
+            "handle": "weatherline-shell"
+          },
+          {
+            "handle": "traverse-grid-fleece"
+          },
+          {
+            "handle": "drift-insulated-vest"
+          }
+        ]
+      }
+    }
+  ]
+}
