@@ -88,9 +88,22 @@ surfaces; functional, stateful, and security-owned surfaces stay theme-owned.
 | `/` | `INDEX` | Weaverse-composed |
 | `/products/[productHandle]` | `PRODUCT` | Weaverse-composed around a theme-owned buy block |
 | `/shop/[collectionHandle]` | `COLLECTION` | Weaverse-composed around a theme-owned product grid |
-| `/journal/[articleHandle]` | `ARTICLE` | Weaverse-composed |
-| `/pages/[pageHandle]` | `PAGE` | Weaverse-composed |
-| `/about`, `/materials`, `/field-testing` | `PAGE` | Weaverse-composed, content included (decided 2026-09-08) |
+| `/journal/[articleHandle]` | `ARTICLE` | Weaverse-composed — **not wired yet** |
+| `/pages/[pageHandle]` | `PAGE` | Weaverse-composed — **not wired yet** |
+| `/about`, `/materials`, `/field-testing` | `CUSTOM` | **Wired.** Content included (decided 2026-09-08) |
+
+**Page type correction (2026-09-08).** These three routes were first recorded as
+`PAGE`. That is wrong: in Weaverse `PAGE` maps to a Shopify page, which is
+`/pages/[pageHandle]`. A theme-owned route living at its own path is a `CUSTOM`
+page, resolved by pathname. Asking for `PAGE/about` returns the project's shared
+default `PAGE` template with an empty handle, not the route's own page. Verified
+against the live API before changing it.
+
+**Not wired yet, and why.** `/pages/[pageHandle]` and `/journal/[articleHandle]`
+carry Shopify-owned bodies, so composition there owns chrome around verbatim
+content rather than the content itself. That is a different problem from the
+three theme-owned editorial routes, whose content the theme owns outright, and
+it belongs to its own slice.
 | `/shop`, `/journal` | — | theme-owned index routes |
 | `/search` | — | theme-owned; query state and result ranking are not editable |
 | `/cart` | — | theme-owned; server cart identity and checkout handoff |

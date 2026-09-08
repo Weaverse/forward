@@ -27,7 +27,11 @@ const STANDARD_COLUMNS = [
  */
 export default async function AboutPage() {
   const [page, projectId] = await Promise.all([
-    loadWeaversePage({ type: "PAGE", handle: "about" }),
+    loadWeaversePage({
+      handle: "about",
+      pathname: "/about",
+      type: "CUSTOM",
+    }),
     Promise.resolve(weaverseProjectId()),
   ]);
 

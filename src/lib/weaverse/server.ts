@@ -42,6 +42,15 @@ export type SearchParams = Record<string, string | string[] | undefined>;
 export interface LoadWeaversePageOptions {
   type: WeaversePageType;
   handle?: string;
+  /**
+   * The route's own path.
+   *
+   * Required, and not optional by accident: Weaverse resolves `CUSTOM` pages
+   * by pathname, and the SDK falls back to `"/"` when the request context has
+   * neither `url` nor `pathname` — which silently resolves every custom route
+   * to the home page.
+   */
+  pathname: string;
   searchParams?: SearchParams;
 }
 
@@ -65,6 +74,7 @@ function toSearchParams(input: SearchParams | undefined): URLSearchParams {
  * why that distinction is load-bearing.
  */
 async function createServerClient(
+  pathname: string,
   searchParams: SearchParams | undefined,
 ): Promise<WeaverseNextServerClient | null> {
   const config = readWeaverseConfig(process.env);
@@ -83,8 +93,25 @@ async function createServerClient(
       : { weaverseHost: config.weaverseHost }),
     requestContext: {
       headers: new Headers(Object.fromEntries(headerList.entries())),
+      pathname,
       searchParams: toSearchParams(searchParams),
     },
+  });
+}
+
+/**
+ * `true` when a page carries at least one authored section.
+ *
+ * The root item always exists; what makes a page real is a child under it.
+ */
+function hasAuthoredSections(page: WeaverseNextLoaderData): boolean {
+  const items = page.page?.items;
+  if (!Array.isArray(items) || items.length === 0) {
+    return false;
+  }
+  return items.some((item) => {
+    const children = (item as { children?: unknown }).children;
+    return Array.isArray(children) && children.length > 0;
   });
 }
 
@@ -97,11 +124,12 @@ async function createServerClient(
  */
 export async function loadWeaversePage({
   handle,
+  pathname,
   searchParams,
   type,
 }: LoadWeaversePageOptions): Promise<WeaverseNextLoaderData | null> {
   try {
-    const client = await createServerClient(searchParams);
+    const client = await createServerClient(pathname, searchParams);
     if (client === null) {
       return null;
     }
@@ -138,7 +166,7 @@ export function weaverseProjectId(): string | null {
 export const loadWeaverseThemeSettings = cache(
   async (): Promise<WeaverseNextThemeSettingsResponse | null> => {
     try {
-      const client = await createServerClient(undefined);
+      const client = await createServerClient("/", undefined);
       if (client === null) {
         return null;
       }

@@ -45,6 +45,7 @@ interface SeedSection {
 interface SeedPage {
   pageType: string;
   handle: string;
+  name?: string;
   description?: string;
   sections: SeedSection[];
 }
@@ -158,13 +159,19 @@ function validate(pages: SeedPage[]): void {
   }
 }
 
+interface RequestResult {
+  ok: boolean;
+  status: number;
+}
+
 async function request(
   apiKey: string,
+  method: "POST" | "PATCH",
   endpoint: string,
   body: unknown,
-): Promise<void> {
+): Promise<RequestResult> {
   const response = await fetch(`${CONTENT_API_BASE}${endpoint}`, {
-    method: "PATCH",
+    method,
     headers: {
       authorization: `Bearer ${apiKey}`,
       "content-type": "application/json",
@@ -172,11 +179,53 @@ async function request(
     body: JSON.stringify(body),
   });
 
-  if (!response.ok) {
-    /* The response body can echo the request; report status and endpoint only
-     * so a key can never reach the log. */
-    fail(`${endpoint} responded ${response.status} ${response.statusText}`);
+  /* The response body can echo the request, so nothing from it is ever logged;
+   * status and endpoint are enough to diagnose and cannot carry the key. */
+  return { ok: response.ok, status: response.status };
+}
+
+/**
+ * Ensures the page exists, then writes its content.
+ *
+ * Creation and update are separate endpoints, and a project that has never
+ * been seeded has neither page. `409` on create means the page is already
+ * there, which is the normal second-run case and not an error.
+ */
+async function seedPage(
+  apiKey: string,
+  projectId: string,
+  page: SeedPage,
+): Promise<void> {
+  const created = await request(
+    apiKey,
+    "POST",
+    `/projects/${projectId}/pages`,
+    {
+      type: page.pageType,
+      handle: page.handle,
+      name: page.name ?? page.handle,
+    },
+  );
+  if (!created.ok && created.status !== 409) {
+    fail(
+      `creating ${page.pageType}/${page.handle} responded ${created.status}`,
+    );
   }
+
+  const updated = await request(
+    apiKey,
+    "PATCH",
+    `/projects/${projectId}/pages/${page.pageType}/${page.handle}`,
+    { items: buildItems(page) },
+  );
+  if (!updated.ok) {
+    fail(
+      `updating ${page.pageType}/${page.handle} responded ${updated.status}`,
+    );
+  }
+  console.log(
+    `  ${created.status === 409 ? "updated" : "created and wrote"} ${page.pageType}/${page.handle}`,
+  );
 }
 
 async function main(): Promise<void> {
@@ -228,17 +277,18 @@ async function main(): Promise<void> {
   }
 
   for (const page of pages) {
-    await request(
-      apiKey,
-      `/projects/${projectId}/pages/${page.pageType}/${page.handle}`,
-      { items: buildItems(page) },
-    );
-    console.log(`  wrote ${page.pageType}/${page.handle}`);
+    await seedPage(apiKey, projectId, page);
   }
 
-  await request(apiKey, `/projects/${projectId}/theme-settings`, {
-    theme: theme.theme,
-  });
+  const themeWrite = await request(
+    apiKey,
+    "PATCH",
+    `/projects/${projectId}/theme-settings`,
+    { theme: theme.theme },
+  );
+  if (!themeWrite.ok) {
+    fail(`writing theme settings responded ${themeWrite.status}`);
+  }
   console.log("  wrote theme settings");
   console.log("seed:weaverse: done.");
 }

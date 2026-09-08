@@ -31,7 +31,11 @@ const SEQUENCE_STEPS = [
  */
 export default async function FieldTestingPage() {
   const [page, projectId] = await Promise.all([
-    loadWeaversePage({ type: "PAGE", handle: "field-testing" }),
+    loadWeaversePage({
+      handle: "field-testing",
+      pathname: "/field-testing",
+      type: "CUSTOM",
+    }),
     Promise.resolve(weaverseProjectId()),
   ]);
 

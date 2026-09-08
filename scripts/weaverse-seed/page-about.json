@@ -1,7 +1,7 @@
 {
-  "pageType": "PAGE",
+  "pageType": "CUSTOM",
   "handle": "about",
-  "description": "Theme-owned editorial route /about. Values are the ones src/app/about/page.tsx renders today.",
+  "description": "Theme-owned editorial route (Weaverse CUSTOM page at that exact path) /about. Values are the ones src/app/about/page.tsx renders today.",
   "sections": [
     {
       "key": "editorial-hero",

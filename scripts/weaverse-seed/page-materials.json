@@ -1,7 +1,7 @@
 {
-  "pageType": "PAGE",
+  "pageType": "CUSTOM",
   "handle": "materials",
-  "description": "Theme-owned editorial route /materials. Values are the ones src/app/materials/page.tsx renders today.",
+  "description": "Theme-owned editorial route (Weaverse CUSTOM page at that exact path) /materials. Values are the ones src/app/materials/page.tsx renders today.",
   "sections": [
     {
       "key": "editorial-hero",

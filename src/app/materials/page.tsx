@@ -28,7 +28,11 @@ const PRINCIPLES = [
  */
 export default async function MaterialsPage() {
   const [page, projectId] = await Promise.all([
-    loadWeaversePage({ type: "PAGE", handle: "materials" }),
+    loadWeaversePage({
+      handle: "materials",
+      pathname: "/materials",
+      type: "CUSTOM",
+    }),
     Promise.resolve(weaverseProjectId()),
   ]);
 

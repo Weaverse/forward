@@ -1,7 +1,7 @@
 {
-  "pageType": "PAGE",
+  "pageType": "CUSTOM",
   "handle": "field-testing",
-  "description": "Theme-owned editorial route /field-testing. Values are the ones src/app/field-testing/page.tsx renders today.",
+  "description": "Theme-owned editorial route (Weaverse CUSTOM page at that exact path) /field-testing. Values are the ones src/app/field-testing/page.tsx renders today.",
   "sections": [
     {
       "key": "editorial-overlay-hero",

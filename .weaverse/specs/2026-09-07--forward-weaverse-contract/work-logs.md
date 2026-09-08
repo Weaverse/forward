@@ -411,3 +411,51 @@
 - Gates: `bun run check` green at `354` node + `66` DOM, 42-page build, route
   contract `20 + 4`, 35 route smokes, and the static browser matrix at
   `146 / 10 / 0`.
+
+## 2026-09-08 (three defects found by questioning the live API) — @hta218
+
+Leo asked whether the routes were actually reading Weaverse yet. Answering that
+honestly meant calling the live API instead of trusting the code, and it exposed
+three defects the whole gate suite had missed.
+
+1. **Wrong page type.** `/about`, `/materials`, `/field-testing` were requested
+   as `PAGE`. In Weaverse `PAGE` is a Shopify page — that is
+   `/pages/[pageHandle]`. A theme-owned route at its own path is `CUSTOM`.
+   Proven against the live API: `PAGE/about` returns the project's shared
+   *"Default regular page"* with an empty handle, while `CUSTOM/about` returns
+   the assignment for `about`. Corrected in the three routes, the three seed
+   payloads, and the contract table.
+2. **Empty-page detection never fired.** The filter matched `page.id` containing
+   `"fallback"`, copied from the POC without checking it applied here. A real
+   default template arrives with an ordinary cuid and a single childless root,
+   so the filter passed it through and the three routes would have rendered an
+   empty Weaverse page instead of their static fallback. Now judged by content:
+   a page with no authored child sections is "not composed yet", whichever way
+   the Builder expresses it.
+3. **The request context had no pathname.** `resolveRequestUrl` falls back to
+   `"/"` when the context supplies neither `url` nor `pathname`, so every
+   `CUSTOM` lookup would have resolved against the home page. `pathname` is now
+   a required field on `LoadWeaversePageOptions` rather than an optional one,
+   because forgetting it fails silently rather than loudly.
+
+**Why every gate missed all three.** `bun run check` and the browser matrices
+run with the Weaverse keys blanked, so they only ever exercise the static
+branch. The seed script had only been dry-run, and a dry run validates section
+types against the registry without touching the API. Nothing in the suite ever
+compared an assumption against the live system.
+
+**Also corrected: the seed script could not have worked.** It only sent `PATCH`,
+but the Content API separates creation (`POST .../pages`) from content update
+(`PATCH .../pages/:type/:handle`), and a project that has never been seeded has
+neither page. It now creates first and treats `409` as "already exists", which
+is the ordinary second-run case.
+
+**Scope recorded honestly.** `/pages/[pageHandle]` and `/journal/[articleHandle]`
+remain unwired. Both carry Shopify-owned bodies, so composition there owns
+chrome around verbatim content — a different problem from the theme-owned
+editorial routes, and its own slice. The contract table now says so instead of
+implying all `PAGE` routes are composed.
+
+Verified after the fixes: `CUSTOM` lookups for all three routes return no page,
+so the routes take their static fallback. `bun run check` green at `354` node +
+`66` DOM, and with the project blank the three routes still build as `○` static.
