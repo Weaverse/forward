@@ -716,3 +716,51 @@ three attempts and the docs settled it.
 - `[locale]` is not part of this: it does not affect the 404 mechanism, and it
   belongs to its own issue since #65 excludes markets and it would touch every
   route file.
+
+## 2026-09-08 (the real cause: a root loading boundary) — @hta218
+
+Leo asked why Pilot answers a real 404 for `/products/x` and Forward did not.
+Chasing that question found the actual cause, and it invalidated most of the
+architecture built earlier today.
+
+- **Pilot is a different framework, and that was the first clue.** Its route
+  `products/:productHandle` matches every handle — React Router has no
+  `dynamicParams` — and its loader throws `new Response("product", { status:
+  404 })` *before* rendering. Nothing has streamed, so the status is free to
+  set. Its root catch-all is safe precisely because specific routes never
+  decline a request.
+- **The Next POC does the same thing with `notFound()` and still gets 404s.**
+  Its product route has no `dynamicParams` and no `generateStaticParams`, yet
+  `/products/khong-co-that` answers 404 on the deployed site. That ruled out
+  every explanation about catch-alls, app-root position, and locale segments.
+- **The difference was `src/app/loading.tsx`.** The POC has none. A root
+  `loading.tsx` wraps every route in a Suspense boundary, so Next streams a
+  shell and commits the response to `200` before any component runs; from there
+  `notFound()` can only be a soft 404. Proven directly: with the file present a
+  probe route answered `200`, and with it removed the same probe answered `404`.
+- Six routes call `notFound()`. None of them could set a status. They answered
+  404 only because `dynamicParams = false` rejects an unknown param before
+  rendering starts — which is also why an unknown handle fell through to a root
+  catch-all instead of 404ing.
+- **Removed the boundary, and most of the day's scaffolding with it.** The
+  renderer went back to `src/app/[...slug]`, the invented `/weaverse-page`
+  prefix is gone, the proxy is once again only the account boundary, and the
+  cached custom-page listing and its nine tests were deleted. Roughly 200 lines
+  of machinery existed only to work around a Suspense boundary.
+- `[locale]` is not needed for any of this. It remains a markets question for
+  its own issue.
+- **A test contract broke quietly.** `gotoReady` waited for the loading text to
+  disappear, which doubled as a hydration signal; with the boundary gone the
+  assertion became vacuous and the mega-panel test started clicking a trigger
+  React had not wired yet. Retrying the click until the panel opens fixed it.
+  `networkidle` was tried first and rejected: it took the matrix from 1.4 to
+  7.4 minutes and still failed.
+- Static-matrix browser coverage for `/about`, `/materials`, and
+  `/field-testing` was removed rather than faked, since those pages no longer
+  exist without a Weaverse project. **Open gap:** no matrix configures Weaverse,
+  so composed pages have no browser coverage at all.
+- Verified: the three custom pages render with five `data-wv-id` items each;
+  `/lookbook`, `/nothing/here`, and unknown product, collection, article, page,
+  and policy handles all answer 404; every real route still answers 200.
+  `bun run check` green at `370` node + `95` DOM, `smoke:routes` `35/35`, and
+  the static browser matrix back to `146 / 10 / 0` in under a minute.
