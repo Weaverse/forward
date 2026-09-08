@@ -1,4 +1,5 @@
-import { describe, expect, it } from "bun:test";
+import { describe, it } from "bun:test";
+import assert from "node:assert/strict";
 import { render } from "@testing-library/react";
 
 import Button from "@/components/button";
@@ -45,7 +46,7 @@ describe("composed sections tolerate merchant-cleared settings", () => {
     it(`renders ${type} with no settings at all`, () => {
       const Untyped = Component as unknown as () => React.ReactNode;
 
-      expect(() => render(<Untyped />)).not.toThrow();
+      assert.doesNotThrow(() => render(<Untyped />));
     });
   }
 });
@@ -72,8 +73,8 @@ describe("image inputs survive Builder's own shape", () => {
     );
 
     const image = container.querySelector("img");
-    expect(image).not.toBeNull();
-    expect(image?.getAttribute("alt")).toBe("Field hero");
+    assert.notEqual(image, null);
+    assert.equal(image?.getAttribute("alt"), "Field hero");
   });
 
   it("drops the image rather than crashing when it has no dimensions", () => {
@@ -86,7 +87,7 @@ describe("image inputs survive Builder's own shape", () => {
       />,
     );
 
-    expect(container.querySelector("img")).toBeNull();
-    expect(container.textContent).toContain("Heading");
+    assert.equal(container.querySelector("img"), null);
+    assert.ok(container.textContent?.includes("Heading"));
   });
 });
