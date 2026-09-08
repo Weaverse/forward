@@ -140,17 +140,16 @@ describe("Studio integration surface", () => {
     );
   });
 
-  it("forwards searchParams from every composed route", async () => {
-    /* Design mode is detected from the query Studio puts on the iframe URL. A
-     * route that does not forward it silently renders published mode. */
-    for (const route of ["about", "materials", "field-testing"]) {
-      const source = await read(`src/app/${route}/page.tsx`);
+  it("forwards searchParams and pathname from the custom-page route", async () => {
+    /* Design mode is detected from the query Studio puts on the iframe URL,
+     * and CUSTOM pages resolve by path, so both are load-bearing. */
+    const source = await read("src/app/weaverse-page/[...slug]/page.tsx");
 
-      assert.match(
-        source,
-        /searchParams: await props\.searchParams/,
-        `${route} does not forward searchParams, so design mode is undetectable`,
-      );
-    }
+    assert.match(
+      source,
+      /searchParams: await props\.searchParams/,
+      "without searchParams the route silently renders published mode",
+    );
+    assert.match(source, /pathname,/);
   });
 });
