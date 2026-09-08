@@ -609,3 +609,30 @@ project-not-found bundle.
   storefront needs was already right, and every break was a field the *bridge*
   needs that the storefront never reads. Storefront-facing checks cannot see
   any of them, which is the argument for a design-mode gate.
+
+## 2026-09-08 (Studio confirmed working end to end) — @hta218
+
+Leo confirmed the full loop in Studio: sections can be selected, edited, saved,
+and the change survives a reload. That is the first evidence the whole chain
+works together — seed → server loader → resource picker → storefront data
+source → client render → Studio bridge → save → publish.
+
+State at this point:
+
+- Composed and working: `/about`, `/materials`, `/field-testing` as `CUSTOM`
+  pages, ten sections plus four shared elements registered.
+- Not composed, recorded in the contract: `/pages/[pageHandle]` (`PAGE`),
+  `/journal/[articleHandle]` (`ARTICLE`), and Home's seven sections, which stay
+  Server Components deliberately.
+- Theme settings seeded nowhere and read nowhere; Header and Footer still take
+  their copy from the storefront data source.
+
+**The open risk is unchanged and now well evidenced.** Every Studio defect
+found today — wrong page type, empty-page detection, missing pathname, missing
+identity attributes, incomplete request context, absent revalidation route —
+was invisible to `bun run check`, the browser matrices, and the route smokes,
+because each was a field the bridge needs and the storefront never reads. Six
+defects, zero caught by automation, all found by Leo opening a page. A
+design-mode gate that asserts a real request carries `requestInfo` with `i18n`,
+`pageType`, and `handle`, one `data-wv-id` per authored section, and a mounted
+Studio script would have caught all six.
