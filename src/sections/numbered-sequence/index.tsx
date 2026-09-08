@@ -1,5 +1,7 @@
-import { createSchema } from "@weaverse/schema";
+"use client";
+
 import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
+import { parseRows } from "../parse";
 
 /** One numbered sequence step: index column, then the step description. */
 const SEQUENCE_STEP_CLASS =
@@ -8,7 +10,8 @@ const SEQUENCE_STEP_CLASS =
 interface NumberedSequenceProps {
   eyebrowLabel: string;
   heading: string;
-  steps: readonly { number: string; title: string; copy: string }[];
+  /** One `number | title | copy` row per line. Parsed by `./parse`. */
+  steps: string;
 }
 
 /** An ordered protocol rendered as a numbered list beside its heading. */
@@ -24,14 +27,14 @@ function NumberedSequence({
         <h2 className={sectionHeading()}>{heading}</h2>
       </header>
       <ol className="m-0 list-none border-border-subtle border-t p-0">
-        {steps.map((step) => (
-          <li className={SEQUENCE_STEP_CLASS} key={step.number}>
-            <span className="font-field-meta">{step.number}</span>
+        {parseRows(steps, 3).map(([number, title, copy]) => (
+          <li className={SEQUENCE_STEP_CLASS} key={number}>
+            <span className="font-field-meta">{number}</span>
             <div>
               <h3 className="m-0 text-balance font-heading text-feature-stat">
-                {step.title}
+                {title}
               </h3>
-              <p>{step.copy}</p>
+              <p>{copy}</p>
             </div>
           </li>
         ))}
@@ -42,29 +45,4 @@ function NumberedSequence({
 
 export default NumberedSequence;
 
-export const schema = createSchema({
-  type: "numbered-sequence",
-  title: "Numbered sequence",
-  settings: [
-    {
-      group: "Content",
-      inputs: [
-        {
-          type: "text",
-          name: "eyebrowLabel",
-          label: "Eyebrow",
-        },
-        {
-          type: "text",
-          name: "heading",
-          label: "Heading",
-        },
-        {
-          type: "textarea",
-          name: "steps",
-          label: "Steps, one `number | title | copy` row per line",
-        },
-      ],
-    },
-  ],
-});
+export { schema } from "./schema";

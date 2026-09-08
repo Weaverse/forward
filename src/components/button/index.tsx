@@ -1,4 +1,5 @@
-import { createSchema } from "@weaverse/schema";
+"use client";
+
 import Link from "next/link";
 
 import { cn } from "@/lib/cn";
@@ -32,30 +33,4 @@ function Button({ className, href, intent = "primary", label }: ButtonProps) {
 
 export default Button;
 
-export const schema = createSchema({
-  type: "button",
-  title: "Button",
-  settings: [
-    {
-      group: "Button",
-      inputs: [
-        { type: "text", name: "label", label: "Label" },
-        { type: "url", name: "href", label: "Link" },
-        {
-          type: "select",
-          name: "intent",
-          label: "Style",
-          defaultValue: "primary",
-          configs: {
-            options: [
-              { value: "primary", label: "Primary" },
-              { value: "signal", label: "Signal" },
-              { value: "light", label: "Light" },
-              { value: "outline", label: "Outline" },
-            ],
-          },
-        },
-      ],
-    },
-  ],
-});
+export { schema } from "./schema";

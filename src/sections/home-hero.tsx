@@ -1,4 +1,3 @@
-import { createSchema } from "@weaverse/schema";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
@@ -25,7 +24,7 @@ interface HomeHeroProps {
 }
 
 /** Home hero: split copy and image, with a summary stat row and image badge. */
-function HomeHero({
+export function HomeHero({
   eyebrowLabel,
   heading,
   lede,
@@ -102,64 +101,3 @@ function HomeHero({
     </section>
   );
 }
-
-export default HomeHero;
-
-export const schema = createSchema({
-  type: "home-hero",
-  title: "Home hero",
-  settings: [
-    {
-      group: "Content",
-      inputs: [
-        {
-          type: "text",
-          name: "eyebrowLabel",
-          label: "Eyebrow",
-          defaultValue: "Forward / Field equipment 2026",
-        },
-        {
-          type: "text",
-          name: "heading",
-          label: "Heading",
-          defaultValue: "Equipment for weather that changes the plan.",
-        },
-        {
-          type: "textarea",
-          name: "lede",
-          label: "Lede",
-        },
-        {
-          type: "text",
-          name: "primaryCtaLabel",
-          label: "Primary CTA label",
-        },
-        {
-          type: "url",
-          name: "primaryCtaHref",
-          label: "Primary CTA link",
-        },
-        {
-          type: "text",
-          name: "secondaryCtaLabel",
-          label: "Secondary CTA label",
-        },
-        {
-          type: "url",
-          name: "secondaryCtaHref",
-          label: "Secondary CTA link",
-        },
-        {
-          type: "image",
-          name: "image",
-          label: "Image",
-        },
-        {
-          type: "text",
-          name: "featuredProductHandle",
-          label: "Featured product handle",
-        },
-      ],
-    },
-  ],
-});

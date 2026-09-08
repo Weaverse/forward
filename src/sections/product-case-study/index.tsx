@@ -1,4 +1,5 @@
-import { createSchema } from "@weaverse/schema";
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { cta, eyebrow } from "@/lib/presentation/variants";
@@ -7,17 +8,23 @@ import type { Product, StorefrontImage } from "@/lib/storefront/types";
 interface ProductCaseStudyProps {
   eyebrowLabel: string;
   ctaLabel: string;
-  product: Product;
-  image: StorefrontImage;
+  /** Resolved by `./loader` from the merchant's product selection. */
+  loaderData?: { product: Product; image: StorefrontImage } | null;
 }
 
 /** A single product examined in depth: description, spec list, and image. */
 function ProductCaseStudy({
   eyebrowLabel,
   ctaLabel,
-  product,
-  image,
+  loaderData,
 }: ProductCaseStudyProps) {
+  /* No selection, or a product that no longer resolves: render nothing rather
+   * than a case study with no case. */
+  if (!loaderData) {
+    return null;
+  }
+  const { image, product } = loaderData;
+
   return (
     <section className="grid grid-cols-split-75 bg-ink text-text-inverse max-md:grid-cols-1">
       <div className="self-center p-[clamp(50px,7vw,110px)] max-md:order-2">
@@ -58,34 +65,4 @@ function ProductCaseStudy({
 
 export default ProductCaseStudy;
 
-export const schema = createSchema({
-  type: "product-case-study",
-  title: "Product case study",
-  settings: [
-    {
-      group: "Content",
-      inputs: [
-        {
-          type: "text",
-          name: "eyebrowLabel",
-          label: "Eyebrow",
-        },
-        {
-          type: "text",
-          name: "ctaLabel",
-          label: "CTA label",
-        },
-        {
-          type: "text",
-          name: "productHandle",
-          label: "Product handle",
-        },
-        {
-          type: "image",
-          name: "image",
-          label: "Image",
-        },
-      ],
-    },
-  ],
-});
+export { schema } from "./schema";

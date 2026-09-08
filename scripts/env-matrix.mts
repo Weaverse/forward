@@ -38,6 +38,15 @@ const CATALOG_CART_OPTIONAL_KEYS = [
   "PUBLIC_MAIN_MENU_HANDLE",
 ] as const;
 
+/**
+ * Weaverse composition inputs.
+ *
+ * They belong in the matrices for the same reason the Shopify keys do: a
+ * configured project turns composed routes dynamic and makes them fetch the
+ * Weaverse API, so a "static" run that leaves them set is not static at all.
+ */
+const WEAVERSE_KEYS = ["WEAVERSE_PROJECT_ID", "WEAVERSE_HOST"] as const;
+
 /** The all-or-none Customer Account tuple. */
 const ACCOUNT_KEYS = [
   "SHOP_ID",
@@ -50,6 +59,7 @@ const ALL_CREDENTIAL_KEYS = [
   ...CATALOG_CART_REQUIRED_KEYS,
   ...CATALOG_CART_OPTIONAL_KEYS,
   ...ACCOUNT_KEYS,
+  ...WEAVERSE_KEYS,
 ] as const;
 
 let repositoryEnvLoaded = false;

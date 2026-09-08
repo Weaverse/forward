@@ -1,4 +1,3 @@
-import { createSchema } from "@weaverse/schema";
 import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
 import {
@@ -19,7 +18,7 @@ interface FeaturedProductsProps {
 }
 
 /** A four-up product grid introduced by a heading, body copy, and one link. */
-function FeaturedProducts({
+export function FeaturedProducts({
   eyebrowLabel,
   heading,
   body,
@@ -56,48 +55,3 @@ function FeaturedProducts({
     </section>
   );
 }
-
-export default FeaturedProducts;
-
-export const schema = createSchema({
-  type: "featured-products",
-  title: "Featured products",
-  settings: [
-    {
-      group: "Content",
-      inputs: [
-        {
-          type: "text",
-          name: "eyebrowLabel",
-          label: "Eyebrow",
-          defaultValue: "New field rotation",
-        },
-        {
-          type: "text",
-          name: "heading",
-          label: "Heading",
-        },
-        {
-          type: "textarea",
-          name: "body",
-          label: "Body",
-        },
-        {
-          type: "text",
-          name: "linkLabel",
-          label: "Link label",
-        },
-        {
-          type: "url",
-          name: "linkHref",
-          label: "Link target",
-        },
-        {
-          type: "textarea",
-          name: "productHandles",
-          label: "Product handles, one per line",
-        },
-      ],
-    },
-  ],
-});

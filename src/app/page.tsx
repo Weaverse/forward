@@ -1,12 +1,12 @@
 import { storefront } from "@/lib/storefront/data-source";
 import type { Collection, Product } from "@/lib/storefront/types";
-import CollectionIndex from "@/sections/collection-index";
-import FeaturedProducts from "@/sections/featured-products";
-import HomeHero from "@/sections/home-hero";
-import KitCallout from "@/sections/kit-callout";
-import MaterialStandard from "@/sections/material-standard";
-import ProductSpotlight from "@/sections/product-spotlight";
-import RepairAndJournal from "@/sections/repair-and-journal";
+import { CollectionIndex } from "@/sections/collection-index";
+import { FeaturedProducts } from "@/sections/featured-products";
+import { HomeHero } from "@/sections/home-hero";
+import { KitCallout } from "@/sections/kit-callout";
+import { MaterialStandard } from "@/sections/material-standard";
+import { ProductSpotlight } from "@/sections/product-spotlight";
+import { RepairAndJournal } from "@/sections/repair-and-journal";
 
 export const revalidate = 3600;
 

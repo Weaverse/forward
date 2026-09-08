@@ -1,4 +1,5 @@
-import { createSchema } from "@weaverse/schema";
+"use client";
+
 import Image from "next/image";
 import { eyebrow } from "@/lib/presentation/variants";
 import type { StorefrontImage } from "@/lib/storefront/types";
@@ -41,34 +42,4 @@ function EditorialOverlayHero({
 
 export default EditorialOverlayHero;
 
-export const schema = createSchema({
-  type: "editorial-overlay-hero",
-  title: "Editorial overlay hero",
-  settings: [
-    {
-      group: "Content",
-      inputs: [
-        {
-          type: "text",
-          name: "eyebrowLabel",
-          label: "Eyebrow",
-        },
-        {
-          type: "text",
-          name: "heading",
-          label: "Heading",
-        },
-        {
-          type: "textarea",
-          name: "lede",
-          label: "Lede",
-        },
-        {
-          type: "image",
-          name: "image",
-          label: "Image",
-        },
-      ],
-    },
-  ],
-});
+export { schema } from "./schema";

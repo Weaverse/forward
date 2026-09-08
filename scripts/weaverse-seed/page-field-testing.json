@@ -27,7 +27,9 @@
       "data": {
         "eyebrowLabel": "Case study / Weatherline",
         "ctaLabel": "View the shell",
-        "productHandle": "weatherline-shell"
+        "product": {
+          "handle": "weatherline-shell"
+        }
       }
     },
     {

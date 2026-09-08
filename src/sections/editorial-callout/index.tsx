@@ -1,4 +1,5 @@
-import { createSchema } from "@weaverse/schema";
+"use client";
+
 import Link from "next/link";
 import { cta, eyebrow, sectionHeading } from "@/lib/presentation/variants";
 
@@ -37,39 +38,4 @@ function EditorialCallout({
 
 export default EditorialCallout;
 
-export const schema = createSchema({
-  type: "editorial-callout",
-  title: "Editorial callout",
-  settings: [
-    {
-      group: "Content",
-      inputs: [
-        {
-          type: "text",
-          name: "eyebrowLabel",
-          label: "Eyebrow",
-        },
-        {
-          type: "text",
-          name: "heading",
-          label: "Heading",
-        },
-        {
-          type: "textarea",
-          name: "body",
-          label: "Body",
-        },
-        {
-          type: "text",
-          name: "ctaLabel",
-          label: "CTA label",
-        },
-        {
-          type: "url",
-          name: "ctaHref",
-          label: "CTA link",
-        },
-      ],
-    },
-  ],
-});
+export { schema } from "./schema";

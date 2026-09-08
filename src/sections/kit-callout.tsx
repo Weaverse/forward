@@ -1,4 +1,3 @@
-import { createSchema } from "@weaverse/schema";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
@@ -20,7 +19,7 @@ interface KitCalloutProps {
 }
 
 /** A named kit: one anchor product beside the pieces that travel with it. */
-function KitCallout({
+export function KitCallout({
   eyebrowLabel,
   heading,
   linkLabel,
@@ -66,44 +65,3 @@ function KitCallout({
     </section>
   );
 }
-
-export default KitCallout;
-
-export const schema = createSchema({
-  type: "kit-callout",
-  title: "Kit callout",
-  settings: [
-    {
-      group: "Content",
-      inputs: [
-        {
-          type: "text",
-          name: "eyebrowLabel",
-          label: "Eyebrow",
-          defaultValue: "One-day kit",
-        },
-        {
-          type: "text",
-          name: "heading",
-          label: "Heading",
-          defaultValue: "Carry the day, not the doubt.",
-        },
-        {
-          type: "text",
-          name: "linkLabel",
-          label: "Link label",
-        },
-        {
-          type: "text",
-          name: "productHandle",
-          label: "Primary product handle",
-        },
-        {
-          type: "textarea",
-          name: "tileProductHandles",
-          label: "Tile product handles, one per line",
-        },
-      ],
-    },
-  ],
-});

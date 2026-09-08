@@ -7,6 +7,8 @@ import { SiteHeader } from "@/components/site-header/site-header";
 import { ShopifyCartRuntime } from "@/lib/cart/shopify-cart-react";
 import { cn } from "@/lib/cn";
 import { storefrontRuntimeMode } from "@/lib/storefront/data-source";
+import { weaverseProjectId } from "@/lib/weaverse/server";
+import { StudioConnect } from "@/lib/weaverse/studio-connect";
 
 import "./globals.css";
 
@@ -48,6 +50,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const shopifyCartEnabled = storefrontRuntimeMode === "shopify";
+  const weaverseEnabled = weaverseProjectId() !== null;
   return (
     <html
       lang="en"
@@ -59,6 +62,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       )}
     >
       <head>
+        {weaverseEnabled ? <StudioConnect /> : null}
         {shopifyCartEnabled ? (
           <script
             crossOrigin="anonymous"

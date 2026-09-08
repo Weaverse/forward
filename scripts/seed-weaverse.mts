@@ -28,7 +28,7 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
-import { WEAVERSE_SECTION_TYPES } from "../src/lib/weaverse/components.ts";
+import { WEAVERSE_SECTION_TYPES } from "../src/lib/weaverse/section-types.ts";
 
 const CONTENT_API_BASE = "https://studio.weaverse.io/api/v1/content";
 const SEED_DIR = path.join(import.meta.dirname, "weaverse-seed");

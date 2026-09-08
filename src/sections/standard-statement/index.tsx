@@ -1,10 +1,13 @@
-import { createSchema } from "@weaverse/schema";
+"use client";
+
 import { eyebrow } from "@/lib/presentation/variants";
+import { parseLines } from "../parse";
 
 interface StandardStatementProps {
   eyebrowLabel: string;
   statement: string;
-  columns: readonly string[];
+  /** One column per line. Parsed by `./parse`. */
+  columns: string;
 }
 
 /** A single wide statement expanded by a row of supporting paragraphs. */
@@ -20,7 +23,7 @@ function StandardStatement({
         {statement}
       </h2>
       <div className="mt-17.5 grid grid-cols-3 gap-10 text-copy-lg max-md:mt-8.75 max-md:grid-cols-1 max-md:gap-2.5">
-        {columns.map((column) => (
+        {parseLines(columns).map((column) => (
           <p key={column}>{column}</p>
         ))}
       </div>
@@ -30,29 +33,4 @@ function StandardStatement({
 
 export default StandardStatement;
 
-export const schema = createSchema({
-  type: "standard-statement",
-  title: "Standard statement",
-  settings: [
-    {
-      group: "Content",
-      inputs: [
-        {
-          type: "text",
-          name: "eyebrowLabel",
-          label: "Eyebrow",
-        },
-        {
-          type: "textarea",
-          name: "statement",
-          label: "Statement",
-        },
-        {
-          type: "textarea",
-          name: "columns",
-          label: "Columns, one per line",
-        },
-      ],
-    },
-  ],
-});
+export { schema } from "./schema";

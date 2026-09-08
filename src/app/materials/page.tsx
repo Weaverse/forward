@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 
 import { storefront } from "@/lib/storefront/data-source";
+import { WeaversePage } from "@/lib/weaverse/page";
+import { loadWeaversePage, weaverseProjectId } from "@/lib/weaverse/server";
 import EditorialCallout from "@/sections/editorial-callout";
 import EditorialHero from "@/sections/editorial-hero";
 import PrincipleGrid from "@/sections/principle-grid";
@@ -11,7 +13,29 @@ export const metadata: Metadata = {
   description: "Forward material choices, care principles, and repair intent.",
 };
 
-export default async function MaterialsCustomPage() {
+const PRINCIPLES = [
+  "01 | Protect without excess | Shell fabrics and insulation are tuned around weather protection, movement, and packability\u2014not maximum numbers in isolation.",
+  "02 | Carry without distraction | Foams, webbing, and hardware are selected to stabilize a load while keeping adjustment and repair straightforward.",
+  "03 | Grip with feedback | Footwear compounds balance traction, ground feel, and controlled wear across mixed trail and rock.",
+].join("\n");
+
+/**
+ * Materials.
+ *
+ * Weaverse composes this route when the project has a page for it; otherwise
+ * the same sections render from local defaults so the credential-free
+ * storefront stays complete.
+ */
+export default async function MaterialsPage() {
+  const [page, projectId] = await Promise.all([
+    loadWeaversePage({ type: "PAGE", handle: "materials" }),
+    Promise.resolve(weaverseProjectId()),
+  ]);
+
+  if (page !== null && projectId !== null) {
+    return <WeaversePage data={page} projectId={projectId} />;
+  }
+
   const [theme, products] = await Promise.all([
     storefront.getThemeContent(),
     storefront.listProducts(),
@@ -33,26 +57,8 @@ export default async function MaterialsCustomPage() {
         image={theme.standardBandImage}
         imageSide="left"
       />
-      <PrincipleGrid
-        principles={[
-          {
-            number: "01",
-            title: "Protect without excess",
-            copy: "Shell fabrics and insulation are tuned around weather protection, movement, and packability—not maximum numbers in isolation.",
-          },
-          {
-            number: "02",
-            title: "Carry without distraction",
-            copy: "Foams, webbing, and hardware are selected to stabilize a load while keeping adjustment and repair straightforward.",
-          },
-          {
-            number: "03",
-            title: "Grip with feedback",
-            copy: "Footwear compounds balance traction, ground feel, and controlled wear across mixed trail and rock.",
-          },
-        ]}
-      />
-      <ProductTiles tiles={representatives} />
+      <PrincipleGrid principles={PRINCIPLES} />
+      <ProductTiles loaderData={{ tiles: representatives }} />
       <EditorialCallout
         eyebrowLabel="Care + repair"
         heading="Maintenance is part of performance."

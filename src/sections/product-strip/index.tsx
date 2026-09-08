@@ -1,4 +1,5 @@
-import { createSchema } from "@weaverse/schema";
+"use client";
+
 import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
 import { sectionHeading, textLink } from "@/lib/presentation/variants";
@@ -9,7 +10,8 @@ interface ProductStripProps {
   heading: string;
   linkLabel: string;
   linkHref: string;
-  products: readonly Product[];
+  /** Resolved by `./loader` from the merchant's product selection. */
+  loaderData?: { products: readonly Product[] };
 }
 
 /** A titled row of product cards with a single catalog link. */
@@ -18,8 +20,9 @@ function ProductStrip({
   heading,
   linkLabel,
   linkHref,
-  products,
+  loaderData,
 }: ProductStripProps) {
+  const products = loaderData?.products ?? [];
   return (
     <section className="mx-auto w-full max-w-page px-page-gutter py-section-block">
       <header className="mb-11.25 grid grid-cols-feature-row items-end gap-10 max-md:grid-cols-1 max-md:gap-5">
@@ -44,39 +47,4 @@ function ProductStrip({
 
 export default ProductStrip;
 
-export const schema = createSchema({
-  type: "product-strip",
-  title: "Product strip",
-  settings: [
-    {
-      group: "Content",
-      inputs: [
-        {
-          type: "text",
-          name: "eyebrowLabel",
-          label: "Eyebrow",
-        },
-        {
-          type: "text",
-          name: "heading",
-          label: "Heading",
-        },
-        {
-          type: "text",
-          name: "linkLabel",
-          label: "Link label",
-        },
-        {
-          type: "url",
-          name: "linkHref",
-          label: "Link target",
-        },
-        {
-          type: "textarea",
-          name: "productHandles",
-          label: "Product handles, one per line",
-        },
-      ],
-    },
-  ],
-});
+export { schema } from "./schema";

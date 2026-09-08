@@ -1,4 +1,3 @@
-import { createSchema } from "@weaverse/schema";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
@@ -22,7 +21,7 @@ interface RepairAndJournalProps {
 }
 
 /** Paired cards: the repair commitment beside the most recent field note. */
-function RepairAndJournal({
+export function RepairAndJournal({
   repairEyebrowLabel,
   repairHeading,
   repairBody,
@@ -74,57 +73,3 @@ function RepairAndJournal({
     </section>
   );
 }
-
-export default RepairAndJournal;
-
-export const schema = createSchema({
-  type: "repair-and-journal",
-  title: "Repair and journal",
-  settings: [
-    {
-      group: "Content",
-      inputs: [
-        {
-          type: "text",
-          name: "repairEyebrowLabel",
-          label: "Repair eyebrow",
-        },
-        {
-          type: "text",
-          name: "repairHeading",
-          label: "Repair heading",
-        },
-        {
-          type: "textarea",
-          name: "repairBody",
-          label: "Repair body",
-        },
-        {
-          type: "text",
-          name: "repairLinkLabel",
-          label: "Repair link label",
-        },
-        {
-          type: "url",
-          name: "repairLinkHref",
-          label: "Repair link target",
-        },
-        {
-          type: "text",
-          name: "journalEyebrowLabel",
-          label: "Journal eyebrow",
-        },
-        {
-          type: "text",
-          name: "journalLinkLabel",
-          label: "Journal link label",
-        },
-        {
-          type: "text",
-          name: "articleHandle",
-          label: "Article handle, blank for the latest",
-        },
-      ],
-    },
-  ],
-});

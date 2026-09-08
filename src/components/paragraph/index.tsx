@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/schema";
+"use client";
 
 import { cn } from "@/lib/cn";
 
@@ -28,28 +28,4 @@ function Paragraph({ className, content, width = "prose" }: ParagraphProps) {
 
 export default Paragraph;
 
-export const schema = createSchema({
-  type: "paragraph",
-  title: "Paragraph",
-  settings: [
-    {
-      group: "Paragraph",
-      inputs: [
-        { type: "textarea", name: "content", label: "Text" },
-        {
-          type: "select",
-          name: "width",
-          label: "Measure",
-          defaultValue: "prose",
-          configs: {
-            options: [
-              { value: "lede", label: "Lede" },
-              { value: "prose", label: "Prose" },
-              { value: "full", label: "Full width" },
-            ],
-          },
-        },
-      ],
-    },
-  ],
-});
+export { schema } from "./schema";

@@ -24,9 +24,8 @@ import type {
 import { createWeaverseNextServerClient } from "@weaverse/next/server";
 import { headers } from "next/headers";
 import { cache } from "react";
-
-import { WEAVERSE_COMPONENTS } from "./components";
 import { readWeaverseConfig } from "./env";
+import { WEAVERSE_SERVER_COMPONENTS } from "./server-components";
 import { themeSchema } from "./theme-schema";
 
 /** Weaverse page roles this theme composes. See the contract in the spec. */
@@ -75,7 +74,7 @@ async function createServerClient(
 
   const headerList = await headers();
   return createWeaverseNextServerClient({
-    components: WEAVERSE_COMPONENTS,
+    components: WEAVERSE_SERVER_COMPONENTS,
     env: config.sdkEnv,
     projectId: config.projectId,
     themeSchema,
@@ -131,6 +130,11 @@ export async function loadWeaversePage({
  * share a single fetch per request. This adds no cross-request caching, so
  * design-mode reads — which the SDK forces to `no-store` — stay fresh.
  */
+/** The configured project id, or `null` when Weaverse is not configured. */
+export function weaverseProjectId(): string | null {
+  return readWeaverseConfig(process.env)?.projectId ?? null;
+}
+
 export const loadWeaverseThemeSettings = cache(
   async (): Promise<WeaverseNextThemeSettingsResponse | null> => {
     try {

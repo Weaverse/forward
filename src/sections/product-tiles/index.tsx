@@ -1,14 +1,19 @@
-import { createSchema } from "@weaverse/schema";
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
 
 interface ProductTilesProps {
-  tiles: readonly { product: Product; image: StorefrontImage }[];
+  /** Resolved by `./loader` from the merchant's product selection. */
+  loaderData?: {
+    tiles: readonly { product: Product; image: StorefrontImage }[];
+  };
 }
 
 /** Full-bleed product tiles, each linking through to its product page. */
-function ProductTiles({ tiles }: ProductTilesProps) {
+function ProductTiles({ loaderData }: ProductTilesProps) {
+  const tiles = loaderData?.tiles ?? [];
   return (
     <section className="grid grid-cols-3 bg-ink max-md:grid-cols-1">
       {tiles.map(({ product, image }) => (
@@ -38,19 +43,4 @@ function ProductTiles({ tiles }: ProductTilesProps) {
 
 export default ProductTiles;
 
-export const schema = createSchema({
-  type: "product-tiles",
-  title: "Product tiles",
-  settings: [
-    {
-      group: "Content",
-      inputs: [
-        {
-          type: "textarea",
-          name: "tileProductHandles",
-          label: "Product handles, one per line",
-        },
-      ],
-    },
-  ],
-});
+export { schema } from "./schema";

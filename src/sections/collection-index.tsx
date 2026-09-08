@@ -1,4 +1,3 @@
-import { createSchema } from "@weaverse/schema";
 import Image from "next/image";
 import Link from "next/link";
 import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
@@ -11,7 +10,7 @@ interface CollectionIndexProps {
 }
 
 /** Full-height collection cards, one per movement system. */
-function CollectionIndex({
+export function CollectionIndex({
   eyebrowLabel,
   heading,
   collections,
@@ -55,33 +54,3 @@ function CollectionIndex({
     </section>
   );
 }
-
-export default CollectionIndex;
-
-export const schema = createSchema({
-  type: "collection-index",
-  title: "Collection index",
-  settings: [
-    {
-      group: "Content",
-      inputs: [
-        {
-          type: "text",
-          name: "eyebrowLabel",
-          label: "Eyebrow",
-          defaultValue: "Shop by system",
-        },
-        {
-          type: "text",
-          name: "heading",
-          label: "Heading",
-        },
-        {
-          type: "textarea",
-          name: "collectionHandles",
-          label: "Collection handles, one per line",
-        },
-      ],
-    },
-  ],
-});
