@@ -669,3 +669,50 @@ catches each one; five of the six turned out to be cheap.
   caught against the live API, and is the case for the opt-in
   `verify:weaverse` script that remains unwritten.
 - Gates: `370` node + `96` DOM tests, build, theme, route contract `20 + 4`.
+
+## 2026-09-08 (one route for every custom page) — @hta218
+
+Leo: custom pages belong on one catch-all, not a route file each, and with the
+content in Weaverse the static fallbacks can go. Both done, but the route took
+three attempts and the docs settled it.
+
+- **`notFound()` cannot set a 404 on a dynamic route, and that is documented.**
+  Next's `notFound` reference: "the response has already begun streaming as a
+  `200`, and the status can't change once streaming has started... To return a
+  real `404` status, the resource has to be checked before the response
+  streams... run that check in `proxy` instead." Measured the same thing first
+  by experiment — sync call, no custom `not-found.tsx`, minimal layout, dev and
+  production, all `200` — which was slower than reading the page. `/zxcx` on
+  production returns 404 because Next matches no route at all and never starts
+  rendering; that path never reaches `notFound()`.
+- **A root-level catch-all is therefore unusable here.** Being dynamic (it needs
+  `searchParams` for design mode and `headers()` for the request context) it
+  matches every unclaimed URL, and `dynamicParams = false` does not gate a route
+  that renders dynamically — verified with a probe where both known and unknown
+  params answered `200`. Six route-contract smokes failed as a result.
+- **The renderer moved behind an internal prefix**, and the proxy rewrites only
+  the paths Weaverse publishes. Everything else keeps ordinary routing, so
+  unknown handles still get real 404s. First attempt used `__weaverse`, which
+  Next never built: a folder starting with `_` is a private folder and is
+  excluded from routing.
+- **The proxy runs again on its own rewrite.** The guard that stops a visitor
+  addressing the internal prefix was blocking the real rewritten request, so
+  two of the three pages 404'd while `/about` happened to pass. Found by logging
+  the proxy's own decisions during a smoke run rather than by more reasoning. A
+  marker header now separates the two.
+- **A fail-open comment that had become false.** While the renderer sat at the
+  root, an unlisted path fell through to a soft 404. Behind the prefix it has no
+  route at all, so the same code now fails *closed* — an outage would hard-404
+  every real custom page. The listing cache now admits every path when it has no
+  usable listing and lets the renderer decide.
+- Static fallbacks deleted with the three route folders, per Leo: Studio owns
+  this content, and future pages will work the same way. Static mode no longer
+  serves those three paths, and the contract records them by smoke path against
+  the shared renderer.
+- Verified: `/about`, `/materials`, `/field-testing` each render with five
+  `data-wv-id` items; `/lookbook`, `/weaverse-page/about`, `/products/x`, and
+  `/pages/x` all return 404. `bun run check` green at `379` node + `96` DOM, and
+  `smoke:routes` back to `35/35`.
+- `[locale]` is not part of this: it does not affect the 404 mechanism, and it
+  belongs to its own issue since #65 excludes markets and it would touch every
+  route file.
