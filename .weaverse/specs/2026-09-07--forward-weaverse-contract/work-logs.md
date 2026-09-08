@@ -100,7 +100,11 @@
   sections — only small cards inside `AccountShell`. Both are theme-owned and
   never Weaverse-composed, so manufacturing sections there would contradict the
   contract.
-- Net **-1048 lines** across 17 files (447 added, 1495 removed).
+- Line count, measured per directory so the number is not read as a repo-wide
+  shrink: the 12 route files lost 1117 lines net (337 added, 1454 removed),
+  while `src/sections/` added 1963 across 35 new files. `src/` therefore grew
+  by 955 lines net. Markup moved out of the routes; the growth is the
+  per-section imports, prop interfaces, and exports that extraction buys.
 - One source-regex assertion in `tests/shopify-content-adapter.test.ts` pointed
   at the article route for `<RichTextRuns runs={block.runs} />`; repointed to
   `src/sections/article-body.tsx`, where that markup now lives.
@@ -152,3 +156,23 @@
 - No section was invented to match the table. `article-related` stayed out
   because the route does not render it, and the four PDP disclosure panels
   stayed inside the buy block because they are one stack, not four sections.
+
+## 2026-09-08 (verification follow-up) — @hta218
+
+- Re-ran the gates on `8a7a749` from the primary checkout, where Bun matches
+  the pinned `1.3.14` line (local `1.4.2`).
+- **The DOM suite is fine.** It passes `66/66` here, so the 25 failures logged
+  above were entirely the older local Bun and not a regression. The pinned-Bun
+  warning in `AGENTS.md` stays useful, but nothing in the extraction broke the
+  DOM layer.
+- Ran `bun run test:browser:static`, which the extraction entry did not cover:
+  `146 passed / 10 intentional skips / 0 failures` across desktop, short
+  desktop, and true mobile against a fresh production build. This is the
+  evidence for "extraction moved markup without changing rendered output" —
+  a 1454-line markup move across 12 routes is exactly what the browser matrix
+  exists to check, and JSDOM cannot prove it.
+- Verified the two new `AGENTS.md` section rules against the tree rather than
+  trusting the log: no file in `src/sections/` imports the storefront data
+  source or a fixture, and every section is a Server Component.
+- `bun run check` passed in full: `338/338` node, `66/66` DOM, GraphQL,
+  42-page build, compiled theme, route contract `20 + 4`.
