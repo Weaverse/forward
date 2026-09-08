@@ -556,3 +556,31 @@ outline. Four separate gaps, each of which alone breaks the bridge.
   is what caught the case-study conflict rather than shipping it.
 - Gates: `bun run check` green at `354` node + `96` DOM, and the static browser
   matrix at `146 / 10 / 0`.
+
+## 2026-09-08 (POC parity audit) — @hta218
+
+Leo's correction: follow the POC rather than deriving from it. The four Studio
+bugs above were all things the POC already had right, and reading it in
+fragments instead of comparing it whole is what produced them. Did the
+comparison properly.
+
+- **Missing: the per-item revalidation route.** `app/api/weaverse/revalidate`
+  exists in the POC and had no counterpart here. Without it a merchant editing a
+  section — especially changing a resource selection — sees stale data until a
+  full reload, because a component loader otherwise only runs during a page
+  load. Added with `createWeaverseNextRevalidateHandler`, plus
+  `revalidateServerClient()` which uses the handler's validated request context
+  when present and falls back to a bare client for older Studio bridges.
+  Verified live: an empty body returns `400 invalid-payload`, so the handler is
+  mounted and validating.
+- **Project id now comes from the payload**, as in the POC, falling back to the
+  environment. Studio targets the project the payload was loaded with; taking it
+  from the environment instead would point the bridge at a different project
+  whenever the two disagree.
+- Deliberately still absent, both deferred with theme settings under option A:
+  `root-provider.tsx` and `theme-settings-css-variables.tsx`. Nothing reads
+  theme settings yet, so adding the provider now would wire a store with no
+  consumer. They land in the slice that wires the Header and Footer.
+- Remaining POC files with no counterpart are its own fixtures and tests
+  (`slideshow-schema`, `resource-picker-smoke`, and their suites), which are
+  spike material rather than starter code.

@@ -24,15 +24,23 @@ import { clientRequestContext } from "./request-context";
 
 export interface WeaversePageProps {
   data: WeaverseNextLoaderData;
+  /** Fallback when the payload carries no project metadata. */
   projectId: string;
 }
 
 export function WeaversePage({ data, projectId }: WeaversePageProps) {
+  /* Prefer the id the payload was actually loaded with: Studio targets that
+   * project, and a mismatch between it and the environment would point the
+   * bridge at the wrong one. */
+  const resolvedProjectId =
+    (data.configs?.projectId as string | undefined) ??
+    (data.project?.id as string | undefined) ??
+    projectId;
   /* Studio attaches to the route identity carried in the payload; without it
    * the bridge has no page to outline and no item to revalidate. */
   const client = createWeaverseNextClient({
     components: WEAVERSE_COMPONENTS,
-    projectId,
+    projectId: resolvedProjectId,
     requestContext: clientRequestContext(data),
   });
 

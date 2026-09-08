@@ -16,7 +16,10 @@
 
 import "server-only";
 
-import type { WeaverseNextLoaderData } from "@weaverse/next";
+import type {
+  WeaverseNextLoaderData,
+  WeaverseNextRequestContext,
+} from "@weaverse/next";
 import type {
   WeaverseNextServerClient,
   WeaverseNextThemeSettingsResponse,
@@ -158,6 +161,37 @@ export async function loadWeaversePage({
  * share a single fetch per request. This adds no cross-request caching, so
  * design-mode reads — which the SDK forces to `no-store` — stay fresh.
  */
+/**
+ * Builds a client for the Studio revalidation handler.
+ *
+ * When the handler supplies a validated request context, the loader re-runs
+ * with the live page's exact route identity. Without one — an older Studio
+ * bridge — fall back to a bare client so the edit still resolves rather than
+ * failing outright.
+ */
+export async function revalidateServerClient(
+  requestContext?: WeaverseNextRequestContext,
+): Promise<WeaverseNextServerClient | null> {
+  if (requestContext === undefined) {
+    return await createServerClient("/", undefined);
+  }
+
+  const config = readWeaverseConfig(process.env);
+  if (config === null) {
+    return null;
+  }
+  return createWeaverseNextServerClient({
+    components: WEAVERSE_SERVER_COMPONENTS,
+    env: config.sdkEnv,
+    projectId: config.projectId,
+    themeSchema,
+    ...(config.weaverseHost === undefined
+      ? {}
+      : { weaverseHost: config.weaverseHost }),
+    requestContext,
+  });
+}
+
 /** The configured project id, or `null` when Weaverse is not configured. */
 export function weaverseProjectId(): string | null {
   return readWeaverseConfig(process.env)?.projectId ?? null;
