@@ -259,3 +259,48 @@
   it is a staging/self-hosted switch. Left empty for production.
 - `WEAVERSE_PUBLIC_API_BASE` remains deliberately absent from the template for
   the same reason: self-hosted deployments only.
+
+## 2026-09-08 (Phase 4 connection slice) — @hta218
+
+- Registry verified at install time: `alpha` resolved to `0.1.0-alpha.16`,
+  `latest` still the stale `0.1.0-alpha.0`. Installed `@weaverse/next` alone
+  and pinned it exactly; `@weaverse/react` and `@weaverse/schema` arrived
+  transitively as predicted. Dependency committed on its own with the gates and
+  a clean 71-package production audit proving it inert before any composition.
+- **The env allowlist plan was wrong and the SDK source corrected it.** The
+  contract said to hand the SDK an explicit object instead of `process.env`.
+  Reading `readEnv` showed that is not enough: it falls back to
+  `process.env[key]` whenever a key is *absent* from the object it was given,
+  so a short allowlist blocks nothing. Only a key present with a defined value
+  short-circuits the fallback. `src/lib/weaverse/env.ts` therefore names all six
+  keys the SDK reads and supplies each one, blanking
+  `PUBLIC_STOREFRONT_API_TOKEN`, `WEAVERSE_API_KEY`, and
+  `WEAVERSE_PUBLIC_API_BASE`. That is the same explicit-empty discipline
+  `scripts/env-matrix.mts` already uses.
+- A test asserts the key list against the installed SDK bundle, so a new SDK
+  env key fails the suite instead of silently falling through to `process.env`.
+  Sabotage-proven: removing one key from the list produced exactly that failure.
+- The seam fails soft everywhere. An unconfigured project, a network error, a
+  missing page, or the Builder's fallback placeholder all yield `null` and the
+  route keeps its theme-owned rendering, so composition can never turn a
+  working page into an error page.
+- 17 section schemas and the component registry landed in `src/lib/weaverse/`
+  rather than inside `src/sections/`, keeping section files pure presentation
+  per `AGENTS.md` and schema code out of route bundles. Every input maps to a
+  prop the shipped section already takes; data-shaped props stay selectors.
+  Header, Footer, the buy block, grid behavior, Cart, account, and the
+  theme-owned route sections are deliberately absent from the registry.
+- Seed data transcribed from the live routes into `scripts/weaverse-seed/`:
+  `INDEX` (7 sections), `/about`, `/materials`, `/field-testing` (4 each), plus
+  theme settings. `bun run seed:weaverse` is a dry run; `--apply` writes and is
+  the only path that reads `WEAVERSE_API_KEY`. Section types are validated
+  against the registry before the first request and item ids are a
+  deterministic digest, so re-running merges instead of duplicating. Validation
+  sabotage-proven against an unregistered type and a duplicate key.
+- The Content API shape came from `docs/content-api/`, not from guesswork:
+  `PATCH /api/v1/content/projects/:id/pages/:type/:handle` with
+  `{ items: [{ id, type, data, children }] }`, and
+  `PATCH .../theme-settings` with `{ theme }`.
+- Gates after each slice: `bun run check` green throughout, ending at `350`
+  node + `66` DOM tests. No composition is wired into any route yet, so the
+  storefront renders exactly as before.
