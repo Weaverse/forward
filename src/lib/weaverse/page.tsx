@@ -20,7 +20,10 @@ import {
 } from "@weaverse/next";
 
 import { WEAVERSE_COMPONENTS } from "./components";
-import type { StorefrontDataContext } from "./data-context";
+import {
+  type StorefrontDataContext,
+  StorefrontDataProvider,
+} from "./data-context";
 import { clientRequestContext } from "./request-context";
 
 export interface WeaversePageProps {
@@ -60,7 +63,9 @@ export function WeaversePage({
 
   return (
     <WeaverseNextProvider client={client}>
-      <WeaverseNextRenderer data={data} dataContext={dataContext} />
+      <StorefrontDataProvider value={dataContext ?? {}}>
+        <WeaverseNextRenderer data={data} dataContext={dataContext} />
+      </StorefrontDataProvider>
     </WeaverseNextProvider>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useWeaverse } from "@weaverse/next";
+import { createContext, type ReactNode, useContext } from "react";
 
 import type {
   Collection,
@@ -38,16 +38,35 @@ export interface StorefrontDataContext {
   theme?: ThemeContent;
 }
 
+const StorefrontData = createContext<StorefrontDataContext>({});
+
+/**
+ * Supplies route-loaded storefront data to the sections below it.
+ *
+ * `WeaversePage` wraps the renderer in this, and a route's own fallback wraps
+ * the same sections in it directly. That is the point: a section reads its
+ * resource from one place whether Weaverse composed the page or the theme
+ * rendered it from its own defaults, so the credential-free storefront and the
+ * composed one run the same component code.
+ */
+export function StorefrontDataProvider({
+  children,
+  value,
+}: {
+  children: ReactNode;
+  value: StorefrontDataContext;
+}) {
+  return <StorefrontData value={value}>{children}</StorefrontData>;
+}
+
 /**
  * Reads the route-provided storefront data.
  *
- * Returns an empty object rather than throwing when a section renders outside
- * a composed page — in Studio a merchant can drop a product section onto a
+ * Defaults to an empty object rather than throwing when a section renders
+ * outside a provider — in Studio a merchant can drop a product section onto a
  * page that has no product, and that should render an empty state, not crash
  * the editor.
  */
 export function useStorefrontContext(): StorefrontDataContext {
-  const weaverse = useWeaverse();
-  const context = weaverse?.dataContext as StorefrontDataContext | undefined;
-  return context ?? {};
+  return useContext(StorefrontData);
 }
