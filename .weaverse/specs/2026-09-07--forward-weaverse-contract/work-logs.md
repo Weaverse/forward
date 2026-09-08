@@ -304,3 +304,36 @@
 - Gates after each slice: `bun run check` green throughout, ending at `350`
   node + `66` DOM tests. No composition is wired into any route yet, so the
   storefront renders exactly as before.
+
+## 2026-09-08 (schema reorganization) — @hta218
+
+- Leo rejected the first schema layout and authorized reading Pilot for file
+  organization only. `AGENTS.md` had a blanket prohibition, so it was rewritten
+  to record the exception and its limit rather than leaving a documented
+  constraint quietly contradicted: layout conventions may be adopted,
+  implementation may not, and nothing here is a translation of Pilot source.
+- Three organizational patterns adopted:
+  1. **Schema beside component.** `src/lib/weaverse/schemas.ts` was a
+     monolith 17 sections away from the markup it described. Each `schema` now
+     lives in its section's own file, so settings and markup cannot drift.
+     Pilot pairs this with `export default` and `import * as`; Forward keeps
+     named exports per its own rule, and the registry pairs the module's schema
+     with the named component instead.
+  2. **Theme settings per group.** `settings/header.ts`, `settings/footer.ts`,
+     `settings/editorial-imagery.ts`, each `as const satisfies
+     WeaverseNextThemeSchemaGroup`, composed in `theme-schema.ts`.
+  3. **Derived types.** `settings/types.ts` walks the input tuples and produces
+     `HeaderSettings`, `FooterSettings`, `EditorialImagerySettings`, and the
+     combined `ThemeSettings`. Because the types come from the same
+     declarations Builder renders, renaming an input breaks its consumers at
+     compile time instead of silently reading `undefined`.
+- Added `Heading`, `Subheading`, `Paragraph`, and `Button` as shared Weaverse
+  elements. They render through the existing `sectionHeading`, `eyebrow`, and
+  `cta` recipes, so Studio-authored copy and route-authored copy are the same
+  pixels rather than a lookalike. `Heading` keeps level (`as`) separate from
+  size because heading level is document structure, not appearance, and
+  `Button` is always a link since every authored CTA navigates.
+- The registry now holds 21 entries: 4 shared elements plus the 17 sections.
+- Gates after the reorganization: `bun run check` green at `350` node + `66`
+  DOM, 42-page build, route contract `20 + 4`. The seed dry run still validates
+  every seeded section type against the registry.
