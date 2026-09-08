@@ -584,3 +584,28 @@ comparison properly.
 - Remaining POC files with no counterpart are its own fixtures and tests
   (`slideshow-schema`, `resource-picker-smoke`, and their suites), which are
   spike material rather than starter code.
+
+## 2026-09-08 (Studio bridge crashed on an incomplete request context) — @hta218
+
+Studio loaded but its runtime threw twice: `reading 'pageId' of undefined` in
+`refreshStudio`, and `reading 'language' of undefined` from its
+project-not-found bundle.
+
+- **Cause: the server request context was missing four fields.** The POC's
+  `buildWeaverseNextPageRequestContext` supplies `url`, `i18n`, `pageType`, and
+  `handle`; this seam supplied only `headers`, `pathname`, and `searchParams`.
+  Those four travel to the client in `configs.requestInfo`, so the bridge read
+  `i18n.language` off `undefined` and had no page identity to refresh.
+- `i18n` reuses `CATALOG_I18N` from the Shopify client rather than declaring a
+  second market table — markets are a deferred slice and one source of truth is
+  enough. It is now exported instead of file-local.
+- `url` is built from the forwarded host so it matches the deployed preview.
+  `resolveRequestUrl` prefers `url` over `pathname`, and a bare pathname
+  resolves against `http://localhost`, which never matches a real preview.
+- Verified on a design-mode request that the payload now carries
+  `requestInfo: { pathname: "/about", search, i18n: { country: "US", language:
+  "EN", locale: "en-us" }, pageType: "CUSTOM", handle: "about" }`.
+- The pattern across today's Studio failures is consistent: everything the
+  storefront needs was already right, and every break was a field the *bridge*
+  needs that the storefront never reads. Storefront-facing checks cannot see
+  any of them, which is the argument for a design-mode gate.
