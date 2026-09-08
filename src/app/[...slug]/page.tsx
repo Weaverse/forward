@@ -17,12 +17,14 @@ interface CustomPageProps {
  * Every Weaverse `CUSTOM` page, served by one route.
  *
  * Merchants create custom pages at paths this repository cannot know ahead of
- * time, so there is no route file per page. The route deliberately does not
- * live at the app root: a dynamic root catch-all matches every unclaimed URL,
- * which would turn unknown product, collection, article, page, and policy
- * handles from real 404s into soft ones. `proxy.ts` rewrites the paths Weaverse
- * actually publishes to this internal prefix instead, so every other URL keeps
- * Next's ordinary routing and its ordinary 404.
+ * time, so there is no route file per page.
+ *
+ * Sitting at the app root, this also catches what other routes decline: a
+ * dynamic route with `dynamicParams = false` does not match an unknown handle,
+ * and routing then falls through to here. `notFound()` answers both cases with
+ * a real 404 — which only holds while no `loading.tsx` wraps the route in a
+ * Suspense boundary, because a streamed shell commits the response to 200
+ * before the check runs.
  */
 export default async function WeaverseCustomPage(props: CustomPageProps) {
   const { slug } = await props.params;
@@ -36,8 +38,6 @@ export default async function WeaverseCustomPage(props: CustomPageProps) {
   const projectId = weaverseProjectId();
 
   if (page === null || projectId === null) {
-    /* The proxy only rewrites paths Weaverse listed, so reaching here means
-     * the page was unpublished between the cached listing and this request. */
     notFound();
   }
 

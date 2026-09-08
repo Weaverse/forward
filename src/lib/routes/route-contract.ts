@@ -116,24 +116,23 @@ export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [
   /*
    * Weaverse custom pages are all rendered by one internal route. Merchants
    * create them at paths this repository cannot know ahead of time, so there
-   * is no route file per page; `proxy.ts` rewrites each published path onto
-   * the renderer. The three entries below pin the pathnames the storefront
-   * ships with, which is what the smoke run actually exercises.
+   * is no route file per page. The three entries below pin the pathnames the
+   * storefront ships with, which is what the smoke run actually exercises.
    */
   {
-    pattern: "/weaverse-page/[...slug]",
+    pattern: "/[...slug]",
     label: "About Forward custom page",
     category: "content",
     smoke: { path: "/about", expectedStatus: 200 },
   },
   {
-    pattern: "/weaverse-page/[...slug]",
+    pattern: "/[...slug]",
     label: "Materials custom page",
     category: "content",
     smoke: { path: "/materials", expectedStatus: 200 },
   },
   {
-    pattern: "/weaverse-page/[...slug]",
+    pattern: "/[...slug]",
     label: "Field testing custom page",
     category: "content",
     smoke: { path: "/field-testing", expectedStatus: 200 },

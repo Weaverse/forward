@@ -32,7 +32,6 @@ import {
   getCustomerAccountRuntime,
 } from "@/lib/account/customer-account";
 import { createCustomerAccountSessionManager } from "@/lib/account/session-manager";
-import { isWeaverseCustomPage } from "@/lib/weaverse/custom-pages";
 
 const ACCOUNT_I18N = { country: "US", language: "EN" } as const;
 const CUSTOMER_ACCOUNT_PROTOCOL_METHODS = new Map<string, string>([
@@ -132,63 +131,7 @@ function personalizedAccountPageResponse(request: NextRequest): Response {
   return response;
 }
 
-/** Where the Weaverse custom-page route lives. Never a public URL. */
-const WEAVERSE_CUSTOM_PREFIX = "/weaverse-page";
-/**
- * Marks a request this proxy rewrote.
- *
- * The proxy runs again on its own rewrite, so the prefix guard below cannot
- * tell an internal rewrite from a visitor typing the internal URL by pathname
- * alone. This header is the difference: only a rewrite carries it.
- */
-const REWRITE_MARKER = "x-forward-weaverse-rewrite";
-
-/**
- * Routes a Weaverse custom page to its renderer, before anything streams.
- *
- * Only paths Weaverse actually publishes are rewritten. Everything else is
- * left to ordinary Next routing, which is what keeps unknown handles answering
- * a real 404 instead of the soft 404 a root-level catch-all would produce.
- */
-async function weaverseCustomPageResponse(
-  request: NextRequest,
-): Promise<Response> {
-  const projectId = process.env.WEAVERSE_PROJECT_ID?.trim();
-  if (!projectId || projectId === "REPLACE_ME") {
-    return NextResponse.next();
-  }
-
-  const { pathname } = request.nextUrl;
-  /* The renderer's prefix is internal. A visitor addressing it directly gets
-   * the same 404 as any other unknown path, so a custom page has exactly one
-   * public URL and the internal one cannot be linked or indexed. Middleware
-   * does not re-run on a rewrite it issued, so this never blocks the real
-   * request. */
-  if (pathname.startsWith(`${WEAVERSE_CUSTOM_PREFIX}/`)) {
-    if (request.headers.get(REWRITE_MARKER) !== null) {
-      return NextResponse.next();
-    }
-    const blocked = request.nextUrl.clone();
-    blocked.pathname = "/weaverse-page-not-addressable";
-    return NextResponse.rewrite(blocked);
-  }
-
-  if (!(await isWeaverseCustomPage(pathname, projectId))) {
-    return NextResponse.next();
-  }
-
-  const target = request.nextUrl.clone();
-  target.pathname = `${WEAVERSE_CUSTOM_PREFIX}${pathname}`;
-  const headers = new Headers(request.headers);
-  headers.set(REWRITE_MARKER, "1");
-  return NextResponse.rewrite(target, { request: { headers } });
-}
-
 export async function proxy(request: NextRequest): Promise<Response> {
-  if (!request.nextUrl.pathname.startsWith("/account")) {
-    return weaverseCustomPageResponse(request);
-  }
-
   try {
     const runtime = getCustomerAccountRuntime();
     if (runtime === null) {
@@ -240,14 +183,5 @@ export async function proxy(request: NextRequest): Promise<Response> {
  * through without invoking Hydrogen's route interceptors.
  */
 export const config = {
-  matcher: [
-    "/account/:path*",
-    /*
-     * Every other storefront path, so a Weaverse custom page can be routed
-     * before rendering starts. Framework assets, API handlers, and root
-     * metadata files are excluded: they are never custom pages, and running
-     * this on them would add a listing lookup to every asset request.
-     */
-    "/((?!_next/|api/|favicon\\.ico$|icon\\.svg$|robots\\.txt$|sitemap\\.xml$|images/).*)",
-  ],
+  matcher: ["/account/:path*"],
 };
