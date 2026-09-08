@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 
 import { storefront } from "@/lib/storefront/data-source";
 import { WeaversePage } from "@/lib/weaverse/page";
-import { loadWeaversePage, weaverseProjectId } from "@/lib/weaverse/server";
+import {
+  loadWeaversePage,
+  type SearchParams,
+  weaverseProjectId,
+} from "@/lib/weaverse/server";
 import EditorialCallout from "@/sections/editorial-callout";
 import EditorialOverlayHero from "@/sections/editorial-overlay-hero";
 import NumberedSequence from "@/sections/numbered-sequence";
@@ -29,11 +33,14 @@ const SEQUENCE_STEPS = [
  * storefront stays complete. The sections take one prop shape either way;
  * only who fills it changes.
  */
-export default async function FieldTestingPage() {
+export default async function FieldTestingPage(props: {
+  searchParams: Promise<SearchParams>;
+}) {
   const [page, projectId] = await Promise.all([
     loadWeaversePage({
       handle: "field-testing",
       pathname: "/field-testing",
+      searchParams: await props.searchParams,
       type: "CUSTOM",
     }),
     Promise.resolve(weaverseProjectId()),

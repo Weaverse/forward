@@ -20,6 +20,7 @@ import {
 } from "@weaverse/next";
 
 import { WEAVERSE_COMPONENTS } from "./components";
+import { clientRequestContext } from "./request-context";
 
 export interface WeaversePageProps {
   data: WeaverseNextLoaderData;
@@ -27,9 +28,12 @@ export interface WeaversePageProps {
 }
 
 export function WeaversePage({ data, projectId }: WeaversePageProps) {
+  /* Studio attaches to the route identity carried in the payload; without it
+   * the bridge has no page to outline and no item to revalidate. */
   const client = createWeaverseNextClient({
     components: WEAVERSE_COMPONENTS,
     projectId,
+    requestContext: clientRequestContext(data),
   });
 
   return (

@@ -2,8 +2,12 @@
 
 import Link from "next/link";
 import { cta, eyebrow, sectionHeading } from "@/lib/presentation/variants";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface EditorialCalloutProps {
+interface EditorialCalloutProps extends WeaverseElementProps {
   eyebrowLabel: string;
   heading: string;
   body: string;
@@ -21,9 +25,13 @@ function EditorialCallout({
   body,
   ctaLabel,
   ctaHref,
+  ...rest
 }: EditorialCalloutProps) {
   return (
-    <section className="mx-auto grid w-full max-w-page grid-cols-spec-row items-end gap-11.25 px-page-gutter py-section-block max-md:grid-cols-1">
+    <section
+      {...elementAttributes(rest)}
+      className="mx-auto grid w-full max-w-page grid-cols-spec-row items-end gap-11.25 px-page-gutter py-section-block max-md:grid-cols-1"
+    >
       <div>
         <p className={eyebrow()}>{eyebrowLabel}</p>
         <h2 className={sectionHeading()}>{heading}</h2>

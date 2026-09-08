@@ -1,16 +1,23 @@
 "use client";
 
 import { parseRows } from "../parse";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface StatBandProps {
+interface StatBandProps extends WeaverseElementProps {
   /** One `value | label` pair per line. Parsed by `./parse`. */
   stats: string;
 }
 
 /** About page: a signal-coloured band of headline counts. */
-function StatBand({ stats }: StatBandProps) {
+function StatBand({ stats, ...rest }: StatBandProps) {
   return (
-    <section className="grid grid-cols-3 bg-signal max-md:grid-cols-1">
+    <section
+      {...elementAttributes(rest)}
+      className="grid grid-cols-3 bg-signal max-md:grid-cols-1"
+    >
       {parseRows(stats, 2).map(([value, label]) => (
         <div
           key={label}

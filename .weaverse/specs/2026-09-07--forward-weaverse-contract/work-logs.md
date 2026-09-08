@@ -516,3 +516,43 @@ so the routes take their static fallback. `bun run check` green at `354` node +
 - Verified on a production build at the exact URL that failed: `/about`,
   `/materials`, and `/field-testing` all return 200 with an editorial image and
   no error page. Gates green at `354` node + `82` DOM.
+
+## 2026-09-08 (Studio could not connect) — @hta218
+
+Leo opened the project in Studio and it would not connect or show a page
+outline. Four separate gaps, each of which alone breaks the bridge.
+
+1. **`StudioConnect` was in `<head>`.** It is a Client Component and belongs in
+   `<body>`, where the POC mounts it.
+2. **Routes never forwarded `searchParams`.** Design mode is detected from the
+   query Studio puts on the iframe URL, so without them the SDK resolved
+   published mode and returned no schema.
+3. **The client had no request context.** `createWeaverseNextClient` was given
+   only components and a project id, so the bridge had no route identity to
+   attach to. `clientRequestContext()` now rebuilds it from
+   `configs.requestInfo`, the way the POC does.
+4. **Components dropped the runtime identity props.** The Weaverse runtime
+   passes `data-wv-id` / `data-wv-type` as props, and a component must spread
+   them onto its root element. None of the fourteen did, so only the root
+   `main` carried an id: the page rendered perfectly and Studio saw one
+   selectable item instead of five. This is the failure mode worth remembering
+   — **the storefront looks completely correct while the theme is unusable in
+   Studio**, so no storefront-facing check can catch it.
+- Added `WeaverseElementProps` and `elementAttributes()`, which forward only the
+  identity attributes rather than the whole prop bag, since the bag also carries
+  authored settings that are not DOM attributes.
+- Measured before and after on a real design-mode request: `data-wv-id` went
+  from `1` to `5` per page, with the expected types — `main` plus the four
+  sections, on all three routes.
+- **A real conflict surfaced while guarding this.** `product-case-study`
+  returned `null` when no product resolved, which is right on the storefront and
+  wrong in Studio: an item that renders nothing cannot be selected, so a
+  merchant could never reach it to choose a product. It now renders a selectable
+  placeholder when the runtime is rendering it — detected by the identity
+  attributes being present — and still renders nothing when a route calls it
+  directly. Pilot solves the same problem with a dedicated placeholder file.
+- `tests/dom/composed-sections.test.tsx` now also asserts every composed
+  component forwards the identity attributes onto its root element. That guard
+  is what caught the case-study conflict rather than shipping it.
+- Gates: `bun run check` green at `354` node + `96` DOM, and the static browser
+  matrix at `146 / 10 / 0`.

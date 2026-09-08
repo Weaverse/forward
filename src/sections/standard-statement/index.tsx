@@ -2,8 +2,12 @@
 
 import { eyebrow } from "@/lib/presentation/variants";
 import { parseLines } from "../parse";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface StandardStatementProps {
+interface StandardStatementProps extends WeaverseElementProps {
   eyebrowLabel: string;
   statement: string;
   /** One column per line. Parsed by `./parse`. */
@@ -15,9 +19,13 @@ function StandardStatement({
   eyebrowLabel,
   statement,
   columns,
+  ...rest
 }: StandardStatementProps) {
   return (
-    <section className="mx-auto w-full max-w-page px-page-gutter py-section-block">
+    <section
+      {...elementAttributes(rest)}
+      className="mx-auto w-full max-w-page px-page-gutter py-section-block"
+    >
       <p className={eyebrow()}>{eyebrowLabel}</p>
       <h2 className="max-w-275 text-balance font-heading text-about-statement leading-display-relaxed">
         {statement}

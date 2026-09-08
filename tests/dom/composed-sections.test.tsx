@@ -91,3 +91,31 @@ describe("image inputs survive Builder's own shape", () => {
     assert.ok(container.textContent?.includes("Heading"));
   });
 });
+
+describe("composed components are addressable by Studio", () => {
+  /* Studio finds an item by the data-wv-* attributes the runtime passes as
+   * props. A component that renders correctly but drops them is invisible in
+   * Studio: no outline entry, nothing to select or reorder. The storefront
+   * looks fine, so only this assertion catches it. */
+  for (const [type, Component] of COMPOSED) {
+    it(`forwards the runtime identity attributes on ${type}`, () => {
+      const Untyped = Component as unknown as (props: {
+        "data-wv-id": string;
+        "data-wv-type": string;
+      }) => React.ReactNode;
+
+      const { container } = render(
+        <Untyped data-wv-id="item-1" data-wv-type={type} />,
+      );
+
+      const root = container.firstElementChild;
+      assert.notEqual(root, null, `${type} rendered nothing`);
+      assert.equal(
+        root?.getAttribute("data-wv-id"),
+        "item-1",
+        `${type} dropped data-wv-id, so Studio cannot select it`,
+      );
+      assert.equal(root?.getAttribute("data-wv-type"), type);
+    });
+  }
+});

@@ -4,8 +4,12 @@ import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
 import { sectionHeading, textLink } from "@/lib/presentation/variants";
 import type { Product } from "@/lib/storefront/types";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface ProductStripProps {
+interface ProductStripProps extends WeaverseElementProps {
   eyebrowLabel: string;
   heading: string;
   linkLabel: string;
@@ -21,10 +25,14 @@ function ProductStrip({
   linkLabel,
   linkHref,
   loaderData,
+  ...rest
 }: ProductStripProps) {
   const products = loaderData?.products ?? [];
   return (
-    <section className="mx-auto w-full max-w-page px-page-gutter py-section-block">
+    <section
+      {...elementAttributes(rest)}
+      className="mx-auto w-full max-w-page px-page-gutter py-section-block"
+    >
       <header className="mb-11.25 grid grid-cols-feature-row items-end gap-10 max-md:grid-cols-1 max-md:gap-5">
         <div>
           <p className="m-0 max-w-copy-narrow font-field-meta text-ui leading-meta font-medium text-signal-strong tracking-field-meta uppercase">

@@ -3,8 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface ProductTilesProps {
+interface ProductTilesProps extends WeaverseElementProps {
   /** Resolved by `./loader` from the merchant's product selection. */
   loaderData?: {
     tiles: readonly { product: Product; image: StorefrontImage }[];
@@ -12,10 +16,13 @@ interface ProductTilesProps {
 }
 
 /** Full-bleed product tiles, each linking through to its product page. */
-function ProductTiles({ loaderData }: ProductTilesProps) {
+function ProductTiles({ loaderData, ...rest }: ProductTilesProps) {
   const tiles = loaderData?.tiles ?? [];
   return (
-    <section className="grid grid-cols-3 bg-ink max-md:grid-cols-1">
+    <section
+      {...elementAttributes(rest)}
+      className="grid grid-cols-3 bg-ink max-md:grid-cols-1"
+    >
       {tiles.map(({ product, image }) => (
         <Link
           className="relative min-h-162.5 text-text-inverse max-md:min-h-150"

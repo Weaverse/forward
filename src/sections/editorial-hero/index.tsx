@@ -5,8 +5,12 @@ import { cn } from "@/lib/cn";
 import { eyebrow } from "@/lib/presentation/variants";
 import type { StorefrontImage } from "@/lib/storefront/types";
 import { weaverseImage } from "@/lib/weaverse/image";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface EditorialHeroProps {
+interface EditorialHeroProps extends WeaverseElementProps {
   eyebrowLabel: string;
   heading: string;
   lede: string;
@@ -26,6 +30,7 @@ function EditorialHero({
   lede,
   image,
   imageSide = "right",
+  ...rest
 }: EditorialHeroProps) {
   const imageFirst = imageSide === "left";
   /* A merchant can clear the image in Studio, so absent is an ordinary state.
@@ -33,7 +38,10 @@ function EditorialHero({
    * column rather than taking the route down. */
   const resolved = weaverseImage(image);
   return (
-    <section className="mt-5.5 mr-7 ml-7 grid min-h-page-min grid-cols-split-90 bg-ink text-text-inverse max-md:mx-2.5 max-md:mt-2.5 max-md:min-h-0 max-md:grid-cols-1">
+    <section
+      {...elementAttributes(rest)}
+      className="mt-5.5 mr-7 ml-7 grid min-h-page-min grid-cols-split-90 bg-ink text-text-inverse max-md:mx-2.5 max-md:mt-2.5 max-md:min-h-0 max-md:grid-cols-1"
+    >
       <div
         className={cn(
           "flex flex-col justify-center p-panel-wide max-md:px-page-gutter max-md:py-13.75",

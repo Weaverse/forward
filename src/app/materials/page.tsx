@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 
 import { storefront } from "@/lib/storefront/data-source";
 import { WeaversePage } from "@/lib/weaverse/page";
-import { loadWeaversePage, weaverseProjectId } from "@/lib/weaverse/server";
+import {
+  loadWeaversePage,
+  type SearchParams,
+  weaverseProjectId,
+} from "@/lib/weaverse/server";
 import EditorialCallout from "@/sections/editorial-callout";
 import EditorialHero from "@/sections/editorial-hero";
 import PrincipleGrid from "@/sections/principle-grid";
@@ -26,11 +30,14 @@ const PRINCIPLES = [
  * the same sections render from local defaults so the credential-free
  * storefront stays complete.
  */
-export default async function MaterialsPage() {
+export default async function MaterialsPage(props: {
+  searchParams: Promise<SearchParams>;
+}) {
   const [page, projectId] = await Promise.all([
     loadWeaversePage({
       handle: "materials",
       pathname: "/materials",
+      searchParams: await props.searchParams,
       type: "CUSTOM",
     }),
     Promise.resolve(weaverseProjectId()),

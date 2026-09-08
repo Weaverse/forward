@@ -1,6 +1,10 @@
 "use client";
 
 import { cn } from "@/lib/cn";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "@/sections/weaverse-element";
 
 type ParagraphWidth = "lede" | "prose" | "full";
 
@@ -10,7 +14,7 @@ const WIDTH_CLASS: Record<ParagraphWidth, string> = {
   full: "",
 };
 
-export interface ParagraphProps {
+export interface ParagraphProps extends WeaverseElementProps {
   content: string;
   width?: ParagraphWidth;
   className?: string;
@@ -22,8 +26,20 @@ export interface ParagraphProps {
  * Width is a named choice rather than a free number so Studio copy cannot
  * drift outside the measure the type scale was designed around.
  */
-function Paragraph({ className, content, width = "prose" }: ParagraphProps) {
-  return <p className={cn(WIDTH_CLASS[width], className)}>{content}</p>;
+function Paragraph({
+  className,
+  content,
+  width = "prose",
+  ...rest
+}: ParagraphProps) {
+  return (
+    <p
+      {...elementAttributes(rest)}
+      className={cn(WIDTH_CLASS[width], className)}
+    >
+      {content}
+    </p>
+  );
 }
 
 export default Paragraph;

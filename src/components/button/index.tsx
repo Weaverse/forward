@@ -4,10 +4,14 @@ import Link from "next/link";
 
 import { cn } from "@/lib/cn";
 import { cta } from "@/lib/presentation/variants";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "@/sections/weaverse-element";
 
 type ButtonIntent = "primary" | "signal" | "light" | "outline";
 
-export interface ButtonProps {
+export interface ButtonProps extends WeaverseElementProps {
   label: string;
   href: string;
   intent?: ButtonIntent;
@@ -23,9 +27,19 @@ export interface ButtonProps {
  * performs an action rather than navigating belongs to the theme-owned
  * commerce surfaces, not to Studio.
  */
-function Button({ className, href, intent = "primary", label }: ButtonProps) {
+function Button({
+  className,
+  href,
+  intent = "primary",
+  label,
+  ...rest
+}: ButtonProps) {
   return (
-    <Link className={cn(cta({ intent }), className)} href={href}>
+    <Link
+      {...elementAttributes(rest)}
+      className={cn(cta({ intent }), className)}
+      href={href}
+    >
       {label}
     </Link>
   );

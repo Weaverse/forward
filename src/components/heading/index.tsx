@@ -2,11 +2,15 @@
 
 import { cn } from "@/lib/cn";
 import { sectionHeading } from "@/lib/presentation/variants";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "@/sections/weaverse-element";
 
 type HeadingSize = "display" | "section" | "subsection" | "subsectionSpaced";
 type HeadingTag = "h1" | "h2" | "h3" | "h4";
 
-export interface HeadingProps {
+export interface HeadingProps extends WeaverseElementProps {
   content: string;
   size?: HeadingSize;
   as?: HeadingTag;
@@ -26,9 +30,15 @@ function Heading({
   className,
   content,
   size = "section",
+  ...rest
 }: HeadingProps) {
   return (
-    <Tag className={cn(sectionHeading({ size }), className)}>{content}</Tag>
+    <Tag
+      {...elementAttributes(rest)}
+      className={cn(sectionHeading({ size }), className)}
+    >
+      {content}
+    </Tag>
   );
 }
 

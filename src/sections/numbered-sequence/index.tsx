@@ -2,12 +2,16 @@
 
 import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { parseRows } from "../parse";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
 /** One numbered sequence step: index column, then the step description. */
 const SEQUENCE_STEP_CLASS =
   "grid grid-cols-[65px_1fr] gap-5 border-border-subtle border-b py-7";
 
-interface NumberedSequenceProps {
+interface NumberedSequenceProps extends WeaverseElementProps {
   eyebrowLabel: string;
   heading: string;
   /** One `number | title | copy` row per line. Parsed by `./parse`. */
@@ -19,9 +23,13 @@ function NumberedSequence({
   eyebrowLabel,
   heading,
   steps,
+  ...rest
 }: NumberedSequenceProps) {
   return (
-    <section className="mx-auto grid w-full max-w-page grid-cols-split-70 gap-20 px-page-gutter py-section-block max-md:grid-cols-1">
+    <section
+      {...elementAttributes(rest)}
+      className="mx-auto grid w-full max-w-page grid-cols-split-70 gap-20 px-page-gutter py-section-block max-md:grid-cols-1"
+    >
       <header>
         <p className={eyebrow()}>{eyebrowLabel}</p>
         <h2 className={sectionHeading()}>{heading}</h2>

@@ -4,8 +4,12 @@ import Image from "next/image";
 import { eyebrow } from "@/lib/presentation/variants";
 import type { StorefrontImage } from "@/lib/storefront/types";
 import { weaverseImage } from "@/lib/weaverse/image";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface EditorialOverlayHeroProps {
+interface EditorialOverlayHeroProps extends WeaverseElementProps {
   eyebrowLabel: string;
   heading: string;
   lede: string;
@@ -19,11 +23,15 @@ function EditorialOverlayHero({
   heading,
   lede,
   image,
+  ...rest
 }: EditorialOverlayHeroProps) {
   /* A merchant can clear the image in Studio; the copy still stands alone. */
   const resolved = weaverseImage(image);
   return (
-    <section className="relative mt-5.5 mr-7 ml-7 min-h-[90svh] overflow-hidden text-text-inverse after:absolute after:inset-0 after:bg-field-testing-overlay after:content-[''] max-md:mx-2.5 max-md:mt-2.5 max-md:min-h-0">
+    <section
+      {...elementAttributes(rest)}
+      className="relative mt-5.5 mr-7 ml-7 min-h-[90svh] overflow-hidden text-text-inverse after:absolute after:inset-0 after:bg-field-testing-overlay after:content-[''] max-md:mx-2.5 max-md:mt-2.5 max-md:min-h-0"
+    >
       {resolved === null ? null : (
         <Image
           className="absolute inset-0 h-full object-cover"
