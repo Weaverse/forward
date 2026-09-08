@@ -36,4 +36,13 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["PAGE", "CUSTOM"],
+  },
+  presets: {
+    eyebrowLabel: "Representative equipment",
+    heading: "The standard, made physical.",
+    linkLabel: "Complete catalog",
+    linkHref: "/shop",
+  },
 });

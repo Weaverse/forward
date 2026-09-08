@@ -15,4 +15,10 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["PAGE", "CUSTOM"],
+  },
+  presets: {
+    stats: "9 | core objects\n3 | movement systems\n01 | repair commitment",
+  },
 });

@@ -30,4 +30,13 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["COLLECTION"],
+  },
+  presets: {
+    eyebrowLabel: "Collection essentials",
+    heading: "A focused kit for a full day out.",
+    ctaLabel: "View all equipment",
+    ctaHref: "/shop",
+  },
 });

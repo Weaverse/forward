@@ -20,4 +20,11 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["PRODUCT"],
+  },
+  presets: {
+    eyebrowLabel: "Works well with",
+    heading: "Complete the field system.",
+  },
 });

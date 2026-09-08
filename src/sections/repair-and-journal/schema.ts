@@ -45,4 +45,17 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["INDEX", "CUSTOM"],
+  },
+  presets: {
+    repairEyebrowLabel: "Repair, not replace",
+    repairHeading: "Keep equipment in motion.",
+    repairBody:
+      "Product defects are repaired free. Wear, accidents, and hard-earned damage are assessed honestly before work begins.",
+    repairLinkLabel: "Visit the repair desk",
+    repairLinkHref: "/pages/field-repair",
+    journalEyebrowLabel: "Latest field note",
+    journalLinkLabel: "Read the dispatch",
+  },
 });

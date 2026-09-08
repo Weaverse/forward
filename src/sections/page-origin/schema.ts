@@ -40,4 +40,14 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["PAGE"],
+  },
+  presets: {
+    eyebrowLabel: "Where this goes",
+    heading: "A short catalog,\nbuilt slowly.",
+    body: "Equipment built to be used, repaired, and used again.",
+    linkLabel: "Shop the catalog",
+    linkHref: "/shop",
+  },
 });

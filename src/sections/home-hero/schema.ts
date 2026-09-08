@@ -43,6 +43,11 @@ export const schema = createSchema({
           label: "Secondary CTA link",
         },
         {
+          type: "textarea",
+          name: "stats",
+          label: "Stats (one `value | label` row per line)",
+        },
+        {
           type: "image",
           name: "image",
           label: "Image",
@@ -61,4 +66,17 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["INDEX"],
+  },
+  presets: {
+    eyebrowLabel: "Forward / Field equipment 2026",
+    heading: "Equipment for weather that changes the plan.",
+    lede: "Layerable apparel, precise footwear, and low-profile carry systems made to move together.",
+    primaryCtaLabel: "Shop all equipment",
+    primaryCtaHref: "/shop",
+    secondaryCtaLabel: "How we test",
+    secondaryCtaHref: "/field-testing",
+    stats: "3 | Systems\n9 | Core objects\nFor life | Repair",
+  },
 });

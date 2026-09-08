@@ -20,4 +20,11 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["ARTICLE"],
+  },
+  presets: {
+    breadcrumbLabel: "Journal",
+    breadcrumbHref: "/journal",
+  },
 });

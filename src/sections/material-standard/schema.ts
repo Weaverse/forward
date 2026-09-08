@@ -50,4 +50,16 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["INDEX", "CUSTOM"],
+  },
+  presets: {
+    eyebrowLabel: "Material standard",
+    heading: "Fewer materials. Better understood.",
+    body: "Every fabric, foam, buckle, and compound is selected around useful life, field repair, and performance you can actually feel.",
+    primaryCtaLabel: "Explore materials",
+    primaryCtaHref: "/materials",
+    secondaryCtaLabel: "About Forward",
+    secondaryCtaHref: "/about",
+  },
 });

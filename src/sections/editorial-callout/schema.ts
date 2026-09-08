@@ -35,4 +35,14 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["PAGE", "CUSTOM"],
+  },
+  presets: {
+    eyebrowLabel: "What this means",
+    heading: "Buy once. Repair often.",
+    body: "A shorter catalog means each object gets the attention it needs to last, and a repair desk that keeps it moving.",
+    ctaLabel: "Explore the catalog",
+    ctaHref: "/shop",
+  },
 });

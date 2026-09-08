@@ -31,4 +31,11 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["INDEX", "CUSTOM"],
+  },
+  presets: {
+    eyebrowLabel: "Shop by system",
+    heading: "Built separately. Better together.",
+  },
 });

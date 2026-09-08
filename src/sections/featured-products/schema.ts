@@ -46,4 +46,14 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["INDEX", "CUSTOM"],
+  },
+  presets: {
+    eyebrowLabel: "New field rotation",
+    heading: "Start with the core four.",
+    body: "A weather layer, breathable midlayer, close-body carry, and trail shoe form the shortest route to a complete Forward system.",
+    linkLabel: "Shop all equipment",
+    linkHref: "/shop",
+  },
 });

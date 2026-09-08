@@ -20,4 +20,11 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["ARTICLE"],
+  },
+  presets: {
+    backLinkLabel: "All field notes",
+    backLinkHref: "/journal",
+  },
 });

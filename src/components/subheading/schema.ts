@@ -24,4 +24,8 @@ export const schema = createSchema({
       ],
     },
   ],
+  presets: {
+    content: "Subheading",
+    tone: "muted",
+  },
 });

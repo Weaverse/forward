@@ -25,4 +25,12 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["COLLECTION"],
+  },
+  presets: {
+    eyebrowPrefix: "Movement system /",
+    ctaLabel: "Shop the complete index",
+    ctaHref: "/shop",
+  },
 });

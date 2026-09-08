@@ -31,4 +31,11 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["PAGE", "CUSTOM"],
+  },
+  presets: {
+    eyebrowLabel: "Case study",
+    ctaLabel: "View the product",
+  },
 });

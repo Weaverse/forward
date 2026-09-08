@@ -20,4 +20,10 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["PAGE"],
+  },
+  presets: {
+    eyebrowLabel: "Custom page",
+  },
 });

@@ -39,4 +39,9 @@ export const schema = createSchema({
       ],
     },
   ],
+  presets: {
+    content: "Section heading",
+    size: "section",
+    as: "h2",
+  },
 });

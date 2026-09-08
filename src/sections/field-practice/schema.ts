@@ -35,4 +35,14 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["COLLECTION"],
+  },
+  presets: {
+    eyebrowLabel: "Field practice",
+    heading: "Let the route set the pace.",
+    body: "Efficient movement is not about speed. It is about keeping effort even, noticing what changes, and reaching the last descent with enough attention left to enjoy it.",
+    linkLabel: "More field stories",
+    linkHref: "/journal",
+  },
 });

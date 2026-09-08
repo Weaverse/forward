@@ -24,4 +24,9 @@ export const schema = createSchema({
       ],
     },
   ],
+  presets: {
+    content:
+      "Supporting copy that explains the section in one or two sentences.",
+    width: "lede",
+  },
 });
