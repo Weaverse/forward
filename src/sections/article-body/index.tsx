@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
@@ -8,6 +10,11 @@ import type {
   JournalArticle,
   RichTextParagraph,
 } from "@/lib/storefront/types";
+import { useStorefrontContext } from "@/lib/weaverse/data-context";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
 type ProseBlock = Exclude<ArticleBlock, { type: "image" }>;
 type ImageBlock = Extract<ArticleBlock, { type: "image" }>;
@@ -128,24 +135,28 @@ function ArticleAside({
   );
 }
 
-interface ArticleBodyProps {
+interface ArticleBodyProps extends WeaverseElementProps {
   backLinkLabel: string;
   backLinkHref: string;
-  article: JournalArticle;
 }
 
 /**
  * Normalized article blocks rendered verbatim, split into prose runs and
  * full-width figures, with the route/filing rails alongside.
+ *
+ * The blocks are the article's own content, edited in Shopify and rendered
+ * as-is; the template only owns the back link.
  */
-export function ArticleBody({
+function ArticleBody({
   backLinkLabel,
   backLinkHref,
-  article,
+  ...rest
 }: ArticleBodyProps) {
+  const { article } = useStorefrontContext();
+  if (article === undefined) return null;
   const runs = splitBody(article.body);
   return (
-    <article>
+    <article {...elementAttributes(rest)}>
       {runs.map((run, index) => (
         <div key={runKey(run)}>
           {run.prose.length > 0 ? (
@@ -187,3 +198,7 @@ export function ArticleBody({
     </article>
   );
 }
+
+export default ArticleBody;
+
+export { schema } from "./schema";

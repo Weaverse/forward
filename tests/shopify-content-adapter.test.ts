@@ -398,7 +398,7 @@ describe("Shopify content mapper", () => {
     assert.equal(articleRun?.href, "/shop/outerwear");
     assert.match(
       readFileSync(
-        new URL("../src/sections/article-body.tsx", import.meta.url),
+        new URL("../src/sections/article-body/index.tsx", import.meta.url),
         "utf8",
       ),
       /<RichTextRuns runs=\{block\.runs\} \/>/,
