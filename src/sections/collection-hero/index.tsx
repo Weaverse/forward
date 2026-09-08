@@ -1,26 +1,39 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
 import { cn } from "@/lib/cn";
 import { cta, eyebrow } from "@/lib/presentation/variants";
 import type { Collection } from "@/lib/storefront/types";
+import { useStorefrontContext } from "@/lib/weaverse/data-context";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface CollectionHeroProps {
+interface CollectionHeroProps extends WeaverseElementProps {
   eyebrowPrefix: string;
   ctaLabel: string;
   ctaHref: string;
-  collection: Collection;
 }
 
 /** Collection hero: wide image beside a dark title panel. */
-export function CollectionHero({
+function CollectionHero({
   eyebrowPrefix,
   ctaLabel,
   ctaHref,
-  collection,
+  ...rest
 }: CollectionHeroProps) {
+  /* The collection is decided by the route, not by a merchant, so it
+   * arrives through the shared data context rather than a picker. */
+  const { collection } = useStorefrontContext();
+  if (collection === undefined) return null;
   return (
-    <section className="relative mt-5.5 mr-7 ml-7 grid min-h-page-min grid-cols-[1.3fr_0.7fr] items-stretch overflow-hidden bg-ink text-text-inverse max-md:mx-3 max-md:min-h-0 max-md:grid-cols-1">
+    <section
+      {...elementAttributes(rest)}
+      className="relative mt-5.5 mr-7 ml-7 grid min-h-page-min grid-cols-[1.3fr_0.7fr] items-stretch overflow-hidden bg-ink text-text-inverse max-md:mx-3 max-md:min-h-0 max-md:grid-cols-1"
+    >
       <div className="relative min-w-0 overflow-hidden max-md:min-h-route-media-min">
         <Image
           className="absolute inset-0 h-full object-cover object-center saturate-75 contrast-105"
@@ -52,3 +65,7 @@ export function CollectionHero({
     </section>
   );
 }
+
+export default CollectionHero;
+
+export { schema } from "./schema";

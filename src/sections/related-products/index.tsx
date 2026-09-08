@@ -1,25 +1,32 @@
+"use client";
+
 import { ProductCard } from "@/components/product-card";
 import {
   eyebrow,
   SHELL_SECTION_CLASS,
   sectionHeading,
 } from "@/lib/presentation/variants";
-import type { Product } from "@/lib/storefront/types";
+import { useStorefrontContext } from "@/lib/weaverse/data-context";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface RelatedProductsProps {
+interface RelatedProductsProps extends WeaverseElementProps {
   eyebrowLabel: string;
   heading: string;
-  products: readonly Product[];
 }
 
 /** Products that complete the system around the one being viewed. */
-export function RelatedProducts({
+function RelatedProducts({
   eyebrowLabel,
   heading,
-  products,
+  ...rest
 }: RelatedProductsProps) {
+  const { products: contextProducts } = useStorefrontContext();
+  const products = contextProducts ?? [];
   return (
-    <section className={SHELL_SECTION_CLASS}>
+    <section {...elementAttributes(rest)} className={SHELL_SECTION_CLASS}>
       <div className="mb-11 flex items-end justify-between gap-7.5 max-sm:flex-col max-sm:items-start">
         <div>
           <p className={eyebrow()}>{eyebrowLabel}</p>
@@ -34,3 +41,7 @@ export function RelatedProducts({
     </section>
   );
 }
+
+export default RelatedProducts;
+
+export { schema } from "./schema";

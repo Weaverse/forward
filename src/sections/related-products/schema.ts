@@ -1,0 +1,23 @@
+import { createSchema } from "@weaverse/schema";
+
+export const schema = createSchema({
+  type: "related-products",
+  title: "Related products",
+  settings: [
+    {
+      group: "Content",
+      inputs: [
+        {
+          type: "text",
+          name: "eyebrowLabel",
+          label: "Eyebrow",
+        },
+        {
+          type: "text",
+          name: "heading",
+          label: "Heading",
+        },
+      ],
+    },
+  ],
+});

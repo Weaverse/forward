@@ -1,27 +1,38 @@
+"use client";
+
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
 import { cta, eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import type { Product } from "@/lib/storefront/types";
+import { useStorefrontContext } from "@/lib/weaverse/data-context";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface CollectionGridProps {
+interface CollectionGridProps extends WeaverseElementProps {
   eyebrowLabel: string;
   heading: string;
   ctaLabel: string;
   ctaHref: string;
-  products: readonly Product[];
 }
 
 /** Dark product grid for a collection, introduced by a heading and one link. */
-export function CollectionGrid({
+function CollectionGrid({
   eyebrowLabel,
   heading,
   ctaLabel,
   ctaHref,
-  products,
+  ...rest
 }: CollectionGridProps) {
+  const { collectionProducts } = useStorefrontContext();
+  const products = collectionProducts ?? [];
   return (
-    <section className="bg-surface-dark py-section-block text-text-inverse">
+    <section
+      {...elementAttributes(rest)}
+      className="bg-surface-dark py-section-block text-text-inverse"
+    >
       <div className="mx-auto w-full max-w-page px-page-gutter">
         <div className="mb-11 flex items-end justify-between gap-7.5 max-sm:flex-col max-sm:items-start">
           <div>
@@ -41,3 +52,7 @@ export function CollectionGrid({
     </section>
   );
 }
+
+export default CollectionGrid;
+
+export { schema } from "./schema";

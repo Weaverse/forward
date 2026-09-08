@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
@@ -6,43 +8,54 @@ import {
   SHELL_SECTION_CLASS,
   textLink,
 } from "@/lib/presentation/variants";
-import type { Product, StorefrontImage } from "@/lib/storefront/types";
+import type { StorefrontImage } from "@/lib/storefront/types";
+import { useStorefrontContext } from "@/lib/weaverse/data-context";
+import { weaverseImage } from "@/lib/weaverse/image";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface SystemManifestProps {
+interface SystemManifestProps extends WeaverseElementProps {
   eyebrowLabel: string;
   heading: string;
   body: string;
-  image: StorefrontImage;
-  products: readonly Product[];
+  /** A Builder image value, a StorefrontImage, or nothing. */
+  image?: StorefrontImage | unknown;
   linkLabel: string;
   /** Omitted when no article resolves; the link is then not rendered. */
   linkHref?: string;
 }
 
 /** An offset image beside the system story and its product manifest list. */
-export function SystemManifest({
+function SystemManifest({
   eyebrowLabel,
   heading,
   body,
   image,
-  products,
   linkLabel,
   linkHref,
+  ...rest
 }: SystemManifestProps) {
+  const { collectionProducts } = useStorefrontContext();
+  const products = collectionProducts ?? [];
+  const resolvedImage = weaverseImage(image);
   return (
-    <section className={SHELL_SECTION_CLASS}>
+    <section {...elementAttributes(rest)} className={SHELL_SECTION_CLASS}>
       <div className="grid grid-cols-[0.8fr_1.2fr] items-center gap-[clamp(50px,10vw,150px)] max-md:grid-cols-1">
-        <div className="translate-y-20 shadow-collection-feature max-md:translate-y-0 max-md:shadow-collection-feature-mobile">
-          <Image
-            className="aspect-4/5 object-cover"
-            src={image.src}
-            alt={image.alt}
-            width={image.width}
-            height={image.height}
-            sizes="(min-width: 820px) 38vw, 100vw"
-            loading="lazy"
-          />
-        </div>
+        {resolvedImage === null ? null : (
+          <div className="translate-y-20 shadow-collection-feature max-md:translate-y-0 max-md:shadow-collection-feature-mobile">
+            <Image
+              className="aspect-4/5 object-cover"
+              src={resolvedImage.src}
+              alt={resolvedImage.alt}
+              width={resolvedImage.width}
+              height={resolvedImage.height}
+              sizes="(min-width: 820px) 38vw, 100vw"
+              loading="lazy"
+            />
+          </div>
+        )}
         <div>
           <p className={eyebrow()}>{eyebrowLabel}</p>
           <h2 className="mb-7 text-balance font-heading text-heading-2 leading-heading font-medium tracking-heading">
@@ -72,3 +85,7 @@ export function SystemManifest({
     </section>
   );
 }
+
+export default SystemManifest;
+
+export { schema } from "./schema";

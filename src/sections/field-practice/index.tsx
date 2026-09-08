@@ -1,13 +1,18 @@
-import Link from "next/link";
+"use client";
 
+import Link from "next/link";
 import {
   eyebrow,
   SHELL_SECTION_CLASS,
   sectionHeading,
   textLink,
 } from "@/lib/presentation/variants";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface FieldPracticeProps {
+interface FieldPracticeProps extends WeaverseElementProps {
   eyebrowLabel: string;
   heading: string;
   body: string;
@@ -16,15 +21,16 @@ interface FieldPracticeProps {
 }
 
 /** A closing two-column note: heading on the left, copy and link on the right. */
-export function FieldPractice({
+function FieldPractice({
   eyebrowLabel,
   heading,
   body,
   linkLabel,
   linkHref,
+  ...rest
 }: FieldPracticeProps) {
   return (
-    <section className={SHELL_SECTION_CLASS}>
+    <section {...elementAttributes(rest)} className={SHELL_SECTION_CLASS}>
       <div className="grid grid-cols-split-85 items-start gap-page-gap max-md:grid-cols-1">
         <div>
           <p className={eyebrow()}>{eyebrowLabel}</p>
@@ -42,3 +48,7 @@ export function FieldPractice({
     </section>
   );
 }
+
+export default FieldPractice;
+
+export { schema } from "./schema";
