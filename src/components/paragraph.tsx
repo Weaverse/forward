@@ -22,13 +22,11 @@ export interface ParagraphProps {
  * Width is a named choice rather than a free number so Studio copy cannot
  * drift outside the measure the type scale was designed around.
  */
-export function Paragraph({
-  className,
-  content,
-  width = "prose",
-}: ParagraphProps) {
+function Paragraph({ className, content, width = "prose" }: ParagraphProps) {
   return <p className={cn(WIDTH_CLASS[width], className)}>{content}</p>;
 }
+
+export default Paragraph;
 
 export const schema = createSchema({
   type: "paragraph",

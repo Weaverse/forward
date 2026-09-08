@@ -20,7 +20,7 @@ interface KitCalloutProps {
 }
 
 /** A named kit: one anchor product beside the pieces that travel with it. */
-export function KitCallout({
+function KitCallout({
   eyebrowLabel,
   heading,
   linkLabel,
@@ -66,6 +66,8 @@ export function KitCallout({
     </section>
   );
 }
+
+export default KitCallout;
 
 export const schema = createSchema({
   type: "kit-callout",

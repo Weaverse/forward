@@ -5,7 +5,7 @@ interface StatBandProps {
 }
 
 /** About page: a signal-coloured band of headline counts. */
-export function StatBand({ stats }: StatBandProps) {
+function StatBand({ stats }: StatBandProps) {
   return (
     <section className="grid grid-cols-3 bg-signal max-md:grid-cols-1">
       {stats.map((stat) => (
@@ -24,6 +24,8 @@ export function StatBand({ stats }: StatBandProps) {
     </section>
   );
 }
+
+export default StatBand;
 
 export const schema = createSchema({
   type: "stat-band",

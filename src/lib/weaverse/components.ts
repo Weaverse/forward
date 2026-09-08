@@ -43,53 +43,51 @@ import * as RepairAndJournal from "@/sections/repair-and-journal";
 import * as StandardStatement from "@/sections/standard-statement";
 import * as StatBand from "@/sections/stat-band";
 
-type SchemaModule = { schema: WeaverseNextComponent["schema"] };
-
 /**
- * Pairs a module's exported component with the schema exported beside it.
+ * A registry entry is just the section module: the component is its default
+ * export and the schema sits beside it in the same file, so the two cannot
+ * drift apart or be paired up wrongly here.
  *
- * Sections keep named exports per `AGENTS.md`, so the component is named
- * rather than a module default. The SDK renders registry entries with its own
- * prop shape; that cast is confined here so no section has to loosen its own
- * types, and mapping settings onto props stays the composition slice's job.
+ * The SDK renders entries with its own prop shape, so the component type is
+ * widened once at this boundary rather than loosening any section's own props.
  */
-function entry(
-  module: SchemaModule,
-  component: unknown,
-): WeaverseNextComponent {
+function entry(module: {
+  default: unknown;
+  schema: WeaverseNextComponent["schema"];
+}): WeaverseNextComponent {
   return {
-    default: component as WeaverseNextComponent["default"],
+    default: module.default as WeaverseNextComponent["default"],
     schema: module.schema,
   };
 }
 
 export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
   /* Shared elements, usable inside any composed section. */
-  entry(Heading, Heading.Heading),
-  entry(Subheading, Subheading.Subheading),
-  entry(Paragraph, Paragraph.Paragraph),
-  entry(Button, Button.Button),
+  entry(Heading),
+  entry(Subheading),
+  entry(Paragraph),
+  entry(Button),
 
   /* INDEX */
-  entry(HomeHero, HomeHero.HomeHero),
-  entry(FeaturedProducts, FeaturedProducts.FeaturedProducts),
-  entry(CollectionIndex, CollectionIndex.CollectionIndex),
-  entry(ProductSpotlight, ProductSpotlight.ProductSpotlight),
-  entry(MaterialStandard, MaterialStandard.MaterialStandard),
-  entry(KitCallout, KitCallout.KitCallout),
-  entry(RepairAndJournal, RepairAndJournal.RepairAndJournal),
+  entry(HomeHero),
+  entry(FeaturedProducts),
+  entry(CollectionIndex),
+  entry(ProductSpotlight),
+  entry(MaterialStandard),
+  entry(KitCallout),
+  entry(RepairAndJournal),
 
   /* PAGE */
-  entry(EditorialHero, EditorialHero.EditorialHero),
-  entry(EditorialOverlayHero, EditorialOverlayHero.EditorialOverlayHero),
-  entry(EditorialCallout, EditorialCallout.EditorialCallout),
-  entry(StandardStatement, StandardStatement.StandardStatement),
-  entry(StatBand, StatBand.StatBand),
-  entry(ProductStrip, ProductStrip.ProductStrip),
-  entry(PrincipleGrid, PrincipleGrid.PrincipleGrid),
-  entry(ProductTiles, ProductTiles.ProductTiles),
-  entry(NumberedSequence, NumberedSequence.NumberedSequence),
-  entry(ProductCaseStudy, ProductCaseStudy.ProductCaseStudy),
+  entry(EditorialHero),
+  entry(EditorialOverlayHero),
+  entry(EditorialCallout),
+  entry(StandardStatement),
+  entry(StatBand),
+  entry(ProductStrip),
+  entry(PrincipleGrid),
+  entry(ProductTiles),
+  entry(NumberedSequence),
+  entry(ProductCaseStudy),
 ];
 
 /** Every registered type, for tests and the seed script. */

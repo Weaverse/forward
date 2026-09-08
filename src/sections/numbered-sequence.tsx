@@ -12,7 +12,7 @@ interface NumberedSequenceProps {
 }
 
 /** An ordered protocol rendered as a numbered list beside its heading. */
-export function NumberedSequence({
+function NumberedSequence({
   eyebrowLabel,
   heading,
   steps,
@@ -39,6 +39,8 @@ export function NumberedSequence({
     </section>
   );
 }
+
+export default NumberedSequence;
 
 export const schema = createSchema({
   type: "numbered-sequence",

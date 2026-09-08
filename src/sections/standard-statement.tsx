@@ -8,7 +8,7 @@ interface StandardStatementProps {
 }
 
 /** A single wide statement expanded by a row of supporting paragraphs. */
-export function StandardStatement({
+function StandardStatement({
   eyebrowLabel,
   statement,
   columns,
@@ -27,6 +27,8 @@ export function StandardStatement({
     </section>
   );
 }
+
+export default StandardStatement;
 
 export const schema = createSchema({
   type: "standard-statement",

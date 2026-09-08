@@ -12,7 +12,7 @@ interface ProductCaseStudyProps {
 }
 
 /** A single product examined in depth: description, spec list, and image. */
-export function ProductCaseStudy({
+function ProductCaseStudy({
   eyebrowLabel,
   ctaLabel,
   product,
@@ -55,6 +55,8 @@ export function ProductCaseStudy({
     </section>
   );
 }
+
+export default ProductCaseStudy;
 
 export const schema = createSchema({
   type: "product-case-study",

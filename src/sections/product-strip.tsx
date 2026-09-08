@@ -13,7 +13,7 @@ interface ProductStripProps {
 }
 
 /** A titled row of product cards with a single catalog link. */
-export function ProductStrip({
+function ProductStrip({
   eyebrowLabel,
   heading,
   linkLabel,
@@ -41,6 +41,8 @@ export function ProductStrip({
     </section>
   );
 }
+
+export default ProductStrip;
 
 export const schema = createSchema({
   type: "product-strip",

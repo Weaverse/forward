@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 
 import { storefront } from "@/lib/storefront/data-source";
-import { EditorialCallout } from "@/sections/editorial-callout";
-import { EditorialHero } from "@/sections/editorial-hero";
-import { PrincipleGrid } from "@/sections/principle-grid";
-import { ProductTiles } from "@/sections/product-tiles";
+import EditorialCallout from "@/sections/editorial-callout";
+import EditorialHero from "@/sections/editorial-hero";
+import PrincipleGrid from "@/sections/principle-grid";
+import ProductTiles from "@/sections/product-tiles";
 
 export const metadata: Metadata = {
   title: "Materials",

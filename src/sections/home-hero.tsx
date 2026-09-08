@@ -25,7 +25,7 @@ interface HomeHeroProps {
 }
 
 /** Home hero: split copy and image, with a summary stat row and image badge. */
-export function HomeHero({
+function HomeHero({
   eyebrowLabel,
   heading,
   lede,
@@ -102,6 +102,8 @@ export function HomeHero({
     </section>
   );
 }
+
+export default HomeHero;
 
 export const schema = createSchema({
   type: "home-hero",

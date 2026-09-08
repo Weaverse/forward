@@ -337,3 +337,23 @@
 - Gates after the reorganization: `bun run check` green at `350` node + `66`
   DOM, 42-page build, route contract `20 + 4`. The seed dry run still validates
   every seeded section type against the registry.
+
+## 2026-09-08 (export convention) — @hta218
+
+- Corrected a misattribution: the "named exports only" rule is Leo's global
+  convention, not anything `AGENTS.md` states, and it carries an explicit
+  "except must-use cases like Route components" clause. The Weaverse registry
+  reading `default` off a module is exactly such a case, so the Pilot pattern
+  was never in tension with the rule and the earlier workaround was unnecessary.
+- Switched the 21 registered components — 17 sections and the 4 shared
+  elements — to `export default`, and the registry to `import * as` with
+  single-argument entries. `entry()` no longer takes the component separately,
+  so a schema can no longer be paired with the wrong component by hand.
+- Scope was deliberate rather than blanket: the other 18 sections
+  (`index-header`, `journal-*`, `product-results`, `search-*`,
+  `policy-document`, `collection-grid`, and the rest) are not Weaverse
+  components, have no platform requirement for a default export, and keep
+  named exports. Default exports outside `src/app/` now number exactly 21 —
+  one per registry entry.
+- Four route files moved to default imports. Gates stayed green: `bun run
+  check` at `350` node + `66` DOM, 42-page build, route contract `20 + 4`.

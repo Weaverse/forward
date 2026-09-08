@@ -5,7 +5,7 @@ interface PrincipleGridProps {
 }
 
 /** Materials page: numbered principle cards on a hairline grid. */
-export function PrincipleGrid({ principles }: PrincipleGridProps) {
+function PrincipleGrid({ principles }: PrincipleGridProps) {
   return (
     <section className="mx-auto grid w-full max-w-page grid-cols-3 gap-px bg-ink p-px max-md:grid-cols-1">
       {principles.map((principle) => (
@@ -25,6 +25,8 @@ export function PrincipleGrid({ principles }: PrincipleGridProps) {
     </section>
   );
 }
+
+export default PrincipleGrid;
 
 export const schema = createSchema({
   type: "principle-grid",

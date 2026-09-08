@@ -21,7 +21,7 @@ export interface HeadingProps {
  * stays separate from `size` because heading level is document structure, not
  * appearance: a visually small heading may still be the page's `h1`.
  */
-export function Heading({
+function Heading({
   as: Tag = "h2",
   className,
   content,
@@ -31,6 +31,8 @@ export function Heading({
     <Tag className={cn(sectionHeading({ size }), className)}>{content}</Tag>
   );
 }
+
+export default Heading;
 
 export const schema = createSchema({
   type: "heading",

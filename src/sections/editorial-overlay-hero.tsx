@@ -11,7 +11,7 @@ interface EditorialOverlayHeroProps {
 }
 
 /** Full-bleed hero: copy sits over a darkened cover image. */
-export function EditorialOverlayHero({
+function EditorialOverlayHero({
   eyebrowLabel,
   heading,
   lede,
@@ -38,6 +38,8 @@ export function EditorialOverlayHero({
     </section>
   );
 }
+
+export default EditorialOverlayHero;
 
 export const schema = createSchema({
   type: "editorial-overlay-hero",

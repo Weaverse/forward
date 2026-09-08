@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { storefront } from "@/lib/storefront/data-source";
-import { EditorialHero } from "@/sections/editorial-hero";
-import { ProductStrip } from "@/sections/product-strip";
-import { StandardStatement } from "@/sections/standard-statement";
-import { StatBand } from "@/sections/stat-band";
+import EditorialHero from "@/sections/editorial-hero";
+import ProductStrip from "@/sections/product-strip";
+import StandardStatement from "@/sections/standard-statement";
+import StatBand from "@/sections/stat-band";
 
 export const metadata: Metadata = {
   title: "About Forward",

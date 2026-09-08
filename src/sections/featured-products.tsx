@@ -19,7 +19,7 @@ interface FeaturedProductsProps {
 }
 
 /** A four-up product grid introduced by a heading, body copy, and one link. */
-export function FeaturedProducts({
+function FeaturedProducts({
   eyebrowLabel,
   heading,
   body,
@@ -56,6 +56,8 @@ export function FeaturedProducts({
     </section>
   );
 }
+
+export default FeaturedProducts;
 
 export const schema = createSchema({
   type: "featured-products",

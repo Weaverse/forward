@@ -17,7 +17,7 @@ interface EditorialHeroProps {
  * Split editorial hero: copy in one column, full-bleed image in the other.
  * Used by the About and Materials custom pages.
  */
-export function EditorialHero({
+function EditorialHero({
   eyebrowLabel,
   heading,
   lede,
@@ -56,6 +56,8 @@ export function EditorialHero({
     </section>
   );
 }
+
+export default EditorialHero;
 
 export const schema = createSchema({
   type: "editorial-hero",

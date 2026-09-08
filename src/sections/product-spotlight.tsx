@@ -22,7 +22,7 @@ interface ProductSpotlightProps {
 }
 
 /** One product examined beside a tall image, with a short spec list. */
-export function ProductSpotlight({
+function ProductSpotlight({
   eyebrowPrefix,
   ctaLabel,
   specCount,
@@ -91,6 +91,8 @@ export function ProductSpotlight({
     </section>
   );
 }
+
+export default ProductSpotlight;
 
 export const schema = createSchema({
   type: "product-spotlight",

@@ -22,7 +22,7 @@ interface RepairAndJournalProps {
 }
 
 /** Paired cards: the repair commitment beside the most recent field note. */
-export function RepairAndJournal({
+function RepairAndJournal({
   repairEyebrowLabel,
   repairHeading,
   repairBody,
@@ -74,6 +74,8 @@ export function RepairAndJournal({
     </section>
   );
 }
+
+export default RepairAndJournal;
 
 export const schema = createSchema({
   type: "repair-and-journal",

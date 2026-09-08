@@ -14,7 +14,7 @@ interface EditorialCalloutProps {
  * Three-column closing callout: heading block, body copy, single call to
  * action. Used by the Materials and Field Testing custom pages.
  */
-export function EditorialCallout({
+function EditorialCallout({
   eyebrowLabel,
   heading,
   body,
@@ -34,6 +34,8 @@ export function EditorialCallout({
     </section>
   );
 }
+
+export default EditorialCallout;
 
 export const schema = createSchema({
   type: "editorial-callout",

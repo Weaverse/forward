@@ -22,18 +22,15 @@ export interface ButtonProps {
  * performs an action rather than navigating belongs to the theme-owned
  * commerce surfaces, not to Studio.
  */
-export function Button({
-  className,
-  href,
-  intent = "primary",
-  label,
-}: ButtonProps) {
+function Button({ className, href, intent = "primary", label }: ButtonProps) {
   return (
     <Link className={cn(cta({ intent }), className)} href={href}>
       {label}
     </Link>
   );
 }
+
+export default Button;
 
 export const schema = createSchema({
   type: "button",

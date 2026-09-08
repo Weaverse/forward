@@ -11,7 +11,7 @@ interface CollectionIndexProps {
 }
 
 /** Full-height collection cards, one per movement system. */
-export function CollectionIndex({
+function CollectionIndex({
   eyebrowLabel,
   heading,
   collections,
@@ -55,6 +55,8 @@ export function CollectionIndex({
     </section>
   );
 }
+
+export default CollectionIndex;
 
 export const schema = createSchema({
   type: "collection-index",

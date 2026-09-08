@@ -17,13 +17,11 @@ export interface SubheadingProps {
  * Rendered as a paragraph rather than a heading tag: it labels the section
  * that follows and must not add a level to the document outline.
  */
-export function Subheading({
-  className,
-  content,
-  tone = "strong",
-}: SubheadingProps) {
+function Subheading({ className, content, tone = "strong" }: SubheadingProps) {
   return <p className={cn(eyebrow({ tone }), className)}>{content}</p>;
 }
+
+export default Subheading;
 
 export const schema = createSchema({
   type: "subheading",

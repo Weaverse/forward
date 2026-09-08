@@ -8,7 +8,7 @@ interface ProductTilesProps {
 }
 
 /** Full-bleed product tiles, each linking through to its product page. */
-export function ProductTiles({ tiles }: ProductTilesProps) {
+function ProductTiles({ tiles }: ProductTilesProps) {
   return (
     <section className="grid grid-cols-3 bg-ink max-md:grid-cols-1">
       {tiles.map(({ product, image }) => (
@@ -35,6 +35,8 @@ export function ProductTiles({ tiles }: ProductTilesProps) {
     </section>
   );
 }
+
+export default ProductTiles;
 
 export const schema = createSchema({
   type: "product-tiles",

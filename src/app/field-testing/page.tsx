@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 
 import { storefront } from "@/lib/storefront/data-source";
-import { EditorialCallout } from "@/sections/editorial-callout";
-import { EditorialOverlayHero } from "@/sections/editorial-overlay-hero";
-import { NumberedSequence } from "@/sections/numbered-sequence";
-import { ProductCaseStudy } from "@/sections/product-case-study";
+import EditorialCallout from "@/sections/editorial-callout";
+import EditorialOverlayHero from "@/sections/editorial-overlay-hero";
+import NumberedSequence from "@/sections/numbered-sequence";
+import ProductCaseStudy from "@/sections/product-case-study";
 
 export const metadata: Metadata = {
   title: "Field Testing",

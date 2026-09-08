@@ -21,7 +21,7 @@ interface MaterialStandardProps {
 }
 
 /** Dark editorial band pairing the material story with a wide image. */
-export function MaterialStandard({
+function MaterialStandard({
   eyebrowLabel,
   heading,
   body,
@@ -59,6 +59,8 @@ export function MaterialStandard({
     </section>
   );
 }
+
+export default MaterialStandard;
 
 export const schema = createSchema({
   type: "material-standard",

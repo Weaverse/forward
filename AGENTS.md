@@ -26,10 +26,13 @@ Forward is a fresh Next.js App Router storefront theme using
   collection and Shop grid behavior, Cart, and `/account/**`. Header and
   Footer are theme-owned components configured through theme settings, never
   Weaverse global sections.
-- A Weaverse component exports its `schema` from the same file as the
-  component, so settings and markup cannot drift apart. The registry in
-  `src/lib/weaverse/components.ts` is the only list the SDK sees; a component
-  absent from it cannot be composed.
+- A Weaverse component is the default export of its file and exports its
+  `schema` from that same file, so settings and markup cannot drift apart and
+  the registry cannot pair them up wrongly. This is the one place beyond Next's
+  route files where a default export is correct: the SDK reads `default` off
+  the module. Sections that are *not* Weaverse components keep named exports.
+  The registry in `src/lib/weaverse/components.ts` is the only list the SDK
+  sees; a component absent from it cannot be composed.
 - Theme settings live one group per file under `src/lib/weaverse/settings/`,
   each declared `as const satisfies WeaverseNextThemeSchemaGroup`.
   `settings/types.ts` derives `ThemeSettings` from those declarations, so
