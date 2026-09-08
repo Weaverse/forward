@@ -9,6 +9,12 @@ hit a registry count, or copied from the Next POC.
 Every section below already exists as markup in a Forward route. Extracting it
 into a Weaverse section must not change its rendered output.
 
+**Status: extracted on 2026-09-08.** All 35 sections live in `src/sections/`
+and every route composes them. The tables below name the shipped component
+file where one exists. Extraction corrected this inventory in three places,
+recorded under "What extraction corrected" — the paper model claimed reuse the
+markup did not have, and missed reuse the markup did.
+
 ## Section inventory
 
 ### `INDEX` — `/` (`src/app/page.tsx`)
@@ -17,17 +23,19 @@ Seven sections, in the order the page renders them today.
 
 | # | Section | Current heading/eyebrow | Data | Settings |
 |---|---|---|---|---|
-| 1 | `hero` | "Forward / Field equipment 2026" | `ThemeContent.homeHeroImage` | eyebrow, heading, lede, CTA label/target, image |
-| 2 | `featured-products` | "New field rotation" | 4 products by handle | heading, product selectors (ordered), CTA |
-| 3 | `collection-index` | "Shop by system" | collections + `fieldCode` | heading, collection selectors (ordered) |
-| 4 | `product-spotlight` | dynamic, from the selected product | one product | heading override, product selector, spec row count |
-| 5 | `material-standard` | "Material standard" | `ThemeContent.standardBandImage` | eyebrow, heading, body, image |
-| 6 | `kit-callout` | "One-day kit" / "Carry the day, not the doubt." | one product | eyebrow, heading, body, product selector, CTA |
-| 7 | `repair-and-journal` | "Repair, not replace" / "Latest field note" | latest article | heading, body, CTA, article selector |
+| 1 | `home-hero` | "Forward / Field equipment 2026" | `ThemeContent.homeHeroImage` | eyebrow, heading, lede, two CTAs, stat rows, featured product |
+| 2 | `featured-products` | "New field rotation" | 4 products by handle | eyebrow, heading, body, link, product selectors (ordered) |
+| 3 | `collection-index` | "Shop by system" | collections + `fieldCode` | eyebrow, heading, collection selectors (ordered) |
+| 4 | `product-spotlight` | dynamic, from the selected product | one product | eyebrow prefix, CTA label, spec row count, product selector |
+| 5 | `material-standard` | "Material standard" | `ThemeContent.standardBandImage` | eyebrow, heading, body, two CTAs, image |
+| 6 | `kit-callout` | "One-day kit" / "Carry the day, not the doubt." | one product + 3 tiles | eyebrow, heading, link label, product selector |
+| 7 | `repair-and-journal` | "Repair, not replace" / "Latest field note" | latest article | repair eyebrow/heading/body/link, journal eyebrow/link, article selector |
 
-Section 4 reads `spotlight.title`, `subtitle`, and `specs` from the selected
-product. Section 7 reads the latest article. Both must keep their existing
-empty-state behavior when the selector resolves to `null`.
+Section 4 reads `title`, `subtitle`, and `specs` from the selected product.
+Section 7 reads the latest article and renders the repair card alone when no
+article resolves. Both keep their existing empty-state behavior when the
+selector resolves to `null`. The `hero` name in the original inventory
+collided with the editorial heroes, so the shipped component is `home-hero`.
 
 ### `PRODUCT` — `/products/[productHandle]`
 
@@ -41,11 +49,13 @@ Composable around it:
 
 | Section | Data | Settings |
 |---|---|---|
-| `product-detail-copy` | selected product `detailParagraphs` | heading, layout |
-| `product-specs` | product `specs` | heading, visible row count |
-| `product-care` | product `care` | heading |
-| `product-repair` | product `repair` | heading, CTA |
-| `related-products` | products by handle or category | heading, selector mode, count |
+| `related-products` | products by handle or category | eyebrow, heading, product selectors |
+
+`related-products` is the only PDP surface extracted. The `detailParagraphs`,
+`specs`, `care`, and `repair` panels named in the original inventory are one
+disclosure stack inside the buy block, not four independent sections, so they
+stay theme-owned with the rest of the block. Splitting them is a separate
+decision and needs its own argument.
 
 ### `COLLECTION` — `/shop/[collectionHandle]`
 
@@ -56,20 +66,27 @@ Composable:
 
 | Section | Data | Settings |
 |---|---|---|
-| `collection-hero` | collection title, description, image | heading override, image, layout |
-| `collection-grid` | collection products | heading, columns, empty-state copy — **grid behavior itself is theme-owned** |
-| `collection-note` | none | heading, body |
+| `collection-hero` | collection title, description, hero image | eyebrow prefix, CTA label/target |
+| `system-manifest` | collection products + a theme image | eyebrow, heading, body, link |
+| `collection-grid` | collection products | eyebrow, heading, CTA — **grid behavior itself is theme-owned** |
+| `field-practice` | none | eyebrow, heading, body, link |
+
+Four sections, not the three originally listed: the route renders a manifest
+band between the hero and the grid that the paper inventory missed, and
+`collection-note` is really `field-practice`.
 
 ### `ARTICLE` — `/journal/[articleHandle]`
 
 | Section | Data | Settings |
 |---|---|---|
-| `article-header` | article title, date, excerpt | layout |
-| `article-body` | normalized article blocks | — rendered verbatim from the structural parser |
-| `article-related` | articles by handle | heading, article selectors, count |
+| `article-header` | article title, plate, date, location, reading time | breadcrumb label/target |
+| `article-body` | normalized article blocks | back-link label/target — body is rendered verbatim |
 
 `article-body` renders the output of the parse5-based content parser. It is not
 free-form rich text in Studio; the merchant edits the article in Shopify.
+`article-related` was in the original inventory but the route does not render
+it today, so it was not invented during extraction. Add it as a real section
+when the design calls for one.
 
 ### `PAGE` — `/pages/[pageHandle]` and the theme-owned routes
 
@@ -84,22 +101,67 @@ the first composition target because they carry no commerce state.
 
 | Section | Used by | Settings |
 |---|---|---|
-| `editorial-hero` | all three | eyebrow, heading, lede, image |
-| `editorial-band` | all three | heading, body, image, side |
-| `spec-table` | materials, field-testing | heading, rows |
-| `product-strip` | all three | heading, product selectors |
-| `article-strip` | field-testing | heading, article selectors |
+| `page-hero` | `/pages/[pageHandle]` | eyebrow, heading, image |
+| `page-premise` | `/pages/[pageHandle]` | eyebrow, intro, premise section |
+| `page-values` | `/pages/[pageHandle]` | eyebrow suffix, sections |
+| `page-origin` | `/pages/[pageHandle]` | eyebrow, heading, body, link, image |
+| `editorial-hero` | about, materials | eyebrow, heading, lede, image, image side |
+| `editorial-overlay-hero` | field-testing | eyebrow, heading, lede, image |
+| `editorial-callout` | materials, field-testing | eyebrow, heading, body, CTA |
+| `standard-statement` | about | eyebrow, statement, columns |
+| `stat-band` | about | stats |
+| `product-strip` | about | eyebrow, heading, link, product selectors |
+| `principle-grid` | materials | principles |
+| `product-tiles` | materials | product/image tiles |
+| `numbered-sequence` | field-testing | eyebrow, heading, steps |
+| `product-case-study` | field-testing | eyebrow, CTA label, product selector |
 
-### Not composable
+### Theme-owned routes, still extracted
 
-`/shop`, `/journal`, `/search`, `/cart`, `/account/**`,
-`/policies/[policyHandle]`, `/robots.txt`, `/sitemap.xml`, `/api/**`,
-`/account/status`.
+`/shop`, `/journal`, `/search`, and `/policies/[policyHandle]` are not
+Weaverse-composable — index routes own pagination and query state, `/search`
+owns ranking, and policy text is legal content rendered verbatim — but their
+markup was still extracted, because the duplication was real:
 
-Rationale per surface is recorded in the README's page-role table. In short:
-index routes own pagination and query state, `/search` owns ranking, `/cart`
-and `/account/**` own server state and security, and policy text is legal
-content that must render verbatim.
+| Section | Used by |
+|---|---|
+| `index-header` | shop, journal, policies |
+| `journal-lead`, `journal-grid` | journal |
+| `product-results` | shop |
+| `search-results`, `search-empty-state` | search |
+| `policy-document` | policies |
+
+Extraction here is code organization, not an ownership change. These sections
+get no Weaverse schema.
+
+### Not extracted
+
+`/cart` already delegates entirely to `CartView`/`ShopifyCartView`, and
+`/account/**` has no page-level sections — only cards inside `AccountShell`.
+Both own server state and security and are never composed. `/robots.txt`,
+`/sitemap.xml`, `/api/**`, and `/account/status` are resource routes.
+
+The PDP buy block and its `colorway`/`size` query state, and the collection and
+Shop grid behavior, stay theme-owned inside the sections that surround them.
+
+## What extraction corrected
+
+1. **`editorial-hero` was not shared by all three editorial routes.** About and
+   Materials do share it, differing only in image side. Field Testing's hero is
+   a full-bleed overlay with an absolutely positioned image and an `after:`
+   scrim — a different section, now `editorial-overlay-hero`.
+2. **Reuse the paper inventory missed.** `editorial-callout` (Materials and
+   Field Testing closed with identical markup), `index-header` (Shop, Journal
+   and the policy routes each repeated the same dark masthead),
+   `search-empty-state` (the no-query and no-match states were one block
+   twice), and `rich-text-paragraph` (the policy route had reimplemented the
+   normalized run renderer inline).
+3. **Section counts were wrong per role.** `COLLECTION` renders four sections,
+   not three; `PRODUCT` has one composable section, not five; `ARTICLE` has two,
+   not three.
+
+The lesson holds for the connection slice: derive from the markup, not from the
+table.
 
 ## Theme settings
 
@@ -110,7 +172,7 @@ than section-owned. The full table lives in the README; the summary is:
 |---|---|
 | Header | `announcement`, menu handle, wordmark, country-selector visibility |
 | Footer | `footerTagline`, `footerStatus`, `demoNotice`, footer menu handle |
-| Editorial imagery | `homeHeroImage`, `standardBandImage` — move to `hero` and `material-standard` section settings once `INDEX` is composed |
+| Editorial imagery | `homeHeroImage`, `standardBandImage` — move to `home-hero` and `material-standard` section settings once `INDEX` is composed |
 
 Header and Footer structure, geometry, ordering, and accessibility behavior stay
 theme-owned code. Only the settings above are editable.
@@ -145,27 +207,33 @@ Per-item revalidation must preserve route context (builder#2737).
 
 ## Implementation steps
 
-1. **Approve this contract.** No code until then.
-2. **Verify the registry again at install time.** Record the exact resolved
-   version. `alpha` was `0.1.0-alpha.16` on 2026-09-07; `latest` is a stale
-   `0.1.0-alpha.0` and must not be installed.
-3. **Add the dependency and the Weaverse environment** as its own commit, with
+1. ~~**Approve this contract.**~~ ✅ All three open questions closed by Leo on
+   2026-09-08.
+2. ~~**Extract every page section into `src/sections/`.**~~ ✅ Done as a pure
+   refactor with no dependency and no Weaverse project, so the remaining steps
+   are not blocked on credentials. Moved ahead of the install deliberately:
+   every gate stayed green, and the extraction corrected the inventory before
+   any schema was written against it.
+3. **Verify the registry again at install time.** Record the exact resolved
+   version. `alpha` was `0.1.0-alpha.16` on 2026-09-07 and again on 2026-09-08;
+   `latest` is a stale `0.1.0-alpha.0` and must not be installed.
+4. **Add the dependency and the Weaverse environment** as its own commit, with
    no composition yet, and prove the existing gates still pass.
-4. **Wire the composition seam** beside the storefront seam, not through it.
-5. **Compose the three theme-owned editorial routes first**
-   (`/about`, `/materials`, `/field-testing`) — no commerce state, so a
-   regression there cannot damage catalog, cart, or account contracts.
-6. **Compose `INDEX`**, section by section, keeping rendered output identical.
-7. **Compose `PRODUCT` and `COLLECTION` chrome**, leaving the buy block and the
-   grid behavior theme-owned.
-8. **Compose `ARTICLE` and `PAGE`** around verbatim Shopify body content.
-9. **Consume SDK-owned pageview analytics.** No transport or deduplication in
+5. **Wire the composition seam** beside the storefront seam, not through it.
+6. **Add `schema` to the sections, role by role**, starting with the three
+   editorial routes (`/about`, `/materials`, `/field-testing`) — no commerce
+   state, so a regression there cannot damage catalog, cart, or account
+   contracts. Then `INDEX`, then `PRODUCT` and `COLLECTION` chrome, then
+   `ARTICLE` and `PAGE`. Section settings map onto the props the components
+   already take; a section whose schema needs a prop it does not have is a
+   signal to check the markup, not to reshape the component blindly.
+7. **Consume SDK-owned pageview analytics.** No transport or deduplication in
    the theme.
-10. **Run the full matrix** and hand Leo the manual Studio QA checklist.
+8. **Run the full matrix** and hand Leo the manual Studio QA checklist.
 
 Steps 3 onward belong to follow-up specs, one per slice.
 
-## Manual Studio QA checklist (for step 10)
+## Manual Studio QA checklist (for step 8)
 
 Automated coverage cannot prove authenticated Studio behavior. Leo runs:
 
@@ -192,31 +260,27 @@ Automated coverage cannot prove authenticated Studio behavior. Leo runs:
 
 ## Files and folders touched
 
-This spec slice is documentation-only and touches exactly:
+Landed under this spec:
 
 ```
-.weaverse/specs/2026-09-07--forward-weaverse-contract/README.md
-.weaverse/specs/2026-09-07--forward-weaverse-contract/plan.md
-.weaverse/specs/2026-09-07--forward-weaverse-contract/work-logs.md
+AGENTS.md                             # section rule, Weaverse approval, Bun pin
+.weaverse/specs/2026-09-07--forward-weaverse-contract/*
+src/sections/                         # 35 section components
+src/components/filter-sidebar.tsx     # extracted from the Shop route
+src/components/rich-text-paragraph.tsx # was duplicated across two routes
+src/lib/presentation/variants.ts      # shared section shell classes
+src/app/**/page.tsx                   # 12 routes now compose sections
+tests/shopify-content-adapter.test.ts # source assertion repointed
 ```
 
-Implementation slices will touch, and are listed here so other agents know the
-eventual scope:
+The connection slice will touch, listed here so other agents know the scope:
 
 ```
-package.json                          # @weaverse/next dependency
+package.json                          # @weaverse/next dependency, exact version
 src/app/layout.tsx                    # composition provider
-src/app/page.tsx                      # INDEX composition
-src/app/about/page.tsx
-src/app/materials/page.tsx
-src/app/field-testing/page.tsx
-src/app/journal/[articleHandle]/page.tsx
-src/app/pages/[pageHandle]/page.tsx
-src/app/products/[productHandle]/page.tsx
-src/app/shop/[collectionHandle]/page.tsx
+src/sections/*.tsx                    # schema exports added to existing files
 src/lib/weaverse/                     # new: composition seam, registry
-src/sections/                         # new: section components
-tests/                                # section and seam contracts
+tests/                                # section schema and seam contracts
 ```
 
 Explicitly **not** touched by any slice under this spec:
