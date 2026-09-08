@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
@@ -7,8 +9,12 @@ import {
   textLink,
 } from "@/lib/presentation/variants";
 import type { JournalArticle } from "@/lib/storefront/types";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface RepairAndJournalProps {
+interface RepairAndJournalProps extends WeaverseElementProps {
   repairEyebrowLabel: string;
   repairHeading: string;
   repairBody: string;
@@ -16,12 +22,12 @@ interface RepairAndJournalProps {
   repairLinkHref: string;
   journalEyebrowLabel: string;
   journalLinkLabel: string;
-  /** Omitted when no article resolves; the repair card then stands alone. */
-  article?: JournalArticle;
+  /** Resolved by `./loader`; the repair card stands alone when absent. */
+  loaderData?: { article: JournalArticle | null };
 }
 
 /** Paired cards: the repair commitment beside the most recent field note. */
-export function RepairAndJournal({
+function RepairAndJournal({
   repairEyebrowLabel,
   repairHeading,
   repairBody,
@@ -29,10 +35,13 @@ export function RepairAndJournal({
   repairLinkHref,
   journalEyebrowLabel,
   journalLinkLabel,
-  article,
+  loaderData,
+  ...rest
 }: RepairAndJournalProps) {
+  const article = loaderData?.article ?? undefined;
   return (
     <section
+      {...elementAttributes(rest)}
       className={cn(
         SHELL_SECTION_CLASS,
         "grid grid-cols-split-70 gap-3 max-md:grid-cols-1",
@@ -73,3 +82,7 @@ export function RepairAndJournal({
     </section>
   );
 }
+
+export default RepairAndJournal;
+
+export { schema } from "./schema";

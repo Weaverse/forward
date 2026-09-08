@@ -12,9 +12,6 @@
  *
  * Deliberately absent, and argued in the spec rather than forgotten:
  *
- * - Home's seven sections, which stay Server Components. Composing them would
- *   ship their JavaScript to the browser and lose the zero-JS baseline on the
- *   highest-traffic page, buying nothing a shopper can see.
  * - Header, Footer, announcement bar, and mini-cart, configured through theme
  *   settings and never composed.
  * - The PDP buy block and its `colorway`/`size` query state, the collection and
@@ -29,14 +26,21 @@ import * as Button from "@/components/button";
 import * as Heading from "@/components/heading";
 import * as Paragraph from "@/components/paragraph";
 import * as Subheading from "@/components/subheading";
+import * as CollectionIndex from "@/sections/collection-index";
 import * as EditorialCallout from "@/sections/editorial-callout";
 import * as EditorialHero from "@/sections/editorial-hero";
 import * as EditorialOverlayHero from "@/sections/editorial-overlay-hero";
+import * as FeaturedProducts from "@/sections/featured-products";
+import * as HomeHero from "@/sections/home-hero";
+import * as KitCallout from "@/sections/kit-callout";
+import * as MaterialStandard from "@/sections/material-standard";
 import * as NumberedSequence from "@/sections/numbered-sequence";
 import * as PrincipleGrid from "@/sections/principle-grid";
 import * as ProductCaseStudy from "@/sections/product-case-study";
+import * as ProductSpotlight from "@/sections/product-spotlight";
 import * as ProductStrip from "@/sections/product-strip";
 import * as ProductTiles from "@/sections/product-tiles";
+import * as RepairAndJournal from "@/sections/repair-and-journal";
 import * as StandardStatement from "@/sections/standard-statement";
 import * as StatBand from "@/sections/stat-band";
 
@@ -64,6 +68,15 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
   entry(Subheading),
   entry(Paragraph),
   entry(Button),
+
+  /* INDEX */
+  entry(HomeHero),
+  entry(FeaturedProducts),
+  entry(CollectionIndex),
+  entry(ProductSpotlight),
+  entry(MaterialStandard),
+  entry(KitCallout),
+  entry(RepairAndJournal),
 
   /* PAGE — the three editorial routes. */
   entry(EditorialHero),

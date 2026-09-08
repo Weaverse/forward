@@ -1,22 +1,34 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import type { Collection } from "@/lib/storefront/types";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface CollectionIndexProps {
+interface CollectionIndexProps extends WeaverseElementProps {
   eyebrowLabel: string;
   heading: string;
-  collections: readonly Collection[];
+  /** Resolved by `./loader` from the merchant's collection selection. */
+  loaderData?: { collections: readonly Collection[] };
 }
 
 /** Full-height collection cards, one per movement system. */
-export function CollectionIndex({
+function CollectionIndex({
   eyebrowLabel,
   heading,
-  collections,
+  loaderData,
+  ...rest
 }: CollectionIndexProps) {
+  const collections = loaderData?.collections ?? [];
   return (
-    <section className="bg-ink pt-20 text-text-inverse">
+    <section
+      {...elementAttributes(rest)}
+      className="bg-ink pt-20 text-text-inverse"
+    >
       <header className="mx-auto w-full max-w-page px-page-gutter pb-11">
         <p className={eyebrow()}>{eyebrowLabel}</p>
         <h2 className={sectionHeading()}>{heading}</h2>
@@ -54,3 +66,7 @@ export function CollectionIndex({
     </section>
   );
 }
+
+export default CollectionIndex;
+
+export { schema } from "./schema";

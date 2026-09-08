@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
@@ -8,8 +10,14 @@ import {
   textLink,
 } from "@/lib/presentation/variants";
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
+import { weaverseImage } from "@/lib/weaverse/image";
+import { parseRows } from "../parse";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface HomeHeroProps {
+interface HomeHeroProps extends WeaverseElementProps {
   eyebrowLabel: string;
   heading: string;
   lede: string;
@@ -17,14 +25,16 @@ interface HomeHeroProps {
   primaryCtaHref: string;
   secondaryCtaLabel: string;
   secondaryCtaHref: string;
-  stats: readonly { label: string; value: string }[];
-  image: StorefrontImage;
-  /** Optional badge linking out of the hero image to one product. */
-  featuredProduct?: Product;
+  /** One `value | label` pair per line. Parsed by `../parse`. */
+  stats: string;
+  /** A Builder image value, a StorefrontImage, or nothing. */
+  image?: StorefrontImage | unknown;
+  /** Resolved by `./loader` from the merchant's product selection. */
+  loaderData?: { featuredProduct: Product | null };
 }
 
 /** Home hero: split copy and image, with a summary stat row and image badge. */
-export function HomeHero({
+function HomeHero({
   eyebrowLabel,
   heading,
   lede,
@@ -34,10 +44,14 @@ export function HomeHero({
   secondaryCtaHref,
   stats,
   image,
-  featuredProduct,
+  loaderData,
+  ...rest
 }: HomeHeroProps) {
+  const featuredProduct = loaderData?.featuredProduct ?? undefined;
+  const resolvedImage = weaverseImage(image);
   return (
     <section
+      {...elementAttributes(rest)}
       aria-labelledby="home-hero-title"
       className="grid min-h-[calc(100svh_-_var(--spacing-header))] grid-cols-[minmax(390px,0.78fr)_minmax(0,1.22fr)] bg-ink text-text-inverse max-md:min-h-[calc(100svh_-_var(--spacing-header-compact))] max-md:grid-cols-1"
     >
@@ -61,26 +75,28 @@ export function HomeHero({
           </Link>
         </div>
         <dl className="mt-auto grid grid-cols-3 border-border-dark-subtle border-t pt-9 max-md:mt-11.25">
-          {stats.map((stat) => (
-            <div className="grid gap-1.5" key={stat.label}>
+          {parseRows(stats, 2).map(([value, label]) => (
+            <div className="grid gap-1.5" key={label}>
               <dt className="m-0 font-field-meta text-micro text-text-dark-meta uppercase">
-                {stat.label}
+                {label}
               </dt>
-              <dd className="m-0 font-heading text-heading-4">{stat.value}</dd>
+              <dd className="m-0 font-heading text-heading-4">{value}</dd>
             </div>
           ))}
         </dl>
       </div>
       <div className="relative m-5 min-h-190 overflow-hidden max-md:mx-2.5 max-md:mt-0 max-md:mb-2.5 max-md:min-h-[68svh]">
-        <Image
-          className="absolute inset-0 h-full object-cover saturate-78 contrast-105"
-          src={image.src}
-          alt={image.alt}
-          width={image.width}
-          height={image.height}
-          sizes="(min-width: 820px) 58vw, 100vw"
-          priority
-        />
+        {resolvedImage === null ? null : (
+          <Image
+            className="absolute inset-0 h-full object-cover saturate-78 contrast-105"
+            src={resolvedImage.src}
+            alt={resolvedImage.alt}
+            width={resolvedImage.width}
+            height={resolvedImage.height}
+            sizes="(min-width: 820px) 58vw, 100vw"
+            priority
+          />
+        )}
         {featuredProduct !== undefined ? (
           <Link
             className="absolute right-4.5 bottom-4.5 grid w-[min(330px,calc(100%_-_36px))] gap-2 bg-signal p-5 text-ink"
@@ -101,3 +117,7 @@ export function HomeHero({
     </section>
   );
 }
+
+export default HomeHero;
+
+export { schema } from "./schema";

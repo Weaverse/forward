@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
@@ -9,25 +11,49 @@ import {
   VIEWPORT_SECTION_CLASS,
 } from "@/lib/presentation/variants";
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface KitCalloutProps {
+interface KitCalloutProps extends WeaverseElementProps {
   eyebrowLabel: string;
   heading: string;
   linkLabel: string;
-  product: Product;
-  tiles: readonly { product: Product; image: StorefrontImage }[];
+  /** Resolved by `./loader` from the merchant's selections. */
+  loaderData?: {
+    product: Product | null;
+    tiles: readonly { product: Product; image: StorefrontImage }[];
+  };
 }
 
 /** A named kit: one anchor product beside the pieces that travel with it. */
-export function KitCallout({
+function KitCallout({
   eyebrowLabel,
   heading,
   linkLabel,
-  product,
-  tiles,
+  loaderData,
+  ...rest
 }: KitCalloutProps) {
+  const product = loaderData?.product ?? null;
+  const tiles = loaderData?.tiles ?? [];
+  /* No product selected: the callout has no subject, so render nothing on
+   * the storefront and a selectable placeholder inside Studio. */
+  if (product === null) {
+    const attributes = elementAttributes(rest);
+    if (attributes["data-wv-id"] === undefined) return null;
+    return (
+      <section
+        {...attributes}
+        className="grid min-h-64 place-items-center bg-ink p-panel-wide text-text-inverse"
+      >
+        <p className={eyebrow()}>Select a product for this kit</p>
+      </section>
+    );
+  }
   return (
     <section
+      {...elementAttributes(rest)}
       className={cn(
         SHELL_SECTION_CLASS,
         "grid grid-cols-[0.55fr_1.45fr] items-end gap-15 max-md:grid-cols-1",
@@ -65,3 +91,7 @@ export function KitCallout({
     </section>
   );
 }
+
+export default KitCallout;
+
+export { schema } from "./schema";

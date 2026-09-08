@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
 import {
@@ -7,27 +9,35 @@ import {
   textLink,
 } from "@/lib/presentation/variants";
 import type { Product } from "@/lib/storefront/types";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface FeaturedProductsProps {
+interface FeaturedProductsProps extends WeaverseElementProps {
   eyebrowLabel: string;
   heading: string;
   body: string;
   linkLabel: string;
   linkHref: string;
-  products: readonly Product[];
+  /** Resolved by `./loader` from the merchant's product selection. */
+  loaderData?: { products: readonly Product[] };
 }
 
 /** A four-up product grid introduced by a heading, body copy, and one link. */
-export function FeaturedProducts({
+function FeaturedProducts({
   eyebrowLabel,
   heading,
   body,
   linkLabel,
   linkHref,
-  products,
+  loaderData,
+  ...rest
 }: FeaturedProductsProps) {
+  const products = loaderData?.products ?? [];
   return (
     <section
+      {...elementAttributes(rest)}
       aria-labelledby="home-featured-title"
       className={SHELL_SECTION_CLASS}
     >
@@ -55,3 +65,7 @@ export function FeaturedProducts({
     </section>
   );
 }
+
+export default FeaturedProducts;
+
+export { schema } from "./schema";

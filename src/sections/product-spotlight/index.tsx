@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
@@ -10,26 +12,46 @@ import {
   VIEWPORT_SECTION_CLASS,
 } from "@/lib/presentation/variants";
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
+import {
+  elementAttributes,
+  type WeaverseElementProps,
+} from "../weaverse-element";
 
-interface ProductSpotlightProps {
+interface ProductSpotlightProps extends WeaverseElementProps {
   eyebrowPrefix: string;
   ctaLabel: string;
   /** How many of the product's specs to list. */
   specCount: number;
-  product: Product;
-  image: StorefrontImage;
+  /** Resolved by `./loader`; `null` when nothing usable is selected. */
+  loaderData?: { product: Product; image: StorefrontImage } | null;
 }
 
 /** One product examined beside a tall image, with a short spec list. */
-export function ProductSpotlight({
+function ProductSpotlight({
   eyebrowPrefix,
   ctaLabel,
   specCount,
-  product,
-  image,
+  loaderData,
+  ...rest
 }: ProductSpotlightProps) {
+  /* Nothing usable selected: render nothing publicly, but stay selectable
+   * in Studio so a merchant can reach the picker. */
+  if (!loaderData) {
+    const attributes = elementAttributes(rest);
+    if (attributes["data-wv-id"] === undefined) return null;
+    return (
+      <section
+        {...attributes}
+        className="grid min-h-64 place-items-center bg-ink p-panel-wide text-text-inverse"
+      >
+        <p className={eyebrow()}>Select a product to spotlight</p>
+      </section>
+    );
+  }
+  const { image, product } = loaderData;
   return (
     <section
+      {...elementAttributes(rest)}
       className={cn(
         SHELL_SECTION_CLASS,
         "grid grid-cols-[minmax(0,1.25fr)_minmax(380px,0.75fr)] gap-0 max-md:grid-cols-1",
@@ -90,3 +112,7 @@ export function ProductSpotlight({
     </section>
   );
 }
+
+export default ProductSpotlight;
+
+export { schema } from "./schema";
