@@ -219,7 +219,35 @@ Per-item revalidation must preserve route context (builder#2737).
    `latest` is a stale `0.1.0-alpha.0` and must not be installed.
 4. **Add the dependency and the Weaverse environment** as its own commit, with
    no composition yet, and prove the existing gates still pass.
+
+   Install `@weaverse/next` alone. At `0.1.0-alpha.16` it already depends on
+   `@weaverse/react@5.16.4` and `@weaverse/schema@0.10.0`, so those arrive
+   transitively and must not be added by hand. Its peers are `next >=14`,
+   `react >=19`, `react-dom >=19`; Forward runs Next `16.3.0` and React
+   `19.2.8`. The Next POC additionally lists `@weaverse/core` and pins the
+   other two, but that is POC convenience, not an install requirement.
+
+   Environment: `WEAVERSE_PROJECT_ID` is required and `WEAVERSE_HOST` is
+   optional. `WEAVERSE_API_KEY` is read inside the SDK, not by theme code.
+
 5. **Wire the composition seam** beside the storefront seam, not through it.
+
+   **Narrow the env handed to the SDK.** The Next POC passes `env: process.env`
+   into `createWeaverseNextServerClient`, and the SDK builds its browser-visible
+   `publicEnv` payload from `PUBLIC_STORE_DOMAIN` and
+   `PUBLIC_STOREFRONT_API_TOKEN`. Forward must pass an explicit allowlisted
+   object instead, so no key reaches a Studio payload by default and
+   `PRIVATE_STOREFRONT_API_TOKEN` can never be exposed by a future SDK change.
+   This is the concrete form of the seam separation this contract requires.
+
+   Fail closed on a missing project id, and treat a placeholder value as
+   missing.
+
+   Cache: the POC configures the SDK client with `{ revalidate: 60 }` plus
+   invalidation tags while design and revision-preview reads are forced
+   `no-store` by the SDK. Forward's route-level exports stay as the contract
+   records them (`revalidate = 3600` on `/`, PDP, and collection); the SDK
+   cache config is a separate knob and must not silently override them.
 6. **Add `schema` to the sections, role by role**, starting with the three
    editorial routes (`/about`, `/materials`, `/field-testing`) — no commerce
    state, so a regression there cannot damage catalog, cart, or account

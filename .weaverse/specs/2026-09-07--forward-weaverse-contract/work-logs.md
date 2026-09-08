@@ -208,3 +208,37 @@
   present in the template. The template adds `PUBLIC_MAIN_MENU_HANDLE`, which
   is optional and defaults to `main-menu`, and the three Weaverse keys.
 - No dependency installed and no composition wired yet.
+
+## 2026-09-08 (POC reference pass) — @hta218
+
+- Leo redirected the reference from Pilot to `weaverse-hydrogen-next-poc`,
+  which this spec already lists as permitted evidence. Read the POC's
+  `package.json`, `app/weaverse-next/server.ts`, and `.env.example`.
+- **Install shape corrected.** The POC lists four Weaverse packages
+  (`core`, `next`, `react`, `schema`), which reads like four are required.
+  Checking the registry instead: `@weaverse/next@0.1.0-alpha.16` already
+  depends on `@weaverse/react@5.16.4` and `@weaverse/schema@0.10.0`. Forward
+  installs `@weaverse/next` alone and lets the rest arrive transitively. Peers
+  `next >=14`, `react >=19`, `react-dom >=19` are satisfied by Forward's Next
+  `16.3.0` and React `19.2.8`. The POC pins `@weaverse/next@0.1.0-alpha.15`,
+  one behind the current `alpha` tag.
+- **A design decision came out of the POC rather than a copy of it.** Its
+  `createWeaverseServerClientFromContext` passes `env: process.env` wholesale,
+  and the SDK builds its browser-visible `publicEnv` from `PUBLIC_STORE_DOMAIN`
+  and `PUBLIC_STOREFRONT_API_TOKEN`. Handing the SDK the whole environment is
+  the mechanism by which a token reaches the client. Forward will pass an
+  explicit allowlisted object instead, so nothing reaches a Studio payload by
+  default and `PRIVATE_STOREFRONT_API_TOKEN` cannot be exposed by a later SDK
+  change. Recorded in `plan.md` step 5.
+- Confirmed the env template already matches what theme code actually reads:
+  the POC reads only `WEAVERSE_PROJECT_ID` and `WEAVERSE_HOST` directly, and
+  `WEAVERSE_API_KEY` is consumed inside the SDK. It also guards against its own
+  `REPLACE_ME` placeholder; Forward's template uses empty values, which the
+  same required-check rejects without a sentinel string.
+- Cache note: the POC sets `{ revalidate: 60 }` with invalidation tags on the
+  SDK client while design/revision-preview reads are forced `no-store` by the
+  SDK. Forward's route-level `revalidate = 3600` exports stay as the contract
+  records them; the SDK cache config is a separate knob and must not silently
+  override the route contract.
+- No Pilot source was read at any point. Still no dependency installed and no
+  composition wired.
