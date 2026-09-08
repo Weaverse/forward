@@ -804,3 +804,14 @@ Branch `feat/weaverse-page-types` from `main@0c84182`.
   than prerendered. `dynamicParams = false` still 404s unknown handles.
 - `bun run check` green at 370 node + 131 DOM, `smoke:routes` 35/35, Home
   verified composing all 7 sections from the seeded `INDEX` template.
+- **The static browser matrix regressed 12 tests, and the app was not at
+  fault.** Confirmed against `main` first — 146/0 there, 134/12 here — so this
+  was a real regression, not a flake. Composing a route makes it render
+  dynamically, so React streams the layout's Suspense boundary: the fallback
+  shell arrives first and the resolved copy waits in a hidden `S:n` carrier
+  until an inline script swaps it in. `gotoReady` returned as soon as
+  `#main-content` was visible, which the *fallback* already satisfies, so six
+  tests queried a document holding two headers and two announcement bars, and
+  clicked markup React had not wired yet. Waiting for every `S:n` carrier to be
+  gone restores 146/0. A real browser was checked directly first, to be sure
+  the storefront itself renders correctly — it does.
