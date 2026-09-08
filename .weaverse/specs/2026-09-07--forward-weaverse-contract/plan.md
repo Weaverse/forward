@@ -227,8 +227,13 @@ Per-item revalidation must preserve route context (builder#2737).
    `19.2.8`. The Next POC additionally lists `@weaverse/core` and pins the
    other two, but that is POC convenience, not an install requirement.
 
-   Environment: `WEAVERSE_PROJECT_ID` is required and `WEAVERSE_HOST` is
-   optional. `WEAVERSE_API_KEY` is read inside the SDK, not by theme code.
+   Environment: `WEAVERSE_PROJECT_ID` is required. `WEAVERSE_HOST` is optional
+   and defaults to `https://studio.weaverse.io`, but setting it to anything
+   else also moves the SDK's API base off the production edge proxy, so it is a
+   staging/self-hosted switch rather than a cosmetic URL. `WEAVERSE_API_KEY` is
+   not part of the storefront runtime at all — it belongs to a local
+   admin-data seeding script — so it stays out of the theme's environment
+   template.
 
 5. **Wire the composition seam** beside the storefront seam, not through it.
 

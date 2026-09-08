@@ -242,3 +242,20 @@
   override the route contract.
 - No Pilot source was read at any point. Still no dependency installed and no
   composition wired.
+
+## 2026-09-08 (env template correction) — @hta218
+
+- Leo corrected the `WEAVERSE_API_KEY` entry: it is not a storefront runtime
+  input at all. It belongs to a local script that seeds admin data, so it has
+  no place in the theme's environment template. Removed from `.env.example`,
+  and the claim in `plan.md` that the SDK reads it was corrected.
+- The earlier note was inferred from the SDK reading the key into its config
+  object. Tracing it further showed the value is never consumed — no request
+  header, no fetch, no auth path — which was consistent with Leo's correction
+  rather than contradicting it, but the template had already been written as
+  though the key mattered to the theme.
+- Also recorded that `WEAVERSE_HOST` is not a cosmetic Studio URL: an explicit
+  non-default value moves the SDK's API base off the production edge proxy, so
+  it is a staging/self-hosted switch. Left empty for production.
+- `WEAVERSE_PUBLIC_API_BASE` remains deliberately absent from the template for
+  the same reason: self-hosted deployments only.
