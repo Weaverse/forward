@@ -108,11 +108,18 @@ test.describe("header navigation surface", () => {
       "the mega panel is a desktop surface",
     );
     await gotoReady(page, "/shop?sort=name");
-    await page.getByRole("button", { name: /Shop/ }).click();
 
-    const packs = page
-      .getByRole("navigation", { name: "Shop collections" })
-      .getByRole("link", { name: /Packs/ });
+    /* The trigger exists in server markup before React attaches, so a single
+     * click can land on an unwired handler and do nothing. Retry the click
+     * until the panel actually opens — cheaper and more honest than waiting
+     * for network silence, which is both slow and not a hydration signal. */
+    const panel = page.getByRole("navigation", { name: "Shop collections" });
+    await expect(async () => {
+      await page.getByRole("button", { name: /Shop/ }).click();
+      await expect(panel).toBeVisible({ timeout: 1000 });
+    }).toPass({ timeout: 15000 });
+
+    const packs = panel.getByRole("link", { name: /Packs/ });
     await expect(packs).toHaveAttribute("href", "/shop/packs?sort=name");
 
     await packs.click();

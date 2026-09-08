@@ -45,31 +45,7 @@ test.describe("content routes", () => {
     );
   });
 
-  test("keeps custom pages, canonical pages, and policies distinct", async ({
-    page,
-  }) => {
-    await gotoReady(page, "/materials");
-    const materialHero = page.getByRole("heading", { level: 1 }).locator("..");
-    const materialCopy = await boxOf(materialHero);
-    const materialImage = await boxOf(
-      page.locator("main > div > section").first().getByRole("img"),
-    );
-    if ((page.viewportSize()?.width ?? 0) > 820) {
-      expect(materialImage.x).toBeLessThan(materialCopy.x);
-    } else {
-      expect(materialCopy.y).toBeLessThan(materialImage.y);
-    }
-    await expect(page.locator('main a[href^="/products/"]')).toHaveCount(3);
-
-    await gotoReady(page, "/field-testing");
-    await expect(
-      page.locator("#main-content ol").getByRole("listitem"),
-    ).toHaveCount(4);
-    await expect(page.locator("main img").first()).toHaveAttribute(
-      "sizes",
-      "100vw",
-    );
-
+  test("keeps canonical pages and policies distinct", async ({ page }) => {
     await gotoReady(page, "/pages/about-forward");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "About Forward",

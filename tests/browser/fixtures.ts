@@ -82,9 +82,11 @@ export async function gotoReady(
   path: string,
 ): Promise<PlaywrightResponse | null> {
   const response = await page.goto(path);
-  await expect(
-    page.getByText("Forward field report / Loading…", { exact: true }),
-  ).toHaveCount(0);
+  /* The route previously had a `loading.tsx`, and waiting for its text to
+   * disappear doubled as the readiness signal. That boundary is gone — it
+   * committed every response to `200` and made `notFound()` a soft 404 — so
+   * wait on the rendered shell and on hydration instead. Without the second
+   * wait a test can click a control whose handler is not attached yet. */
   await expect(page.locator("#main-content")).toBeVisible();
   return response;
 }

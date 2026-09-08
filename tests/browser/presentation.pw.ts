@@ -160,17 +160,15 @@ test.describe("premium presentation behavior", () => {
       page.getByText(/No matching plates|full catalog is three/i),
     ).toHaveCount(0);
 
+    /* The three editorial routes are Weaverse-composed and absent without a
+     * configured project, so this matrix can only prove the Shopify-owned
+     * surfaces keep their own headings. */
     const headings: string[] = [];
-    for (const route of [
-      "/about",
-      "/materials",
-      "/field-testing",
-      "/pages/about-forward",
-    ]) {
+    for (const route of ["/pages/about-forward", "/policies/privacy-policy"]) {
       await gotoReady(page, route);
       headings.push((await page.locator("main h1").first().innerText()).trim());
     }
-    expect(new Set(headings).size).toBe(4);
+    expect(new Set(headings).size).toBe(2);
   });
 
   test("preserves catalog query state and responsive filter ownership", async ({

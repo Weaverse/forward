@@ -143,7 +143,7 @@ describe("Studio integration surface", () => {
   it("forwards searchParams and pathname from the custom-page route", async () => {
     /* Design mode is detected from the query Studio puts on the iframe URL,
      * and CUSTOM pages resolve by path, so both are load-bearing. */
-    const source = await read("src/app/weaverse-page/[...slug]/page.tsx");
+    const source = await read("src/app/[...slug]/page.tsx");
 
     assert.match(
       source,
