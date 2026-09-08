@@ -111,3 +111,44 @@
   repo's pinned 1.3.14, which breaks `--path-ignore-patterns` and
   `@testing-library`'s fake-timer detection. Not caused by this work, but the
   DOM suite cannot be trusted locally until Bun matches.
+
+## 2026-09-08 (close-out) — @hta218
+
+- Updated `AGENTS.md` now that the extraction has landed and the connection
+  gate is open:
+  - Weaverse moved from "outside that approval" into the approved set for the
+    current ordered slices, with its own guardrails alongside: install only an
+    exact registry-verified version, never the stale npm `latest`; keep the
+    Shopify data seam and the Weaverse composition seam separate so no
+    credential, private token, or raw payload reaches a Studio payload; and
+    leave pageview transport and deduplication to the SDK.
+  - Added the section rule: routes compose named sections from `src/sections/`,
+    a section is pure presentation taking content and data as props, sections
+    never import the data source, and a section reused by more than one route
+    takes its variations as props rather than forking into a near-copy.
+  - Recorded which surfaces are not sections and stay theme-owned: the PDP buy
+    block and its `colorway`/`size` query state, the collection and Shop grid
+    behavior, Cart, `/account/**`, and Header/Footer.
+  - Clarified the no-Pilot constraint rather than weakening it. Adopting a
+    documented Weaverse platform pattern is a platform decision, not Pilot
+    emulation, and still does not license reading Pilot source.
+  - Corrected the verification list from `bun test` to `bun run test`; the bare
+    form skips the DOM suite's preload. Pinned the Bun expectation to
+    `packageManager` and explained the failure mode an older Bun produces, so
+    the next agent does not chase 25 phantom failures.
+- `README.md`: recorded the post-extraction state beside the original baseline,
+  put extraction into the spec's Included scope with the reason it moved ahead
+  of the install, excluded schema/registry/seam work explicitly, and renumbered
+  the phase gates — Phase 2 is now the completed extraction and the connection
+  slice became Phase 4.
+- `plan.md`: rewrote the inventory to match the shipped components rather than
+  the paper model, and added a "What extraction corrected" section so the three
+  disagreements are recorded rather than quietly patched — `editorial-hero` was
+  not shared by all three editorial routes, four kinds of reuse were missed, and
+  the per-role section counts were wrong (`COLLECTION` four not three, `PRODUCT`
+  one not five, `ARTICLE` two not three). Also documented the theme-owned routes
+  that were extracted for code organization without becoming composable, and
+  reordered the implementation steps so extraction sits before the install.
+- No section was invented to match the table. `article-related` stayed out
+  because the route does not render it, and the four PDP disclosure panels
+  stayed inside the buy block because they are one stack, not four sections.
