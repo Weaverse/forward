@@ -1,3 +1,4 @@
+import { createSchema } from "@weaverse/schema";
 import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 
 /** One numbered sequence step: index column, then the step description. */
@@ -38,3 +39,30 @@ export function NumberedSequence({
     </section>
   );
 }
+
+export const schema = createSchema({
+  type: "numbered-sequence",
+  title: "Numbered sequence",
+  settings: [
+    {
+      group: "Content",
+      inputs: [
+        {
+          type: "text",
+          name: "eyebrowLabel",
+          label: "Eyebrow",
+        },
+        {
+          type: "text",
+          name: "heading",
+          label: "Heading",
+        },
+        {
+          type: "textarea",
+          name: "steps",
+          label: "Steps, one `number | title | copy` row per line",
+        },
+      ],
+    },
+  ],
+});

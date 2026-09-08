@@ -1,6 +1,6 @@
+import { createSchema } from "@weaverse/schema";
 import Image from "next/image";
 import Link from "next/link";
-
 import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import type { Collection } from "@/lib/storefront/types";
 
@@ -55,3 +55,31 @@ export function CollectionIndex({
     </section>
   );
 }
+
+export const schema = createSchema({
+  type: "collection-index",
+  title: "Collection index",
+  settings: [
+    {
+      group: "Content",
+      inputs: [
+        {
+          type: "text",
+          name: "eyebrowLabel",
+          label: "Eyebrow",
+          defaultValue: "Shop by system",
+        },
+        {
+          type: "text",
+          name: "heading",
+          label: "Heading",
+        },
+        {
+          type: "textarea",
+          name: "collectionHandles",
+          label: "Collection handles, one per line",
+        },
+      ],
+    },
+  ],
+});

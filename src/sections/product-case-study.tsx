@@ -1,6 +1,6 @@
+import { createSchema } from "@weaverse/schema";
 import Image from "next/image";
 import Link from "next/link";
-
 import { cta, eyebrow } from "@/lib/presentation/variants";
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
 
@@ -55,3 +55,35 @@ export function ProductCaseStudy({
     </section>
   );
 }
+
+export const schema = createSchema({
+  type: "product-case-study",
+  title: "Product case study",
+  settings: [
+    {
+      group: "Content",
+      inputs: [
+        {
+          type: "text",
+          name: "eyebrowLabel",
+          label: "Eyebrow",
+        },
+        {
+          type: "text",
+          name: "ctaLabel",
+          label: "CTA label",
+        },
+        {
+          type: "text",
+          name: "productHandle",
+          label: "Product handle",
+        },
+        {
+          type: "image",
+          name: "image",
+          label: "Image",
+        },
+      ],
+    },
+  ],
+});

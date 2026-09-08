@@ -1,6 +1,6 @@
+import { createSchema } from "@weaverse/schema";
 import Image from "next/image";
 import Link from "next/link";
-
 import { cn } from "@/lib/cn";
 import {
   cta,
@@ -91,3 +91,41 @@ export function ProductSpotlight({
     </section>
   );
 }
+
+export const schema = createSchema({
+  type: "product-spotlight",
+  title: "Product spotlight",
+  settings: [
+    {
+      group: "Content",
+      inputs: [
+        {
+          type: "text",
+          name: "eyebrowPrefix",
+          label: "Eyebrow prefix",
+        },
+        {
+          type: "text",
+          name: "ctaLabel",
+          label: "CTA label",
+        },
+        {
+          type: "range",
+          name: "specCount",
+          label: "Spec rows shown",
+          defaultValue: 3,
+        },
+        {
+          type: "text",
+          name: "productHandle",
+          label: "Product handle",
+        },
+        {
+          type: "image",
+          name: "image",
+          label: "Image",
+        },
+      ],
+    },
+  ],
+});

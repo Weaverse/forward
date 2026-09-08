@@ -1,3 +1,5 @@
+import { createSchema } from "@weaverse/schema";
+
 interface PrincipleGridProps {
   principles: readonly { number: string; title: string; copy: string }[];
 }
@@ -23,3 +25,20 @@ export function PrincipleGrid({ principles }: PrincipleGridProps) {
     </section>
   );
 }
+
+export const schema = createSchema({
+  type: "principle-grid",
+  title: "Principle grid",
+  settings: [
+    {
+      group: "Content",
+      inputs: [
+        {
+          type: "textarea",
+          name: "principles",
+          label: "Principles, one `number | title | copy` row per line",
+        },
+      ],
+    },
+  ],
+});

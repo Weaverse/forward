@@ -1,10 +1,11 @@
 /**
  * The Weaverse component registry.
  *
- * One entry per composable section, pairing the shipped presentation component
- * with its Builder schema. The registry is the single list the SDK sees, so a
- * section that is not here cannot be composed — which is exactly how the
- * contract's theme-owned surfaces stay theme-owned.
+ * Each entry pairs a shipped component with the `schema` exported beside it,
+ * so a component and the settings Builder shows for it are edited in one file
+ * and cannot drift apart. The registry is the single list the SDK sees, which
+ * is how the contract's theme-owned surfaces stay theme-owned: a component
+ * that is not here cannot be composed.
  *
  * Deliberately absent, and argued in the spec rather than forgotten:
  *
@@ -20,83 +21,77 @@
 
 import type { WeaverseNextComponent } from "@weaverse/next";
 
-import { CollectionIndex } from "@/sections/collection-index";
-import { EditorialCallout } from "@/sections/editorial-callout";
-import { EditorialHero } from "@/sections/editorial-hero";
-import { EditorialOverlayHero } from "@/sections/editorial-overlay-hero";
-import { FeaturedProducts } from "@/sections/featured-products";
-import { HomeHero } from "@/sections/home-hero";
-import { KitCallout } from "@/sections/kit-callout";
-import { MaterialStandard } from "@/sections/material-standard";
-import { NumberedSequence } from "@/sections/numbered-sequence";
-import { PrincipleGrid } from "@/sections/principle-grid";
-import { ProductCaseStudy } from "@/sections/product-case-study";
-import { ProductSpotlight } from "@/sections/product-spotlight";
-import { ProductStrip } from "@/sections/product-strip";
-import { ProductTiles } from "@/sections/product-tiles";
-import { RepairAndJournal } from "@/sections/repair-and-journal";
-import { StandardStatement } from "@/sections/standard-statement";
-import { StatBand } from "@/sections/stat-band";
+import * as Button from "@/components/button";
+import * as Heading from "@/components/heading";
+import * as Paragraph from "@/components/paragraph";
+import * as Subheading from "@/components/subheading";
+import * as CollectionIndex from "@/sections/collection-index";
+import * as EditorialCallout from "@/sections/editorial-callout";
+import * as EditorialHero from "@/sections/editorial-hero";
+import * as EditorialOverlayHero from "@/sections/editorial-overlay-hero";
+import * as FeaturedProducts from "@/sections/featured-products";
+import * as HomeHero from "@/sections/home-hero";
+import * as KitCallout from "@/sections/kit-callout";
+import * as MaterialStandard from "@/sections/material-standard";
+import * as NumberedSequence from "@/sections/numbered-sequence";
+import * as PrincipleGrid from "@/sections/principle-grid";
+import * as ProductCaseStudy from "@/sections/product-case-study";
+import * as ProductSpotlight from "@/sections/product-spotlight";
+import * as ProductStrip from "@/sections/product-strip";
+import * as ProductTiles from "@/sections/product-tiles";
+import * as RepairAndJournal from "@/sections/repair-and-journal";
+import * as StandardStatement from "@/sections/standard-statement";
+import * as StatBand from "@/sections/stat-band";
 
-import {
-  collectionIndexSchema,
-  editorialCalloutSchema,
-  editorialHeroSchema,
-  editorialOverlayHeroSchema,
-  featuredProductsSchema,
-  homeHeroSchema,
-  kitCalloutSchema,
-  materialStandardSchema,
-  numberedSequenceSchema,
-  principleGridSchema,
-  productCaseStudySchema,
-  productSpotlightSchema,
-  productStripSchema,
-  productTilesSchema,
-  repairAndJournalSchema,
-  standardStatementSchema,
-  statBandSchema,
-} from "./schemas";
+type SchemaModule = { schema: WeaverseNextComponent["schema"] };
 
-/*
- * The section components take exact typed props; the SDK renders registry
- * entries with its own prop shape. The cast is confined to this list so no
- * `any` leaks into a section, and the mapping from settings to props is the
- * composition slice's job, not the registry's.
+/**
+ * Pairs a module's exported component with the schema exported beside it.
+ *
+ * Sections keep named exports per `AGENTS.md`, so the component is named
+ * rather than a module default. The SDK renders registry entries with its own
+ * prop shape; that cast is confined here so no section has to loosen its own
+ * types, and mapping settings onto props stays the composition slice's job.
  */
 function entry(
+  module: SchemaModule,
   component: unknown,
-  schema: WeaverseNextComponent["schema"],
 ): WeaverseNextComponent {
   return {
     default: component as WeaverseNextComponent["default"],
-    schema,
+    schema: module.schema,
   };
 }
 
 export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
+  /* Shared elements, usable inside any composed section. */
+  entry(Heading, Heading.Heading),
+  entry(Subheading, Subheading.Subheading),
+  entry(Paragraph, Paragraph.Paragraph),
+  entry(Button, Button.Button),
+
   /* INDEX */
-  entry(HomeHero, homeHeroSchema),
-  entry(FeaturedProducts, featuredProductsSchema),
-  entry(CollectionIndex, collectionIndexSchema),
-  entry(ProductSpotlight, productSpotlightSchema),
-  entry(MaterialStandard, materialStandardSchema),
-  entry(KitCallout, kitCalloutSchema),
-  entry(RepairAndJournal, repairAndJournalSchema),
+  entry(HomeHero, HomeHero.HomeHero),
+  entry(FeaturedProducts, FeaturedProducts.FeaturedProducts),
+  entry(CollectionIndex, CollectionIndex.CollectionIndex),
+  entry(ProductSpotlight, ProductSpotlight.ProductSpotlight),
+  entry(MaterialStandard, MaterialStandard.MaterialStandard),
+  entry(KitCallout, KitCallout.KitCallout),
+  entry(RepairAndJournal, RepairAndJournal.RepairAndJournal),
 
   /* PAGE */
-  entry(EditorialHero, editorialHeroSchema),
-  entry(EditorialOverlayHero, editorialOverlayHeroSchema),
-  entry(EditorialCallout, editorialCalloutSchema),
-  entry(StandardStatement, standardStatementSchema),
-  entry(StatBand, statBandSchema),
-  entry(ProductStrip, productStripSchema),
-  entry(PrincipleGrid, principleGridSchema),
-  entry(ProductTiles, productTilesSchema),
-  entry(NumberedSequence, numberedSequenceSchema),
-  entry(ProductCaseStudy, productCaseStudySchema),
+  entry(EditorialHero, EditorialHero.EditorialHero),
+  entry(EditorialOverlayHero, EditorialOverlayHero.EditorialOverlayHero),
+  entry(EditorialCallout, EditorialCallout.EditorialCallout),
+  entry(StandardStatement, StandardStatement.StandardStatement),
+  entry(StatBand, StatBand.StatBand),
+  entry(ProductStrip, ProductStrip.ProductStrip),
+  entry(PrincipleGrid, PrincipleGrid.PrincipleGrid),
+  entry(ProductTiles, ProductTiles.ProductTiles),
+  entry(NumberedSequence, NumberedSequence.NumberedSequence),
+  entry(ProductCaseStudy, ProductCaseStudy.ProductCaseStudy),
 ];
 
-/** Every registered section type, for tests and the seed script. */
+/** Every registered type, for tests and the seed script. */
 export const WEAVERSE_SECTION_TYPES: readonly string[] =
   WEAVERSE_COMPONENTS.map((component) => component.schema.type);

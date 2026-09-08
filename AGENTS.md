@@ -8,11 +8,11 @@ Forward is a fresh Next.js App Router storefront theme using
 ## Architecture constraints
 
 - Implement from scratch in this repository.
-- Do not inspect, fork, import, copy, or emulate Pilot code, architecture,
-  sections, or conventions. Adopting a documented Weaverse platform pattern —
-  such as configuring Header and Footer through theme settings rather than
-  global sections — is a platform decision, not Pilot emulation, and does not
-  license reading Pilot source.
+- Do not fork, import, copy, port, or emulate Pilot code, architecture,
+  sections, or visual design. Reading Pilot to learn how a Weaverse theme
+  *organizes* its files was authorized by Leo on 2026-09-08 and is the only
+  permitted use: layout conventions may be adopted, implementation may not.
+  Nothing in this repository is a translation of Pilot source.
 - The existing static Forward POC is a visual reference only; do not copy its implementation wholesale.
 - Storefront completeness is defined by `.weaverse/specs/2026-08-05--static-demo-productionization/README.md` and the Shopify route contract.
 - Build the theme before making deployment or demo-integration decisions.
@@ -26,6 +26,19 @@ Forward is a fresh Next.js App Router storefront theme using
   collection and Shop grid behavior, Cart, and `/account/**`. Header and
   Footer are theme-owned components configured through theme settings, never
   Weaverse global sections.
+- A Weaverse component exports its `schema` from the same file as the
+  component, so settings and markup cannot drift apart. The registry in
+  `src/lib/weaverse/components.ts` is the only list the SDK sees; a component
+  absent from it cannot be composed.
+- Theme settings live one group per file under `src/lib/weaverse/settings/`,
+  each declared `as const satisfies WeaverseNextThemeSchemaGroup`.
+  `settings/types.ts` derives `ThemeSettings` from those declarations, so
+  renaming an input breaks its consumers at compile time instead of silently
+  reading `undefined`.
+- Shared editorial elements — `Heading`, `Subheading`, `Paragraph`, `Button` —
+  are registered Weaverse components that render through the existing
+  presentation recipes, so copy authored in Studio and copy authored in a
+  route render identically.
 - `src/app/globals.css` is the only target global stylesheet: Tailwind import,
   one semantic `@theme` token set, and minimal document-level base rules only.
   Components/routes own presentation through utilities; use `cn()` for

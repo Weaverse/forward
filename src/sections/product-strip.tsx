@@ -1,5 +1,5 @@
+import { createSchema } from "@weaverse/schema";
 import Link from "next/link";
-
 import { ProductCard } from "@/components/product-card";
 import { sectionHeading, textLink } from "@/lib/presentation/variants";
 import type { Product } from "@/lib/storefront/types";
@@ -41,3 +41,40 @@ export function ProductStrip({
     </section>
   );
 }
+
+export const schema = createSchema({
+  type: "product-strip",
+  title: "Product strip",
+  settings: [
+    {
+      group: "Content",
+      inputs: [
+        {
+          type: "text",
+          name: "eyebrowLabel",
+          label: "Eyebrow",
+        },
+        {
+          type: "text",
+          name: "heading",
+          label: "Heading",
+        },
+        {
+          type: "text",
+          name: "linkLabel",
+          label: "Link label",
+        },
+        {
+          type: "url",
+          name: "linkHref",
+          label: "Link target",
+        },
+        {
+          type: "textarea",
+          name: "productHandles",
+          label: "Product handles, one per line",
+        },
+      ],
+    },
+  ],
+});

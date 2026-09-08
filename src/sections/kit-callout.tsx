@@ -1,6 +1,6 @@
+import { createSchema } from "@weaverse/schema";
 import Image from "next/image";
 import Link from "next/link";
-
 import { cn } from "@/lib/cn";
 import {
   eyebrow,
@@ -66,3 +66,42 @@ export function KitCallout({
     </section>
   );
 }
+
+export const schema = createSchema({
+  type: "kit-callout",
+  title: "Kit callout",
+  settings: [
+    {
+      group: "Content",
+      inputs: [
+        {
+          type: "text",
+          name: "eyebrowLabel",
+          label: "Eyebrow",
+          defaultValue: "One-day kit",
+        },
+        {
+          type: "text",
+          name: "heading",
+          label: "Heading",
+          defaultValue: "Carry the day, not the doubt.",
+        },
+        {
+          type: "text",
+          name: "linkLabel",
+          label: "Link label",
+        },
+        {
+          type: "text",
+          name: "productHandle",
+          label: "Primary product handle",
+        },
+        {
+          type: "textarea",
+          name: "tileProductHandles",
+          label: "Tile product handles, one per line",
+        },
+      ],
+    },
+  ],
+});

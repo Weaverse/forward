@@ -1,3 +1,5 @@
+import { createSchema } from "@weaverse/schema";
+
 interface StatBandProps {
   stats: readonly { value: string; label: string }[];
 }
@@ -22,3 +24,20 @@ export function StatBand({ stats }: StatBandProps) {
     </section>
   );
 }
+
+export const schema = createSchema({
+  type: "stat-band",
+  title: "Stat band",
+  settings: [
+    {
+      group: "Content",
+      inputs: [
+        {
+          type: "textarea",
+          name: "stats",
+          label: "Stats, one `value | label` pair per line",
+        },
+      ],
+    },
+  ],
+});

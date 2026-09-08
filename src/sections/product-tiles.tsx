@@ -1,6 +1,6 @@
+import { createSchema } from "@weaverse/schema";
 import Image from "next/image";
 import Link from "next/link";
-
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
 
 interface ProductTilesProps {
@@ -35,3 +35,20 @@ export function ProductTiles({ tiles }: ProductTilesProps) {
     </section>
   );
 }
+
+export const schema = createSchema({
+  type: "product-tiles",
+  title: "Product tiles",
+  settings: [
+    {
+      group: "Content",
+      inputs: [
+        {
+          type: "textarea",
+          name: "tileProductHandles",
+          label: "Product handles, one per line",
+        },
+      ],
+    },
+  ],
+});
