@@ -21,6 +21,14 @@
  *   bun run seed:weaverse --apply          # writes the pages
  *   bun run seed:weaverse --apply --with-theme
  *
+ * Only the `INDEX` template is seeded among the resource-backed page types.
+ * `PRODUCT`, `COLLECTION`, `PAGE`, and `ARTICLE` each have one shared default
+ * template that the Builder creates with the project and stores with an empty
+ * handle, and the Content API refuses to address it: both reading and writing
+ * `/pages/PRODUCT` answer `400 A handle is required for PRODUCT pages`. Their
+ * content lives in each section's `presets` instead, which is what Studio
+ * inserts when a merchant adds the section.
+ *
  * Theme settings are skipped unless `--with-theme` is passed. Nothing in the
  * storefront reads them yet — the Header and Footer still take their copy from
  * the storefront data source — so writing them would put values in Studio that
@@ -51,6 +59,13 @@ interface SeedSection {
 
 interface SeedPage {
   pageType: string;
+  /**
+   * Empty for a resource-backed template.
+   *
+   * `INDEX`, `PRODUCT`, `COLLECTION`, `PAGE`, and `ARTICLE` are one shared
+   * template each, created with the project and addressed by type alone. Only
+   * a `CUSTOM` page has a handle of its own.
+   */
   handle: string;
   name?: string;
   description?: string;
@@ -68,6 +83,13 @@ interface PageItem {
   type?: string;
   data: Record<string, unknown>;
   children?: { id: string }[];
+}
+
+/** How a page is addressed in the Content API and in this script's output. */
+function pageRef(page: SeedPage): string {
+  return page.handle.length > 0
+    ? `${page.pageType}/${page.handle}`
+    : page.pageType;
 }
 
 function fail(message: string): never {
@@ -136,13 +158,20 @@ function validate(pages: SeedPage[]): void {
   const registered = new Set(WEAVERSE_SECTION_TYPES);
   const problems: string[] = [];
 
+  const addressed = new Set<string>();
   for (const page of pages) {
+    const ref = pageRef(page);
+    if (addressed.has(ref)) {
+      problems.push(`${ref}: two seed files target the same page`);
+    }
+    addressed.add(ref);
+
     if (page.sections.length === 0) {
-      problems.push(`${page.handle}: no sections`);
+      problems.push(`${ref}: no sections`);
     }
     if (page.sections.length + 1 > MAX_ITEMS_PER_REQUEST) {
       problems.push(
-        `${page.handle}: ${page.sections.length + 1} items exceeds the ${MAX_ITEMS_PER_REQUEST}-item request cap`,
+        `${ref}: ${page.sections.length + 1} items exceeds the ${MAX_ITEMS_PER_REQUEST}-item request cap`,
       );
     }
 
@@ -150,14 +179,14 @@ function validate(pages: SeedPage[]): void {
     for (const section of page.sections) {
       if (seen.has(section.key)) {
         problems.push(
-          `${page.handle}: duplicate section key "${section.key}" would collide on one item id`,
+          `${ref}: duplicate section key "${section.key}" would collide on one item id`,
         );
       }
       seen.add(section.key);
 
       if (!registered.has(section.type)) {
         problems.push(
-          `${page.handle}: section type "${section.type}" is not in the component registry`,
+          `${ref}: section type "${section.type}" is not in the component registry`,
         );
       }
     }
@@ -207,13 +236,11 @@ async function fetchRootId(
   page: SeedPage,
 ): Promise<string> {
   const response = await fetch(
-    `${CONTENT_API_BASE}/projects/${projectId}/pages/${page.pageType}/${page.handle}`,
+    `${CONTENT_API_BASE}/projects/${projectId}/pages/${pageRef(page)}`,
     { headers: { authorization: `Bearer ${apiKey}` } },
   );
   if (!response.ok) {
-    fail(
-      `reading ${page.pageType}/${page.handle} responded ${response.status}`,
-    );
+    fail(`reading ${pageRef(page)} responded ${response.status}`);
   }
 
   const body = (await response.json()) as {
@@ -225,7 +252,7 @@ async function fetchRootId(
   );
   const rootId = body.rootId ?? fromItems?.id;
   if (typeof rootId !== "string" || rootId.length === 0) {
-    fail(`${page.pageType}/${page.handle} has no root item to attach to`);
+    fail(`${pageRef(page)} has no root item to attach to`);
   }
   return rootId;
 }
@@ -235,36 +262,38 @@ async function seedPage(
   projectId: string,
   page: SeedPage,
 ): Promise<void> {
-  const created = await request(
-    apiKey,
-    "POST",
-    `/projects/${projectId}/pages`,
-    {
-      type: page.pageType,
-      handle: page.handle,
-      name: page.name ?? page.handle,
-    },
-  );
-  if (!created.ok && created.status !== 409) {
-    fail(
-      `creating ${page.pageType}/${page.handle} responded ${created.status}`,
+  /* A template already exists — the Builder creates one per page type with
+   * the project — so only a CUSTOM page is ever created here. */
+  let existed = true;
+  if (page.handle.length > 0) {
+    const created = await request(
+      apiKey,
+      "POST",
+      `/projects/${projectId}/pages`,
+      {
+        type: page.pageType,
+        handle: page.handle,
+        name: page.name ?? page.handle,
+      },
     );
+    if (!created.ok && created.status !== 409) {
+      fail(`creating ${pageRef(page)} responded ${created.status}`);
+    }
+    existed = created.status === 409;
   }
 
   const rootId = await fetchRootId(apiKey, projectId, page);
   const updated = await request(
     apiKey,
     "PATCH",
-    `/projects/${projectId}/pages/${page.pageType}/${page.handle}`,
+    `/projects/${projectId}/pages/${pageRef(page)}`,
     { items: buildItems(page, rootId) },
   );
   if (!updated.ok) {
-    fail(
-      `updating ${page.pageType}/${page.handle} responded ${updated.status}`,
-    );
+    fail(`updating ${pageRef(page)} responded ${updated.status}`);
   }
   console.log(
-    `  ${created.status === 409 ? "updated" : "created and wrote"} ${page.pageType}/${page.handle}`,
+    `  ${existed ? "updated" : "created and wrote"} ${pageRef(page)}`,
   );
 }
 
@@ -292,7 +321,7 @@ async function main(): Promise<void> {
   );
   for (const page of pages) {
     console.log(
-      `  ${page.pageType}/${page.handle}: ${page.sections.length} sections (+1 root)`,
+      `  ${pageRef(page)}: ${page.sections.length} sections (+1 root)`,
     );
     for (const section of page.sections) {
       console.log(`    - ${section.type}`);
