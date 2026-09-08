@@ -764,3 +764,43 @@ architecture built earlier today.
   and policy handles all answer 404; every real route still answers 200.
   `bun run check` green at `370` node + `95` DOM, `smoke:routes` `35/35`, and
   the static browser matrix back to `146 / 10 / 0` in under a minute.
+
+## 2026-09-08 — Composing the remaining page types (#67)
+
+Branch `feat/weaverse-page-types` from `main@0c84182`.
+
+- **The `dataContext` seam.** `CUSTOM` sections pick their own resource; a
+  resource-backed template does not — the route decides which product,
+  collection, page, or article it is rendering. That data now travels through
+  one React context: `WeaversePage` supplies it around the renderer, and a
+  route supplies it around its own fallback, so the same component runs
+  composed or not. Reading it off `useWeaverse()` alone would have made every
+  fallback render nothing.
+- **All five templates composed.** `INDEX` (7 sections), `PRODUCT` (1, around
+  the theme-owned buy block), `COLLECTION` (4), `PAGE` (4), `ARTICLE` (2).
+  Eleven sections became folder sections with schemas; all are registered in
+  both registries and in `section-types.ts`.
+- **A silent break, found by looking at the rendered HTML.** `loadWeaversePage`
+  imported `hasAuthoredSections` and never called it, so the Builder's empty
+  default template was treated as a composed page. Home, the PDP, the
+  collection, the article, and the Shopify page all rendered blank while every
+  status check passed. The guard is applied now, and skipped in design mode
+  where an empty page is precisely what the merchant is about to compose.
+  `smoke:routes` now fails a 200 HTML route that renders no `<h1>`; disabling
+  the guard and rebuilding was used to confirm the assertion actually fires.
+- **The composed-section DOM suite was a hand-kept list**, so eleven new
+  sections would have shipped with no render and no Studio-addressability
+  assertion. It is now derived from `WEAVERSE_COMPONENTS`, and the identity
+  assertions render inside a populated route context. 95 → 131 DOM tests.
+- **`presets` and `enabledOn` on every section.** Preset copy is the theme's
+  own defaults, so an added section looks like the shipped page. `home-hero`
+  also gained the `stats` input it renders but never declared.
+- **Only `INDEX` is seedable.** `PRODUCT`, `COLLECTION`, `PAGE`, and `ARTICLE`
+  each have one default template stored with an empty handle, and the Content
+  API refuses to address it — `GET` and `PATCH` on `/pages/PRODUCT` both answer
+  `400 A handle is required for PRODUCT pages`. Their content lives in section
+  presets instead. Verified against the live API; worth a Builder issue.
+- Routes that read `searchParams` for design-mode detection are dynamic rather
+  than prerendered. `dynamicParams = false` still 404s unknown handles.
+- `bun run check` green at 370 node + 131 DOM, `smoke:routes` 35/35, Home
+  verified composing all 7 sections from the seeded `INDEX` template.
