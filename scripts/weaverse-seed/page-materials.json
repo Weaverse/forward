@@ -1,0 +1,34 @@
+{
+  "pageType": "CUSTOM",
+  "handle": "materials",
+  "name": "Materials",
+  "sections": [
+    {
+      "type": "editorial-hero",
+      "data": {
+        "eyebrowLabel": "Custom page / Materials",
+        "heading": "Fewer materials. Better understood.",
+        "lede": "Every fabric, foam, buckle, and compound is selected around useful life, field repair, and performance you can actually feel.",
+        "imageSide": "left",
+        "image": {
+          "url": "/images/editorial/mountain-ridges.webp",
+          "altText": "Layered mountain ridges fading into evening haze",
+          "width": 1800,
+          "height": 1200
+        }
+      }
+    },
+    { "type": "principle-grid" },
+    {
+      "type": "product-tiles",
+      "data": {
+        "products": [
+          { "handle": "weatherline-shell" },
+          { "handle": "traverse-grid-fleece" },
+          { "handle": "talus-trail-shoe" }
+        ]
+      }
+    },
+    { "type": "editorial-callout" }
+  ]
+}

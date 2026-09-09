@@ -1,0 +1,6 @@
+{
+  "pageType": "PRODUCT",
+  "handle": "",
+  "description": "Product template. The buy block is theme-owned and renders above these sections.",
+  "sections": [{ "type": "related-products" }]
+}

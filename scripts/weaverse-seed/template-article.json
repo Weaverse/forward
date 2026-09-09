@@ -1,0 +1,6 @@
+{
+  "pageType": "ARTICLE",
+  "handle": "",
+  "description": "Journal article template.",
+  "sections": [{ "type": "article-header" }, { "type": "article-body" }]
+}

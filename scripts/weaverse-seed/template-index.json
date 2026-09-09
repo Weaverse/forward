@@ -1,0 +1,67 @@
+{
+  "pageType": "INDEX",
+  "handle": "",
+  "description": "Home.",
+  "sections": [
+    {
+      "type": "home-hero",
+      "data": {
+        "featuredProduct": { "handle": "weatherline-shell" },
+        "image": {
+          "url": "/images/editorial/hero-open-sky.webp",
+          "altText": "Climber on an open granite face under a wide pale sky",
+          "width": 2000,
+          "height": 1445
+        }
+      }
+    },
+    {
+      "type": "featured-products",
+      "data": {
+        "products": [
+          { "handle": "weatherline-shell" },
+          { "handle": "traverse-grid-fleece" },
+          { "handle": "ridge-30-field-pack" },
+          { "handle": "talus-trail-shoe" }
+        ]
+      }
+    },
+    {
+      "type": "collection-index",
+      "data": {
+        "collections": [
+          { "handle": "outerwear" },
+          { "handle": "packs" },
+          { "handle": "footwear" }
+        ]
+      }
+    },
+    {
+      "type": "product-spotlight",
+      "data": { "product": { "handle": "drift-insulated-vest" } }
+    },
+    {
+      "type": "material-standard",
+      "data": {
+        "image": {
+          "url": "/images/editorial/mountain-ridges.webp",
+          "altText": "Layered mountain ridges fading into evening haze",
+          "width": 1800,
+          "height": 1200
+        }
+      }
+    },
+    {
+      "type": "kit-callout",
+      "data": {
+        "product": { "handle": "approach-18-day-pack" },
+        "tileProducts": [
+          { "handle": "weatherline-shell" },
+          { "handle": "traverse-grid-fleece" },
+          { "handle": "ridge-30-field-pack" }
+        ]
+      }
+    },
+    { "type": "repair-and-journal" }
+  ]
+}
