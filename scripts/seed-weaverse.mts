@@ -5,6 +5,12 @@
  * routes render today, so seeding produces a Studio project that matches the
  * live storefront instead of an empty shell a merchant has to rebuild.
  *
+ * Two kinds of page are seeded. A `CUSTOM` page is one page per path and is
+ * created here if the project has none. The resource-backed templates —
+ * `INDEX`, `PRODUCT`, `COLLECTION`, `PAGE`, `ARTICLE` — already exist: the
+ * Builder creates one of each with the project, and this script only fills
+ * them in. See `TEMPLATE_HANDLE` for how they are addressed.
+ *
  * Safety:
  *
  * - dry run by default; `--apply` is required to write anything;
@@ -20,14 +26,6 @@
  *   bun run seed:weaverse                  # dry run, prints the plan
  *   bun run seed:weaverse --apply          # writes the pages
  *   bun run seed:weaverse --apply --with-theme
- *
- * Only the `INDEX` template is seeded among the resource-backed page types.
- * `PRODUCT`, `COLLECTION`, `PAGE`, and `ARTICLE` each have one shared default
- * template that the Builder creates with the project and stores with an empty
- * handle, and the Content API refuses to address it: both reading and writing
- * `/pages/PRODUCT` answer `400 A handle is required for PRODUCT pages`. Their
- * content lives in each section's `presets` instead, which is what Studio
- * inserts when a merchant adds the section.
  *
  * Theme settings are skipped unless `--with-theme` is passed. Nothing in the
  * storefront reads them yet — the Header and Footer still take their copy from
@@ -85,11 +83,29 @@ interface PageItem {
   children?: { id: string }[];
 }
 
-/** How a page is addressed in the Content API and in this script's output. */
+/** How a page is named in this script's output and in its item ids. */
 function pageRef(page: SeedPage): string {
   return page.handle.length > 0
     ? `${page.pageType}/${page.handle}`
     : page.pageType;
+}
+
+/**
+ * Stands in for a resource-backed template's handle in the request path.
+ *
+ * The Content API requires a handle segment for `PRODUCT`, `COLLECTION`,
+ * `PAGE`, and `ARTICLE` — omitting it answers `400 A handle is required` — but
+ * it does not resolve by it: every handle returns the one shared default
+ * template, stored with an empty handle, and writes land on that template
+ * rather than creating a page under the handle sent. So any value works, and
+ * this one says why it is there.
+ */
+const TEMPLATE_HANDLE = "default";
+
+/** Where a page is addressed in the Content API. */
+function pagePath(page: SeedPage): string {
+  const handle = page.handle.length > 0 ? page.handle : TEMPLATE_HANDLE;
+  return `${page.pageType}/${handle}`;
 }
 
 function fail(message: string): never {
@@ -236,7 +252,7 @@ async function fetchRootId(
   page: SeedPage,
 ): Promise<string> {
   const response = await fetch(
-    `${CONTENT_API_BASE}/projects/${projectId}/pages/${pageRef(page)}`,
+    `${CONTENT_API_BASE}/projects/${projectId}/pages/${pagePath(page)}`,
     { headers: { authorization: `Bearer ${apiKey}` } },
   );
   if (!response.ok) {
@@ -286,7 +302,7 @@ async function seedPage(
   const updated = await request(
     apiKey,
     "PATCH",
-    `/projects/${projectId}/pages/${pageRef(page)}`,
+    `/projects/${projectId}/pages/${pagePath(page)}`,
     { items: buildItems(page, rootId) },
   );
   if (!updated.ok) {

@@ -1,0 +1,15 @@
+{
+  "pageType": "PRODUCT",
+  "handle": "",
+  "description": "Product template. The buy block is theme-owned and renders above these sections.",
+  "sections": [
+    {
+      "key": "related-products",
+      "type": "related-products",
+      "data": {
+        "eyebrowLabel": "Works well with",
+        "heading": "Complete the field system."
+      }
+    }
+  ]
+}

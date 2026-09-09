@@ -795,11 +795,20 @@ Branch `feat/weaverse-page-types` from `main@0c84182`.
 - **`presets` and `enabledOn` on every section.** Preset copy is the theme's
   own defaults, so an added section looks like the shipped page. `home-hero`
   also gained the `stats` input it renders but never declared.
-- **Only `INDEX` is seedable.** `PRODUCT`, `COLLECTION`, `PAGE`, and `ARTICLE`
-  each have one default template stored with an empty handle, and the Content
-  API refuses to address it — `GET` and `PATCH` on `/pages/PRODUCT` both answer
-  `400 A handle is required for PRODUCT pages`. Their content lives in section
-  presets instead. Verified against the live API; worth a Builder issue.
+- **All five templates are seeded.** The Content API requires a handle segment
+  for `PRODUCT`, `COLLECTION`, `PAGE`, and `ARTICLE` — omitting it answers
+  `400 A handle is required` — but it does not resolve by it: `/pages/PRODUCT/x`,
+  `/pages/PRODUCT/default`, and `/pages/PRODUCT/weatherline-shell` all return
+  the same default template, and a write lands on that template rather than
+  creating a page under the handle sent (checked: the project still holds
+  exactly its 11 pages afterwards). The seed script sends `default`.
+
+  This was first recorded here as a Builder limitation — "only `INDEX` is
+  seedable" — because the `400` was taken at face value and no handle was ever
+  tried. Leo asked whether the templates had been fetched to see what handle
+  they carry, which is what turned it up. The lesson is narrow and repeatable:
+  a `400` naming a missing parameter says the parameter is required, not that
+  the resource is unreachable.
 - Routes that read `searchParams` for design-mode detection are dynamic rather
   than prerendered. `dynamicParams = false` still 404s unknown handles.
 - `bun run check` green at 370 node + 131 DOM, `smoke:routes` 35/35, Home
@@ -815,3 +824,11 @@ Branch `feat/weaverse-page-types` from `main@0c84182`.
   clicked markup React had not wired yet. Waiting for every `S:n` carrier to be
   gone restores 146/0. A real browser was checked directly first, to be sure
   the storefront itself renders correctly — it does.
+- Verified after seeding: `/` composes 7 sections, `/products/[handle]` 1 around
+  the theme-owned buy block, `/shop/[handle]` 4, `/pages/[handle]` 4, and
+  `/journal/[handle]` 2 — each still rendering its real `h1`.
+- **The Content API cannot delete an item.** `DELETE` answers `405 Use PATCH or
+  POST`, and both of those upsert rather than replace an item set. A probe item
+  written while testing the write path is therefore still on the `PRODUCT`
+  template, detached from the root so it never renders; it can be removed in
+  Studio. Worth a Builder issue on its own.

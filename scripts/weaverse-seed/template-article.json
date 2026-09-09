@@ -1,0 +1,23 @@
+{
+  "pageType": "ARTICLE",
+  "handle": "",
+  "description": "Journal article template. The article body is rendered verbatim from Shopify.",
+  "sections": [
+    {
+      "key": "article-header",
+      "type": "article-header",
+      "data": {
+        "breadcrumbLabel": "Journal",
+        "breadcrumbHref": "/journal"
+      }
+    },
+    {
+      "key": "article-body",
+      "type": "article-body",
+      "data": {
+        "backLinkLabel": "All field notes",
+        "backLinkHref": "/journal"
+      }
+    }
+  ]
+}
