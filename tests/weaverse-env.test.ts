@@ -24,7 +24,6 @@ async function sdkEnvKeysFromBundle(): Promise<Set<string>> {
 const FULL_ENV = {
   WEAVERSE_PROJECT_ID: "project-123",
   WEAVERSE_HOST: "https://staging.example",
-  WEAVERSE_API_KEY: "admin-seed-key",
   WEAVERSE_PUBLIC_API_BASE: "https://self-hosted.example",
   PUBLIC_STORE_DOMAIN: "forward.myshopify.com",
   PUBLIC_STOREFRONT_API_TOKEN: "public-token",
@@ -43,6 +42,19 @@ describe("Weaverse SDK environment key coverage", () => {
       missing,
       [],
       `The SDK reads environment keys this boundary does not name, so they would fall through to process.env: ${missing.join(", ")}`,
+    );
+  });
+
+  it("names no environment key the installed SDK stopped reading", async () => {
+    /* The other direction matters too. `WEAVERSE_API_KEY` sat here for a
+     * release after the SDK dropped it, blanking a value nothing read. */
+    const fromBundle = await sdkEnvKeysFromBundle();
+    const stale = SDK_ENV_KEYS.filter((key) => !fromBundle.has(key));
+
+    assert.deepEqual(
+      stale,
+      [],
+      `This boundary names environment keys the SDK no longer reads: ${stale.join(", ")}`,
     );
   });
 });
