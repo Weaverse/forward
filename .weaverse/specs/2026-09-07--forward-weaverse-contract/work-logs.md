@@ -876,3 +876,103 @@ Branch `feat/weaverse-page-types` from `main@0c84182`.
   placeholder for a handle that does not exist. Not worth a log that lies.
 - Gates after all of it: `check` 370 node + 131 DOM, `smoke:routes` 35/35,
   static browser matrix 146/0.
+
+## 2026-09-09 — Sections as composable containers (#72)
+
+Leo reviewed the composed sections and named three gaps, all of which held up:
+no shared `Section` wrapper, no nesting at all, and the shared elements
+(`heading`, `subheading`, `paragraph`, `button`) registered but used in **zero**
+sections. Reading Pilot confirmed the shape: 29 of its sections go through
+`app/components/section.tsx`, 34 of 79 schemas declare `childTypes`, and the
+elements live as children of content blocks.
+
+The root cause was one decision made during the extraction: sections were cut
+as **whole visual bands** — one component renders one finished band — where
+Pilot cuts them as **containers**. That is why every setting became a flat text
+input and why the four elements had nowhere to live.
+
+### Spike first
+
+A throwaway section declaring `childTypes: ["heading", "paragraph"]`, written to
+a `CUSTOM` page as a three-level tree, rendered `main` → `spike-stack` →
+`heading` + `paragraph`, each child keeping its own `data-wv-id`. Leo confirmed
+select, drag-reorder and add-child in Studio. Nothing was blocked on the SDK, so
+the whole plan was safe to start. The spike was removed afterwards; its page and
+items are still in the project because the Content API cannot delete them.
+
+### Slice 1 — the shared shell
+
+`src/components/section/` holds width, gutter, vertical rhythm, background and
+overlay once, and exports the inputs a schema declares. `pageWidth` became a
+theme setting and the root layout **reads theme settings for the first time**,
+emitting `--container-page` — which closes the "theme settings are declared but
+nothing reads them" gap carried since #67.
+
+- **cva defaults leaked onto the outer element.** One recipe called twice put
+  the width classes on both elements and dropped `px-page-gutter`; content ran
+  to the viewport edge. Split into `outerVariants` / `innerVariants`, and the
+  inner class is now byte-identical to the old `SHELL_SECTION_CLASS`, so no
+  content edge moved.
+- **`elementAttributes` swallowed `aria-labelledby`.** It forwarded only
+  `data-wv-*` and `id`, so wrapping `featured-products` removed the section's
+  accessible name and three browser tests went from 4 matching cards to 0. It
+  forwards `aria-*` now, with a DOM test pinning it. Worth recording: typecheck,
+  lint, 371 node tests, 131 DOM tests and `smoke:routes` were **all green**
+  while that name was gone. Only the browser matrix noticed.
+
+### Slice 2 — and the seed script came back, as a different thing
+
+`section-content` is the column that holds the shared elements. `button` gained
+a `link` intent rendering the underlined arrow link the sections already use —
+without it, converting a section would silently turn its text link into a call
+to action.
+
+Converting `field-practice` exposed the real obstacle: changing a section's
+shape strands the flat data its pages already hold, and the seed script had been
+deleted in #70. Migrating by hand meant a `curl` per section with ~19 to go, no
+way to remove the items left behind, and no fallback to catch a mistake. Leo
+chose to rebuild the script and reseed every page.
+
+The rebuilt script is not the old one. A seed file now says **only** which
+sections a page carries and in what order; the copy, the nested children and
+their settings expand from each schema's `presets`, recursively. A shape change
+is a `presets` edit plus a re-run. One bug on the first pass: `expand()` ignored
+a parent's preset children, so both columns of a two-column band expanded to the
+same generic default — the parent's children win now, and the child schema's own
+are the fallback for a column placed by hand.
+
+### Slice 3 — smaller than expected
+
+Checking first changed the size of it: `main-collection`, `main-article` and
+`main-page` **already existed** as sections. The PDP was the only main page
+content still rendering outside Weaverse.
+
+`main-product` wraps `ProductDetail` unchanged — gallery, colorway and size
+selection, price and the cart handoff own variant identity and query state and
+stay in code — and takes its product from the route context. That is the
+ownership rule Leo confirmed: *theme-owned means the logic lives in code, not
+that the surface is invisible to Studio*. The route went from 175 lines to 75,
+and all 146 browser assertions stayed green.
+
+### Slice 4 — and what was deliberately left alone
+
+`editorial-callout` became three content columns. Five more sections moved onto
+the shared shell with no markup change, gaining width and padding settings.
+
+Left flat on purpose: the full-bleed heroes (own grid and min-height),
+`article-body` (renders Shopify blocks verbatim), the data-driven lists (no
+editorial copy to lift), and the `standard-statement` statement itself, whose
+`text-about-statement` size the `heading` element cannot express. Converting the
+hero group needs more sizes on `heading` first, which touches the type scale and
+belongs to its own issue.
+
+The rule applied throughout: lift copy into children only where it is genuinely
+editorial **and** a shared element can express it. Converting the rest
+mechanically would have changed the design without giving a merchant anything.
+
+### Verification
+
+Every gate was re-run after **each** slice, not once at the end:
+`bun run check` 371 node + 136 DOM, `smoke:routes` 35/35, static browser matrix
+146/0. All eight seeded routes were checked for their real `h1` after each
+reseed.
