@@ -90,8 +90,3 @@ export const SECTION_SCHEMAS: readonly SchemaType[] = [
   numberedSequence,
   productCaseStudy,
 ];
-
-/** The component types this theme registers, in registry order. */
-export const WEAVERSE_SECTION_TYPES: readonly string[] = SECTION_SCHEMAS.map(
-  (schema) => schema.type,
-);
