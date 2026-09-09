@@ -30,17 +30,3 @@ checks. Run `bun run smoke:routes` afterward to verify the built application ove
 real HTTP. Live and browser matrices are explicit, slower gates for their
 respective environments.
 
-## `seed-weaverse.mts`
-
-Seeds the Weaverse project with Forward's current page content, so a fresh
-Studio project matches the live storefront instead of starting empty.
-
-The payloads in `weaverse-seed/*.json` are transcribed from what the routes
-render today. `bun run seed:weaverse` is a dry run that prints the plan and
-writes nothing; `--apply` performs the writes and additionally requires
-`WEAVERSE_API_KEY`.
-
-Every section type is validated against the component registry before any
-request, item ids are derived deterministically from the page and section keys
-so re-running merges rather than duplicating, and the API key is never logged
-or included in an error message.

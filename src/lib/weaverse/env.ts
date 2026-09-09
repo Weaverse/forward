@@ -27,7 +27,6 @@ import { ShopifyConfigurationError } from "@/lib/storefront/shopify/errors";
 
 export const WEAVERSE_PROJECT_ID_ENV_KEY = "WEAVERSE_PROJECT_ID";
 export const WEAVERSE_HOST_ENV_KEY = "WEAVERSE_HOST";
-export const WEAVERSE_API_KEY_ENV_KEY = "WEAVERSE_API_KEY";
 export const WEAVERSE_PUBLIC_API_BASE_ENV_KEY = "WEAVERSE_PUBLIC_API_BASE";
 export const STORE_DOMAIN_ENV_KEY = "PUBLIC_STORE_DOMAIN";
 export const PUBLIC_STOREFRONT_TOKEN_ENV_KEY = "PUBLIC_STOREFRONT_API_TOKEN";
@@ -35,13 +34,14 @@ export const PUBLIC_STOREFRONT_TOKEN_ENV_KEY = "PUBLIC_STOREFRONT_API_TOKEN";
 /**
  * Every key `@weaverse/next` reads from the environment.
  *
- * If the SDK gains a new one, this list goes stale silently, so
- * `tests/weaverse-env.test.ts` asserts the set against the installed package.
+ * The list goes stale silently in both directions — a key the SDK gains falls
+ * through to `process.env`, and a key it drops leaves a value here that means
+ * nothing — so `tests/weaverse-env.test.ts` asserts the set against the
+ * installed package both ways.
  */
 export const SDK_ENV_KEYS = [
   WEAVERSE_PROJECT_ID_ENV_KEY,
   WEAVERSE_HOST_ENV_KEY,
-  WEAVERSE_API_KEY_ENV_KEY,
   WEAVERSE_PUBLIC_API_BASE_ENV_KEY,
   STORE_DOMAIN_ENV_KEY,
   PUBLIC_STOREFRONT_TOKEN_ENV_KEY,
@@ -54,15 +54,11 @@ export const SDK_ENV_KEYS = [
  * the browser. Public-token browser use is outside the current approval, so it
  * is suppressed rather than forwarded.
  *
- * `WEAVERSE_API_KEY` is not a storefront runtime input at all — it belongs to
- * local admin-data tooling — so the running theme never forwards it.
- *
  * `WEAVERSE_PUBLIC_API_BASE` is a self-hosted override Forward does not use;
  * blanking it keeps the API base derived from the resolved host alone.
  */
 export const SUPPRESSED_ENV_KEYS = [
   PUBLIC_STOREFRONT_TOKEN_ENV_KEY,
-  WEAVERSE_API_KEY_ENV_KEY,
   WEAVERSE_PUBLIC_API_BASE_ENV_KEY,
 ] as const;
 

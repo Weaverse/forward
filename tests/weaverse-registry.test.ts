@@ -3,7 +3,9 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, it } from "node:test";
 
-import { WEAVERSE_SECTION_TYPES } from "../src/lib/weaverse/section-schemas.ts";
+import { SECTION_SCHEMAS } from "../src/lib/weaverse/section-schemas.ts";
+
+const SECTION_TYPES = SECTION_SCHEMAS.map((schema) => schema.type);
 
 const CLIENT_REGISTRY = "src/lib/weaverse/components.ts";
 const SERVER_REGISTRY = "src/lib/weaverse/server-components.ts";
@@ -64,15 +66,15 @@ describe("Weaverse registry split", () => {
 
     assert.equal(
       clientEntries,
-      WEAVERSE_SECTION_TYPES.length,
+      SECTION_TYPES.length,
       "a component in the schema list is missing from the client registry",
     );
   });
 
   it("declares no duplicate component types", () => {
     assert.equal(
-      new Set(WEAVERSE_SECTION_TYPES).size,
-      WEAVERSE_SECTION_TYPES.length,
+      new Set(SECTION_TYPES).size,
+      SECTION_TYPES.length,
       "two components share one type; Builder would render the wrong one",
     );
   });
