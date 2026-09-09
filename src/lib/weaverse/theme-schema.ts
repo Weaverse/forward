@@ -15,13 +15,19 @@ import type { WeaverseNextThemeSchema } from "@weaverse/next";
 import { editorialImagerySettings } from "./settings/editorial-imagery";
 import { footerSettings } from "./settings/footer";
 import { headerSettings } from "./settings/header";
+import { layoutSettings } from "./settings/layout";
 
 export const themeSchema: WeaverseNextThemeSchema = {
   info: {
     name: "Forward",
     version: "0.1.0",
   },
-  settings: [headerSettings, footerSettings, editorialImagerySettings],
+  settings: [
+    layoutSettings,
+    headerSettings,
+    footerSettings,
+    editorialImagerySettings,
+  ],
 };
 
 export type {

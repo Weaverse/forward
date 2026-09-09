@@ -7,7 +7,10 @@ import { SiteHeader } from "@/components/site-header/site-header";
 import { ShopifyCartRuntime } from "@/lib/cart/shopify-cart-react";
 import { cn } from "@/lib/cn";
 import { storefrontRuntimeMode } from "@/lib/storefront/data-source";
-import { weaverseProjectId } from "@/lib/weaverse/server";
+import {
+  loadWeaverseThemeSettings,
+  weaverseProjectId,
+} from "@/lib/weaverse/server";
 import { StudioConnect } from "@/lib/weaverse/studio-connect";
 
 import "./globals.css";
@@ -48,9 +51,32 @@ export const viewport: Viewport = {
   themeColor: "#11130f",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+/**
+ * Reads the merchant's page measure, or `null` to keep the theme's own.
+ *
+ * This is the first theme setting the storefront actually consumes. It lands
+ * as a CSS variable rather than a prop because `max-w-page` is a Tailwind
+ * token every section already resolves through.
+ */
+async function pageWidthStyle(): Promise<string | null> {
+  const theme = await loadWeaverseThemeSettings();
+  const pageWidth = (
+    theme?.themeSettings as { pageWidth?: unknown } | undefined
+  )?.pageWidth;
+  if (typeof pageWidth !== "number" || pageWidth <= 0) {
+    return null;
+  }
+  return `:root{--container-page:${pageWidth}px}`;
+}
+
+export default async function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const shopifyCartEnabled = storefrontRuntimeMode === "shopify";
   const weaverseEnabled = weaverseProjectId() !== null;
+  const pageWidth = await pageWidthStyle();
   return (
     <html
       lang="en"
@@ -62,6 +88,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       )}
     >
       <head>
+        {pageWidth === null ? null : (
+          <style
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: one numeric theme setting rendered into a single custom property, never merchant markup.
+            dangerouslySetInnerHTML={{ __html: pageWidth }}
+          />
+        )}
         {shopifyCartEnabled ? (
           <script
             crossOrigin="anonymous"
