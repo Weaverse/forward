@@ -41,7 +41,10 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
-import { WEAVERSE_SECTION_TYPES } from "../src/lib/weaverse/section-types.ts";
+import {
+  SECTION_SCHEMAS,
+  WEAVERSE_SECTION_TYPES,
+} from "../src/lib/weaverse/section-schemas.ts";
 
 const CONTENT_API_BASE = "https://studio.weaverse.io/api/v1/content";
 const SEED_DIR = path.join(import.meta.dirname, "weaverse-seed");
@@ -52,7 +55,16 @@ const MAX_ITEMS_PER_REQUEST = 100;
 interface SeedSection {
   key: string;
   type: string;
-  data: Record<string, unknown>;
+  /**
+   * Settings that differ from the section's `presets`.
+   *
+   * A seed file lists which sections a page carries and in what order; the
+   * copy itself already lives in each schema's `presets`, which is what Studio
+   * inserts when a merchant adds the section. Repeating it here is how the
+   * same sentence ends up in two files and drifts. Only overrides belong here
+   * — a picked product, an image, a label the template needs to differ on.
+   */
+  data?: Record<string, unknown>;
 }
 
 interface SeedPage {
@@ -108,6 +120,13 @@ function pagePath(page: SeedPage): string {
   return `${page.pageType}/${handle}`;
 }
 
+/** A section's shipped defaults, which the seed writes unless overridden. */
+function presetsFor(type: string): Record<string, unknown> {
+  const schema = SECTION_SCHEMAS.find((entry) => entry.type === type);
+  const { children, ...presets } = schema?.presets ?? {};
+  return presets;
+}
+
 function fail(message: string): never {
   console.error(`seed:weaverse: ${message}`);
   process.exit(1);
@@ -161,7 +180,7 @@ function buildItems(page: SeedPage, rootId: string): PageItem[] {
   const sections = page.sections.map((section) => ({
     id: itemId(page.handle, section.key),
     type: section.type,
-    data: section.data,
+    data: { ...presetsFor(section.type), ...section.data },
   }));
 
   return [
@@ -174,14 +193,12 @@ function validate(pages: SeedPage[]): void {
   const registered = new Set(WEAVERSE_SECTION_TYPES);
   const problems: string[] = [];
 
-  const addressed = new Set<string>();
+  /* Item ids are keyed on the page handle, and every resource-backed template
+   * has the same empty one, so a section key reused across two templates would
+   * silently write both to one item. */
+  const claimed = new Map<string, string>();
   for (const page of pages) {
     const ref = pageRef(page);
-    if (addressed.has(ref)) {
-      problems.push(`${ref}: two seed files target the same page`);
-    }
-    addressed.add(ref);
-
     if (page.sections.length === 0) {
       problems.push(`${ref}: no sections`);
     }
@@ -199,6 +216,15 @@ function validate(pages: SeedPage[]): void {
         );
       }
       seen.add(section.key);
+
+      const id = itemId(page.handle, section.key);
+      const owner = claimed.get(id);
+      if (owner !== undefined) {
+        problems.push(
+          `${ref}: section key "${section.key}" collides with ${owner} on one item id`,
+        );
+      }
+      claimed.set(id, ref);
 
       if (!registered.has(section.type)) {
         problems.push(
@@ -280,7 +306,6 @@ async function seedPage(
 ): Promise<void> {
   /* A template already exists — the Builder creates one per page type with
    * the project — so only a CUSTOM page is ever created here. */
-  let existed = true;
   if (page.handle.length > 0) {
     const created = await request(
       apiKey,
@@ -295,7 +320,6 @@ async function seedPage(
     if (!created.ok && created.status !== 409) {
       fail(`creating ${pageRef(page)} responded ${created.status}`);
     }
-    existed = created.status === 409;
   }
 
   const rootId = await fetchRootId(apiKey, projectId, page);
@@ -308,9 +332,7 @@ async function seedPage(
   if (!updated.ok) {
     fail(`updating ${pageRef(page)} responded ${updated.status}`);
   }
-  console.log(
-    `  ${existed ? "updated" : "created and wrote"} ${pageRef(page)}`,
-  );
+  console.log(`  wrote ${pageRef(page)}`);
 }
 
 async function main(): Promise<void> {

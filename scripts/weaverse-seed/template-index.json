@@ -7,37 +7,34 @@
       "key": "home-hero",
       "type": "home-hero",
       "data": {
-        "eyebrowLabel": "Forward / Field equipment 2026",
-        "heading": "Equipment for weather that changes the plan.",
-        "lede": "Layerable apparel, precise footwear, and low-profile carry systems made to move together.",
-        "primaryCtaLabel": "Shop all equipment",
-        "primaryCtaHref": "/shop",
-        "secondaryCtaLabel": "How we test",
-        "secondaryCtaHref": "/field-testing",
-        "stats": "3 | Systems\n9 | Core objects\nFor life | Repair",
         "image": {
           "url": "/images/editorial/hero-open-sky.webp",
           "altText": "Climber on an open granite face under a wide pale sky",
           "width": 2000,
           "height": 1445
         },
-        "featuredProduct": { "handle": "weatherline-shell" }
+        "featuredProduct": {
+          "handle": "weatherline-shell"
+        }
       }
     },
     {
       "key": "featured-products",
       "type": "featured-products",
       "data": {
-        "eyebrowLabel": "New field rotation",
-        "heading": "Start with the core four.",
-        "body": "A weather layer, breathable midlayer, close-body carry, and trail shoe form the shortest route to a complete Forward system.",
-        "linkLabel": "Shop the full catalog",
-        "linkHref": "/shop",
         "products": [
-          { "handle": "weatherline-shell" },
-          { "handle": "traverse-grid-fleece" },
-          { "handle": "ridge-30-field-pack" },
-          { "handle": "talus-trail-shoe" }
+          {
+            "handle": "weatherline-shell"
+          },
+          {
+            "handle": "traverse-grid-fleece"
+          },
+          {
+            "handle": "ridge-30-field-pack"
+          },
+          {
+            "handle": "talus-trail-shoe"
+          }
         ]
       }
     },
@@ -45,12 +42,16 @@
       "key": "collection-index",
       "type": "collection-index",
       "data": {
-        "eyebrowLabel": "Shop by system",
-        "heading": "Built separately. Better together.",
         "collections": [
-          { "handle": "outerwear" },
-          { "handle": "packs" },
-          { "handle": "footwear" }
+          {
+            "handle": "outerwear"
+          },
+          {
+            "handle": "packs"
+          },
+          {
+            "handle": "footwear"
+          }
         ]
       }
     },
@@ -58,23 +59,15 @@
       "key": "product-spotlight",
       "type": "product-spotlight",
       "data": {
-        "eyebrowPrefix": "Layer focus /",
-        "ctaLabel": "Explore the layer",
-        "specCount": 3,
-        "product": { "handle": "drift-insulated-vest" }
+        "product": {
+          "handle": "drift-insulated-vest"
+        }
       }
     },
     {
       "key": "material-standard",
       "type": "material-standard",
       "data": {
-        "eyebrowLabel": "Material standard",
-        "heading": "Fewer materials. Better understood.",
-        "body": "Every fabric, foam, buckle, and compound is selected around useful life, field repair, and performance you can actually feel.",
-        "primaryCtaLabel": "Explore materials",
-        "primaryCtaHref": "/materials",
-        "secondaryCtaLabel": "About Forward",
-        "secondaryCtaHref": "/about",
         "image": {
           "url": "/images/editorial/mountain-ridges.webp",
           "altText": "Layered mountain ridges fading into evening haze",
@@ -87,29 +80,25 @@
       "key": "kit-callout",
       "type": "kit-callout",
       "data": {
-        "eyebrowLabel": "One-day kit",
-        "heading": "Carry the day, not the doubt.",
-        "linkLabel": "View the kit",
-        "product": { "handle": "approach-18-day-pack" },
+        "product": {
+          "handle": "approach-18-day-pack"
+        },
         "tileProducts": [
-          { "handle": "weatherline-shell" },
-          { "handle": "traverse-grid-fleece" },
-          { "handle": "ridge-30-field-pack" }
+          {
+            "handle": "weatherline-shell"
+          },
+          {
+            "handle": "traverse-grid-fleece"
+          },
+          {
+            "handle": "ridge-30-field-pack"
+          }
         ]
       }
     },
     {
       "key": "repair-and-journal",
-      "type": "repair-and-journal",
-      "data": {
-        "repairEyebrowLabel": "Repair, not replace",
-        "repairHeading": "Keep equipment in motion.",
-        "repairBody": "Product defects are repaired free. Wear, accidents, and hard-earned damage are assessed honestly before work begins.",
-        "repairLinkLabel": "Visit the repair desk",
-        "repairLinkHref": "/pages/field-repair",
-        "journalEyebrowLabel": "Latest field note",
-        "journalLinkLabel": "Read the dispatch"
-      }
+      "type": "repair-and-journal"
     }
   ]
 }

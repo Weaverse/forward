@@ -7,7 +7,6 @@
       "key": "page-hero",
       "type": "page-hero",
       "data": {
-        "eyebrowLabel": "Custom page",
         "image": {
           "url": "/images/editorial/mountain-ridges.webp",
           "altText": "Layered mountain ridges fading into evening haze",
@@ -18,23 +17,17 @@
     },
     {
       "key": "page-premise",
-      "type": "page-premise",
-      "data": { "eyebrowLabel": "Our premise" }
+      "type": "page-premise"
     },
     {
       "key": "page-values",
-      "type": "page-values",
-      "data": { "eyebrowSuffix": "Field standard" }
+      "type": "page-values"
     },
     {
       "key": "page-origin",
       "type": "page-origin",
       "data": {
-        "eyebrowLabel": "Where this goes",
-        "heading": "A short catalog,\nbuilt slowly.",
         "body": "Gear for moving through weather, not around it. A short catalog, built slowly and repaired indefinitely.",
-        "linkLabel": "Shop the catalog",
-        "linkHref": "/shop",
         "image": {
           "url": "/images/editorial/hero-open-sky.webp",
           "altText": "Climber on an open granite face under a wide pale sky",

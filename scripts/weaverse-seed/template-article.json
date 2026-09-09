@@ -5,19 +5,11 @@
   "sections": [
     {
       "key": "article-header",
-      "type": "article-header",
-      "data": {
-        "breadcrumbLabel": "Journal",
-        "breadcrumbHref": "/journal"
-      }
+      "type": "article-header"
     },
     {
       "key": "article-body",
-      "type": "article-body",
-      "data": {
-        "backLinkLabel": "All field notes",
-        "backLinkHref": "/journal"
-      }
+      "type": "article-body"
     }
   ]
 }
