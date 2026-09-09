@@ -29,6 +29,7 @@ import { schema as featuredProducts } from "@/sections/featured-products/schema"
 import { schema as fieldPractice } from "@/sections/field-practice/schema";
 import { schema as homeHero } from "@/sections/home-hero/schema";
 import { schema as kitCallout } from "@/sections/kit-callout/schema";
+import { schema as mainProduct } from "@/sections/main-product/schema";
 import { schema as materialStandard } from "@/sections/material-standard/schema";
 import { schema as numberedSequence } from "@/sections/numbered-sequence/schema";
 import { schema as pageHero } from "@/sections/page-hero/schema";
@@ -64,6 +65,7 @@ export const SECTION_SCHEMAS: readonly SchemaType[] = [
   repairAndJournal,
 
   /* PRODUCT */
+  mainProduct,
   relatedProducts,
 
   /* COLLECTION */

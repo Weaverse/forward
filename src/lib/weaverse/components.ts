@@ -39,6 +39,7 @@ import * as FeaturedProducts from "@/sections/featured-products";
 import * as FieldPractice from "@/sections/field-practice";
 import * as HomeHero from "@/sections/home-hero";
 import * as KitCallout from "@/sections/kit-callout";
+import * as MainProduct from "@/sections/main-product";
 import * as MaterialStandard from "@/sections/material-standard";
 import * as NumberedSequence from "@/sections/numbered-sequence";
 import * as PageHero from "@/sections/page-hero";
@@ -92,6 +93,7 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
   entry(RepairAndJournal),
 
   /* PRODUCT */
+  entry(MainProduct),
   entry(RelatedProducts),
 
   /* COLLECTION */
