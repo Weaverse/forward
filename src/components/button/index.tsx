@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import { cn } from "@/lib/cn";
-import { cta } from "@/lib/presentation/variants";
+import { cta, textLink } from "@/lib/presentation/variants";
 import {
   elementAttributes,
   type WeaverseElementProps,
@@ -14,7 +14,7 @@ type ButtonIntent = "primary" | "signal" | "light" | "outline";
 export interface ButtonProps extends WeaverseElementProps {
   label: string;
   href: string;
-  intent?: ButtonIntent;
+  intent?: "link" | ButtonIntent;
   className?: string;
 }
 
@@ -34,10 +34,17 @@ function Button({
   label,
   ...rest
 }: ButtonProps) {
+  /* `link` is the underlined arrow link the sections already use for a
+   * secondary destination. It lives here rather than as a fifth element so a
+   * merchant can switch a call to action between weights without swapping the
+   * item out and losing its settings. */
   return (
     <Link
       {...elementAttributes(rest)}
-      className={cn(cta({ intent }), className)}
+      className={cn(
+        intent === "link" ? textLink() : cta({ intent }),
+        className,
+      )}
       href={href}
     >
       {label}
