@@ -2,15 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { storefront } from "@/lib/storefront/data-source";
-import { StorefrontDataProvider } from "@/lib/weaverse/data-context";
 import { WeaversePage } from "@/lib/weaverse/page";
 import {
   loadWeaversePage,
   type SearchParams,
   weaverseProjectId,
 } from "@/lib/weaverse/server";
-import ArticleBody from "@/sections/article-body";
-import ArticleHeader from "@/sections/article-header";
 
 interface ArticlePageProps {
   params: Promise<{ articleHandle: string }>;
@@ -54,25 +51,11 @@ export default async function ArticlePage(props: ArticlePageProps) {
     }),
     Promise.resolve(weaverseProjectId()),
   ]);
-  if (article === null) {
+  if (article === null || page === null || projectId === null) {
     notFound();
   }
 
-  if (page !== null && projectId !== null) {
-    return (
-      <WeaversePage
-        data={page}
-        dataContext={{ article }}
-        projectId={projectId}
-      />
-    );
-  }
-
   return (
-    <StorefrontDataProvider value={{ article }}>
-      <ArticleHeader breadcrumbLabel="Journal" breadcrumbHref="/journal" />
-
-      <ArticleBody backLinkLabel="All field notes" backLinkHref="/journal" />
-    </StorefrontDataProvider>
+    <WeaversePage data={page} dataContext={{ article }} projectId={projectId} />
   );
 }

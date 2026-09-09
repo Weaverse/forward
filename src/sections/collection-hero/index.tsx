@@ -5,7 +5,6 @@ import Link from "next/link";
 
 import { cn } from "@/lib/cn";
 import { cta, eyebrow } from "@/lib/presentation/variants";
-import type { Collection } from "@/lib/storefront/types";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
 import {
   elementAttributes,

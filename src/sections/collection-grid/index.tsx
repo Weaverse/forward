@@ -4,7 +4,6 @@ import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card";
 import { cta, eyebrow, sectionHeading } from "@/lib/presentation/variants";
-import type { Product } from "@/lib/storefront/types";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
 import {
   elementAttributes,

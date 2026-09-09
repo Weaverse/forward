@@ -5,15 +5,12 @@ import { Suspense } from "react";
 
 import { storefront } from "@/lib/storefront/data-source";
 import type { Product } from "@/lib/storefront/types";
-import { StorefrontDataProvider } from "@/lib/weaverse/data-context";
 import { WeaversePage } from "@/lib/weaverse/page";
 import {
   loadWeaversePage,
   type SearchParams,
   weaverseProjectId,
 } from "@/lib/weaverse/server";
-import RelatedProducts from "@/sections/related-products";
-
 import { ProductDetail, ProductDetailFallback } from "./product-detail";
 
 interface ProductPageProps {
@@ -140,7 +137,7 @@ export default async function ProductPage(props: ProductPageProps) {
     }),
     Promise.resolve(weaverseProjectId()),
   ]);
-  if (product === null) {
+  if (product === null || page === null || projectId === null) {
     notFound();
   }
   const related = await relatedProducts(product);
@@ -156,20 +153,11 @@ export default async function ProductPage(props: ProductPageProps) {
         <ProductDetail product={product} fieldRecord={fieldRecord} />
       </Suspense>
 
-      {page !== null && projectId !== null ? (
-        <WeaversePage
-          data={page}
-          dataContext={{ product, products: related }}
-          projectId={projectId}
-        />
-      ) : related.length > 0 ? (
-        <StorefrontDataProvider value={{ product, products: related }}>
-          <RelatedProducts
-            eyebrowLabel="Works well with"
-            heading="Complete the field system."
-          />
-        </StorefrontDataProvider>
-      ) : null}
+      <WeaversePage
+        data={page}
+        dataContext={{ product, products: related }}
+        projectId={projectId}
+      />
     </>
   );
 }
