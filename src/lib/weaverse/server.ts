@@ -32,7 +32,6 @@ import { hasAuthoredSections } from "./page-payload";
 import {
   buildRequestContext,
   type SearchParams,
-  toSearchParams,
   type WeaversePageType,
 } from "./request-info";
 import { WEAVERSE_SERVER_COMPONENTS } from "./server-components";

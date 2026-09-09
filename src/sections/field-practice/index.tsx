@@ -1,16 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import {
-  eyebrow,
-  SHELL_SECTION_CLASS,
-  sectionHeading,
-  textLink,
-} from "@/lib/presentation/variants";
-import {
-  elementAttributes,
-  type WeaverseElementProps,
-} from "../weaverse-element";
+import { Section } from "@/components/section";
+import { eyebrow, sectionHeading, textLink } from "@/lib/presentation/variants";
+import type { WeaverseElementProps } from "../weaverse-element";
 
 interface FieldPracticeProps extends WeaverseElementProps {
   eyebrowLabel: string;
@@ -30,7 +23,7 @@ function FieldPractice({
   ...rest
 }: FieldPracticeProps) {
   return (
-    <section {...elementAttributes(rest)} className={SHELL_SECTION_CLASS}>
+    <Section {...rest}>
       <div className="grid grid-cols-split-85 items-start gap-page-gap max-md:grid-cols-1">
         <div>
           <p className={eyebrow()}>{eyebrowLabel}</p>
@@ -45,7 +38,7 @@ function FieldPractice({
           </Link>
         </div>
       </div>
-    </section>
+    </Section>
   );
 }
 

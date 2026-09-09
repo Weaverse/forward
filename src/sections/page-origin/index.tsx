@@ -2,19 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-
-import {
-  eyebrow,
-  SHELL_SECTION_CLASS,
-  sectionHeading,
-  textLink,
-} from "@/lib/presentation/variants";
+import { Section } from "@/components/section";
+import { eyebrow, sectionHeading, textLink } from "@/lib/presentation/variants";
 import type { StorefrontImage } from "@/lib/storefront/types";
 import { weaverseImage } from "@/lib/weaverse/image";
-import {
-  elementAttributes,
-  type WeaverseElementProps,
-} from "../weaverse-element";
+import type { WeaverseElementProps } from "../weaverse-element";
 
 interface PageOriginProps extends WeaverseElementProps {
   eyebrowLabel: string;
@@ -38,7 +30,7 @@ function PageOrigin({
 }: PageOriginProps) {
   const resolvedImage = weaverseImage(image);
   return (
-    <section {...elementAttributes(rest)} className={SHELL_SECTION_CLASS}>
+    <Section {...rest}>
       <div className="grid grid-cols-split-75 items-start gap-20 max-md:grid-cols-1">
         <div>
           <p className={eyebrow()}>{eyebrowLabel}</p>
@@ -66,7 +58,7 @@ function PageOrigin({
           </Link>
         </div>
       </div>
-    </section>
+    </Section>
   );
 }
 

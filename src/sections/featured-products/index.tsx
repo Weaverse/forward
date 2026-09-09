@@ -2,17 +2,10 @@
 
 import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
-import {
-  eyebrow,
-  SHELL_SECTION_CLASS,
-  sectionHeading,
-  textLink,
-} from "@/lib/presentation/variants";
+import { Section } from "@/components/section";
+import { eyebrow, sectionHeading, textLink } from "@/lib/presentation/variants";
 import type { Product } from "@/lib/storefront/types";
-import {
-  elementAttributes,
-  type WeaverseElementProps,
-} from "../weaverse-element";
+import type { WeaverseElementProps } from "../weaverse-element";
 
 interface FeaturedProductsProps extends WeaverseElementProps {
   eyebrowLabel: string;
@@ -36,11 +29,7 @@ function FeaturedProducts({
 }: FeaturedProductsProps) {
   const products = loaderData?.products ?? [];
   return (
-    <section
-      {...elementAttributes(rest)}
-      aria-labelledby="home-featured-title"
-      className={SHELL_SECTION_CLASS}
-    >
+    <Section {...rest} aria-labelledby="home-featured-title">
       <header className="mb-11.25 grid grid-cols-feature-row items-end gap-10 max-md:grid-cols-1 max-md:gap-5">
         <div>
           <p className={eyebrow()}>{eyebrowLabel}</p>
@@ -62,7 +51,7 @@ function FeaturedProducts({
           />
         ))}
       </div>
-    </section>
+    </Section>
   );
 }
 

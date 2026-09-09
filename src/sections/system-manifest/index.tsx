@@ -2,19 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-
-import {
-  eyebrow,
-  SHELL_SECTION_CLASS,
-  textLink,
-} from "@/lib/presentation/variants";
+import { Section } from "@/components/section";
+import { eyebrow, textLink } from "@/lib/presentation/variants";
 import type { StorefrontImage } from "@/lib/storefront/types";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
 import { weaverseImage } from "@/lib/weaverse/image";
-import {
-  elementAttributes,
-  type WeaverseElementProps,
-} from "../weaverse-element";
+import type { WeaverseElementProps } from "../weaverse-element";
 
 interface SystemManifestProps extends WeaverseElementProps {
   eyebrowLabel: string;
@@ -41,7 +34,7 @@ function SystemManifest({
   const products = collectionProducts ?? [];
   const resolvedImage = weaverseImage(image);
   return (
-    <section {...elementAttributes(rest)} className={SHELL_SECTION_CLASS}>
+    <Section {...rest}>
       <div className="grid grid-cols-[0.8fr_1.2fr] items-center gap-[clamp(50px,10vw,150px)] max-md:grid-cols-1">
         {resolvedImage === null ? null : (
           <div className="translate-y-20 shadow-collection-feature max-md:translate-y-0 max-md:shadow-collection-feature-mobile">
@@ -82,7 +75,7 @@ function SystemManifest({
           ) : null}
         </div>
       </div>
-    </section>
+    </Section>
   );
 }
 

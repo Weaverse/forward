@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Section } from "@/components/section";
 import { cn } from "@/lib/cn";
 import {
   cta,
   eyebrow,
   LEDE_CLASS,
-  SHELL_SECTION_CLASS,
   sectionHeading,
   VIEWPORT_SECTION_CLASS,
 } from "@/lib/presentation/variants";
@@ -50,10 +50,10 @@ function ProductSpotlight({
   }
   const { image, product } = loaderData;
   return (
-    <section
-      {...elementAttributes(rest)}
-      className={cn(
-        SHELL_SECTION_CLASS,
+    <Section
+      {...rest}
+      verticalPadding="none"
+      containerClassName={cn(
         "grid grid-cols-[minmax(0,1.25fr)_minmax(380px,0.75fr)] gap-0 max-md:grid-cols-1",
         VIEWPORT_SECTION_CLASS,
       )}
@@ -109,7 +109,7 @@ function ProductSpotlight({
           {ctaLabel}
         </Link>
       </div>
-    </section>
+    </Section>
   );
 }
 
