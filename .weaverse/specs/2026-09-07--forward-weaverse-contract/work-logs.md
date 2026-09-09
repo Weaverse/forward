@@ -832,3 +832,47 @@ Branch `feat/weaverse-page-types` from `main@0c84182`.
   written while testing the write path is therefore still on the `PRODUCT`
   template, detached from the root so it never renders; it can be removed in
   Studio. Worth a Builder issue on its own.
+
+### Removing the static fallbacks (same day)
+
+- **Leo had already ruled on this** — "giờ có data rồi thì cần gì fallback tĩnh
+  nữa … mấy route/page làm sau này cũng sẽ vậy" — and the five new routes were
+  written with fallbacks anyway. The justification recorded for them ("the route
+  contract requires 200 without Weaverse") was circular: the gate demanded that
+  because we wrote the gate that way, not because the product does.
+- **What the fallback actually cost.** Every default string lived in three
+  places — the section's `presets`, the route's JSX, the seed file — with
+  nothing to catch a drift. It was also a second rendering path nobody reads,
+  and the reason the empty-template bug rendered a plausible page instead of an
+  obvious blank one.
+- The `static` browser matrix was emptying `WEAVERSE_PROJECT_ID`, so it had been
+  verifying a storefront that composes nothing. All three matrices now run
+  against a real project, which closes the "composed pages have no browser
+  coverage" gap #67 opened with. "Static" there means the Shopify catalog and
+  cart, which do have a fixture-only mode.
+- Home: 164 → 41 lines. Each route now composes or `404`s.
+- **The matrix caught a real defect immediately after.** The `featured-products`
+  preset was written as "Shop all equipment", which the home hero already uses;
+  the theme had a product count in that slot, so the collision only appeared
+  once presets became the source of the copy. Two links, one accessible name,
+  six failures.
+
+### Ponytail review follow-up
+
+- **One schema list, not three.** `components.ts`, `server-components.ts`, and
+  `section-types.ts` each named all 32 schemas by hand, with a test policing the
+  drift. `SECTION_SCHEMAS` is now the list; the server registry maps over it and
+  pairs in the nine loaders by type. Loaders stay out of that module — a loader
+  reaches the data source through `server-only`, which would make the list
+  unimportable from the seed script.
+- **Seed files carry only overrides.** Section `data` defaults to the schema's
+  `presets`; 78 preset-identical fields dropped. Re-seeding afterwards produced
+  byte-identical content, which is the proof the presets reproduce it.
+- Replaced the seed's duplicate-page check with one that catches a real hazard:
+  every template shares an empty handle, and item ids are keyed on it, so a
+  section key reused across two templates would write both to one item.
+- **Declined one finding.** Merging `pageRef` into `pagePath` saves six lines
+  and makes the log print `wrote PRODUCT/default`, where `default` is a
+  placeholder for a handle that does not exist. Not worth a log that lies.
+- Gates after all of it: `check` 370 node + 131 DOM, `smoke:routes` 35/35,
+  static browser matrix 146/0.
