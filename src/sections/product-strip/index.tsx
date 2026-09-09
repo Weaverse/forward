@@ -2,12 +2,10 @@
 
 import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
+import { Section } from "@/components/section";
 import { sectionHeading, textLink } from "@/lib/presentation/variants";
 import type { Product } from "@/lib/storefront/types";
-import {
-  elementAttributes,
-  type WeaverseElementProps,
-} from "../weaverse-element";
+import type { WeaverseElementProps } from "../weaverse-element";
 
 interface ProductStripProps extends WeaverseElementProps {
   eyebrowLabel: string;
@@ -29,10 +27,7 @@ function ProductStrip({
 }: ProductStripProps) {
   const products = loaderData?.products ?? [];
   return (
-    <section
-      {...elementAttributes(rest)}
-      className="mx-auto w-full max-w-page px-page-gutter py-section-block"
-    >
+    <Section {...rest}>
       <header className="mb-11.25 grid grid-cols-feature-row items-end gap-10 max-md:grid-cols-1 max-md:gap-5">
         <div>
           <p className="m-0 max-w-copy-narrow font-field-meta text-ui leading-meta font-medium text-signal-strong tracking-field-meta uppercase">
@@ -49,7 +44,7 @@ function ProductStrip({
           <ProductCard key={product.handle} product={product} />
         ))}
       </div>
-    </section>
+    </Section>
   );
 }
 

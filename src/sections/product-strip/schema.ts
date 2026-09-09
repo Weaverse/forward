@@ -1,9 +1,12 @@
 import { createSchema } from "@weaverse/schema";
 
+import { layoutInputs } from "@/components/section/inputs";
+
 export const schema = createSchema({
   type: "product-strip",
   title: "Product strip",
   settings: [
+    { group: "Layout", inputs: layoutInputs },
     {
       group: "Content",
       inputs: [

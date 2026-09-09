@@ -1,9 +1,12 @@
 import { createSchema } from "@weaverse/schema";
 
+import { layoutInputs } from "@/components/section/inputs";
+
 export const schema = createSchema({
   type: "numbered-sequence",
   title: "Numbered sequence",
   settings: [
+    { group: "Layout", inputs: layoutInputs },
     {
       group: "Content",
       inputs: [

@@ -4,12 +4,10 @@ import {
   RichTextParagraph,
   richTextParagraphKey,
 } from "@/components/rich-text-paragraph";
+import { Section } from "@/components/section";
 import { cn } from "@/lib/cn";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
-import {
-  elementAttributes,
-  type WeaverseElementProps,
-} from "../weaverse-element";
+import type { WeaverseElementProps } from "../weaverse-element";
 
 interface PageValuesProps extends WeaverseElementProps {
   eyebrowSuffix: string;
@@ -26,10 +24,7 @@ function PageValues({ eyebrowSuffix, ...rest }: PageValuesProps) {
   const sections = page?.sections.slice(1) ?? [];
   if (sections.length === 0) return null;
   return (
-    <section
-      {...elementAttributes(rest)}
-      className="mx-auto w-full max-w-page px-page-gutter py-section-block-compact"
-    >
+    <Section {...rest} verticalPadding="compact">
       <div className="grid grid-cols-12 gap-3 max-sm:grid-cols-1">
         {sections.map((section, index) => (
           <article
@@ -57,7 +52,7 @@ function PageValues({ eyebrowSuffix, ...rest }: PageValuesProps) {
           </article>
         ))}
       </div>
-    </section>
+    </Section>
   );
 }
 

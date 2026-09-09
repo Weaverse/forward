@@ -1,9 +1,12 @@
 import { createSchema } from "@weaverse/schema";
 
+import { layoutInputs } from "@/components/section/inputs";
+
 export const schema = createSchema({
   type: "standard-statement",
   title: "Standard statement",
   settings: [
+    { group: "Layout", inputs: layoutInputs },
     {
       group: "Content",
       inputs: [
