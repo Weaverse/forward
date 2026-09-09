@@ -1,43 +1,29 @@
 "use client";
 
-import Link from "next/link";
+import type { ReactNode } from "react";
+
 import { Section } from "@/components/section";
-import { eyebrow, sectionHeading, textLink } from "@/lib/presentation/variants";
 import type { WeaverseElementProps } from "../weaverse-element";
 
 interface FieldPracticeProps extends WeaverseElementProps {
-  eyebrowLabel: string;
-  heading: string;
-  body: string;
-  linkLabel: string;
-  linkHref: string;
+  children?: ReactNode;
 }
 
-/** A closing two-column note: heading on the left, copy and link on the right. */
-function FieldPractice({
-  eyebrowLabel,
-  heading,
-  body,
-  linkLabel,
-  linkHref,
-  ...rest
-}: FieldPracticeProps) {
+/**
+ * A closing two-column note.
+ *
+ * The section owns the split, not the words: each column is a `section-content`
+ * child a merchant fills with elements, so the heading size, the copy width and
+ * whether the link is a button or a text link are all editable — none of which
+ * was true when the four strings were flat settings on this component.
+ */
+function FieldPractice({ children, ...rest }: FieldPracticeProps) {
   return (
-    <Section {...rest}>
-      <div className="grid grid-cols-split-85 items-start gap-page-gap max-md:grid-cols-1">
-        <div>
-          <p className={eyebrow()}>{eyebrowLabel}</p>
-          <h2 className={sectionHeading()}>{heading}</h2>
-        </div>
-        <div>
-          <p className="max-w-lede text-lede leading-lede text-text-muted">
-            {body}
-          </p>
-          <Link className={textLink()} href={linkHref}>
-            {linkLabel}
-          </Link>
-        </div>
-      </div>
+    <Section
+      {...rest}
+      containerClassName="grid grid-cols-split-85 items-start gap-page-gap max-md:grid-cols-1"
+    >
+      {children}
     </Section>
   );
 }
