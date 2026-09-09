@@ -58,7 +58,7 @@ export interface LoadWeaversePageOptions {
 
 /** Whether this request is Studio composing the page rather than a visitor. */
 function isDesignMode(searchParams: SearchParams | undefined): boolean {
-  return toSearchParams(searchParams).get("isDesignMode") === "true";
+  return String(searchParams?.isDesignMode) === "true";
 }
 
 /**
