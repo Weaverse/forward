@@ -26,4 +26,9 @@ export const schema = createSchema({
       ],
     },
   ],
+  presets: {
+    label: "Shop the catalog",
+    href: "/shop",
+    intent: "dark",
+  },
 });

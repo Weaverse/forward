@@ -1,0 +1,31 @@
+{
+  "pageType": "COLLECTION",
+  "handle": "",
+  "description": "Collection template. The collection and its products come from the route, not from a picker.",
+  "sections": [
+    {
+      "key": "collection-hero",
+      "type": "collection-hero"
+    },
+    {
+      "key": "system-manifest",
+      "type": "system-manifest",
+      "data": {
+        "image": {
+          "url": "/images/editorial/mountain-ridges.webp",
+          "altText": "Layered mountain ridges fading into evening haze",
+          "width": 1800,
+          "height": 1200
+        }
+      }
+    },
+    {
+      "key": "collection-grid",
+      "type": "collection-grid"
+    },
+    {
+      "key": "field-practice",
+      "type": "field-practice"
+    }
+  ]
+}

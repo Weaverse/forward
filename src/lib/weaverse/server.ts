@@ -56,6 +56,11 @@ export interface LoadWeaversePageOptions {
   searchParams?: SearchParams;
 }
 
+/** Whether this request is Studio composing the page rather than a visitor. */
+function isDesignMode(searchParams: SearchParams | undefined): boolean {
+  return String(searchParams?.isDesignMode) === "true";
+}
+
 /**
  * Builds the server client, or `null` when Weaverse is not configured.
  *
@@ -123,6 +128,13 @@ export async function loadWeaversePage({
       typeof page.page?.id === "string" &&
       page.page.id.includes("fallback")
     ) {
+      return null;
+    }
+    /* An empty payload is the project's shared default template, or a page a
+     * merchant emptied. Rendering it composes a blank route, so the route
+     * falls back to its own sections instead — except in Studio, where that
+     * empty page is exactly what the merchant is about to compose. */
+    if (!isDesignMode(searchParams) && !hasAuthoredSections(page)) {
       return null;
     }
     return page;

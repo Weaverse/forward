@@ -314,6 +314,20 @@ async function checkStatus(smoke: RouteSmoke): Promise<void> {
     }
   }
 
+  /* A page that answers 200 with no top-level heading is blank, which is how
+   * an empty Weaverse payload composed itself over every theme-owned route
+   * while still passing every status check here. */
+  const rendersHtml = (response.headers.get("content-type") ?? "")
+    .toLowerCase()
+    .startsWith("text/html");
+  if (smoke.expectedStatus === 200 && rendersHtml && !body.includes("<h1")) {
+    failures.push({
+      path: smoke.path,
+      expected: "a rendered <h1>",
+      actual: "no heading — the route rendered a blank page",
+    });
+  }
+
   const rendersAccountLink = body.includes('href="/account"');
   if (!CUSTOMER_ACCOUNT_MODE && rendersAccountLink) {
     failures.push({

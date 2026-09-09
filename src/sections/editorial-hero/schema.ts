@@ -42,4 +42,13 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["PAGE", "CUSTOM"],
+  },
+  presets: {
+    eyebrowLabel: "Custom page / About Forward",
+    heading: "Make less equipment. Make every piece matter.",
+    lede: "Forward is built around complete movement systems rather than seasonal noise: fewer products, clearer jobs, longer useful lives.",
+    imageSide: "right",
+  },
 });

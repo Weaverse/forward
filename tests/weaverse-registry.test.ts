@@ -3,7 +3,7 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, it } from "node:test";
 
-import { WEAVERSE_SECTION_TYPES } from "../src/lib/weaverse/section-types.ts";
+import { WEAVERSE_SECTION_TYPES } from "../src/lib/weaverse/section-schemas.ts";
 
 const CLIENT_REGISTRY = "src/lib/weaverse/components.ts";
 const SERVER_REGISTRY = "src/lib/weaverse/server-components.ts";
@@ -52,24 +52,20 @@ describe("Weaverse registry split", () => {
     }
   });
 
-  it("registers the same component types on both sides", async () => {
-    const [client, server] = await Promise.all([
-      read(CLIENT_REGISTRY),
-      read(SERVER_REGISTRY),
-    ]);
-
+  it("registers every schema in the client registry", async () => {
+    /* The server registry is derived from SECTION_SCHEMAS and cannot drift.
+     * The client registry still names its component modules one by one — a
+     * static import is what puts them in the bundle — so it is the only side
+     * that can fall behind. Read as source: the module is a Client Component
+     * and importing it here would pull the whole component graph into a node
+     * test. */
+    const client = await read(CLIENT_REGISTRY);
     const clientEntries = [...client.matchAll(/entry\((\w+)\)/g)].length;
-    const serverEntries = [...server.matchAll(/schema: (\w+)Schema/g)].length;
 
     assert.equal(
       clientEntries,
       WEAVERSE_SECTION_TYPES.length,
-      "a component in the type list is missing from the client registry",
-    );
-    assert.equal(
-      serverEntries,
-      WEAVERSE_SECTION_TYPES.length,
-      "a component in the type list is missing from the server registry",
+      "a component in the schema list is missing from the client registry",
     );
   });
 

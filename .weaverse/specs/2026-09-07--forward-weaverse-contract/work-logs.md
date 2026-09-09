@@ -764,3 +764,115 @@ architecture built earlier today.
   and policy handles all answer 404; every real route still answers 200.
   `bun run check` green at `370` node + `95` DOM, `smoke:routes` `35/35`, and
   the static browser matrix back to `146 / 10 / 0` in under a minute.
+
+## 2026-09-08 — Composing the remaining page types (#67)
+
+Branch `feat/weaverse-page-types` from `main@0c84182`.
+
+- **The `dataContext` seam.** `CUSTOM` sections pick their own resource; a
+  resource-backed template does not — the route decides which product,
+  collection, page, or article it is rendering. That data now travels through
+  one React context: `WeaversePage` supplies it around the renderer, and a
+  route supplies it around its own fallback, so the same component runs
+  composed or not. Reading it off `useWeaverse()` alone would have made every
+  fallback render nothing.
+- **All five templates composed.** `INDEX` (7 sections), `PRODUCT` (1, around
+  the theme-owned buy block), `COLLECTION` (4), `PAGE` (4), `ARTICLE` (2).
+  Eleven sections became folder sections with schemas; all are registered in
+  both registries and in `section-types.ts`.
+- **A silent break, found by looking at the rendered HTML.** `loadWeaversePage`
+  imported `hasAuthoredSections` and never called it, so the Builder's empty
+  default template was treated as a composed page. Home, the PDP, the
+  collection, the article, and the Shopify page all rendered blank while every
+  status check passed. The guard is applied now, and skipped in design mode
+  where an empty page is precisely what the merchant is about to compose.
+  `smoke:routes` now fails a 200 HTML route that renders no `<h1>`; disabling
+  the guard and rebuilding was used to confirm the assertion actually fires.
+- **The composed-section DOM suite was a hand-kept list**, so eleven new
+  sections would have shipped with no render and no Studio-addressability
+  assertion. It is now derived from `WEAVERSE_COMPONENTS`, and the identity
+  assertions render inside a populated route context. 95 → 131 DOM tests.
+- **`presets` and `enabledOn` on every section.** Preset copy is the theme's
+  own defaults, so an added section looks like the shipped page. `home-hero`
+  also gained the `stats` input it renders but never declared.
+- **All five templates are seeded.** The Content API requires a handle segment
+  for `PRODUCT`, `COLLECTION`, `PAGE`, and `ARTICLE` — omitting it answers
+  `400 A handle is required` — but it does not resolve by it: `/pages/PRODUCT/x`,
+  `/pages/PRODUCT/default`, and `/pages/PRODUCT/weatherline-shell` all return
+  the same default template, and a write lands on that template rather than
+  creating a page under the handle sent (checked: the project still holds
+  exactly its 11 pages afterwards). The seed script sends `default`.
+
+  This was first recorded here as a Builder limitation — "only `INDEX` is
+  seedable" — because the `400` was taken at face value and no handle was ever
+  tried. Leo asked whether the templates had been fetched to see what handle
+  they carry, which is what turned it up. The lesson is narrow and repeatable:
+  a `400` naming a missing parameter says the parameter is required, not that
+  the resource is unreachable.
+- Routes that read `searchParams` for design-mode detection are dynamic rather
+  than prerendered. `dynamicParams = false` still 404s unknown handles.
+- `bun run check` green at 370 node + 131 DOM, `smoke:routes` 35/35, Home
+  verified composing all 7 sections from the seeded `INDEX` template.
+- **The static browser matrix regressed 12 tests, and the app was not at
+  fault.** Confirmed against `main` first — 146/0 there, 134/12 here — so this
+  was a real regression, not a flake. Composing a route makes it render
+  dynamically, so React streams the layout's Suspense boundary: the fallback
+  shell arrives first and the resolved copy waits in a hidden `S:n` carrier
+  until an inline script swaps it in. `gotoReady` returned as soon as
+  `#main-content` was visible, which the *fallback* already satisfies, so six
+  tests queried a document holding two headers and two announcement bars, and
+  clicked markup React had not wired yet. Waiting for every `S:n` carrier to be
+  gone restores 146/0. A real browser was checked directly first, to be sure
+  the storefront itself renders correctly — it does.
+- Verified after seeding: `/` composes 7 sections, `/products/[handle]` 1 around
+  the theme-owned buy block, `/shop/[handle]` 4, `/pages/[handle]` 4, and
+  `/journal/[handle]` 2 — each still rendering its real `h1`.
+- **The Content API cannot delete an item.** `DELETE` answers `405 Use PATCH or
+  POST`, and both of those upsert rather than replace an item set. A probe item
+  written while testing the write path is therefore still on the `PRODUCT`
+  template, detached from the root so it never renders; it can be removed in
+  Studio. Worth a Builder issue on its own.
+
+### Removing the static fallbacks (same day)
+
+- **Leo had already ruled on this** — "giờ có data rồi thì cần gì fallback tĩnh
+  nữa … mấy route/page làm sau này cũng sẽ vậy" — and the five new routes were
+  written with fallbacks anyway. The justification recorded for them ("the route
+  contract requires 200 without Weaverse") was circular: the gate demanded that
+  because we wrote the gate that way, not because the product does.
+- **What the fallback actually cost.** Every default string lived in three
+  places — the section's `presets`, the route's JSX, the seed file — with
+  nothing to catch a drift. It was also a second rendering path nobody reads,
+  and the reason the empty-template bug rendered a plausible page instead of an
+  obvious blank one.
+- The `static` browser matrix was emptying `WEAVERSE_PROJECT_ID`, so it had been
+  verifying a storefront that composes nothing. All three matrices now run
+  against a real project, which closes the "composed pages have no browser
+  coverage" gap #67 opened with. "Static" there means the Shopify catalog and
+  cart, which do have a fixture-only mode.
+- Home: 164 → 41 lines. Each route now composes or `404`s.
+- **The matrix caught a real defect immediately after.** The `featured-products`
+  preset was written as "Shop all equipment", which the home hero already uses;
+  the theme had a product count in that slot, so the collision only appeared
+  once presets became the source of the copy. Two links, one accessible name,
+  six failures.
+
+### Ponytail review follow-up
+
+- **One schema list, not three.** `components.ts`, `server-components.ts`, and
+  `section-types.ts` each named all 32 schemas by hand, with a test policing the
+  drift. `SECTION_SCHEMAS` is now the list; the server registry maps over it and
+  pairs in the nine loaders by type. Loaders stay out of that module — a loader
+  reaches the data source through `server-only`, which would make the list
+  unimportable from the seed script.
+- **Seed files carry only overrides.** Section `data` defaults to the schema's
+  `presets`; 78 preset-identical fields dropped. Re-seeding afterwards produced
+  byte-identical content, which is the proof the presets reproduce it.
+- Replaced the seed's duplicate-page check with one that catches a real hazard:
+  every template shares an empty handle, and item ids are keyed on it, so a
+  section key reused across two templates would write both to one item.
+- **Declined one finding.** Merging `pageRef` into `pagePath` saves six lines
+  and makes the log print `wrote PRODUCT/default`, where `default` is a
+  placeholder for a handle that does not exist. Not worth a log that lies.
+- Gates after all of it: `check` 370 node + 131 DOM, `smoke:routes` 35/35,
+  static browser matrix 146/0.

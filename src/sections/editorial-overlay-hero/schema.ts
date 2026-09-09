@@ -30,4 +30,12 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["PAGE", "CUSTOM"],
+  },
+  presets: {
+    eyebrowLabel: "Custom page / Field testing",
+    heading: "Tested where it is used.",
+    lede: "Every product is carried through real days out before it is signed off: wet, cold, loaded, and long.",
+  },
 });

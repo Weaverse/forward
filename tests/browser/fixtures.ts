@@ -73,21 +73,28 @@ export const test = base.extend<Options & { runtimeHealth: null }>({
 export { expect };
 
 /**
- * Navigates to a normal route and waits for the streamed App Router loading
- * boundary to be replaced by the route content. Deliberate error/404 tests use
- * `page.goto()` directly because the system state is their final UI.
+ * Navigates to a normal route and waits for the streamed document to settle.
+ *
+ * Deliberate error/404 tests use `page.goto()` directly because the system
+ * state is their final UI.
  */
 export async function gotoReady(
   page: Page,
   path: string,
 ): Promise<PlaywrightResponse | null> {
   const response = await page.goto(path);
-  /* The route previously had a `loading.tsx`, and waiting for its text to
-   * disappear doubled as the readiness signal. That boundary is gone — it
-   * committed every response to `200` and made `notFound()` a soft 404 — so
-   * wait on the rendered shell and on hydration instead. Without the second
-   * wait a test can click a control whose handler is not attached yet. */
   await expect(page.locator("#main-content")).toBeVisible();
+  /* `#main-content` alone is not readiness. A composed route renders
+   * dynamically, so React streams it: the Suspense fallback shell is in the
+   * document first, and the resolved content arrives afterwards parked in
+   * `<div hidden id="S:n">` until an inline script swaps it in. In that window
+   * the page carries two copies of everything inside the boundary — two
+   * headers, two announcement bars — and a query for one of them fails Playwright's
+   * strict mode while a click lands on markup React has not wired yet.
+   *
+   * Waiting for every `S:n` carrier to be gone is the settled-document signal:
+   * React removes each one as it swaps its boundary in. */
+  await expect(page.locator('body > div[hidden][id^="S:"]')).toHaveCount(0);
   return response;
 }
 

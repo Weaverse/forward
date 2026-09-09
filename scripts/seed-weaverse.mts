@@ -5,6 +5,12 @@
  * routes render today, so seeding produces a Studio project that matches the
  * live storefront instead of an empty shell a merchant has to rebuild.
  *
+ * Two kinds of page are seeded. A `CUSTOM` page is one page per path and is
+ * created here if the project has none. The resource-backed templates —
+ * `INDEX`, `PRODUCT`, `COLLECTION`, `PAGE`, `ARTICLE` — already exist: the
+ * Builder creates one of each with the project, and this script only fills
+ * them in. See `TEMPLATE_HANDLE` for how they are addressed.
+ *
  * Safety:
  *
  * - dry run by default; `--apply` is required to write anything;
@@ -35,7 +41,10 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
-import { WEAVERSE_SECTION_TYPES } from "../src/lib/weaverse/section-types.ts";
+import {
+  SECTION_SCHEMAS,
+  WEAVERSE_SECTION_TYPES,
+} from "../src/lib/weaverse/section-schemas.ts";
 
 const CONTENT_API_BASE = "https://studio.weaverse.io/api/v1/content";
 const SEED_DIR = path.join(import.meta.dirname, "weaverse-seed");
@@ -46,11 +55,27 @@ const MAX_ITEMS_PER_REQUEST = 100;
 interface SeedSection {
   key: string;
   type: string;
-  data: Record<string, unknown>;
+  /**
+   * Settings that differ from the section's `presets`.
+   *
+   * A seed file lists which sections a page carries and in what order; the
+   * copy itself already lives in each schema's `presets`, which is what Studio
+   * inserts when a merchant adds the section. Repeating it here is how the
+   * same sentence ends up in two files and drifts. Only overrides belong here
+   * — a picked product, an image, a label the template needs to differ on.
+   */
+  data?: Record<string, unknown>;
 }
 
 interface SeedPage {
   pageType: string;
+  /**
+   * Empty for a resource-backed template.
+   *
+   * `INDEX`, `PRODUCT`, `COLLECTION`, `PAGE`, and `ARTICLE` are one shared
+   * template each, created with the project and addressed by type alone. Only
+   * a `CUSTOM` page has a handle of its own.
+   */
   handle: string;
   name?: string;
   description?: string;
@@ -68,6 +93,38 @@ interface PageItem {
   type?: string;
   data: Record<string, unknown>;
   children?: { id: string }[];
+}
+
+/** How a page is named in this script's output and in its item ids. */
+function pageRef(page: SeedPage): string {
+  return page.handle.length > 0
+    ? `${page.pageType}/${page.handle}`
+    : page.pageType;
+}
+
+/**
+ * Stands in for a resource-backed template's handle in the request path.
+ *
+ * The Content API requires a handle segment for `PRODUCT`, `COLLECTION`,
+ * `PAGE`, and `ARTICLE` — omitting it answers `400 A handle is required` — but
+ * it does not resolve by it: every handle returns the one shared default
+ * template, stored with an empty handle, and writes land on that template
+ * rather than creating a page under the handle sent. So any value works, and
+ * this one says why it is there.
+ */
+const TEMPLATE_HANDLE = "default";
+
+/** Where a page is addressed in the Content API. */
+function pagePath(page: SeedPage): string {
+  const handle = page.handle.length > 0 ? page.handle : TEMPLATE_HANDLE;
+  return `${page.pageType}/${handle}`;
+}
+
+/** A section's shipped defaults, which the seed writes unless overridden. */
+function presetsFor(type: string): Record<string, unknown> {
+  const schema = SECTION_SCHEMAS.find((entry) => entry.type === type);
+  const { children, ...presets } = schema?.presets ?? {};
+  return presets;
 }
 
 function fail(message: string): never {
@@ -123,7 +180,7 @@ function buildItems(page: SeedPage, rootId: string): PageItem[] {
   const sections = page.sections.map((section) => ({
     id: itemId(page.handle, section.key),
     type: section.type,
-    data: section.data,
+    data: { ...presetsFor(section.type), ...section.data },
   }));
 
   return [
@@ -136,13 +193,18 @@ function validate(pages: SeedPage[]): void {
   const registered = new Set(WEAVERSE_SECTION_TYPES);
   const problems: string[] = [];
 
+  /* Item ids are keyed on the page handle, and every resource-backed template
+   * has the same empty one, so a section key reused across two templates would
+   * silently write both to one item. */
+  const claimed = new Map<string, string>();
   for (const page of pages) {
+    const ref = pageRef(page);
     if (page.sections.length === 0) {
-      problems.push(`${page.handle}: no sections`);
+      problems.push(`${ref}: no sections`);
     }
     if (page.sections.length + 1 > MAX_ITEMS_PER_REQUEST) {
       problems.push(
-        `${page.handle}: ${page.sections.length + 1} items exceeds the ${MAX_ITEMS_PER_REQUEST}-item request cap`,
+        `${ref}: ${page.sections.length + 1} items exceeds the ${MAX_ITEMS_PER_REQUEST}-item request cap`,
       );
     }
 
@@ -150,14 +212,23 @@ function validate(pages: SeedPage[]): void {
     for (const section of page.sections) {
       if (seen.has(section.key)) {
         problems.push(
-          `${page.handle}: duplicate section key "${section.key}" would collide on one item id`,
+          `${ref}: duplicate section key "${section.key}" would collide on one item id`,
         );
       }
       seen.add(section.key);
 
+      const id = itemId(page.handle, section.key);
+      const owner = claimed.get(id);
+      if (owner !== undefined) {
+        problems.push(
+          `${ref}: section key "${section.key}" collides with ${owner} on one item id`,
+        );
+      }
+      claimed.set(id, ref);
+
       if (!registered.has(section.type)) {
         problems.push(
-          `${page.handle}: section type "${section.type}" is not in the component registry`,
+          `${ref}: section type "${section.type}" is not in the component registry`,
         );
       }
     }
@@ -207,13 +278,11 @@ async function fetchRootId(
   page: SeedPage,
 ): Promise<string> {
   const response = await fetch(
-    `${CONTENT_API_BASE}/projects/${projectId}/pages/${page.pageType}/${page.handle}`,
+    `${CONTENT_API_BASE}/projects/${projectId}/pages/${pagePath(page)}`,
     { headers: { authorization: `Bearer ${apiKey}` } },
   );
   if (!response.ok) {
-    fail(
-      `reading ${page.pageType}/${page.handle} responded ${response.status}`,
-    );
+    fail(`reading ${pageRef(page)} responded ${response.status}`);
   }
 
   const body = (await response.json()) as {
@@ -225,7 +294,7 @@ async function fetchRootId(
   );
   const rootId = body.rootId ?? fromItems?.id;
   if (typeof rootId !== "string" || rootId.length === 0) {
-    fail(`${page.pageType}/${page.handle} has no root item to attach to`);
+    fail(`${pageRef(page)} has no root item to attach to`);
   }
   return rootId;
 }
@@ -235,37 +304,35 @@ async function seedPage(
   projectId: string,
   page: SeedPage,
 ): Promise<void> {
-  const created = await request(
-    apiKey,
-    "POST",
-    `/projects/${projectId}/pages`,
-    {
-      type: page.pageType,
-      handle: page.handle,
-      name: page.name ?? page.handle,
-    },
-  );
-  if (!created.ok && created.status !== 409) {
-    fail(
-      `creating ${page.pageType}/${page.handle} responded ${created.status}`,
+  /* A template already exists — the Builder creates one per page type with
+   * the project — so only a CUSTOM page is ever created here. */
+  if (page.handle.length > 0) {
+    const created = await request(
+      apiKey,
+      "POST",
+      `/projects/${projectId}/pages`,
+      {
+        type: page.pageType,
+        handle: page.handle,
+        name: page.name ?? page.handle,
+      },
     );
+    if (!created.ok && created.status !== 409) {
+      fail(`creating ${pageRef(page)} responded ${created.status}`);
+    }
   }
 
   const rootId = await fetchRootId(apiKey, projectId, page);
   const updated = await request(
     apiKey,
     "PATCH",
-    `/projects/${projectId}/pages/${page.pageType}/${page.handle}`,
+    `/projects/${projectId}/pages/${pagePath(page)}`,
     { items: buildItems(page, rootId) },
   );
   if (!updated.ok) {
-    fail(
-      `updating ${page.pageType}/${page.handle} responded ${updated.status}`,
-    );
+    fail(`updating ${pageRef(page)} responded ${updated.status}`);
   }
-  console.log(
-    `  ${created.status === 409 ? "updated" : "created and wrote"} ${page.pageType}/${page.handle}`,
-  );
+  console.log(`  wrote ${pageRef(page)}`);
 }
 
 async function main(): Promise<void> {
@@ -292,7 +359,7 @@ async function main(): Promise<void> {
   );
   for (const page of pages) {
     console.log(
-      `  ${page.pageType}/${page.handle}: ${page.sections.length} sections (+1 root)`,
+      `  ${pageRef(page)}: ${page.sections.length} sections (+1 root)`,
     );
     for (const section of page.sections) {
       console.log(`    - ${section.type}`);

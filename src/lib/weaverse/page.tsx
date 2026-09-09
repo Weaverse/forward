@@ -20,15 +20,32 @@ import {
 } from "@weaverse/next";
 
 import { WEAVERSE_COMPONENTS } from "./components";
+import {
+  type StorefrontDataContext,
+  StorefrontDataProvider,
+} from "./data-context";
 import { clientRequestContext } from "./request-context";
 
 export interface WeaversePageProps {
   data: WeaverseNextLoaderData;
   /** Fallback when the payload carries no project metadata. */
   projectId: string;
+  /**
+   * Storefront data the route already loaded.
+   *
+   * Resource-backed templates — product, collection, page, article — are
+   * shared across every resource of their kind, so the one being rendered is
+   * decided by the route rather than by a merchant's picker. This is how it
+   * reaches the sections.
+   */
+  dataContext?: StorefrontDataContext;
 }
 
-export function WeaversePage({ data, projectId }: WeaversePageProps) {
+export function WeaversePage({
+  data,
+  dataContext,
+  projectId,
+}: WeaversePageProps) {
   /* Prefer the id the payload was actually loaded with: Studio targets that
    * project, and a mismatch between it and the environment would point the
    * bridge at the wrong one. */
@@ -46,7 +63,9 @@ export function WeaversePage({ data, projectId }: WeaversePageProps) {
 
   return (
     <WeaverseNextProvider client={client}>
-      <WeaverseNextRenderer data={data} />
+      <StorefrontDataProvider value={dataContext ?? {}}>
+        <WeaverseNextRenderer data={data} />
+      </StorefrontDataProvider>
     </WeaverseNextProvider>
   );
 }

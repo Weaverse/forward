@@ -2,13 +2,16 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { storefront } from "@/lib/storefront/data-source";
-import { CollectionGrid } from "@/sections/collection-grid";
-import { CollectionHero } from "@/sections/collection-hero";
-import { FieldPractice } from "@/sections/field-practice";
-import { SystemManifest } from "@/sections/system-manifest";
+import { WeaversePage } from "@/lib/weaverse/page";
+import {
+  loadWeaversePage,
+  type SearchParams,
+  weaverseProjectId,
+} from "@/lib/weaverse/server";
 
 interface CollectionPageProps {
   params: Promise<{ collectionHandle: string }>;
+  searchParams: Promise<SearchParams>;
 }
 
 export const dynamicParams = false;
@@ -37,58 +40,41 @@ export async function generateMetadata({
   };
 }
 
-/** Collection content comes entirely from the normalized storefront model. */
-export default async function CollectionPage({ params }: CollectionPageProps) {
-  const { collectionHandle } = await params;
-  const [collection, products, themeContent, articles] = await Promise.all([
+/**
+ * Collection.
+ *
+ * `COLLECTION` is one template shared by every collection, so which collection
+ * it renders is the route's decision, not a merchant's. The resource travels
+ * to the sections through `dataContext`; the template only decides layout and
+ * copy.
+ */
+export default async function CollectionPage(props: CollectionPageProps) {
+  const { collectionHandle } = await props.params;
+  const [collection, products, page, projectId] = await Promise.all([
     storefront.getCollection(collectionHandle),
     storefront.getCollectionProducts(collectionHandle),
-    storefront.getThemeContent(),
-    storefront.listArticles(),
+    loadWeaversePage({
+      handle: collectionHandle,
+      pathname: `/shop/${collectionHandle}`,
+      searchParams: await props.searchParams,
+      type: "COLLECTION",
+    }),
+    Promise.resolve(weaverseProjectId()),
   ]);
-  if (collection === null || products === null) {
+  if (
+    collection === null ||
+    products === null ||
+    page === null ||
+    projectId === null
+  ) {
     notFound();
   }
-  const guideArticle = articles[0];
 
   return (
-    <>
-      <CollectionHero
-        eyebrowPrefix="Movement system /"
-        ctaLabel="Shop the complete index"
-        ctaHref="/shop"
-        collection={collection}
-      />
-
-      <SystemManifest
-        eyebrowLabel="The system"
-        heading="Prepare for change, not every possibility."
-        body="Start with a layer that moves moisture, add warmth you can vent, and finish with a shell that packs small enough to bring every time. This kit is built to work as one system."
-        image={themeContent.standardBandImage}
-        products={products}
-        linkLabel="Read the field note"
-        linkHref={
-          guideArticle === undefined
-            ? undefined
-            : `/journal/${guideArticle.handle}`
-        }
-      />
-
-      <CollectionGrid
-        eyebrowLabel={`${collection.title} essentials`}
-        heading="A focused kit for a full day out."
-        ctaLabel="View all equipment"
-        ctaHref="/shop"
-        products={products}
-      />
-
-      <FieldPractice
-        eyebrowLabel={`Field practice / ${collection.fieldCode}`}
-        heading="Let the route set the pace."
-        body="Efficient movement is not about speed. It is about keeping effort even, noticing what changes, and reaching the last descent with enough attention left to enjoy it."
-        linkLabel="More field stories"
-        linkHref="/journal"
-      />
-    </>
+    <WeaversePage
+      data={page}
+      dataContext={{ collection, collectionProducts: products }}
+      projectId={projectId}
+    />
   );
 }

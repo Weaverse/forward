@@ -5,12 +5,17 @@ import { Suspense } from "react";
 
 import { storefront } from "@/lib/storefront/data-source";
 import type { Product } from "@/lib/storefront/types";
-import { RelatedProducts } from "@/sections/related-products";
-
+import { WeaversePage } from "@/lib/weaverse/page";
+import {
+  loadWeaversePage,
+  type SearchParams,
+  weaverseProjectId,
+} from "@/lib/weaverse/server";
 import { ProductDetail, ProductDetailFallback } from "./product-detail";
 
 interface ProductPageProps {
   params: Promise<{ productHandle: string }>;
+  searchParams: Promise<SearchParams>;
 }
 
 export const dynamicParams = false;
@@ -110,10 +115,29 @@ function ProductFieldRecord({ product }: { product: Product }) {
   );
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
-  const { productHandle } = await params;
-  const product = await storefront.getProduct(productHandle);
-  if (product === null) {
+/**
+ * Product.
+ *
+ * The buy block is not composable — gallery, colorway and size selection,
+ * price, availability, and the cart handoff own variant identity and URL query
+ * state, so they stay theme-owned and render above whatever Weaverse composes.
+ * `PRODUCT` therefore composes the surfaces *around* the buy block, and the
+ * product itself reaches them through `dataContext` because the route, not a
+ * merchant, decides which product this template is rendering.
+ */
+export default async function ProductPage(props: ProductPageProps) {
+  const { productHandle } = await props.params;
+  const [product, page, projectId] = await Promise.all([
+    storefront.getProduct(productHandle),
+    loadWeaversePage({
+      handle: productHandle,
+      pathname: `/products/${productHandle}`,
+      searchParams: await props.searchParams,
+      type: "PRODUCT",
+    }),
+    Promise.resolve(weaverseProjectId()),
+  ]);
+  if (product === null || page === null || projectId === null) {
     notFound();
   }
   const related = await relatedProducts(product);
@@ -129,13 +153,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <ProductDetail product={product} fieldRecord={fieldRecord} />
       </Suspense>
 
-      {related.length > 0 ? (
-        <RelatedProducts
-          eyebrowLabel="Works well with"
-          heading="Complete the field system."
-          products={related}
-        />
-      ) : null}
+      <WeaversePage
+        data={page}
+        dataContext={{ product, products: related }}
+        projectId={projectId}
+      />
     </>
   );
 }

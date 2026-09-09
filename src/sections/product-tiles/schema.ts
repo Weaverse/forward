@@ -16,4 +16,8 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["PAGE", "CUSTOM"],
+  },
+  presets: {},
 });

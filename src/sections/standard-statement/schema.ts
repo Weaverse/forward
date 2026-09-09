@@ -25,4 +25,14 @@ export const schema = createSchema({
       ],
     },
   ],
+  enabledOn: {
+    pages: ["PAGE", "CUSTOM"],
+  },
+  presets: {
+    eyebrowLabel: "The Forward standard",
+    statement:
+      "Useful over novel. Repairable over disposable. Quiet over loud.",
+    columns:
+      "We begin with the work a product must do, then remove anything that does not improve movement, protection, carry, or recovery.\nMaterials are selected for known performance and honest aging. A worn product should carry evidence of use\u2014not become obsolete.\nEvery core object belongs to a system, so layers and equipment earn their place together instead of competing for attention.",
+  },
 });

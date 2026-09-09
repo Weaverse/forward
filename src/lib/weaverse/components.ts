@@ -12,9 +12,6 @@
  *
  * Deliberately absent, and argued in the spec rather than forgotten:
  *
- * - Home's seven sections, which stay Server Components. Composing them would
- *   ship their JavaScript to the browser and lose the zero-JS baseline on the
- *   highest-traffic page, buying nothing a shopper can see.
  * - Header, Footer, announcement bar, and mini-cart, configured through theme
  *   settings and never composed.
  * - The PDP buy block and its `colorway`/`size` query state, the collection and
@@ -29,16 +26,34 @@ import * as Button from "@/components/button";
 import * as Heading from "@/components/heading";
 import * as Paragraph from "@/components/paragraph";
 import * as Subheading from "@/components/subheading";
+import * as ArticleBody from "@/sections/article-body";
+import * as ArticleHeader from "@/sections/article-header";
+import * as CollectionGrid from "@/sections/collection-grid";
+import * as CollectionHero from "@/sections/collection-hero";
+import * as CollectionIndex from "@/sections/collection-index";
 import * as EditorialCallout from "@/sections/editorial-callout";
 import * as EditorialHero from "@/sections/editorial-hero";
 import * as EditorialOverlayHero from "@/sections/editorial-overlay-hero";
+import * as FeaturedProducts from "@/sections/featured-products";
+import * as FieldPractice from "@/sections/field-practice";
+import * as HomeHero from "@/sections/home-hero";
+import * as KitCallout from "@/sections/kit-callout";
+import * as MaterialStandard from "@/sections/material-standard";
 import * as NumberedSequence from "@/sections/numbered-sequence";
+import * as PageHero from "@/sections/page-hero";
+import * as PageOrigin from "@/sections/page-origin";
+import * as PagePremise from "@/sections/page-premise";
+import * as PageValues from "@/sections/page-values";
 import * as PrincipleGrid from "@/sections/principle-grid";
 import * as ProductCaseStudy from "@/sections/product-case-study";
+import * as ProductSpotlight from "@/sections/product-spotlight";
 import * as ProductStrip from "@/sections/product-strip";
 import * as ProductTiles from "@/sections/product-tiles";
+import * as RelatedProducts from "@/sections/related-products";
+import * as RepairAndJournal from "@/sections/repair-and-journal";
 import * as StandardStatement from "@/sections/standard-statement";
 import * as StatBand from "@/sections/stat-band";
+import * as SystemManifest from "@/sections/system-manifest";
 
 /**
  * A registry entry is the module itself: the component is its default export
@@ -65,7 +80,33 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
   entry(Paragraph),
   entry(Button),
 
-  /* PAGE — the three editorial routes. */
+  /* INDEX */
+  entry(HomeHero),
+  entry(FeaturedProducts),
+  entry(CollectionIndex),
+  entry(ProductSpotlight),
+  entry(MaterialStandard),
+  entry(KitCallout),
+  entry(RepairAndJournal),
+
+  /* PRODUCT */
+  entry(RelatedProducts),
+
+  /* COLLECTION */
+  entry(CollectionHero),
+  entry(SystemManifest),
+  entry(CollectionGrid),
+  entry(FieldPractice),
+
+  /* ARTICLE */
+  entry(ArticleHeader),
+  entry(ArticleBody),
+
+  /* PAGE — Shopify pages and the three editorial routes. */
+  entry(PageHero),
+  entry(PagePremise),
+  entry(PageValues),
+  entry(PageOrigin),
   entry(EditorialHero),
   entry(EditorialOverlayHero),
   entry(EditorialCallout),
