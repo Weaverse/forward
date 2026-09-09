@@ -7,7 +7,6 @@ import type {
   JournalArticle,
   Product,
   StorePage,
-  ThemeContent,
 } from "@/lib/storefront/types";
 
 /**
@@ -24,18 +23,12 @@ import type {
  * source, so a section still never sees a raw Shopify payload.
  */
 export interface StorefrontDataContext {
-  /* The renderer takes a plain record, so the shape stays index-signature
-   * compatible while the named fields keep sections honestly typed. */
-  [key: string]: unknown;
   article?: JournalArticle;
   collection?: Collection;
   collectionProducts?: readonly Product[];
   page?: StorePage;
   product?: Product;
   products?: readonly Product[];
-  collections?: readonly Collection[];
-  articles?: readonly JournalArticle[];
-  theme?: ThemeContent;
 }
 
 const StorefrontData = createContext<StorefrontDataContext>({});

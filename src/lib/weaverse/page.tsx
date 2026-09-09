@@ -64,7 +64,7 @@ export function WeaversePage({
   return (
     <WeaverseNextProvider client={client}>
       <StorefrontDataProvider value={dataContext ?? {}}>
-        <WeaverseNextRenderer data={data} dataContext={dataContext} />
+        <WeaverseNextRenderer data={data} />
       </StorefrontDataProvider>
     </WeaverseNextProvider>
   );

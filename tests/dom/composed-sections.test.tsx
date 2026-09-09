@@ -4,7 +4,6 @@ import { render } from "@testing-library/react";
 
 import { COLLECTION_FIXTURES } from "@/lib/storefront/fixtures/collections";
 import { JOURNAL_FIXTURES } from "@/lib/storefront/fixtures/journal";
-import { THEME_CONTENT_FIXTURE } from "@/lib/storefront/fixtures/navigation";
 import { PAGE_FIXTURES } from "@/lib/storefront/fixtures/pages";
 import { PRODUCT_FIXTURES } from "@/lib/storefront/fixtures/products";
 import { WEAVERSE_COMPONENTS } from "@/lib/weaverse/components";
@@ -37,14 +36,11 @@ const COMPOSED = WEAVERSE_COMPONENTS.map(
  */
 const ROUTE_CONTEXT: StorefrontDataContext = {
   article: JOURNAL_FIXTURES[0],
-  articles: JOURNAL_FIXTURES,
   collection: COLLECTION_FIXTURES[0],
   collectionProducts: PRODUCT_FIXTURES,
-  collections: COLLECTION_FIXTURES,
   page: PAGE_FIXTURES[0],
   product: PRODUCT_FIXTURES[0],
   products: PRODUCT_FIXTURES,
-  theme: THEME_CONTENT_FIXTURE,
 };
 
 describe("composed sections tolerate merchant-cleared settings", () => {
