@@ -1,14 +1,13 @@
 /**
  * Every section schema this theme registers, in the order Studio lists them.
  *
- * One list, so the three things that need it cannot drift apart: the server
- * registry pairs each schema with its loader, `WEAVERSE_SECTION_TYPES` names
- * them for the seed script, and `tests/weaverse-registry.test.ts` checks the
- * client registry against it.
+ * One list, so the two sides that need it cannot drift apart: the server
+ * registry pairs each schema with its loader, and
+ * `tests/weaverse-registry.test.ts` checks the client registry against it.
  *
  * Schemas only. A loader reaches the storefront data source through
  * `server-only`, so pairing them here would make this module unimportable from
- * the seed script and any other tooling that runs outside Next.
+ * tooling that runs outside Next, the test suite included.
  */
 
 import type { SchemaType } from "@weaverse/schema";
@@ -92,7 +91,7 @@ export const SECTION_SCHEMAS: readonly SchemaType[] = [
   productCaseStudy,
 ];
 
-/** The component types the seed script is allowed to write. */
+/** The component types this theme registers, in registry order. */
 export const WEAVERSE_SECTION_TYPES: readonly string[] = SECTION_SCHEMAS.map(
   (schema) => schema.type,
 );
