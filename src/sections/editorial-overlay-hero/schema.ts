@@ -1,7 +1,5 @@
 import { createSchema } from "@weaverse/schema";
 
-import { layoutInputs } from "@/components/section/inputs";
-
 export const schema = createSchema({
   type: "editorial-overlay-hero",
   title: "Editorial overlay hero",
@@ -12,7 +10,6 @@ export const schema = createSchema({
       group: "Content",
       inputs: [{ type: "image", name: "image", label: "Image" }],
     },
-    { group: "Layout", inputs: layoutInputs },
   ],
   presets: {
     children: [
