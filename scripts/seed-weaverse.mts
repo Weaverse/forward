@@ -88,10 +88,18 @@ function pagePath(page: SeedPage): string {
 
 const SCHEMA_BY_TYPE = new Map(SECTION_SCHEMAS.map((s) => [s.type, s]));
 
-/** A stable UUID-shaped id for one position in one page's tree. */
-function itemId(pageKey: string, treePath: string): string {
+/**
+ * A stable UUID-shaped id for one position in one page's tree.
+ *
+ * The component type is part of the key because the Content API will not
+ * change an existing item's `type`: it accepts the new children and keeps the
+ * old type, which silently produced a `button` holding two buttons. Keying on
+ * the type means a changed component is a new item, and the old one is left
+ * detached like any other superseded item.
+ */
+function itemId(pageKey: string, treePath: string, type: string): string {
   const digest = createHash("sha256")
-    .update(`forward:${pageKey}:${treePath}`)
+    .update(`forward:${pageKey}:${treePath}:${type}`)
     .digest("hex");
   return [
     digest.slice(0, 8),
@@ -130,7 +138,7 @@ function expand(
   } & Record<string, unknown>;
   const children = childrenOverride ?? schemaChildren;
 
-  const id = itemId(pageKey, treePath);
+  const id = itemId(pageKey, treePath, type);
   const childIds = children.map((child, index) => {
     const {
       type: childType,
