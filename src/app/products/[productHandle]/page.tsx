@@ -3,12 +3,15 @@ import { notFound } from "next/navigation";
 
 import { storefront } from "@/lib/storefront/data-source";
 import type { Product } from "@/lib/storefront/types";
+import { StorefrontDataProvider } from "@/lib/weaverse/data-context";
 import { WeaversePage } from "@/lib/weaverse/page";
+import { pageRenders } from "@/lib/weaverse/page-payload";
 import {
   loadWeaversePage,
   type SearchParams,
   weaverseProjectId,
 } from "@/lib/weaverse/server";
+import MainProduct from "@/sections/main-product";
 
 interface ProductPageProps {
   params: Promise<{ productHandle: string }>;
@@ -66,10 +69,22 @@ export default async function ProductPage(props: ProductPageProps) {
   const related = await relatedProducts(product);
 
   return (
-    <WeaversePage
-      data={page}
-      dataContext={{ product, products: related }}
-      projectId={projectId}
-    />
+    <>
+      {/* The buy block is the one surface a product URL cannot be without. It
+       * is a section so Studio can place things around it, but a template that
+       * has not been seeded — or one a merchant removed it from — must not
+       * leave a product page with no gallery, no variant selection and no way
+       * to add to cart. So the route renders it when the page does not. */}
+      {pageRenders(page, "main-product") ? null : (
+        <StorefrontDataProvider value={{ product }}>
+          <MainProduct />
+        </StorefrontDataProvider>
+      )}
+      <WeaversePage
+        data={page}
+        dataContext={{ product, products: related }}
+        projectId={projectId}
+      />
+    </>
   );
 }
