@@ -136,8 +136,13 @@ export function Section({
         )}
         style={{
           ...(onContent ? { backgroundColor } : undefined),
+          /* Spacing only. Setting `display` here would win over whatever
+           * `containerClassName` asks for, which collapsed the multi-column
+           * bands into one column the moment a merchant touched the spacing
+           * control. A section that lays its own container out keeps that
+           * layout; only one with no layout of its own is stacked. */
           ...(gap === undefined ? undefined : { gap: `${gap}px` }),
-          ...(gap === undefined
+          ...(gap === undefined || containerClassName !== undefined
             ? undefined
             : { display: "flex", flexDirection: "column" }),
         }}

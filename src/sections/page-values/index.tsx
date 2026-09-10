@@ -4,12 +4,13 @@ import {
   RichTextParagraph,
   richTextParagraphKey,
 } from "@/components/rich-text-paragraph";
-import { Section } from "@/components/section";
+import { Section, type SectionProps } from "@/components/section";
 import { cn } from "@/lib/cn";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
 import type { WeaverseElementProps } from "../weaverse-element";
 
 interface PageValuesProps extends WeaverseElementProps {
+  verticalPadding?: SectionProps["verticalPadding"];
   eyebrowSuffix: string;
 }
 
@@ -19,12 +20,16 @@ interface PageValuesProps extends WeaverseElementProps {
  * Renders the page's body sections after the premise, so the card count
  * follows the page a merchant wrote rather than a template setting.
  */
-function PageValues({ eyebrowSuffix, ...rest }: PageValuesProps) {
+function PageValues({
+  eyebrowSuffix,
+  verticalPadding = "compact",
+  ...rest
+}: PageValuesProps) {
   const { page } = useStorefrontContext();
   const sections = page?.sections.slice(1) ?? [];
   if (sections.length === 0) return null;
   return (
-    <Section {...rest} verticalPadding="compact">
+    <Section {...rest} verticalPadding={verticalPadding}>
       <div className="grid grid-cols-12 gap-3 max-sm:grid-cols-1">
         {sections.map((section, index) => (
           <article
