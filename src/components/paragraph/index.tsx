@@ -1,6 +1,9 @@
 "use client";
 
+import type { VariantProps } from "class-variance-authority";
+
 import { cn } from "@/lib/cn";
+import { blockSpacing } from "@/lib/presentation/variants";
 import {
   elementAttributes,
   type WeaverseElementProps,
@@ -14,7 +17,9 @@ const WIDTH_CLASS: Record<ParagraphWidth, string> = {
   full: "",
 };
 
-export interface ParagraphProps extends WeaverseElementProps {
+export interface ParagraphProps
+  extends VariantProps<typeof blockSpacing>,
+    WeaverseElementProps {
   content: string;
   width?: ParagraphWidth;
   className?: string;
@@ -29,13 +34,19 @@ export interface ParagraphProps extends WeaverseElementProps {
 function Paragraph({
   className,
   content,
+  marginBottom,
+  marginTop,
   width = "prose",
   ...rest
 }: ParagraphProps) {
   return (
     <p
       {...elementAttributes(rest)}
-      className={cn(WIDTH_CLASS[width], className)}
+      className={cn(
+        WIDTH_CLASS[width],
+        blockSpacing({ marginTop, marginBottom }),
+        className,
+      )}
     >
       {content}
     </p>

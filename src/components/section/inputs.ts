@@ -1,5 +1,5 @@
 /**
- * The settings every section shares.
+ * The settings sections and shared elements reuse.
  *
  * A section schema spreads these rather than restating them, so "content
  * width" and "vertical padding" mean the same thing everywhere and a merchant
@@ -42,5 +42,35 @@ export const layoutInputs: SectionInputs = [
         { value: "default", label: "Default" },
       ],
     },
+  },
+];
+
+/**
+ * Space above and below a shared element.
+ *
+ * One choice per edge, no breakpoint pickers: each step is a clamp that already
+ * scales with the viewport. Left unset, the element keeps whatever rhythm its
+ * own recipe carries.
+ */
+const BLOCK_SPACING_OPTIONS = [
+  { value: "none", label: "None" },
+  { value: "sm", label: "Small" },
+  { value: "md", label: "Medium" },
+  { value: "lg", label: "Large" },
+  { value: "xl", label: "Extra large" },
+];
+
+export const blockSpacingInputs: SectionInputs = [
+  {
+    type: "select",
+    name: "marginTop",
+    label: "Space above",
+    configs: { options: BLOCK_SPACING_OPTIONS },
+  },
+  {
+    type: "select",
+    name: "marginBottom",
+    label: "Space below",
+    configs: { options: BLOCK_SPACING_OPTIONS },
   },
 ];

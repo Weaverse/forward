@@ -169,6 +169,13 @@
   --spacing-page-gap: clamp(48px, 10vw, 150px);
   --spacing-panel: clamp(45px, 5vw, 80px);
   --spacing-panel-wide: clamp(45px, 6vw, 95px);
+  /* Author-controlled block rhythm for shared elements. One clamp per step
+   * carries the responsive range, so a merchant picks "Medium" once instead of
+   * a value per breakpoint. */
+  --spacing-block-sm: clamp(0.75rem, 1.5vw, 1.25rem);
+  --spacing-block-md: clamp(1.25rem, 2.5vw, 2.25rem);
+  --spacing-block-lg: clamp(2rem, 4vw, 3.75rem);
+  --spacing-block-xl: clamp(3rem, 6vw, 6rem);
   --spacing-prose-block: 1.4em;
   --spacing-prose-subhead: 0.8em;
   --spacing-prose-paragraph: 1em;

@@ -1,5 +1,7 @@
 import { createSchema } from "@weaverse/schema";
 
+import { blockSpacingInputs } from "@/components/section/inputs";
+
 export const schema = createSchema({
   type: "paragraph",
   title: "Paragraph",
@@ -23,6 +25,7 @@ export const schema = createSchema({
         },
       ],
     },
+    { group: "Spacing", inputs: blockSpacingInputs },
   ],
   presets: {
     content:
