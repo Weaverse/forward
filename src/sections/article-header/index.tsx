@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { eyebrow } from "@/lib/presentation/variants";
+import { cn } from "@/lib/cn";
+import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { formatDate } from "@/lib/storefront/format";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
 import {
@@ -50,7 +51,7 @@ function ArticleHeader({
           <Link href={breadcrumbHref}>{breadcrumbLabel}</Link> {"/"}{" "}
           {article.plate}
         </p>
-        <h1 className="m-0 max-w-250 text-balance font-heading text-article-display leading-heading font-medium tracking-heading">
+        <h1 className={cn(sectionHeading({ size: "article" }), "max-w-250")}>
           {article.title}
         </h1>
         <div className="mt-7 flex flex-wrap gap-6 text-ui font-bold tracking-button uppercase">

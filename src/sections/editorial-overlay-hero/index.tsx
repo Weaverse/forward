@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { eyebrow } from "@/lib/presentation/variants";
+import { cn } from "@/lib/cn";
+import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import type { StorefrontImage } from "@/lib/storefront/types";
 import { weaverseImage } from "@/lib/weaverse/image";
 import {
@@ -45,7 +46,7 @@ function EditorialOverlayHero({
       )}
       <div className="relative z-1 max-w-205 p-[clamp(70px,9vw,150px)] max-md:px-page-gutter max-md:py-16.25">
         <p className={eyebrow()}>{eyebrowLabel}</p>
-        <h1 className="mt-5 mb-7.5 text-balance font-heading text-display-wide leading-display-tightest tracking-display-tight max-md:text-display-mobile">
+        <h1 className={cn(sectionHeading({ size: "heroWide" }), "mt-5 mb-7.5")}>
           {heading}
         </h1>
         <p className="max-w-state text-control-lg">{lede}</p>

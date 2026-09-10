@@ -1,7 +1,8 @@
 "use client";
 
 import { Section } from "@/components/section";
-import { eyebrow } from "@/lib/presentation/variants";
+import { cn } from "@/lib/cn";
+import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { parseLines } from "../parse";
 import type { WeaverseElementProps } from "../weaverse-element";
 
@@ -22,7 +23,7 @@ function StandardStatement({
   return (
     <Section {...rest}>
       <p className={eyebrow()}>{eyebrowLabel}</p>
-      <h2 className="max-w-275 text-balance font-heading text-about-statement leading-display-relaxed">
+      <h2 className={cn(sectionHeading({ size: "statement" }), "max-w-275")}>
         {statement}
       </h2>
       <div className="mt-17.5 grid grid-cols-3 gap-10 text-copy-lg max-md:mt-8.75 max-md:grid-cols-1 max-md:gap-2.5">

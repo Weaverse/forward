@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 
-import { eyebrow } from "@/lib/presentation/variants";
+import { cn } from "@/lib/cn";
+import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import type { StorefrontImage } from "@/lib/storefront/types";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
 import { weaverseImage } from "@/lib/weaverse/image";
@@ -50,7 +51,7 @@ function PageHero({ eyebrowLabel, image, ...rest }: PageHeroProps) {
         <p className={eyebrow({ tone: "warm" })}>
           {page.eyebrow || eyebrowLabel}
         </p>
-        <h1 className="m-0 max-w-162.5 text-balance font-heading text-page-display leading-heading font-medium tracking-heading max-md:text-page-display-mobile">
+        <h1 className={cn(sectionHeading({ size: "page" }), "max-w-162.5")}>
           {page.title}
         </h1>
       </div>

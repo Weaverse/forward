@@ -7,7 +7,18 @@ import {
   type WeaverseElementProps,
 } from "@/sections/weaverse-element";
 
-type HeadingSize = "display" | "section" | "subsection" | "subsectionSpaced";
+type HeadingSize =
+  | "display"
+  | "section"
+  | "subsection"
+  | "subsectionSpaced"
+  | "hero"
+  | "heroWide"
+  | "page"
+  | "collection"
+  | "article"
+  | "statement"
+  | "feature";
 type HeadingTag = "h1" | "h2" | "h3" | "h4";
 
 export interface HeadingProps extends WeaverseElementProps {

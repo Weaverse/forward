@@ -46,6 +46,21 @@ export const sectionHeading = cva("", {
         "m-0 text-balance font-heading text-heading-3 leading-subheading font-medium tracking-heading",
       subsectionSpaced:
         "mb-4.5 text-balance font-heading text-heading-3 leading-subheading font-medium tracking-heading",
+      /* The display scales the page mastheads use. Each one existed only as a
+       * class string inside its section, which is why the shared `heading`
+       * element could not express a hero and those sections stayed flat. */
+      hero: "m-0 text-balance font-heading text-home-hero leading-home-hero font-medium tracking-home-hero max-md:text-home-hero-mobile",
+      heroWide:
+        "m-0 text-balance font-heading text-display-wide leading-display-tightest tracking-display-tight max-md:text-display-mobile",
+      page: "m-0 text-balance font-heading text-page-display leading-heading font-medium tracking-heading max-md:text-page-display-mobile",
+      collection:
+        "m-0 text-balance font-heading text-collection-display leading-heading font-medium tracking-heading max-md:text-page-display-mobile",
+      article:
+        "m-0 text-balance font-heading text-article-display leading-heading font-medium tracking-heading",
+      statement:
+        "m-0 text-balance font-heading text-about-statement leading-display-relaxed",
+      feature:
+        "m-0 text-balance font-heading text-home-display leading-display-relaxed",
     },
   },
   defaultVariants: { size: "section" },

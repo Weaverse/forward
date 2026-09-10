@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { cn } from "@/lib/cn";
-import { cta, eyebrow } from "@/lib/presentation/variants";
+import { cta, eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
 import {
   elementAttributes,
@@ -48,7 +48,7 @@ function CollectionHero({
         <p className={eyebrow({ tone: "warm" })}>
           {eyebrowPrefix} {collection.fieldCode}
         </p>
-        <h1 className="m-0 max-w-155 text-balance font-heading text-collection-display leading-heading font-medium tracking-heading max-md:text-page-display-mobile">
+        <h1 className={cn(sectionHeading({ size: "collection" }), "max-w-155")}>
           {collection.title}
         </h1>
         <p className="mt-6 mb-8 max-w-lede text-lede leading-lede text-text-dark-subtle">

@@ -7,6 +7,7 @@ import {
   cta,
   eyebrow,
   LEDE_CLASS,
+  sectionHeading,
   textLink,
 } from "@/lib/presentation/variants";
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
@@ -58,7 +59,10 @@ function HomeHero({
       <div className="flex flex-col justify-center p-[clamp(48px,6vw,100px)] max-md:px-page-gutter max-md:py-13.75">
         <p className={eyebrow()}>{eyebrowLabel}</p>
         <h1
-          className="mt-5.5 mb-7 max-w-190 text-balance font-heading text-home-hero leading-home-hero font-medium tracking-home-hero max-md:text-home-hero-mobile"
+          className={cn(
+            sectionHeading({ size: "hero" }),
+            "mt-5.5 mb-7 max-w-190",
+          )}
           id="home-hero-title"
         >
           {heading}

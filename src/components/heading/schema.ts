@@ -15,6 +15,13 @@ export const schema = createSchema({
           defaultValue: "section",
           configs: {
             options: [
+              { value: "hero", label: "Hero" },
+              { value: "heroWide", label: "Hero (wide)" },
+              { value: "page", label: "Page masthead" },
+              { value: "collection", label: "Collection masthead" },
+              { value: "article", label: "Article masthead" },
+              { value: "statement", label: "Statement" },
+              { value: "feature", label: "Feature" },
               { value: "display", label: "Display" },
               { value: "section", label: "Section" },
               { value: "subsection", label: "Subsection" },

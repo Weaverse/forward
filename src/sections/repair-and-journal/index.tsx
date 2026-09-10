@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Section } from "@/components/section";
-import { eyebrow, textLink } from "@/lib/presentation/variants";
+import { cn } from "@/lib/cn";
+import { eyebrow, sectionHeading, textLink } from "@/lib/presentation/variants";
 import type { JournalArticle } from "@/lib/storefront/types";
 import type { WeaverseElementProps } from "../weaverse-element";
 
@@ -39,7 +40,7 @@ function RepairAndJournal({
     >
       <article className="min-h-140 bg-signal p-[clamp(35px,5vw,70px)] max-md:min-h-0">
         <p className={eyebrow()}>{repairEyebrowLabel}</p>
-        <h2 className="mb-home-copy text-balance font-heading text-home-display leading-display-relaxed">
+        <h2 className={cn(sectionHeading({ size: "feature" }), "mb-home-copy")}>
           {repairHeading}
         </h2>
         <p className="mb-prose-paragraph">{repairBody}</p>
@@ -59,7 +60,12 @@ function RepairAndJournal({
           />
           <div className="self-center p-11.25">
             <p className={eyebrow()}>{journalEyebrowLabel}</p>
-            <h2 className="mb-home-copy text-balance font-heading text-home-display leading-display-relaxed">
+            <h2
+              className={cn(
+                sectionHeading({ size: "feature" }),
+                "mb-home-copy",
+              )}
+            >
               {article.title}
             </h2>
             <p className="mb-prose-paragraph">{article.excerpt}</p>
