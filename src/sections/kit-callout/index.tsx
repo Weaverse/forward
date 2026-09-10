@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Section } from "@/components/section";
 import { cn } from "@/lib/cn";
 import {
   eyebrow,
-  SHELL_SECTION_CLASS,
   sectionHeading,
   textLink,
   VIEWPORT_SECTION_CLASS,
@@ -52,10 +52,10 @@ function KitCallout({
     );
   }
   return (
-    <section
-      {...elementAttributes(rest)}
-      className={cn(
-        SHELL_SECTION_CLASS,
+    <Section
+      {...rest}
+      verticalPadding="none"
+      containerClassName={cn(
         "grid grid-cols-[0.55fr_1.45fr] items-end gap-15 max-md:grid-cols-1",
         VIEWPORT_SECTION_CLASS,
       )}
@@ -88,7 +88,7 @@ function KitCallout({
           </Link>
         ))}
       </div>
-    </section>
+    </Section>
   );
 }
 

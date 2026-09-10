@@ -11,6 +11,7 @@
 import type { editorialImagerySettings } from "./editorial-imagery";
 import type { footerSettings } from "./footer";
 import type { headerSettings } from "./header";
+import type { layoutSettings } from "./layout";
 
 /** A Weaverse image value as it arrives from Builder. */
 export interface WeaverseImageValue {
@@ -61,6 +62,7 @@ type SettingsFromInputs<T extends readonly unknown[]> = {
 export type ExtractSettings<T extends { inputs: readonly unknown[] }> =
   SettingsFromInputs<T["inputs"]>;
 
+export type LayoutSettings = ExtractSettings<typeof layoutSettings>;
 export type HeaderSettings = ExtractSettings<typeof headerSettings>;
 export type FooterSettings = ExtractSettings<typeof footerSettings>;
 export type EditorialImagerySettings = ExtractSettings<
@@ -68,6 +70,7 @@ export type EditorialImagerySettings = ExtractSettings<
 >;
 
 /** Every theme setting this theme declares. */
-export type ThemeSettings = HeaderSettings &
+export type ThemeSettings = LayoutSettings &
+  HeaderSettings &
   FooterSettings &
   EditorialImagerySettings;

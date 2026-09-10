@@ -4,16 +4,10 @@ import {
   RichTextParagraph,
   richTextParagraphKey,
 } from "@/components/rich-text-paragraph";
-import {
-  eyebrow,
-  SHELL_SECTION_CLASS,
-  sectionHeading,
-} from "@/lib/presentation/variants";
+import { Section } from "@/components/section";
+import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
-import {
-  elementAttributes,
-  type WeaverseElementProps,
-} from "../weaverse-element";
+import type { WeaverseElementProps } from "../weaverse-element";
 
 interface PagePremiseProps extends WeaverseElementProps {
   eyebrowLabel: string;
@@ -30,7 +24,7 @@ function PagePremise({ eyebrowLabel, ...rest }: PagePremiseProps) {
   if (page === undefined) return null;
   const premise = page.sections[0];
   return (
-    <section {...elementAttributes(rest)} className={SHELL_SECTION_CLASS}>
+    <Section {...rest}>
       <div className="grid grid-cols-split-85 items-start gap-page-gap max-md:grid-cols-1">
         <div>
           <p className={eyebrow()}>{eyebrowLabel}</p>
@@ -52,7 +46,7 @@ function PagePremise({ eyebrowLabel, ...rest }: PagePremiseProps) {
           ))}
         </div>
       </div>
-    </section>
+    </Section>
   );
 }
 

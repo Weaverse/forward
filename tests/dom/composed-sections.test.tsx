@@ -12,6 +12,7 @@ import {
   StorefrontDataProvider,
 } from "@/lib/weaverse/data-context";
 import EditorialHero from "@/sections/editorial-hero";
+import { elementAttributes } from "@/sections/weaverse-element";
 
 /**
  * Every component a merchant can place in Studio, taken from the registry
@@ -91,6 +92,27 @@ describe("image inputs survive Builder's own shape", () => {
 
     assert.equal(container.querySelector("img"), null);
     assert.ok(container.textContent?.includes("Heading"));
+  });
+});
+
+describe("element attributes", () => {
+  /* `aria-labelledby` on a section is its accessible name. The filter used to
+   * drop it, which removed the name silently — the storefront looked right and
+   * only a browser assertion noticed. */
+  it("forwards aria attributes as well as the Weaverse identity", () => {
+    assert.deepEqual(
+      elementAttributes({
+        "aria-labelledby": "title",
+        "data-wv-id": "item-1",
+        "data-wv-type": "featured-products",
+        heading: "not a DOM attribute",
+      }),
+      {
+        "aria-labelledby": "title",
+        "data-wv-id": "item-1",
+        "data-wv-type": "featured-products",
+      },
+    );
   });
 });
 

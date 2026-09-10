@@ -2,17 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { cn } from "@/lib/cn";
-import {
-  eyebrow,
-  SHELL_SECTION_CLASS,
-  textLink,
-} from "@/lib/presentation/variants";
+import { Section } from "@/components/section";
+import { eyebrow, textLink } from "@/lib/presentation/variants";
 import type { JournalArticle } from "@/lib/storefront/types";
-import {
-  elementAttributes,
-  type WeaverseElementProps,
-} from "../weaverse-element";
+import type { WeaverseElementProps } from "../weaverse-element";
 
 interface RepairAndJournalProps extends WeaverseElementProps {
   repairEyebrowLabel: string;
@@ -40,12 +33,9 @@ function RepairAndJournal({
 }: RepairAndJournalProps) {
   const article = loaderData?.article ?? undefined;
   return (
-    <section
-      {...elementAttributes(rest)}
-      className={cn(
-        SHELL_SECTION_CLASS,
-        "grid grid-cols-split-70 gap-3 max-md:grid-cols-1",
-      )}
+    <Section
+      {...rest}
+      containerClassName="grid grid-cols-split-70 gap-3 max-md:grid-cols-1"
     >
       <article className="min-h-140 bg-signal p-[clamp(35px,5vw,70px)] max-md:min-h-0">
         <p className={eyebrow()}>{repairEyebrowLabel}</p>
@@ -79,7 +69,7 @@ function RepairAndJournal({
           </div>
         </article>
       ) : null}
-    </section>
+    </Section>
   );
 }
 

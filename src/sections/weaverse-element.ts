@@ -26,13 +26,22 @@ export interface WeaverseElementProps {
  *
  * The runtime's prop bag also carries authored settings, which are not DOM
  * attributes; passing those to React logs unknown-prop warnings. Only the
- * identity attributes and `id` are forwarded.
+ * identity attributes, `id`, and any `aria-*` a component passes through are
+ * forwarded — an ARIA attribute is never an authored setting, and dropping one
+ * silently removes the accessible name a section was labelled by.
  */
 export function elementAttributes(
   props: WeaverseElementProps,
 ): Record<string, string> {
   const attributes: Record<string, string> = {};
-  for (const key of ["data-wv-id", "data-wv-type", "id"] as const) {
+  const forwarded = Object.keys(props).filter(
+    (key) =>
+      key === "data-wv-id" ||
+      key === "data-wv-type" ||
+      key === "id" ||
+      key.startsWith("aria-"),
+  );
+  for (const key of forwarded) {
     const value = props[key];
     if (typeof value === "string" && value.length > 0) {
       attributes[key] = value;
