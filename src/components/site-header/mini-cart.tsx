@@ -12,20 +12,14 @@ import {
   useShopifyCart,
   useShopifyCartMode,
 } from "@/lib/cart/shopify-cart-react";
-import { cn } from "@/lib/cn";
 import { subtotal } from "@/lib/demo-cart/cart-logic";
 import { useDemoCartLines } from "@/lib/demo-cart/use-demo-cart";
-import { CONTROL_TRANSITION } from "@/lib/presentation/variants";
 import { formatMoney } from "@/lib/storefront/format";
 
 /** Long enough to read, short enough not to sit over the page. */
 const AUTO_DISMISS_MS = 8000;
 const miniCartAction = cva(
-  cn(
-    "inline-flex min-h-touch w-full items-center justify-center gap-2.5 border px-5.5 py-3 text-caption font-ui-strong text-ink tracking-button uppercase shadow-button",
-    CONTROL_TRANSITION,
-    "hover:translate-0.5 hover:border-ink hover:bg-ink hover:text-text-inverse hover:shadow-button-hover active:translate-1 active:shadow-none focus-visible:outline-ink focus-visible:outline-3 focus-visible:outline-offset-4 motion-reduce:hover:translate-none motion-reduce:active:translate-none",
-  ),
+  "inline-flex min-h-touch w-full items-center justify-center gap-2.5 border px-5.5 py-3 text-caption font-ui-strong text-ink tracking-button uppercase shadow-button active:translate-1 active:shadow-none focus-visible:outline-ink focus-visible:outline-3 focus-visible:outline-offset-4 motion-reduce:active:translate-none",
   {
     variants: {
       intent: {

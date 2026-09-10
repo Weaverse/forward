@@ -13,16 +13,34 @@ export const schema = createSchema({
           type: "select",
           name: "intent",
           label: "Style",
-          defaultValue: "primary",
+          defaultValue: "signal",
           configs: {
             options: [
-              { value: "primary", label: "Primary" },
+              { value: "signal", label: "Yellow" },
               { value: "link", label: "Text link" },
-              { value: "signal", label: "Signal" },
-              { value: "light", label: "Light" },
-              { value: "outline", label: "Outline" },
             ],
           },
+        },
+        {
+          type: "select",
+          name: "tone",
+          label: "Reads against",
+          defaultValue: "dark",
+          helpText:
+            "Pick the one that contrasts with this section's background: a dark shadow on a light background, a light one on a dark background.",
+          configs: {
+            options: [
+              { value: "dark", label: "Light background" },
+              { value: "light", label: "Dark background" },
+            ],
+          },
+        },
+        {
+          type: "switch",
+          name: "showBorder",
+          label: "Underline",
+          defaultValue: true,
+          helpText: "Text link only.",
         },
       ],
     },
@@ -30,6 +48,6 @@ export const schema = createSchema({
   presets: {
     label: "Shop the catalog",
     href: "/shop",
-    intent: "dark",
+    intent: "signal",
   },
 });

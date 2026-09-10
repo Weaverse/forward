@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { textLink } from "@/lib/presentation/variants";
 import type { Product } from "@/lib/storefront/types";
 
 /**
@@ -64,7 +65,7 @@ export function ProductFieldRecord({ product }: { product: Product }) {
         <p className="text-label text-text-dark-muted">{product.repair}</p>
         <p>
           <Link
-            className="inline-flex min-h-touch items-center gap-3.5 border-text-inverse border-b font-body text-ui font-medium tracking-link uppercase after:text-control-lg after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-1.25"
+            className={textLink({ tone: "light" })}
             href="/pages/field-repair"
           >
             The repairs programme

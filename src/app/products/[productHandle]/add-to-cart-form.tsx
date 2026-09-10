@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/cn";
 import { lineKey, MAX_LINE_QUANTITY } from "@/lib/demo-cart/cart-logic";
 import { addCartLine } from "@/lib/demo-cart/store";
-import { CONTROL_TRANSITION } from "@/lib/presentation/variants";
+import { cta } from "@/lib/presentation/variants";
 import { formatMoney } from "@/lib/storefront/format";
 import {
   type ProductSelection,
@@ -32,10 +32,11 @@ const QUANTITY_CLASS =
 const QUANTITY_BUTTON_CLASS =
   "bg-transparent text-control-lg hover:bg-signal hover:text-ink disabled:text-text-disabled disabled:hover:bg-transparent disabled:hover:text-text-disabled";
 const QUANTITY_OUTPUT_CLASS = "grid place-items-center font-bold";
+/* The buy button is the shared yellow CTA on a dark panel, plus the disabled
+ * state that only a real form needs. */
 const ADD_TO_CART_CLASS = cn(
-  "inline-flex min-h-12 items-center justify-center gap-2.5 border border-signal bg-signal px-5.5 py-3 font-body text-ui font-bold text-ink tracking-button uppercase shadow-button-inverse",
-  CONTROL_TRANSITION,
-  "hover:translate-0.5 hover:border-text-inverse hover:bg-text-inverse hover:shadow-button-inverse-hover active:translate-1 active:shadow-none focus-visible:outline-2 focus-visible:outline-signal focus-visible:outline-offset-3 disabled:translate-0 disabled:border-control-disabled disabled:bg-control-disabled disabled:text-text-disabled disabled:opacity-46 disabled:shadow-none disabled:hover:translate-0 disabled:hover:border-control-disabled disabled:hover:bg-control-disabled disabled:hover:text-text-disabled disabled:hover:shadow-none motion-reduce:hover:translate-0 motion-reduce:active:translate-0",
+  cta({ tone: "light" }),
+  "disabled:border-control-disabled disabled:bg-control-disabled disabled:text-text-disabled disabled:opacity-46 disabled:shadow-none disabled:hover:border-control-disabled disabled:hover:bg-control-disabled disabled:hover:text-text-disabled disabled:hover:shadow-none",
 );
 const FEEDBACK_CLASS = "mt-3 mb-0 min-h-6 text-caption font-bold text-signal";
 const NOTE_CLASS =

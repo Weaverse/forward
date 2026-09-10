@@ -35,7 +35,7 @@ export const schema = createSchema({
             type: "button",
             label: "Explore the catalog",
             href: "/shop",
-            intent: "primary",
+            intent: "signal",
           },
         ],
       },

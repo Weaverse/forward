@@ -70,7 +70,7 @@ function ProductCaseStudy({
           ))}
         </dl>
         <Link
-          className={cta({ intent: "light" })}
+          className={cta({ tone: "light" })}
           href={`/products/${product.handle}`}
         >
           {ctaLabel}

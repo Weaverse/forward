@@ -1,5 +1,4 @@
 import { cva } from "class-variance-authority";
-import { cn } from "@/lib/cn";
 
 /** Lede paragraph beneath a section heading. */
 export const LEDE_CLASS =
@@ -12,14 +11,6 @@ export const SHELL_SECTION_CLASS =
 /** Opt a section into the viewport-height media sizing used on Home. */
 export const VIEWPORT_SECTION_CLASS =
   "md-up:[--home-viewport-pad:clamp(48px,5vw,96px)] md-up:[--home-viewport-media:calc(100svh_-_2_*_var(--home-viewport-pad))] md-up:py-(--home-viewport-pad) short-desktop:[--home-viewport-pad:clamp(8px,2svh,16px)]";
-
-/**
- * The transition every button-like control animates with. It has no scalar
- * theme namespace, so one exported constant keeps it authored once instead of
- * repeated per intent and per owner.
- */
-export const CONTROL_TRANSITION =
-  "[transition:background_var(--duration-fast)_var(--ease-standard),color_var(--duration-fast)_var(--ease-standard),border-color_var(--duration-fast)_var(--ease-standard),box-shadow_120ms_var(--ease-standard),transform_120ms_var(--ease-standard)]";
 
 export const eyebrow = cva(
   "mb-3.5 font-field-meta text-ui leading-meta font-medium",
@@ -66,33 +57,56 @@ export const sectionHeading = cva("", {
   defaultVariants: { size: "section" },
 });
 
+/**
+ * The solid call to action. One fill, one axis.
+ *
+ * There used to be a second fill — solid ink — and it never worked: on a light
+ * ground its only usable shadow colour was ink, which is the fill, so the
+ * offset block dissolved into the button. The yellow fill reads on both grounds
+ * already, so `tone` is all that is left: it picks the shadow colour that has
+ * to contrast with the *surface*, dark on the page ground and light inside a
+ * dark band.
+ *
+ * Anything that needs to be quieter than this is a `textLink`, not a second
+ * fill.
+ *
+ * Hover does nothing — the shadow used to shrink and the colours used to
+ * invert, and both are gone. Pressing is the exception: the button travels the
+ * exact offset of its own shadow and the shadow drops, so it lands where the
+ * shadow was. That is the only motion left, and reduced-motion opts out of it.
+ */
 export const cta = cva(
-  cn(
-    "inline-flex min-h-12 items-center justify-center gap-2.5 border",
-    CONTROL_TRANSITION,
-  ),
+  "inline-flex min-h-12 items-center justify-center gap-2.5 border border-neutral-300 bg-signal px-5.5 py-3 font-body text-ui font-bold tracking-button text-ink uppercase hover:bg-signal/98 focus-visible:outline-3 focus-visible:outline-ink focus-visible:outline-offset-4 active:translate-1 active:shadow-none motion-reduce:active:translate-none",
   {
     variants: {
-      intent: {
-        primary:
-          "border-ink bg-ink px-5.5 py-3 font-body text-ui font-bold text-text-inverse tracking-button uppercase shadow-button-signal hover:translate-0.5 hover:shadow-button-signal-hover active:translate-1 active:shadow-none focus-visible:outline-3 focus-visible:outline-signal focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0",
-        signal:
-          "border-signal bg-signal px-5.5 py-3 font-body text-ui font-bold text-ink tracking-button uppercase shadow-button hover:translate-0.5 hover:border-ink hover:bg-ink hover:text-signal hover:shadow-button-hover active:translate-1 active:shadow-none focus-visible:outline-3 focus-visible:outline-ink focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0",
-        light:
-          "border-text-inverse bg-transparent px-5.5 py-3 font-body text-ui font-bold text-text-inverse tracking-button uppercase shadow-button-inverse hover:translate-0.5 hover:bg-text-inverse hover:text-ink hover:shadow-button-inverse-hover active:translate-1 active:shadow-none focus-visible:outline-3 focus-visible:outline-text-inverse focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0",
-        outline:
-          "border-ink bg-transparent px-5.5 py-3 font-body text-ui font-bold text-ink tracking-button uppercase shadow-button hover:translate-0.5 hover:bg-ink hover:text-text-inverse hover:shadow-button-hover active:translate-1 active:shadow-none focus-visible:outline-3 focus-visible:outline-ink focus-visible:outline-offset-4 motion-reduce:hover:translate-0 motion-reduce:active:translate-0",
+      tone: {
+        dark: "shadow-button",
+        light: "shadow-button-inverse",
       },
     },
-    defaultVariants: { intent: "primary" },
+    defaultVariants: { tone: "dark" },
   },
 );
 
+/**
+ * The minimal control: an arrow, and by default an underline.
+ *
+ * `tone` means the same thing it means on `cta` — the colour that has to read
+ * against the surface — except here it colours the text and the rule rather
+ * than a shadow. `showBorder` is a setting because the underline is the part
+ * merchants most often want gone.
+ */
 export const textLink = cva(
-  "inline-flex min-h-touch items-center gap-3.5 border-ink border-b font-body text-ui font-medium tracking-link uppercase after:text-control-lg after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-1.25",
+  "inline-flex min-h-touch items-center gap-3.5 font-body text-ui font-medium tracking-link uppercase after:text-control-lg after:font-normal after:content-['→'] after:transition-transform after:duration-200 after:ease-standard hover:after:translate-x-1.25",
   {
-    variants: { kind: { link: "", control: "bg-transparent" } },
-    defaultVariants: { kind: "link" },
+    variants: {
+      tone: {
+        dark: "border-ink text-ink",
+        light: "border-text-inverse text-text-inverse",
+      },
+      showBorder: { true: "border-b", false: "" },
+    },
+    defaultVariants: { tone: "dark", showBorder: true },
   },
 );
 
@@ -105,4 +119,32 @@ export const emptyState = cva("grid", {
     },
   },
   defaultVariants: { size: "panel" },
+});
+
+/**
+ * Author-controlled space above and below a shared element.
+ *
+ * Each step is a single `--spacing-block-*` clamp, so one authored choice
+ * covers every viewport and Studio never has to expose a value per breakpoint.
+ * Both axes default to `undefined` rather than `"none"`: an unset margin has to
+ * emit nothing, or it would override the rhythm a recipe like `eyebrow` already
+ * carries.
+ */
+export const blockSpacing = cva("", {
+  variants: {
+    marginTop: {
+      none: "mt-0",
+      sm: "mt-block-sm",
+      md: "mt-block-md",
+      lg: "mt-block-lg",
+      xl: "mt-block-xl",
+    },
+    marginBottom: {
+      none: "mb-0",
+      sm: "mb-block-sm",
+      md: "mb-block-md",
+      lg: "mb-block-lg",
+      xl: "mb-block-xl",
+    },
+  },
 });

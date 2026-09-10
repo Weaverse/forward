@@ -28,11 +28,7 @@ export default function ErrorPage({
             Reference / {error.digest}
           </p>
         ) : null}
-        <button
-          className={cta({ intent: "signal" })}
-          type="button"
-          onClick={reset}
-        >
+        <button className={cta()} type="button" onClick={reset}>
           Try again
         </button>
       </div>

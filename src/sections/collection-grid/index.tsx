@@ -34,7 +34,7 @@ function CollectionGrid({
       <div className="mx-auto w-full max-w-page px-page-gutter">
         <div className="mb-11 flex items-end justify-between gap-7.5 max-sm:flex-col max-sm:items-start">
           <div>{children}</div>
-          <Link className={cta({ intent: "light" })} href={ctaHref}>
+          <Link className={cta({ tone: "light" })} href={ctaHref}>
             {ctaLabel}
           </Link>
         </div>

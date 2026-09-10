@@ -81,7 +81,7 @@ export function AccountShell({
           })}
           {signedIn ? (
             <form method="post" action={CUSTOMER_ACCOUNT_LOGOUT_PATH}>
-              <button type="submit" className={textLink({ kind: "control" })}>
+              <button type="submit" className={textLink()}>
                 Sign out
               </button>
             </form>

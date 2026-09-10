@@ -9,12 +9,19 @@ import {
   type WeaverseElementProps,
 } from "@/sections/weaverse-element";
 
-type ButtonIntent = "primary" | "signal" | "light" | "outline";
-
 export interface ButtonProps extends WeaverseElementProps {
   label: string;
   href: string;
-  intent?: "link" | ButtonIntent;
+  /** The solid yellow call to action, or the minimal arrow control. */
+  intent?: "signal" | "link";
+  /**
+   * The colour that has to read against the surface behind the button: the
+   * shadow on `signal`, the text and rule on `link`. A merchant picks it
+   * because only they know what the section's background became.
+   */
+  tone?: "dark" | "light";
+  /** `link` only. The underline is the part most often unwanted. */
+  showBorder?: boolean;
   className?: string;
 }
 
@@ -30,19 +37,17 @@ export interface ButtonProps extends WeaverseElementProps {
 function Button({
   className,
   href,
-  intent = "primary",
+  intent = "signal",
   label,
+  showBorder = true,
+  tone = "dark",
   ...rest
 }: ButtonProps) {
-  /* `link` is the underlined arrow link the sections already use for a
-   * secondary destination. It lives here rather than as a fifth element so a
-   * merchant can switch a call to action between weights without swapping the
-   * item out and losing its settings. */
   return (
     <Link
       {...elementAttributes(rest)}
       className={cn(
-        intent === "link" ? textLink() : cta({ intent }),
+        intent === "link" ? textLink({ showBorder, tone }) : cta({ tone }),
         className,
       )}
       href={href}

@@ -55,7 +55,7 @@ function CollectionHero({
           {collection.description}
         </p>
         <Link
-          className={cn(cta({ intent: "signal" }), "self-start")}
+          className={cn(cta({ tone: "light" }), "self-start")}
           href={ctaHref}
         >
           {ctaLabel}

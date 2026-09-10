@@ -277,7 +277,7 @@ export default async function AddressesPage({
               {address.isDefault ? null : (
                 <AddressActionForm
                   submitLabel="Make default"
-                  submitClassName={textLink({ kind: "control" })}
+                  submitClassName={textLink()}
                 >
                   <input type="hidden" name="intent" value="default" />
                   <input type="hidden" name="addressId" value={address.id} />
@@ -285,15 +285,13 @@ export default async function AddressesPage({
               )}
               <AddressActionForm
                 submitLabel="Delete address"
-                submitClassName={textLink({ kind: "control" })}
+                submitClassName={textLink()}
               >
                 <input type="hidden" name="intent" value="delete" />
                 <input type="hidden" name="addressId" value={address.id} />
               </AddressActionForm>
               <details>
-                <summary className={textLink({ kind: "control" })}>
-                  Edit address
-                </summary>
+                <summary className={textLink()}>Edit address</summary>
                 <AddressActionForm submitLabel="Save changes">
                   <input type="hidden" name="intent" value="update" />
                   <input type="hidden" name="addressId" value={address.id} />
@@ -311,9 +309,7 @@ export default async function AddressesPage({
       )}
       <div className={ACCOUNT_BLOCK_CLASS}>
         <details>
-          <summary className={textLink({ kind: "control" })}>
-            Add an address
-          </summary>
+          <summary className={textLink()}>Add an address</summary>
           <AddressActionForm submitLabel="Save address">
             <input type="hidden" name="intent" value="create" />
             <AddressFields idPrefix="new-address" values={EMPTY_ADDRESS} />

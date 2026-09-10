@@ -123,10 +123,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             Anything bought from Forward can come back for repair — defects
             free, everything else at an honest quoted cost.
           </p>
-          <Link
-            className={cta({ intent: "outline" })}
-            href="/pages/field-repair"
-          >
+          <Link className={cta()} href="/pages/field-repair">
             The repairs programme
           </Link>
         </article>

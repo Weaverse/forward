@@ -29,10 +29,7 @@ export default async function NotFound() {
           <Link className={cn(cta(), "max-sm:w-full")} href="/">
             Return home
           </Link>
-          <Link
-            className={cn(cta({ intent: "outline" }), "max-sm:w-full")}
-            href="/shop"
-          >
+          <Link className={cn(cta(), "max-sm:w-full")} href="/shop">
             Explore gear
           </Link>
         </div>
