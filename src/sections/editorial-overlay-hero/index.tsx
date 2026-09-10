@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { cn } from "@/lib/cn";
-import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
+import type { ReactNode } from "react";
 import type { StorefrontImage } from "@/lib/storefront/types";
 import { weaverseImage } from "@/lib/weaverse/image";
 import {
@@ -11,18 +10,14 @@ import {
 } from "../weaverse-element";
 
 interface EditorialOverlayHeroProps extends WeaverseElementProps {
-  eyebrowLabel: string;
-  heading: string;
-  lede: string;
+  children?: ReactNode;
   /** A Builder image value, a StorefrontImage, or nothing. */
   image?: StorefrontImage | unknown;
 }
 
 /** Full-bleed hero: copy sits over a darkened cover image. */
 function EditorialOverlayHero({
-  eyebrowLabel,
-  heading,
-  lede,
+  children,
   image,
   ...rest
 }: EditorialOverlayHeroProps) {
@@ -45,11 +40,7 @@ function EditorialOverlayHero({
         />
       )}
       <div className="relative z-1 max-w-205 p-[clamp(70px,9vw,150px)] max-md:px-page-gutter max-md:py-16.25">
-        <p className={eyebrow()}>{eyebrowLabel}</p>
-        <h1 className={cn(sectionHeading({ size: "heroWide" }), "mt-5 mb-7.5")}>
-          {heading}
-        </h1>
-        <p className="max-w-state text-control-lg">{lede}</p>
+        {children}
       </div>
     </section>
   );
