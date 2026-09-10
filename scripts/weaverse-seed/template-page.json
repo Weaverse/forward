@@ -1,0 +1,31 @@
+{
+  "pageType": "PAGE",
+  "handle": "",
+  "description": "Shopify page template.",
+  "sections": [
+    {
+      "type": "page-hero",
+      "data": {
+        "image": {
+          "url": "/images/editorial/mountain-ridges.webp",
+          "altText": "Layered mountain ridges fading into evening haze",
+          "width": 1800,
+          "height": 1200
+        }
+      }
+    },
+    { "type": "page-premise" },
+    { "type": "page-values" },
+    {
+      "type": "page-origin",
+      "data": {
+        "image": {
+          "url": "/images/editorial/hero-open-sky.webp",
+          "altText": "Climber on an open granite face under a wide pale sky",
+          "width": 2000,
+          "height": 1445
+        }
+      }
+    }
+  ]
+}

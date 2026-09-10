@@ -52,7 +52,6 @@ function ProductSpotlight({
   return (
     <Section
       {...rest}
-      verticalPadding="none"
       containerClassName={cn(
         "grid grid-cols-[minmax(0,1.25fr)_minmax(380px,0.75fr)] gap-0 max-md:grid-cols-1",
         VIEWPORT_SECTION_CLASS,

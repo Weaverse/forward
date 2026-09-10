@@ -1,0 +1,21 @@
+{
+  "pageType": "COLLECTION",
+  "handle": "",
+  "description": "Collection template.",
+  "sections": [
+    { "type": "collection-hero" },
+    {
+      "type": "system-manifest",
+      "data": {
+        "image": {
+          "url": "/images/editorial/mountain-ridges.webp",
+          "altText": "Layered mountain ridges fading into evening haze",
+          "width": 1800,
+          "height": 1200
+        }
+      }
+    },
+    { "type": "collection-grid" },
+    { "type": "field-practice" }
+  ]
+}

@@ -1,46 +1,30 @@
 "use client";
 
-import Link from "next/link";
-import { cta, eyebrow, sectionHeading } from "@/lib/presentation/variants";
-import {
-  elementAttributes,
-  type WeaverseElementProps,
-} from "../weaverse-element";
+import type { ReactNode } from "react";
+
+import { Section } from "@/components/section";
+import type { WeaverseElementProps } from "../weaverse-element";
 
 interface EditorialCalloutProps extends WeaverseElementProps {
-  eyebrowLabel: string;
-  heading: string;
-  body: string;
-  ctaLabel: string;
-  ctaHref: string;
+  children?: ReactNode;
 }
 
 /**
  * Three-column closing callout: heading block, body copy, single call to
  * action. Used by the Materials and Field Testing custom pages.
+ *
+ * The section owns the three-column split; each column is a `section-content`
+ * child, so what goes in them — and whether the call to action is a button or
+ * a text link — is the merchant's decision rather than a fixed prop shape.
  */
-function EditorialCallout({
-  eyebrowLabel,
-  heading,
-  body,
-  ctaLabel,
-  ctaHref,
-  ...rest
-}: EditorialCalloutProps) {
+function EditorialCallout({ children, ...rest }: EditorialCalloutProps) {
   return (
-    <section
-      {...elementAttributes(rest)}
-      className="mx-auto grid w-full max-w-page grid-cols-spec-row items-end gap-11.25 px-page-gutter py-section-block max-md:grid-cols-1"
+    <Section
+      {...rest}
+      containerClassName="grid grid-cols-spec-row items-end gap-11.25 max-md:grid-cols-1"
     >
-      <div>
-        <p className={eyebrow()}>{eyebrowLabel}</p>
-        <h2 className={sectionHeading()}>{heading}</h2>
-      </div>
-      <p>{body}</p>
-      <Link className={cta()} href={ctaHref}>
-        {ctaLabel}
-      </Link>
-    </section>
+      {children}
+    </Section>
   );
 }
 

@@ -12,6 +12,7 @@ import {
   weaverseProjectId,
 } from "@/lib/weaverse/server";
 import { StudioConnect } from "@/lib/weaverse/studio-connect";
+import type { ThemeSettings } from "@/lib/weaverse/theme-schema";
 
 import "./globals.css";
 
@@ -60,9 +61,11 @@ export const viewport: Viewport = {
  */
 async function pageWidthStyle(): Promise<string | null> {
   const theme = await loadWeaverseThemeSettings();
-  const pageWidth = (
-    theme?.themeSettings as { pageWidth?: unknown } | undefined
-  )?.pageWidth;
+  /* Read through the type derived from the schema groups, so renaming the
+   * input or changing its type breaks here rather than silently ignoring the
+   * merchant's setting. */
+  const settings = theme?.themeSettings as Partial<ThemeSettings> | undefined;
+  const pageWidth = settings?.pageWidth;
   if (typeof pageWidth !== "number" || pageWidth <= 0) {
     return null;
   }

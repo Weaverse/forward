@@ -1,11 +1,9 @@
 "use client";
 
+import { Section } from "@/components/section";
 import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { parseRows } from "../parse";
-import {
-  elementAttributes,
-  type WeaverseElementProps,
-} from "../weaverse-element";
+import type { WeaverseElementProps } from "../weaverse-element";
 
 /** One numbered sequence step: index column, then the step description. */
 const SEQUENCE_STEP_CLASS =
@@ -26,9 +24,9 @@ function NumberedSequence({
   ...rest
 }: NumberedSequenceProps) {
   return (
-    <section
-      {...elementAttributes(rest)}
-      className="mx-auto grid w-full max-w-page grid-cols-split-70 gap-20 px-page-gutter py-section-block max-md:grid-cols-1"
+    <Section
+      {...rest}
+      containerClassName="grid grid-cols-split-70 gap-20 max-md:grid-cols-1"
     >
       <header>
         <p className={eyebrow()}>{eyebrowLabel}</p>
@@ -47,7 +45,7 @@ function NumberedSequence({
           </li>
         ))}
       </ol>
-    </section>
+    </Section>
   );
 }
 

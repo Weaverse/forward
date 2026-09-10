@@ -1,0 +1,24 @@
+{
+  "pageType": "CUSTOM",
+  "handle": "field-testing",
+  "name": "Field testing",
+  "sections": [
+    {
+      "type": "editorial-overlay-hero",
+      "data": {
+        "image": {
+          "url": "/images/editorial/trail-movement.webp",
+          "altText": "Runner moving along a high dirt trail at golden hour",
+          "width": 2000,
+          "height": 1333
+        }
+      }
+    },
+    { "type": "numbered-sequence" },
+    {
+      "type": "product-case-study",
+      "data": { "product": { "handle": "talus-trail-shoe" } }
+    },
+    { "type": "editorial-callout" }
+  ]
+}

@@ -15,6 +15,7 @@ import type { SchemaType } from "@weaverse/schema";
 import { schema as button } from "@/components/button/schema";
 import { schema as heading } from "@/components/heading/schema";
 import { schema as paragraph } from "@/components/paragraph/schema";
+import { schema as sectionContent } from "@/components/section-content/schema";
 import { schema as subheading } from "@/components/subheading/schema";
 import { schema as articleBody } from "@/sections/article-body/schema";
 import { schema as articleHeader } from "@/sections/article-header/schema";
@@ -28,6 +29,7 @@ import { schema as featuredProducts } from "@/sections/featured-products/schema"
 import { schema as fieldPractice } from "@/sections/field-practice/schema";
 import { schema as homeHero } from "@/sections/home-hero/schema";
 import { schema as kitCallout } from "@/sections/kit-callout/schema";
+import { schema as mainProduct } from "@/sections/main-product/schema";
 import { schema as materialStandard } from "@/sections/material-standard/schema";
 import { schema as numberedSequence } from "@/sections/numbered-sequence/schema";
 import { schema as pageHero } from "@/sections/page-hero/schema";
@@ -51,6 +53,7 @@ export const SECTION_SCHEMAS: readonly SchemaType[] = [
   subheading,
   paragraph,
   button,
+  sectionContent,
 
   /* INDEX */
   homeHero,
@@ -62,6 +65,7 @@ export const SECTION_SCHEMAS: readonly SchemaType[] = [
   repairAndJournal,
 
   /* PRODUCT */
+  mainProduct,
   relatedProducts,
 
   /* COLLECTION */

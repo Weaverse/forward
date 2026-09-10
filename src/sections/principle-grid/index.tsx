@@ -1,10 +1,8 @@
 "use client";
 
+import { Section } from "@/components/section";
 import { parseRows } from "../parse";
-import {
-  elementAttributes,
-  type WeaverseElementProps,
-} from "../weaverse-element";
+import type { WeaverseElementProps } from "../weaverse-element";
 
 interface PrincipleGridProps extends WeaverseElementProps {
   /** One `number | title | copy` row per line. Parsed by `./parse`. */
@@ -14,9 +12,10 @@ interface PrincipleGridProps extends WeaverseElementProps {
 /** Materials page: numbered principle cards on a hairline grid. */
 function PrincipleGrid({ principles, ...rest }: PrincipleGridProps) {
   return (
-    <section
-      {...elementAttributes(rest)}
-      className="mx-auto grid w-full max-w-page grid-cols-3 gap-px bg-ink p-px max-md:grid-cols-1"
+    <Section
+      {...rest}
+      verticalPadding="none"
+      containerClassName="grid grid-cols-3 gap-px bg-ink p-px max-md:grid-cols-1"
     >
       {parseRows(principles, 3).map(([number, title, copy]) => (
         <article
@@ -30,7 +29,7 @@ function PrincipleGrid({ principles, ...rest }: PrincipleGridProps) {
           <p>{copy}</p>
         </article>
       ))}
-    </section>
+    </Section>
   );
 }
 

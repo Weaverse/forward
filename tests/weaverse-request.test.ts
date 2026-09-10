@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import type { WeaverseNextLoaderData } from "@weaverse/next";
-import { hasAuthoredSections } from "../src/lib/weaverse/page-payload.ts";
+import {
+  hasAuthoredSections,
+  pageRenders,
+} from "../src/lib/weaverse/page-payload.ts";
 import { buildRequestContext } from "../src/lib/weaverse/request-info.ts";
 
 /**
@@ -139,5 +142,31 @@ describe("buildRequestContext", () => {
       "hiking",
       "climbing",
     ]);
+  });
+});
+
+describe("pageRenders", () => {
+  const page = (items: unknown[]) =>
+    ({ page: { items } }) as unknown as WeaverseNextLoaderData;
+
+  it("finds a component the page places", () => {
+    assert.equal(
+      pageRenders(page([{ id: "a", type: "main-product" }]), "main-product"),
+      true,
+    );
+  });
+
+  it("reports a component the page omits", () => {
+    /* The product route relies on this to keep a buy block on every product
+     * URL when a template has not been seeded, or a merchant removed it. */
+    assert.equal(
+      pageRenders(
+        page([{ id: "a", type: "related-products" }]),
+        "main-product",
+      ),
+      false,
+    );
+    assert.equal(pageRenders(null, "main-product"), false);
+    assert.equal(pageRenders(page([]), "main-product"), false);
   });
 });

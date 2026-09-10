@@ -25,6 +25,7 @@ import type { WeaverseNextComponent } from "@weaverse/next";
 import * as Button from "@/components/button";
 import * as Heading from "@/components/heading";
 import * as Paragraph from "@/components/paragraph";
+import * as SectionContent from "@/components/section-content";
 import * as Subheading from "@/components/subheading";
 import * as ArticleBody from "@/sections/article-body";
 import * as ArticleHeader from "@/sections/article-header";
@@ -38,6 +39,7 @@ import * as FeaturedProducts from "@/sections/featured-products";
 import * as FieldPractice from "@/sections/field-practice";
 import * as HomeHero from "@/sections/home-hero";
 import * as KitCallout from "@/sections/kit-callout";
+import * as MainProduct from "@/sections/main-product";
 import * as MaterialStandard from "@/sections/material-standard";
 import * as NumberedSequence from "@/sections/numbered-sequence";
 import * as PageHero from "@/sections/page-hero";
@@ -79,6 +81,7 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
   entry(Subheading),
   entry(Paragraph),
   entry(Button),
+  entry(SectionContent),
 
   /* INDEX */
   entry(HomeHero),
@@ -90,6 +93,7 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
   entry(RepairAndJournal),
 
   /* PRODUCT */
+  entry(MainProduct),
   entry(RelatedProducts),
 
   /* COLLECTION */

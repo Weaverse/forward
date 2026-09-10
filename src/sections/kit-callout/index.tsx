@@ -54,7 +54,6 @@ function KitCallout({
   return (
     <Section
       {...rest}
-      verticalPadding="none"
       containerClassName={cn(
         "grid grid-cols-[0.55fr_1.45fr] items-end gap-15 max-md:grid-cols-1",
         VIEWPORT_SECTION_CLASS,

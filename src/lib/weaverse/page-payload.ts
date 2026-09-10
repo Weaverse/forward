@@ -28,3 +28,15 @@ export function hasAuthoredSections(
     return Array.isArray(children) && children.length > 0;
   });
 }
+
+/** Whether a composed page already places a given component type. */
+export function pageRenders(
+  page: WeaverseNextLoaderData | null | undefined,
+  type: string,
+): boolean {
+  const items = page?.page?.items;
+  if (!Array.isArray(items)) {
+    return false;
+  }
+  return items.some((item) => (item as { type?: unknown }).type === type);
+}

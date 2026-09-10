@@ -17,6 +17,7 @@ export const schema = createSchema({
           configs: {
             options: [
               { value: "primary", label: "Primary" },
+              { value: "link", label: "Text link" },
               { value: "signal", label: "Signal" },
               { value: "light", label: "Light" },
               { value: "outline", label: "Outline" },
