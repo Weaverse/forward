@@ -23,6 +23,7 @@
 import type { WeaverseNextComponent } from "@weaverse/next";
 
 import * as Button from "@/components/button";
+import * as Buttons from "@/components/buttons";
 import * as Heading from "@/components/heading";
 import * as Paragraph from "@/components/paragraph";
 import * as SectionContent from "@/components/section-content";
@@ -81,6 +82,7 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
   entry(Subheading),
   entry(Paragraph),
   entry(Button),
+  entry(Buttons),
   entry(SectionContent),
 
   /* INDEX */

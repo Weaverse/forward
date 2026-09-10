@@ -3,7 +3,7 @@ import { createSchema } from "@weaverse/schema";
 export const schema = createSchema({
   type: "section-content",
   title: "Content",
-  childTypes: ["subheading", "heading", "paragraph", "button"],
+  childTypes: ["subheading", "heading", "paragraph", "button", "buttons"],
   settings: [
     {
       group: "Layout",

@@ -13,6 +13,7 @@
 import type { SchemaType } from "@weaverse/schema";
 
 import { schema as button } from "@/components/button/schema";
+import { schema as buttons } from "@/components/buttons/schema";
 import { schema as heading } from "@/components/heading/schema";
 import { schema as paragraph } from "@/components/paragraph/schema";
 import { schema as sectionContent } from "@/components/section-content/schema";
@@ -53,6 +54,7 @@ export const SECTION_SCHEMAS: readonly SchemaType[] = [
   subheading,
   paragraph,
   button,
+  buttons,
   sectionContent,
 
   /* INDEX */
