@@ -102,8 +102,11 @@ test.describe("Cart presentation", () => {
         outlineColor: style.outlineColor,
       };
     });
-    expect(primaryStyles.boxShadow).toContain("rgb(217, 255, 87)");
-    expect(primaryStyles.boxShadow).not.toContain("rgb(17, 19, 15)");
+    // The primary CTA is the yellow fill with the ink shadow: the shadow has
+    // to be the colour the fill is not, or the offset block disappears into
+    // the button.
+    expect(primaryStyles.boxShadow).toContain("rgb(17, 19, 15)");
+    expect(primaryStyles.boxShadow).not.toContain("rgb(217, 255, 87)");
 
     // Enter through the real keyboard tab order; programmatic `.focus()` does
     // not necessarily activate the browser's `:focus-visible` heuristic, and
@@ -122,7 +125,7 @@ test.describe("Cart presentation", () => {
       .poll(() =>
         emptyCartCta.evaluate((node) => getComputedStyle(node).outlineColor),
       )
-      .toBe("rgb(217, 255, 87)");
+      .toBe("rgb(17, 19, 15)");
   });
 });
 

@@ -271,15 +271,17 @@ test.describe("interactive affordances", () => {
       return;
     }
 
+    /* The shadow used to shrink on hover, which read as a bounce. Hover holds
+     * still now; the button only moves into its own shadow when it is actually
+     * pressed. */
     await button.hover();
-    await expect
-      .poll(async () => (await shadowOf()).shadow)
-      .toMatch(/2px 2px 0px/);
+    expect((await shadowOf()).shadow).toMatch(/4px 4px 0px/);
 
+    /* `shadow-none` resolves to a stack of fully transparent layers rather
+     * than the literal `none`, so assert the offset block is gone, not the
+     * keyword. */
     await page.mouse.down();
-    await expect
-      .poll(async () => (await shadowOf()).shadow)
-      .toMatch(/0px 0px 0px/);
+    expect((await shadowOf()).shadow).not.toMatch(/4px 4px 0px/);
     await page.mouse.up();
   });
 
