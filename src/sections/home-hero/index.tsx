@@ -35,7 +35,7 @@ function HomeHero({
     <section
       {...elementAttributes(rest)}
       aria-labelledby="home-hero-title"
-      className="grid min-h-[calc(100svh_-_var(--spacing-header))] grid-cols-[minmax(390px,0.78fr)_minmax(0,1.22fr)] bg-ink text-text-inverse max-md:min-h-[calc(100svh_-_var(--spacing-header-compact))] max-md:grid-cols-1"
+      className="grid min-h-[calc(100svh-var(--spacing-header))] grid-cols-[minmax(390px,0.78fr)_minmax(0,1.22fr)] bg-ink text-text-inverse max-md:min-h-[calc(100svh-var(--spacing-header-compact))] max-md:grid-cols-1"
     >
       <div className="flex flex-col justify-center p-[clamp(48px,6vw,100px)] max-md:px-page-gutter max-md:py-13.75">
         {children}
@@ -64,7 +64,7 @@ function HomeHero({
         )}
         {featuredProduct !== undefined ? (
           <Link
-            className="absolute right-4.5 bottom-4.5 grid w-[min(330px,calc(100%_-_36px))] gap-2 bg-signal p-5 text-ink"
+            className="absolute right-4.5 bottom-4.5 grid w-[min(330px,calc(100%-36px))] gap-2 bg-signal p-5 text-ink"
             href={`/products/${featuredProduct.handle}`}
           >
             <span className="font-field-meta text-micro uppercase">
