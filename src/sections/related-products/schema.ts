@@ -5,29 +5,20 @@ import { layoutInputs } from "@/components/section/inputs";
 export const schema = createSchema({
   type: "related-products",
   title: "Related products",
-  settings: [
-    { group: "Layout", inputs: layoutInputs },
-    {
-      group: "Content",
-      inputs: [
-        {
-          type: "text",
-          name: "eyebrowLabel",
-          label: "Eyebrow",
-        },
-        {
-          type: "text",
-          name: "heading",
-          label: "Heading",
-        },
-      ],
-    },
-  ],
+  childTypes: ["section-content"],
+  settings: [{ group: "Layout", inputs: layoutInputs }],
   enabledOn: {
     pages: ["PRODUCT"],
   },
   presets: {
-    eyebrowLabel: "Works well with",
-    heading: "Complete the field system.",
+    children: [
+      {
+        type: "section-content",
+        children: [
+          { type: "subheading", content: "Works well with" },
+          { type: "heading", content: "Complete the field system." },
+        ],
+      },
+    ],
   },
 });

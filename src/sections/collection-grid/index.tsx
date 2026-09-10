@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { ProductCard } from "@/components/product-card";
-import { cta, eyebrow, sectionHeading } from "@/lib/presentation/variants";
+import { cta } from "@/lib/presentation/variants";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
 import {
   elementAttributes,
@@ -11,16 +12,14 @@ import {
 } from "../weaverse-element";
 
 interface CollectionGridProps extends WeaverseElementProps {
-  eyebrowLabel: string;
-  heading: string;
+  children?: ReactNode;
   ctaLabel: string;
   ctaHref: string;
 }
 
 /** Dark product grid for a collection, introduced by a heading and one link. */
 function CollectionGrid({
-  eyebrowLabel,
-  heading,
+  children,
   ctaLabel,
   ctaHref,
   ...rest
@@ -34,10 +33,7 @@ function CollectionGrid({
     >
       <div className="mx-auto w-full max-w-page px-page-gutter">
         <div className="mb-11 flex items-end justify-between gap-7.5 max-sm:flex-col max-sm:items-start">
-          <div>
-            <p className={eyebrow()}>{eyebrowLabel}</p>
-            <h2 className={sectionHeading()}>{heading}</h2>
-          </div>
+          <div>{children}</div>
           <Link className={cta({ intent: "light" })} href={ctaHref}>
             {ctaLabel}
           </Link>

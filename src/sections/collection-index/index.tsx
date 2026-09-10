@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
+import type { ReactNode } from "react";
+import { eyebrow } from "@/lib/presentation/variants";
 import type { Collection } from "@/lib/storefront/types";
 import {
   elementAttributes,
@@ -10,16 +11,14 @@ import {
 } from "../weaverse-element";
 
 interface CollectionIndexProps extends WeaverseElementProps {
-  eyebrowLabel: string;
-  heading: string;
+  children?: ReactNode;
   /** Resolved by `./loader` from the merchant's collection selection. */
   loaderData?: { collections: readonly Collection[] };
 }
 
 /** Full-height collection cards, one per movement system. */
 function CollectionIndex({
-  eyebrowLabel,
-  heading,
+  children,
   loaderData,
   ...rest
 }: CollectionIndexProps) {
@@ -30,8 +29,7 @@ function CollectionIndex({
       className="bg-ink pt-20 text-text-inverse"
     >
       <header className="mx-auto w-full max-w-page px-page-gutter pb-11">
-        <p className={eyebrow()}>{eyebrowLabel}</p>
-        <h2 className={sectionHeading()}>{heading}</h2>
+        {children}
       </header>
       <div className="grid grid-cols-3 max-md:grid-cols-1">
         {collections.map((collection) => (

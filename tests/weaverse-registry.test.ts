@@ -71,6 +71,44 @@ describe("Weaverse registry split", () => {
     );
   });
 
+  it("declares no empty settings group", () => {
+    /* `createSchema` only warns on stderr for this, so a group left empty by
+     * an edit ships a schema Builder rejects while every gate stays green.
+     * Three sections reached that state during the container rework. */
+    const empty = SECTION_SCHEMAS.flatMap((schema) =>
+      (schema.settings ?? [])
+        .filter((group) => (group.inputs ?? []).length === 0)
+        .map((group) => `${schema.type} -> ${group.group}`),
+    );
+
+    assert.deepEqual(empty, []);
+  });
+
+  it("advertises no layout control a section cannot honour", async () => {
+    /* Declaring `layoutInputs` puts width, spacing and padding in Studio, but
+     * only `Section` reads them — everything else drops them in
+     * `elementAttributes`. Six sections have shipped that way across two
+     * rounds of this rework, each time invisible to every other gate because
+     * the storefront still looks right. */
+    const broken: string[] = [];
+    for (const schema of SECTION_SCHEMAS) {
+      const dir = `src/sections/${schema.type}`;
+      const [component, source] = await Promise.all([
+        read(`${dir}/index.tsx`).catch(() => null),
+        read(`${dir}/schema.ts`).catch(() => null),
+      ]);
+      if (component === null || source === null) continue;
+      if (
+        source.includes("layoutInputs") &&
+        !component.includes('from "@/components/section"')
+      ) {
+        broken.push(schema.type);
+      }
+    }
+
+    assert.deepEqual(broken, []);
+  });
+
   it("declares no duplicate component types", () => {
     assert.equal(
       new Set(SECTION_TYPES).size,

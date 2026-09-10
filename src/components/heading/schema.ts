@@ -9,6 +9,12 @@ export const schema = createSchema({
       inputs: [
         { type: "text", name: "content", label: "Text" },
         {
+          type: "text",
+          name: "elementId",
+          label: "Anchor id",
+          helpText: "Optional. Lets a link or a label point at this heading.",
+        },
+        {
           type: "select",
           name: "size",
           label: "Size",

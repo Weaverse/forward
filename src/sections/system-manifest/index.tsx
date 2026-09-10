@@ -2,17 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { Section } from "@/components/section";
-import { eyebrow, textLink } from "@/lib/presentation/variants";
+import { textLink } from "@/lib/presentation/variants";
 import type { StorefrontImage } from "@/lib/storefront/types";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
 import { weaverseImage } from "@/lib/weaverse/image";
 import type { WeaverseElementProps } from "../weaverse-element";
 
 interface SystemManifestProps extends WeaverseElementProps {
-  eyebrowLabel: string;
-  heading: string;
-  body: string;
+  children?: ReactNode;
   /** A Builder image value, a StorefrontImage, or nothing. */
   image?: StorefrontImage | unknown;
   linkLabel: string;
@@ -22,9 +21,7 @@ interface SystemManifestProps extends WeaverseElementProps {
 
 /** An offset image beside the system story and its product manifest list. */
 function SystemManifest({
-  eyebrowLabel,
-  heading,
-  body,
+  children,
   image,
   linkLabel,
   linkHref,
@@ -50,13 +47,7 @@ function SystemManifest({
           </div>
         )}
         <div>
-          <p className={eyebrow()}>{eyebrowLabel}</p>
-          <h2 className="mb-7 text-balance font-heading text-heading-2 leading-heading font-medium tracking-heading">
-            {heading}
-          </h2>
-          <p className="mb-7.5 max-w-lede text-lede leading-lede text-text-muted">
-            {body}
-          </p>
+          {children}
           <ul className="my-8 list-none border-border-subtle border-t p-0">
             {products.map((product) => (
               <li

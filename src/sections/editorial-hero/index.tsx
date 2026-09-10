@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
-import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import type { StorefrontImage } from "@/lib/storefront/types";
 import { weaverseImage } from "@/lib/weaverse/image";
 import {
@@ -11,9 +11,7 @@ import {
 } from "../weaverse-element";
 
 interface EditorialHeroProps extends WeaverseElementProps {
-  eyebrowLabel: string;
-  heading: string;
-  lede: string;
+  children?: ReactNode;
   /** A Builder image value, a StorefrontImage, or nothing. */
   image?: StorefrontImage | unknown;
   /** Which column the image occupies on desktop. Defaults to `right`. */
@@ -25,9 +23,7 @@ interface EditorialHeroProps extends WeaverseElementProps {
  * Used by the About and Materials custom pages.
  */
 function EditorialHero({
-  eyebrowLabel,
-  heading,
-  lede,
+  children,
   image,
   imageSide = "right",
   ...rest
@@ -48,13 +44,7 @@ function EditorialHero({
           imageFirst && "order-2 max-md:order-1",
         )}
       >
-        <p className={eyebrow()}>{eyebrowLabel}</p>
-        <h1 className={cn(sectionHeading({ size: "heroWide" }), "mt-5 mb-7.5")}>
-          {heading}
-        </h1>
-        <p className="max-w-lede text-lede leading-lede text-text-muted">
-          {lede}
-        </p>
+        {children}
       </div>
       {resolved === null ? null : (
         <Image

@@ -3,20 +3,11 @@ import { createSchema } from "@weaverse/schema";
 export const schema = createSchema({
   type: "collection-grid",
   title: "Collection grid",
+  childTypes: ["section-content"],
   settings: [
     {
       group: "Content",
       inputs: [
-        {
-          type: "text",
-          name: "eyebrowLabel",
-          label: "Eyebrow",
-        },
-        {
-          type: "text",
-          name: "heading",
-          label: "Heading",
-        },
         {
           type: "text",
           name: "ctaLabel",
@@ -34,8 +25,15 @@ export const schema = createSchema({
     pages: ["COLLECTION"],
   },
   presets: {
-    eyebrowLabel: "Collection essentials",
-    heading: "A focused kit for a full day out.",
+    children: [
+      {
+        type: "section-content",
+        children: [
+          { type: "subheading", content: "Collection essentials" },
+          { type: "heading", content: "A focused kit for a full day out." },
+        ],
+      },
+    ],
     ctaLabel: "View all equipment",
     ctaHref: "/shop",
   },

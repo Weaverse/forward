@@ -47,5 +47,12 @@ export function elementAttributes(
       attributes[key] = value;
     }
   }
+  /* Applied after the loop on purpose: the runtime keeps `id` for the item's
+   * own identity, so an authored anchor travels under its own name and has to
+   * win when both are present. A section labelled by its heading needs that
+   * heading to carry the stable id, and the heading is a child now. */
+  if (typeof props.elementId === "string" && props.elementId.length > 0) {
+    attributes.id = props.elementId;
+  }
   return attributes;
 }

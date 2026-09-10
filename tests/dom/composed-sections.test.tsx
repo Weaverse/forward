@@ -67,12 +67,9 @@ describe("image inputs survive Builder's own shape", () => {
 
   it("renders a Builder image in the editorial hero", () => {
     const { container } = render(
-      <EditorialHero
-        eyebrowLabel="Eyebrow"
-        heading="Heading"
-        lede="Lede"
-        image={BUILDER_IMAGE}
-      />,
+      <EditorialHero image={BUILDER_IMAGE}>
+        <p>Copy</p>
+      </EditorialHero>,
     );
 
     const image = container.querySelector("img");
@@ -81,17 +78,16 @@ describe("image inputs survive Builder's own shape", () => {
   });
 
   it("drops the image rather than crashing when it has no dimensions", () => {
+    /* The copy is children now, so the section keeps carrying it when the
+     * image is unusable rather than taking the route down with it. */
     const { container } = render(
-      <EditorialHero
-        eyebrowLabel="Eyebrow"
-        heading="Heading"
-        lede="Lede"
-        image={{ url: "https://cdn.example/hero.jpg" }}
-      />,
+      <EditorialHero image={{ url: "https://cdn.example/hero.jpg" }}>
+        <p>Copy</p>
+      </EditorialHero>,
     );
 
     assert.equal(container.querySelector("img"), null);
-    assert.ok(container.textContent?.includes("Heading"));
+    assert.ok(container.textContent?.includes("Copy"));
   });
 });
 

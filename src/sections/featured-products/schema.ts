@@ -5,38 +5,9 @@ import { layoutInputs } from "@/components/section/inputs";
 export const schema = createSchema({
   type: "featured-products",
   title: "Featured products",
+  childTypes: ["section-content"],
   settings: [
     { group: "Layout", inputs: layoutInputs },
-    {
-      group: "Content",
-      inputs: [
-        {
-          type: "text",
-          name: "eyebrowLabel",
-          label: "Eyebrow",
-        },
-        {
-          type: "text",
-          name: "heading",
-          label: "Heading",
-        },
-        {
-          type: "textarea",
-          name: "body",
-          label: "Body",
-        },
-        {
-          type: "text",
-          name: "linkLabel",
-          label: "Link label",
-        },
-        {
-          type: "url",
-          name: "linkHref",
-          label: "Link target",
-        },
-      ],
-    },
     {
       group: "Resources",
       inputs: [
@@ -53,10 +24,40 @@ export const schema = createSchema({
     pages: ["INDEX", "CUSTOM"],
   },
   presets: {
-    eyebrowLabel: "New field rotation",
-    heading: "Start with the core four.",
-    body: "A weather layer, breathable midlayer, close-body carry, and trail shoe form the shortest route to a complete Forward system.",
-    linkLabel: "Shop the full catalog",
-    linkHref: "/shop",
+    children: [
+      {
+        type: "section-content",
+        children: [
+          { type: "subheading", content: "New field rotation" },
+          {
+            type: "heading",
+            elementId: "home-featured-title",
+            content: "Start with the core four.",
+          },
+        ],
+      },
+      {
+        type: "section-content",
+        children: [
+          {
+            type: "paragraph",
+            content:
+              "A weather layer, breathable midlayer, close-body carry, and trail shoe form the shortest route to a complete Forward system.",
+          },
+        ],
+      },
+      {
+        type: "section-content",
+        justify: "end",
+        children: [
+          {
+            type: "button",
+            label: "Shop the full catalog",
+            href: "/shop",
+            intent: "link",
+          },
+        ],
+      },
+    ],
   },
 });
