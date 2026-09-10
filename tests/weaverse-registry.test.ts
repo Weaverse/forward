@@ -71,6 +71,19 @@ describe("Weaverse registry split", () => {
     );
   });
 
+  it("declares no empty settings group", () => {
+    /* `createSchema` only warns on stderr for this, so a group left empty by
+     * an edit ships a schema Builder rejects while every gate stays green.
+     * Three sections reached that state during the container rework. */
+    const empty = SECTION_SCHEMAS.flatMap((schema) =>
+      (schema.settings ?? [])
+        .filter((group) => (group.inputs ?? []).length === 0)
+        .map((group) => `${schema.type} -> ${group.group}`),
+    );
+
+    assert.deepEqual(empty, []);
+  });
+
   it("declares no duplicate component types", () => {
     assert.equal(
       new Set(SECTION_TYPES).size,
