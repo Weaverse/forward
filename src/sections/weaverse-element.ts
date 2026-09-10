@@ -34,13 +34,6 @@ export function elementAttributes(
   props: WeaverseElementProps,
 ): Record<string, string> {
   const attributes: Record<string, string> = {};
-  /* The runtime keeps `id` for the item's own identity, so an authored anchor
-   * has to travel under its own name. It matters beyond anchors: a section
-   * labelled by its heading needs that heading to carry a stable id, and the
-   * heading is a child now. */
-  if (typeof props.elementId === "string" && props.elementId.length > 0) {
-    attributes.id = props.elementId;
-  }
   const forwarded = Object.keys(props).filter(
     (key) =>
       key === "data-wv-id" ||
@@ -53,6 +46,13 @@ export function elementAttributes(
     if (typeof value === "string" && value.length > 0) {
       attributes[key] = value;
     }
+  }
+  /* Applied after the loop on purpose: the runtime keeps `id` for the item's
+   * own identity, so an authored anchor travels under its own name and has to
+   * win when both are present. A section labelled by its heading needs that
+   * heading to carry the stable id, and the heading is a child now. */
+  if (typeof props.elementId === "string" && props.elementId.length > 0) {
+    attributes.id = props.elementId;
   }
   return attributes;
 }
