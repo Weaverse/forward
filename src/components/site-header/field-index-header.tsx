@@ -295,12 +295,12 @@ export function FieldIndexHeader({
             ),
           )}
         </nav>
-        <div className="relative flex items-center justify-self-end gap-3">
+        <div className="relative flex items-center justify-self-end gap-1">
           {searchItem ? (
             <Link
               className={cn(
                 HEADER_CONTROL_CLASS,
-                "hidden md:inline-flex lg:hidden xl:inline-flex",
+                "hidden md:inline-flex lg:hidden xl:inline-flex px-1.5 sm:px-3",
               )}
               href={createHeaderNavigationHref(searchItem.href, queryString)}
               aria-current={
