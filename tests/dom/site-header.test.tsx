@@ -90,7 +90,7 @@ describe("header shell", () => {
     });
     assert.match(
       visibleText(announcement),
-      /Forward field report \/ 01Free shipping over \$150 · Repairs for life/,
+      /Shopify · Hydrogen · Next\.js · WeaverseFree shipping over \$150 · Repairs for life/,
     );
     assert.match(visibleText(announcement), /United States · USD/);
 

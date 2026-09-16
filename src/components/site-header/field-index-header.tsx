@@ -193,7 +193,9 @@ export function FieldIndexHeader({
         data-shell-background
         aria-label="Store announcement"
       >
-        <span className="hidden md:inline">Forward field report / 01</span>
+        <span className="hidden md:inline">
+          Shopify · Hydrogen · Next.js · Weaverse
+        </span>
         <span>{announcement}</span>
         <CountryControl />
       </aside>
