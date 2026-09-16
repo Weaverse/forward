@@ -42,7 +42,7 @@ export function FieldIndexPanel({
 
   return (
     <section
-      className="absolute inset-x-0 top-full -z-1 hidden animate-shell-panel border-ink border-b bg-canvas shadow-panel motion-reduce:animate-none lg:block"
+      className="absolute inset-x-0 top-full -z-1 hidden animate-shell-panel border-ink border-b bg-canvas text-ink shadow-panel motion-reduce:animate-none lg:block"
       id={id}
       aria-label="Shop field index"
     >

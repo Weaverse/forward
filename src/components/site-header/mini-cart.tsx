@@ -285,7 +285,7 @@ export function MiniCart() {
       {presentation === null ? null : (
         <div
           aria-label="Cart updated"
-          className="absolute top-[calc(100%+12px)] right-0 z-130 grid w-[min(340px,calc(100vw-28px))] gap-3 border border-ink bg-canvas p-4.5 text-start shadow-mini-cart"
+          className="absolute top-[calc(100%+12px)] right-0 z-130 grid w-[min(340px,calc(100vw-28px))] gap-3 border border-ink bg-canvas p-4.5 text-start text-ink shadow-mini-cart"
           role="dialog"
         >
           <p className="m-0 flex items-center gap-2 font-body text-ui font-ui-strong tracking-label uppercase">
