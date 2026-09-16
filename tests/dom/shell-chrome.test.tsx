@@ -6,6 +6,7 @@
 import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { act, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import { ICON_PATHS, Icon } from "@/components/icon";
 import { CartCount } from "@/components/site-header/cart-count";
@@ -67,29 +68,72 @@ describe("icon semantics", () => {
   });
 });
 
-describe("market indicator", () => {
-  it("states the single published market instead of offering a choice", () => {
-    const { container } = render(<CountryControl />);
+describe("market selector", () => {
+  it("opens on the active market and lists every published market", async () => {
+    const user = userEvent.setup();
+    render(<CountryControl />);
 
-    assert.equal(AVAILABLE_STOREFRONT_COUNTRIES.length, 1);
-    assert.deepEqual(ACTIVE_STOREFRONT_COUNTRY, {
-      isoCode: "US",
-      name: "United States",
-      currencyCode: "USD",
+    const trigger = screen.getByRole("button", {
+      name: new RegExp(countryControlLabel(ACTIVE_STOREFRONT_COUNTRY)),
     });
-    assert.ok(
-      visibleText(container).startsWith(
-        countryControlLabel(ACTIVE_STOREFRONT_COUNTRY),
+    assert.equal(trigger.getAttribute("aria-expanded"), "false");
+    assert.equal(screen.queryByRole("list"), null);
+
+    await user.click(trigger);
+    assert.equal(trigger.getAttribute("aria-expanded"), "true");
+    assert.deepEqual(
+      within(screen.getByRole("list"))
+        .getAllByRole("button")
+        .map((option) => visibleText(option)),
+      AVAILABLE_STOREFRONT_COUNTRIES.map((country) =>
+        countryControlLabel(country),
       ),
     );
-    assert.match(
-      visibleText(container),
-      /Forward currently ships to this market only\.$/,
+    assert.equal(
+      within(screen.getByRole("list"))
+        .getAllByRole("button")
+        .filter((option) => option.getAttribute("aria-current") === "true")
+        .length,
+      1,
     );
-    assert.equal(screen.queryByRole("combobox"), null);
-    assert.equal(screen.queryByRole("link"), null);
-    assert.equal(screen.queryByRole("button"), null);
-    assert.equal(container.querySelector("select, option"), null);
+  });
+
+  it("moves the marker to the chosen market and closes", async () => {
+    const user = userEvent.setup();
+    const other = AVAILABLE_STOREFRONT_COUNTRIES[1];
+    assert.ok(other !== undefined);
+    render(<CountryControl />);
+
+    await user.click(
+      screen.getByRole("button", {
+        name: new RegExp(countryControlLabel(ACTIVE_STOREFRONT_COUNTRY)),
+      }),
+    );
+    await user.click(
+      within(screen.getByRole("list")).getByRole("button", {
+        name: countryControlLabel(other),
+      }),
+    );
+
+    assert.equal(screen.queryByRole("list"), null);
+    const trigger = screen.getByRole("button");
+    assert.match(visibleText(trigger), new RegExp(countryControlLabel(other)));
+    assert.equal(trigger.getAttribute("aria-expanded"), "false");
+  });
+
+  it("closes on Escape without changing the market", async () => {
+    const user = userEvent.setup();
+    render(<CountryControl />);
+
+    const trigger = screen.getByRole("button");
+    await user.click(trigger);
+    await user.keyboard("{Escape}");
+
+    assert.equal(screen.queryByRole("list"), null);
+    assert.match(
+      visibleText(trigger),
+      new RegExp(countryControlLabel(ACTIVE_STOREFRONT_COUNTRY)),
+    );
   });
 });
 

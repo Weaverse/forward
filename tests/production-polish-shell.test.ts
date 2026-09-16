@@ -127,8 +127,7 @@ describe("Phosphor icon system", () => {
 });
 
 describe("truthful country control", () => {
-  it("exposes exactly the one market the store sells to today", () => {
-    assert.equal(AVAILABLE_STOREFRONT_COUNTRIES.length, 1);
+  it("keeps the one market the store sells to as the active market", () => {
     assert.deepEqual(ACTIVE_STOREFRONT_COUNTRY, {
       isoCode: "US",
       name: "United States",
@@ -137,6 +136,23 @@ describe("truthful country control", () => {
     assert.equal(
       countryControlLabel(ACTIVE_STOREFRONT_COUNTRY),
       "United States · USD",
+    );
+    assert.deepEqual(
+      AVAILABLE_STOREFRONT_COUNTRIES[0],
+      ACTIVE_STOREFRONT_COUNTRY,
+    );
+  });
+
+  it("describes every preview market completely and without duplicates", () => {
+    for (const country of AVAILABLE_STOREFRONT_COUNTRIES) {
+      assert.match(country.isoCode, /^[A-Z]{2}$/);
+      assert.match(country.currencyCode, /^[A-Z]{3}$/);
+      assert.ok(country.name.length > 0);
+    }
+    assert.equal(
+      new Set(AVAILABLE_STOREFRONT_COUNTRIES.map((entry) => entry.isoCode))
+        .size,
+      AVAILABLE_STOREFRONT_COUNTRIES.length,
     );
   });
 });
