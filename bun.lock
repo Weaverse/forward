@@ -13,6 +13,7 @@
         "react": "19.2.8",
         "react-country-flag": "3.1.0",
         "react-dom": "19.2.8",
+        "react-svg-credit-card-payment-icons": "6.0.4",
       },
       "devDependencies": {
         "@biomejs/biome": "2.5.7",
@@ -311,6 +312,8 @@
     "react-dom": ["react-dom@19.2.8", "", { "dependencies": { "scheduler": "^0.27.0" }, "peerDependencies": { "react": "^19.2.8" } }, "sha512-rVprimfGBG3DR+Tq0IQG2DT5PxKth1WIGDmj5yPmlzr4YBe7uyE+Du4oVqTDXZSHGGGXRtTJEGSSePyQCMBglQ=="],
 
     "react-is": ["react-is@17.0.2", "", {}, "sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w=="],
+
+    "react-svg-credit-card-payment-icons": ["react-svg-credit-card-payment-icons@6.0.4", "", { "peerDependencies": { "react": ">=16", "react-dom": ">=16", "react-native-svg": ">=12" }, "optionalPeers": ["react-dom", "react-native-svg"] }, "sha512-kp8Dhk5kedjPMmFIzkeIQKa1NouOEVymwiXwPcKEcIBVM4qzxQdEd5fMTl9H5fVTCZWviX/g0tjd6RCCpvbUYw=="],
 
     "scheduler": ["scheduler@0.27.0", "", {}, "sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q=="],
 

@@ -9,10 +9,12 @@ import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { ICON_PATHS, Icon } from "@/components/icon";
+import { PaymentMarks } from "@/components/payment-marks";
 import { CartCount } from "@/components/site-header/cart-count";
 import { CountryControl } from "@/components/site-header/country-control";
 import { Wordmark } from "@/components/wordmark";
 import { addCartLine } from "@/lib/demo-cart/store";
+import { CHECKOUT_PAYMENT_MARKS } from "@/lib/storefront/integrations";
 import {
   ACTIVE_STOREFRONT_COUNTRY,
   AVAILABLE_STOREFRONT_COUNTRIES,
@@ -218,5 +220,19 @@ describe("cart count", () => {
     });
 
     assert.equal(visibleText(container), ", 1 item in cart1");
+  });
+});
+
+describe("footer payment marks", () => {
+  it("draws every mark with its brand name available to assistive tech", () => {
+    render(<PaymentMarks />);
+
+    const row = screen.getByRole("list", { name: "Accepted payment methods" });
+    assert.deepEqual(
+      within(row)
+        .getAllByRole("img")
+        .map((mark) => mark.getAttribute("aria-label")),
+      CHECKOUT_PAYMENT_MARKS.map((mark) => mark.label),
+    );
   });
 });

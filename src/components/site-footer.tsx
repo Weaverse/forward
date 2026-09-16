@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Icon } from "@/components/icon";
+import { PaymentMarks } from "@/components/payment-marks";
 import { Wordmark } from "@/components/wordmark";
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
 import { cn } from "@/lib/cn";
@@ -8,7 +9,6 @@ import { THEME_CUSTOM_PAGE_LINKS } from "@/lib/routes/route-contract";
 import { storefront } from "@/lib/storefront/data-source";
 import {
   SOCIAL_SECTION_HEADING,
-  VERIFIED_CHECKOUT_PAYMENT_MARKS,
   VERIFIED_SOCIAL_LINKS,
 } from "@/lib/storefront/integrations";
 
@@ -108,9 +108,7 @@ export async function SiteFooter() {
           <span>{themeContent.footerStatus}</span>
         ) : null}
         <span>FORWARD · Field office 54.4609° N / 3.0886° W</span>
-        {VERIFIED_CHECKOUT_PAYMENT_MARKS.length > 0 ? (
-          <span>{VERIFIED_CHECKOUT_PAYMENT_MARKS.join(" · ")}</span>
-        ) : null}
+        <PaymentMarks />
       </div>
     </footer>
   );

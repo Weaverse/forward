@@ -18,6 +18,7 @@ import {
   THEME_CUSTOM_PAGE_LINKS,
 } from "../src/lib/routes/route-contract.ts";
 import {
+  CHECKOUT_PAYMENT_MARKS,
   NEWSLETTER_PROVIDER,
   SOCIAL_SECTION_HEADING,
   VERIFIED_CHECKOUT_PAYMENT_MARKS,
@@ -183,6 +184,28 @@ describe("verified footer integrations", () => {
   it("has nothing to claim for payments or a newsletter provider", () => {
     assert.equal(VERIFIED_CHECKOUT_PAYMENT_MARKS.length, 0);
     assert.equal(NEWSLETTER_PROVIDER, null);
+  });
+
+  it("falls back to labelled preview marks only while nothing is verified", () => {
+    /* The preview row exists to demonstrate the theme. The moment the Store
+     * reports real methods, the Footer must draw those instead, so the drawn
+     * list may never be the preview list once anything is verified. */
+    if (VERIFIED_CHECKOUT_PAYMENT_MARKS.length > 0) {
+      assert.deepEqual(CHECKOUT_PAYMENT_MARKS, VERIFIED_CHECKOUT_PAYMENT_MARKS);
+    } else {
+      assert.notDeepEqual(
+        CHECKOUT_PAYMENT_MARKS,
+        VERIFIED_CHECKOUT_PAYMENT_MARKS,
+      );
+    }
+    assert.ok(CHECKOUT_PAYMENT_MARKS.length > 0);
+    for (const mark of CHECKOUT_PAYMENT_MARKS) {
+      assert.ok(mark.label.length > 0, `payment mark ${mark.id} needs a label`);
+    }
+    assert.equal(
+      new Set(CHECKOUT_PAYMENT_MARKS.map((mark) => mark.id)).size,
+      CHECKOUT_PAYMENT_MARKS.length,
+    );
   });
 
   it("keeps the theme-owned custom pages distinct from Shopify routes", () => {
