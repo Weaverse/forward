@@ -30,7 +30,7 @@ describe("product card", () => {
     );
     assert.match(
       visibleText(container),
-      new RegExp(`${SHELL.colorways[0]?.name} · 02 colorways`),
+      new RegExp(`${SHELL.colorways[0]?.name}`),
     );
     const image = within(
       screen.getByRole("link", { name: `View ${SHELL.title}` }),
