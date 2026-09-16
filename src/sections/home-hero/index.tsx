@@ -35,7 +35,7 @@ function HomeHero({
     <section
       {...elementAttributes(rest)}
       aria-labelledby="home-hero-title"
-      className="grid min-h-[calc(100svh-var(--spacing-header-compact))] grid-cols-1 bg-ink text-text-inverse md:min-h-[calc(100svh-var(--spacing-header))] md:grid-cols-[minmax(390px,0.78fr)_minmax(0,1.22fr)]"
+      className="grid min-h-[calc(100svh_-_var(--spacing-announcement)_-_var(--spacing-header-compact)_+_var(--header-inset,0px))] grid-cols-1 bg-ink text-text-inverse md:min-h-[calc(100svh_-_var(--spacing-announcement)_-_var(--spacing-header)_+_var(--header-inset,0px))] md:grid-cols-[minmax(390px,0.78fr)_minmax(0,1.22fr)]"
     >
       <div className="flex flex-col justify-center px-page-gutter py-13.75 md:p-[clamp(48px,6vw,100px)]">
         {children}

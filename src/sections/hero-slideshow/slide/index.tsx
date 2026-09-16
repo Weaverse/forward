@@ -103,7 +103,7 @@ function HeroSlide({
         <p
           key={`tag-${phase}`}
           className={cn(
-            "absolute top-4 right-page-gutter left-page-gutter z-10 m-0 bg-ink/55 px-3 py-2 font-field-meta text-micro uppercase backdrop-blur-md transition-opacity duration-300 starting:opacity-0 md:top-6 md:left-auto",
+            "absolute top-[calc(var(--header-inset,0px)_+_1rem)] right-page-gutter left-page-gutter z-10 m-0 bg-ink/55 px-3 py-2 font-field-meta text-micro uppercase backdrop-blur-md transition-opacity duration-300 starting:opacity-0 md:top-[calc(var(--header-inset,0px)_+_1.5rem)] md:left-auto",
             fade,
           )}
         >
@@ -125,7 +125,7 @@ function HeroSlide({
       <FeaturedBadge
         key={`badge-${phase}`}
         className={cn(
-          "absolute inset-x-0 bottom-0 z-10 h-22 w-auto border-text-inverse/15 border-t transition-[opacity,background-color] duration-300 starting:opacity-0 md:right-0 md:left-auto md:h-28 md:w-80 md:border-t-0 md:border-l md:px-2",
+          "absolute inset-x-0 bottom-0 z-10 h-22 w-auto border-text-inverse/15 border-t transition-[opacity,background-color] duration-300 starting:opacity-0 md:right-0 md:left-auto md:h-28 md:w-80 md:border-t-0 md:border-l md:px-3",
           fade,
         )}
         product={product}

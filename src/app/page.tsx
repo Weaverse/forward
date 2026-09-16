@@ -34,7 +34,7 @@ export default async function HomePage(props: HomePageProps) {
   }
 
   return (
-    <div className="bg-text-inverse">
+    <div className="-mt-header-compact [--header-inset:var(--spacing-header-compact)] bg-text-inverse md:-mt-header md:[--header-inset:var(--spacing-header)]">
       <WeaversePage data={page} projectId={projectId} />
     </div>
   );

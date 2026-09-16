@@ -20,7 +20,12 @@ import {
   isActive,
   isBranchActive,
 } from "./header-navigation";
-import { HEADER_CONTROL_CLASS, PRIMARY_NAV_ITEM_CLASS } from "./header-styles";
+import {
+  HEADER_CONTROL_CLASS,
+  NAV_ITEM_CARET_CLASS,
+  NAV_ITEM_INDEX_CLASS,
+  PRIMARY_NAV_ITEM_CLASS,
+} from "./header-styles";
 import { MiniCart } from "./mini-cart";
 import { MobileMenu } from "./mobile-menu";
 
@@ -28,6 +33,9 @@ import { MobileMenu } from "./mobile-menu";
 const UTILITY_ICONS: Readonly<Record<string, IconName>> = {
   "/account": "user",
 };
+
+/** Far enough that the bar settles after a nudge, not on every rubber-band. */
+const SCROLL_THRESHOLD = 8;
 
 export interface FieldIndexHeaderProps {
   announcement: string;
@@ -53,6 +61,7 @@ export function FieldIndexHeader({
   const [aboutOpen, setAboutOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountSignedIn, setAccountSignedIn] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [activeIndex, setActiveIndex] = useState(() =>
     activeCollectionIndex(pathname, collections ?? []),
   );
@@ -74,6 +83,22 @@ export function FieldIndexHeader({
   const accountAvailable = utilityLinks.some(
     (item) => item.href === "/account",
   );
+  /* Only Home leads with a full-bleed dark hero, so it is the one route whose
+   * content is drawn behind the header and can carry a transparent bar. */
+  const overlay = pathname === "/";
+  const transparent = overlay && !scrolled;
+
+  useEffect(() => {
+    if (!overlay) {
+      return;
+    }
+    function readScroll() {
+      setScrolled(window.scrollY > SCROLL_THRESHOLD);
+    }
+    readScroll();
+    window.addEventListener("scroll", readScroll, { passive: true });
+    return () => window.removeEventListener("scroll", readScroll);
+  }, [overlay]);
 
   useEffect(() => {
     if (!accountAvailable) {
@@ -200,10 +225,19 @@ export function FieldIndexHeader({
         <CountryControl />
       </aside>
       <header
-        className="sticky top-0 z-80 isolate grid h-header-compact grid-cols-lead-trailing items-center border-ink border-b bg-canvas/96 px-page-gutter md:h-header lg:grid-cols-[minmax(155px,1fr)_auto_minmax(230px,1fr)]"
+        className={cn(
+          "group/header sticky top-0 z-80 isolate grid h-header-compact grid-cols-lead-trailing items-center border-b px-page-gutter transition-colors duration-(--duration-fast) ease-standard motion-reduce:transition-none md:h-header lg:grid-cols-[minmax(155px,1fr)_auto_minmax(230px,1fr)]",
+          transparent
+            ? "border-transparent bg-transparent text-text-inverse"
+            : "border-ink bg-canvas/96",
+        )}
         data-shell-background
+        data-transparent={transparent ? "true" : undefined}
       >
-        <Wordmark href={createHeaderNavigationHref("/", queryString)} />
+        <Wordmark
+          href={createHeaderNavigationHref("/", queryString)}
+          variant={transparent ? "header-overlay" : "header"}
+        />
         <nav
           className="hidden self-stretch justify-center lg:flex"
           aria-label="Primary navigation"
@@ -216,9 +250,7 @@ export function FieldIndexHeader({
                 isActive(pathname, shopItem.href) ? "page" : undefined
               }
             >
-              <i className="text-ui text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
-                01
-              </i>
+              <i className={NAV_ITEM_INDEX_CLASS}>01</i>
               {shopItem.label}
             </Link>
           ) : (
@@ -233,14 +265,9 @@ export function FieldIndexHeader({
               aria-controls={desktopOpen ? desktopPanelId : undefined}
               onClick={toggleDesktop}
             >
-              <i className="text-ui text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
-                01
-              </i>
+              <i className={NAV_ITEM_INDEX_CLASS}>01</i>
               {shopItem.label}
-              <span
-                className="inline-flex min-w-2.5 items-center text-label text-signal-strong"
-                aria-hidden="true"
-              >
+              <span className={NAV_ITEM_CARET_CLASS} aria-hidden="true">
                 <Icon
                   name={desktopOpen ? "caret-up" : "caret-down"}
                   size={12}
@@ -262,14 +289,11 @@ export function FieldIndexHeader({
                 aria-controls={aboutOpen ? aboutPanelId : undefined}
                 onClick={toggleAbout}
               >
-                <i className="text-ui text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
+                <i className={NAV_ITEM_INDEX_CLASS}>
                   {String(index + 2).padStart(2, "0")}
                 </i>
                 {item.label}
-                <span
-                  className="inline-flex min-w-2.5 items-center text-label text-signal-strong"
-                  aria-hidden="true"
-                >
+                <span className={NAV_ITEM_CARET_CLASS} aria-hidden="true">
                   <Icon
                     name={aboutOpen ? "caret-up" : "caret-down"}
                     size={12}
@@ -289,7 +313,7 @@ export function FieldIndexHeader({
                   setAboutOpen(false);
                 }}
               >
-                <i className="text-ui text-text-muted not-italic group-hover:text-text-dark-muted group-aria-[current=page]:text-text-dark-muted">
+                <i className={NAV_ITEM_INDEX_CLASS}>
                   {String(index + 2).padStart(2, "0")}
                 </i>
                 {item.label}

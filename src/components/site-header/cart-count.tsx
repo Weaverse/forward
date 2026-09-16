@@ -16,7 +16,7 @@ function Count({ count }: { count: number }) {
       </span>
       <span
         aria-hidden="true"
-        className="inline-grid h-5 min-w-5 place-items-center rounded-full bg-signal px-1.25 text-field-meta"
+        className="inline-grid h-5 min-w-5 place-items-center rounded-full bg-signal px-1.25 text-field-meta text-ink"
       >
         {count}
       </span>

@@ -9,7 +9,7 @@
 
 import { afterEach, describe, it } from "bun:test";
 import assert from "node:assert/strict";
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { ICON_PATHS } from "@/components/icon";
@@ -603,5 +603,48 @@ describe("mobile navigation dialog", () => {
       null,
     );
     assert.ok(screen.getByRole("dialog", { name: "Site menu" }));
+  });
+});
+
+/** `window.scrollY` is read-only under happy-dom, so drive it explicitly. */
+function scrollTo(offset: number) {
+  Object.defineProperty(window, "scrollY", {
+    value: offset,
+    configurable: true,
+  });
+  act(() => {
+    window.dispatchEvent(new Event("scroll"));
+  });
+}
+
+describe("transparent header over the home hero", () => {
+  it("starts transparent on Home and takes its surface back once scrolled", () => {
+    mountHeader({ pathname: "/", withAccount: false });
+    const banner = screen.getByRole("banner");
+
+    assert.equal(banner.getAttribute("data-transparent"), "true");
+    assert.match(
+      banner.querySelector("img")?.getAttribute("src") ?? "",
+      /reversed\.svg/,
+    );
+
+    scrollTo(240);
+    assert.equal(banner.getAttribute("data-transparent"), null);
+    assert.match(
+      banner.querySelector("img")?.getAttribute("src") ?? "",
+      /moss\.svg/,
+    );
+
+    scrollTo(0);
+    assert.equal(banner.getAttribute("data-transparent"), "true");
+  });
+
+  it("stays opaque on routes that do not draw behind the header", () => {
+    mountHeader({ pathname: "/shop", withAccount: false });
+
+    assert.equal(
+      screen.getByRole("banner").getAttribute("data-transparent"),
+      null,
+    );
   });
 });

@@ -3,13 +3,20 @@ import Link from "next/link";
 
 interface WordmarkProps {
   href?: string;
-  variant?: "header" | "footer" | "mobile";
+  variant?: "header" | "header-overlay" | "footer" | "mobile";
 }
+
+const HEADER_WORDMARK_CLASS = "block w-29.25 leading-none sm:w-38.75";
 
 const WORDMARKS = {
   header: {
-    className: "block w-29.25 leading-none sm:w-38.75",
+    className: HEADER_WORDMARK_CLASS,
     src: "/images/brand/forward-wordmark-horizontal-moss.svg",
+  },
+  /** Same lockup reversed, for the header floating over a dark hero. */
+  "header-overlay": {
+    className: HEADER_WORDMARK_CLASS,
+    src: "/images/brand/forward-wordmark-horizontal-reversed.svg",
   },
   footer: {
     className: "block w-[clamp(280px,31vw,480px)] leading-none",
@@ -38,7 +45,7 @@ export function Wordmark({ href = "/", variant = "header" }: WordmarkProps) {
         width={480}
         height={96}
         /* The header lockup is above the fold and is the LCP element. */
-        loading={variant === "header" ? "eager" : undefined}
+        loading={variant.startsWith("header") ? "eager" : undefined}
       />
     </Link>
   );
