@@ -30,7 +30,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         What are you looking for?
       </h1>
       <form
-        className="mt-17.5 mb-15 grid grid-cols-lead-trailing border-ink border-b-3 max-sm:grid-cols-1"
+        className="mt-17.5 mb-15 grid grid-cols-1 border-ink border-b-3 sm:grid-cols-lead-trailing"
         method="get"
         action="/search"
       >
@@ -41,12 +41,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           id="search-input"
           name="q"
           type="search"
-          className="h-27.5 min-w-0 border-0 bg-transparent font-heading text-search-display focus:outline-0 max-sm:h-16"
+          className="h-16 min-w-0 border-0 bg-transparent font-heading text-search-display focus:outline-0 sm:h-27.5"
           defaultValue={rawQuery}
           placeholder="Try “trail”, “shell”, or “camp”"
         />
         <button
-          className="min-w-25 bg-transparent font-body text-caption font-extrabold tracking-label uppercase max-sm:min-h-12 max-sm:justify-self-start"
+          className="min-h-12 min-w-25 justify-self-start bg-transparent font-body text-caption font-extrabold tracking-label uppercase sm:min-h-auto sm:justify-self-auto"
           type="submit"
         >
           Search →

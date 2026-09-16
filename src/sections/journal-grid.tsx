@@ -25,7 +25,7 @@ export function JournalGrid({
 }: JournalGridProps) {
   return (
     <section className={SHELL_SECTION_CLASS}>
-      <div className="mb-11 flex items-end justify-between gap-7.5 max-sm:flex-col max-sm:items-start">
+      <div className="mb-11 flex flex-col items-start justify-between gap-7.5 sm:flex-row sm:items-end">
         <div>
           <p className={eyebrow()}>{eyebrowLabel}</p>
           <h2 className={sectionHeading()}>{heading}</h2>
@@ -35,7 +35,7 @@ export function JournalGrid({
         {articles.map((article) => (
           <article
             key={article.handle}
-            className="col-span-4 max-md:col-span-6 max-sm:col-span-full"
+            className="col-span-full sm:col-span-6 md:col-span-4"
           >
             <Link href={`/journal/${article.handle}`}>
               <Image

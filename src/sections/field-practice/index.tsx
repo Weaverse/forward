@@ -21,7 +21,7 @@ function FieldPractice({ children, ...rest }: FieldPracticeProps) {
   return (
     <Section
       {...rest}
-      containerClassName="grid grid-cols-split-85 items-start gap-page-gap max-md:grid-cols-1"
+      containerClassName="grid grid-cols-1 items-start gap-page-gap md:grid-cols-split-85"
     >
       {children}
     </Section>

@@ -21,7 +21,7 @@ function StandardStatement({
   return (
     <Section {...rest}>
       {children}
-      <div className="mt-17.5 grid grid-cols-3 gap-10 text-copy-lg max-md:mt-8.75 max-md:grid-cols-1 max-md:gap-2.5">
+      <div className="mt-8.75 grid grid-cols-1 gap-2.5 text-copy-lg md:mt-17.5 md:grid-cols-3 md:gap-10">
         {parseLines(columns).map((column) => (
           <p key={column}>{column}</p>
         ))}

@@ -60,16 +60,16 @@ const CATEGORY_LABEL: Record<ProductCategory, string> = {
 };
 
 const GRID_CLASS =
-  "grid grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] items-stretch md-up:min-h-[min(calc(100svh_-_var(--spacing-header)_-_6rem),760px)] max-md:grid-cols-1";
+  "grid grid-cols-1 items-stretch md:min-h-[min(calc(100svh_-_var(--spacing-header)_-_6rem),760px)] md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]";
 const PANEL_CLASS =
   "flex min-w-0 flex-col justify-center bg-surface-subtle p-[clamp(28px,5vw,72px)]";
-const TITLE_CLASS = cn(sectionHeading(), "md-up:text-spotlight-title");
+const TITLE_CLASS = cn(sectionHeading(), "md:text-spotlight-title");
 const OPTION_LABEL_CLASS =
   "mb-2.5 flex justify-between font-body text-micro font-medium tracking-control uppercase";
 const IMAGE_CLASS = "aspect-4/5 w-full bg-media-placeholder object-cover";
 /* The preview keeps 4:5 on mobile; on desktop it fills the media column,
  * which stretches to the row, so image and panel always match in height. */
-const PREVIEW_CLASS = cn(IMAGE_CLASS, "md-up:aspect-auto md-up:h-full");
+const PREVIEW_CLASS = cn(IMAGE_CLASS, "md:aspect-auto md:h-full");
 
 /* Weaverse placeholder art is SVG on Weaverse's CDN, outside this theme's
  * `remotePatterns`, so it bypasses the optimizer. */
@@ -82,14 +82,14 @@ const PLACEHOLDER_THUMBS = [
 const PLACEHOLDER_CHIPS = ["chip-1", "chip-2", "chip-3"];
 
 const mediaColumn = cva(
-  "grid min-w-0 content-start gap-3 md-up:grid-rows-[minmax(0,1fr)] md-up:content-stretch",
+  "grid min-w-0 content-start gap-3 md:grid-rows-[minmax(0,1fr)] md:content-stretch",
   {
     variants: {
-      imagePosition: { left: "", right: "md-up:order-2" },
+      imagePosition: { left: "", right: "md:order-2" },
       /* Thumbnails sit in a narrow rail beside the preview on desktop, below it
        * on mobile, so they never add to the section's height. */
       thumbnails: {
-        true: "md-up:grid-cols-[88px_minmax(0,1fr)] md-up:items-start",
+        true: "md:grid-cols-[88px_minmax(0,1fr)] md:items-start",
         false: "",
       },
     },
@@ -352,7 +352,7 @@ function Gallery({
         />
       ) : null}
       {showThumbnails && images.length > 1 ? (
-        <div className="grid grid-cols-4 content-start gap-2 md-up:order-first md-up:grid-cols-1">
+        <div className="grid grid-cols-4 content-start gap-2 md:order-first md:grid-cols-1">
           {images.map((image, index) => (
             <button
               key={image.src}
@@ -404,7 +404,7 @@ function SpotlightPlaceholder({
           unoptimized
         />
         {showThumbnails ? (
-          <div className="grid grid-cols-4 content-start gap-2 md-up:order-first md-up:grid-cols-1">
+          <div className="grid grid-cols-4 content-start gap-2 md:order-first md:grid-cols-1">
             {PLACEHOLDER_THUMBS.map((src) => (
               <Image
                 key={src}

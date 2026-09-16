@@ -32,9 +32,9 @@ function PageHero({ eyebrowLabel, image, ...rest }: PageHeroProps) {
   return (
     <section
       {...elementAttributes(rest)}
-      className="mt-5.5 mr-7 ml-7 grid min-h-article-min grid-cols-[1.15fr_0.85fr] place-items-stretch bg-ink text-left text-text-inverse max-md:mx-3 max-md:min-h-0 max-md:grid-cols-1"
+      className="mx-3 mt-5.5 grid min-h-0 grid-cols-1 place-items-stretch bg-ink text-left text-text-inverse md:mx-7 md:min-h-article-min md:grid-cols-[1.15fr_0.85fr]"
     >
-      <div className="relative min-w-0 overflow-hidden max-md:min-h-route-media-min">
+      <div className="relative min-h-route-media-min min-w-0 overflow-hidden md:min-h-auto">
         {resolvedImage === null ? null : (
           <Image
             className="absolute inset-0 h-full object-cover object-[56%_center] saturate-76"
@@ -47,7 +47,7 @@ function PageHero({ eyebrowLabel, image, ...rest }: PageHeroProps) {
           />
         )}
       </div>
-      <div className="relative z-2 flex flex-col justify-center bg-ink p-[clamp(45px,6vw,96px)] max-md:px-page-gutter max-md:pt-12 max-md:pb-14.5">
+      <div className="relative z-2 flex flex-col justify-center bg-ink px-page-gutter pt-12 pb-14.5 md:p-[clamp(45px,6vw,96px)]">
         <p className={eyebrow({ tone: "warm" })}>
           {page.eyebrow || eyebrowLabel}
         </p>

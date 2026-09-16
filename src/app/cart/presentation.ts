@@ -9,15 +9,14 @@ import {
 export const CART_EYEBROW = eyebrow();
 export const CART_PAGE_HEADING = sectionHeading({ size: "display" });
 export const CART_LINE =
-  "grid grid-cols-line-item gap-6 border-border-subtle border-b py-5.5 max-sm:grid-cols-line-item-compact max-sm:gap-3.5";
-export const CART_IMAGE =
-  "aspect-4/5 w-47.5 object-cover saturate-72 max-sm:w-23";
+  "grid grid-cols-line-item-compact gap-3.5 border-border-subtle border-b py-5.5 sm:grid-cols-line-item sm:gap-6";
+export const CART_IMAGE = "aspect-4/5 w-23 object-cover saturate-72 sm:w-47.5";
 export const CART_LINE_HEADING =
   "m-0 mb-1 text-balance font-heading text-heading-3-fixed font-medium";
 export const CART_LINE_CONTROLS =
-  "mt-4.5 flex items-center gap-3.75 max-sm:flex-col max-sm:items-start";
+  "mt-4.5 flex flex-col items-start gap-3.75 sm:flex-row sm:items-center";
 export const CART_QUANTITY =
-  "grid h-11 w-28 grid-cols-stepper border border-border-dark-strong max-sm:h-12";
+  "grid h-12 w-28 grid-cols-stepper border border-border-dark-strong sm:h-11";
 export const CART_QUANTITY_BUTTON =
   "bg-transparent text-control-lg hover:bg-signal hover:text-ink";
 export const CART_REMOVE_BUTTON =

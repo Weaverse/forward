@@ -14,10 +14,10 @@ interface JournalLeadProps {
 export function JournalLead({ linkLabel, article }: JournalLeadProps) {
   return (
     <Link
-      className="mx-7 grid min-h-205 grid-cols-split-65 bg-ink text-text-inverse max-md:mx-3 max-md:grid-cols-1"
+      className="mx-3 grid min-h-205 grid-cols-1 bg-ink text-text-inverse md:mx-7 md:grid-cols-split-65"
       href={`/journal/${article.handle}`}
     >
-      <div className="order-2 m-6 max-md:order-1 max-md:min-h-state-min">
+      <div className="order-1 m-6 min-h-state-min md:order-2 md:min-h-auto">
         <Image
           className="h-full object-cover"
           src={article.heroImage.src}
@@ -28,7 +28,7 @@ export function JournalLead({ linkLabel, article }: JournalLeadProps) {
           priority
         />
       </div>
-      <div className="order-1 flex flex-col justify-center p-[clamp(36px,6vw,90px)] max-md:order-2">
+      <div className="order-2 flex flex-col justify-center p-[clamp(36px,6vw,90px)] md:order-1">
         <p className={eyebrow({ tone: "warm" })}>
           {article.plate} · {article.readingMinutes} min read ·{" "}
           {formatDate(article.publishedAt)}

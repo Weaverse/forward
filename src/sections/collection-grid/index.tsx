@@ -32,13 +32,13 @@ function CollectionGrid({
       className="bg-surface-dark py-section-block text-text-inverse"
     >
       <div className="mx-auto w-full max-w-page px-page-gutter">
-        <div className="mb-11 flex items-end justify-between gap-7.5 max-sm:flex-col max-sm:items-start">
+        <div className="mb-11 flex flex-col items-start justify-between gap-7.5 sm:flex-row sm:items-end">
           <div>{children}</div>
           <Link className={cta({ tone: "light" })} href={ctaHref}>
             {ctaLabel}
           </Link>
         </div>
-        <div className="grid grid-cols-4 gap-4.5 max-lg:grid-cols-2 max-sm:grid-cols-2 max-sm:gap-2.5">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-4.5 lg:grid-cols-4">
           {products.map((product) => (
             <ProductCard key={product.handle} product={product} />
           ))}

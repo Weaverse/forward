@@ -30,14 +30,14 @@ function PageValues({
   if (sections.length === 0) return null;
   return (
     <Section {...rest} verticalPadding={verticalPadding}>
-      <div className="grid grid-cols-12 gap-3 max-sm:grid-cols-1">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
         {sections.map((section, index) => (
           <article
             key={section.heading}
             className={cn(
-              "col-span-6 min-h-82.5 border border-ink bg-transparent p-[clamp(34px,5vw,70px)] max-sm:col-auto",
+              "col-auto min-h-82.5 border border-ink bg-transparent p-[clamp(34px,5vw,70px)] sm:col-span-6",
               index % 2 === 1 &&
-                "translate-y-17.5 bg-surface-subtle max-sm:translate-y-0",
+                "translate-y-0 bg-surface-subtle sm:translate-y-17.5",
             )}
           >
             <span className="font-field-meta text-ui font-medium text-signal-strong tracking-field-meta">

@@ -43,10 +43,10 @@ export async function SiteFooter() {
       data-shell-background
     >
       <div
-        className="mx-auto grid w-full max-w-page grid-cols-[1.5fr_repeat(4,0.45fr)] gap-12.5 max-lg:grid-cols-[1.2fr_repeat(2,minmax(0,1fr))] max-md:grid-cols-2 max-sm:grid-cols-1"
+        className="mx-auto grid w-full max-w-page grid-cols-1 gap-12.5 sm:grid-cols-2 md:grid-cols-[1.2fr_repeat(2,minmax(0,1fr))] lg:grid-cols-[1.5fr_repeat(4,0.45fr)]"
         data-footer-grid
       >
-        <div className="max-md:col-span-full max-sm:col-auto">
+        <div className="col-auto sm:col-span-full md:col-auto">
           <Wordmark variant="footer" />
           <p className="mt-7.5 mb-prose-paragraph max-w-95 text-text-dark-muted">
             {themeContent.footerTagline}
@@ -79,7 +79,7 @@ export async function SiteFooter() {
         </nav>
       </div>
       {VERIFIED_SOCIAL_LINKS.length > 0 ? (
-        <div className="mx-auto mt-11 flex w-full max-w-page items-center justify-between gap-6 border-white/20 border-t pt-5.5 max-sm:flex-col max-sm:items-start">
+        <div className="mx-auto mt-11 flex w-full max-w-page flex-col items-start justify-between gap-6 border-white/20 border-t pt-5.5 sm:flex-row sm:items-center">
           <h2 className="m-0 text-ui font-ui text-text-dark-muted tracking-field-meta uppercase">
             {SOCIAL_SECTION_HEADING}
           </h2>
@@ -100,7 +100,7 @@ export async function SiteFooter() {
       ) : null}
       <div
         className={cn(
-          "mx-auto flex w-full max-w-page justify-between border-white/20 border-t pt-5 font-body text-field-meta text-text-dark-muted tracking-label uppercase max-sm:flex-col max-sm:items-start max-sm:gap-2 max-sm:pb-9.5",
+          "mx-auto flex w-full max-w-page flex-col items-start justify-between gap-2 border-white/20 border-t pt-5 pb-9.5 font-body text-field-meta text-text-dark-muted tracking-label uppercase sm:flex-row sm:items-stretch sm:gap-0 sm:pb-0",
           VERIFIED_SOCIAL_LINKS.length > 0 ? "mt-6" : "mt-15",
         )}
       >

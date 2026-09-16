@@ -31,10 +31,10 @@ function CollectionIndex({
       <header className="mx-auto w-full max-w-page px-page-gutter pb-11">
         {children}
       </header>
-      <div className="grid grid-cols-3 max-md:grid-cols-1">
+      <div className="grid grid-cols-1 md:grid-cols-3">
         {collections.map((collection) => (
           <Link
-            className="group relative min-h-177.5 overflow-hidden border-border-dark-divider border-r text-text-inverse after:absolute after:inset-x-0 after:top-2/5 after:bottom-0 after:bg-system-card-overlay after:content-[''] max-md:min-h-150"
+            className="group relative min-h-150 overflow-hidden border-border-dark-divider border-r text-text-inverse after:absolute after:inset-x-0 after:top-2/5 after:bottom-0 after:bg-system-card-overlay after:content-[''] md:min-h-177.5"
             href={`/shop/${collection.handle}`}
             key={collection.handle}
           >

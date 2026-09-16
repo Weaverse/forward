@@ -132,9 +132,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         lede="A compact system of weather protection, carry, and footwear. Designed to work hard together and age well apart."
       />
 
-      <div className="sticky top-header z-30 flex min-h-18 items-center justify-between border-ink border-y bg-signal px-page-gutter py-2 max-md:top-header-compact max-sm:flex-col max-sm:items-start max-sm:gap-2.5 max-sm:py-3">
-        <div className="flex items-center gap-4 max-sm:w-full max-sm:justify-between">
-          <span className="max-sm:text-ui" aria-live="polite">
+      <div className="sticky top-header-compact z-30 flex min-h-18 flex-col items-start justify-between gap-2.5 border-ink border-y bg-signal px-page-gutter py-3 sm:flex-row sm:items-center sm:gap-0 sm:py-2 md:top-header">
+        <div className="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-start">
+          <span className="text-ui sm:text-copy-sm" aria-live="polite">
             {products.length} {products.length === 1 ? "product" : "products"}
             {category !== undefined ? ` · ${category}` : ""}
             {activity !== undefined ? ` · ${activity}` : ""}
@@ -142,7 +142,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         </div>
         {/* Sorting stays a plain GET form so it works without JavaScript. */}
         <form
-          className="flex items-center gap-4 max-sm:w-full max-sm:justify-between"
+          className="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-start"
           method="get"
           action="/shop"
         >
@@ -159,7 +159,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             Sort
           </label>
           <select
-            className="min-h-touch rounded-none border border-ink bg-transparent py-0 pr-9.5 pl-3.5 font-body text-micro font-bold uppercase max-sm:flex-1"
+            className="min-h-touch flex-1 rounded-none border border-ink bg-transparent py-0 pr-9.5 pl-3.5 font-body text-micro font-bold uppercase sm:flex-initial"
             id="sort-products"
             name="sort"
             defaultValue={sort}
@@ -179,7 +179,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         </form>
       </div>
 
-      <div className="mx-auto grid w-full max-w-page grid-cols-media-row gap-9 px-page-gutter pt-15.5 pb-25 max-md:grid-cols-1">
+      <div className="mx-auto grid w-full max-w-page grid-cols-1 gap-9 px-page-gutter pt-15.5 pb-25 md:grid-cols-media-row">
         <FilterSidebar groups={filterGroups} idPrefix="desktop" />
         <ProductResults filterGroups={filterGroups} products={products} />
       </div>

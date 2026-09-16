@@ -35,11 +35,11 @@ function HomeHero({
     <section
       {...elementAttributes(rest)}
       aria-labelledby="home-hero-title"
-      className="grid min-h-[calc(100svh-var(--spacing-header))] grid-cols-[minmax(390px,0.78fr)_minmax(0,1.22fr)] bg-ink text-text-inverse max-md:min-h-[calc(100svh-var(--spacing-header-compact))] max-md:grid-cols-1"
+      className="grid min-h-[calc(100svh-var(--spacing-header-compact))] grid-cols-1 bg-ink text-text-inverse md:min-h-[calc(100svh-var(--spacing-header))] md:grid-cols-[minmax(390px,0.78fr)_minmax(0,1.22fr)]"
     >
-      <div className="flex flex-col justify-center p-[clamp(48px,6vw,100px)] max-md:px-page-gutter max-md:py-13.75">
+      <div className="flex flex-col justify-center px-page-gutter py-13.75 md:p-[clamp(48px,6vw,100px)]">
         {children}
-        <dl className="mt-auto grid grid-cols-3 border-border-dark-subtle border-t pt-9 max-md:mt-11.25">
+        <dl className="mt-11.25 grid grid-cols-3 border-border-dark-subtle border-t pt-9 md:mt-auto">
           {parseRows(stats, 2).map(([value, label]) => (
             <div className="grid gap-1.5" key={label}>
               <dt className="m-0 font-field-meta text-micro text-text-dark-meta uppercase">
@@ -50,7 +50,7 @@ function HomeHero({
           ))}
         </dl>
       </div>
-      <div className="relative m-5 min-h-190 overflow-hidden max-md:mx-2.5 max-md:mt-0 max-md:mb-2.5 max-md:min-h-[68svh]">
+      <div className="relative mx-2.5 mt-0 mb-2.5 min-h-[68svh] overflow-hidden md:m-5 md:min-h-190">
         {resolvedImage === null ? null : (
           <Image
             className="absolute inset-0 h-full object-cover saturate-78 contrast-105"

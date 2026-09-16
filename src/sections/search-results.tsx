@@ -22,7 +22,7 @@ export function SearchResults({ query, products }: SearchResultsProps) {
           {products.length} found
         </span>
       </div>
-      <div className="grid grid-cols-4 gap-4.5 max-lg:grid-cols-2 max-sm:grid-cols-2 max-sm:gap-2.5">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4.5 lg:grid-cols-4">
         {products.map((product, index) => (
           <ProductCard
             key={product.handle}

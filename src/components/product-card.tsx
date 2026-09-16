@@ -53,15 +53,15 @@ export function ProductCard({ product, priority }: ProductCardProps) {
         ) : null}
       </Link>
       <div className="border-ink border-t px-0 pt-3.5 pb-5.5">
-        <div className="flex justify-between gap-4.5 max-sm:block">
-          <h3 className="m-0 font-heading text-card-title font-semibold max-sm:text-copy">
+        <div className="block gap-4.5 sm:flex sm:justify-between">
+          <h3 className="m-0 font-heading text-copy font-semibold sm:text-card-title">
             <Link href={href}>{product.title}</Link>
           </h3>
-          <span className="whitespace-nowrap text-label max-sm:mt-0.75 max-sm:block">
+          <span className="mt-0.75 block whitespace-nowrap text-label sm:mt-0 sm:inline">
             {formatMoney(product.price)}
           </span>
         </div>
-        <p className="mt-1.25 font-body text-micro font-semibold text-text-muted uppercase max-sm:hidden">
+        <p className="mt-1.25 hidden font-body text-micro font-semibold text-text-muted uppercase sm:block">
           {product.category} / {product.activities.join(" · ")}
         </p>
         <fieldset className="mt-4 flex min-h-touch items-center gap-3">

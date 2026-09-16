@@ -260,7 +260,7 @@ export default async function AddressesPage({
         <h2 className={sectionHeading()}>Addresses</h2>
       </div>
       {addresses.length > 0 ? (
-        <div className="mt-12.5 grid grid-cols-2 gap-3 max-sm:grid-cols-1">
+        <div className="mt-12.5 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {addresses.map((address) => (
             <article key={address.id} className={ACCOUNT_BLOCK_CLASS}>
               <p className={eyebrow()}>

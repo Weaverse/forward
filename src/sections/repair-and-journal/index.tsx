@@ -36,9 +36,9 @@ function RepairAndJournal({
   return (
     <Section
       {...rest}
-      containerClassName="grid grid-cols-split-70 gap-3 max-md:grid-cols-1"
+      containerClassName="grid grid-cols-1 gap-3 md:grid-cols-split-70"
     >
-      <article className="min-h-140 bg-signal p-[clamp(35px,5vw,70px)] max-md:min-h-0">
+      <article className="min-h-0 bg-signal p-[clamp(35px,5vw,70px)] md:min-h-140">
         <p className={eyebrow()}>{repairEyebrowLabel}</p>
         <h2 className={cn(sectionHeading({ size: "feature" }), "mb-home-copy")}>
           {repairHeading}
@@ -49,9 +49,9 @@ function RepairAndJournal({
         </Link>
       </article>
       {article !== undefined ? (
-        <article className="grid min-h-140 grid-cols-split-90 bg-surface-subtle p-0 max-md:min-h-0 max-md:grid-cols-1">
+        <article className="grid min-h-0 grid-cols-1 bg-surface-subtle p-0 md:min-h-140 md:grid-cols-split-90">
           <Image
-            className="h-full object-cover max-md:max-h-[55svh]"
+            className="h-full max-h-[55svh] object-cover md:max-h-none"
             src={article.heroImage.src}
             alt={article.heroImage.alt}
             width={article.heroImage.width}

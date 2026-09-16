@@ -21,14 +21,14 @@ function MaterialStandard({ children, image, ...rest }: MaterialStandardProps) {
   return (
     <section
       {...elementAttributes(rest)}
-      className="grid grid-cols-split-85 bg-ink text-text-inverse max-md:grid-cols-1"
+      className="grid grid-cols-1 bg-ink text-text-inverse md:grid-cols-split-85"
     >
       <div className="flex flex-col justify-center p-[clamp(48px,7vw,110px)]">
         {children}
       </div>
       {resolvedImage === null ? null : (
         <Image
-          className="h-175 object-cover saturate-70 max-md:h-[58svh]"
+          className="h-[58svh] object-cover saturate-70 md:h-175"
           src={resolvedImage.src}
           alt={resolvedImage.alt}
           width={resolvedImage.width}

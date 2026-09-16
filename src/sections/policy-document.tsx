@@ -24,8 +24,8 @@ export function PolicyDocument({
 }: PolicyDocumentProps) {
   return (
     <article>
-      <div className="mx-auto grid w-full max-w-page grid-cols-article-body justify-center gap-article-gap px-page-gutter py-section-block-short max-md:grid-cols-1">
-        <aside className="text-caption text-text-muted max-md:border-border-subtle max-md:border-b max-md:pb-5">
+      <div className="mx-auto grid w-full max-w-page grid-cols-1 justify-center gap-article-gap px-page-gutter py-section-block-short md:grid-cols-article-body">
+        <aside className="border-border-subtle border-b pb-5 text-caption text-text-muted md:border-b-0 md:pb-0">
           <p className={eyebrow()}>Store policies</p>
           <nav aria-label="Store policies">
             {allPolicies.map((entry) => (

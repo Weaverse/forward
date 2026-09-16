@@ -13,8 +13,8 @@ export default async function NotFound() {
   const panelImage = collections[0]?.heroImage ?? themeContent.homeHeroImage;
 
   return (
-    <div className="m-6 grid min-h-[72svh] grid-cols-split-65 border border-ink max-md:m-3 max-md:grid-cols-1">
-      <section className="flex flex-col justify-center bg-signal p-page-gutter max-md:min-h-[55svh]">
+    <div className="m-3 grid min-h-[72svh] grid-cols-1 border border-ink md:m-6 md:grid-cols-split-65">
+      <section className="flex min-h-[55svh] flex-col justify-center bg-signal p-page-gutter md:min-h-auto">
         <span className="mb-7 font-field-meta text-label font-medium text-signal-strong tracking-field-meta">
           404 / Off route
         </span>
@@ -25,16 +25,16 @@ export default async function NotFound() {
           The page may have moved, or the route was never marked. Return to
           familiar ground and choose another direction.
         </p>
-        <div className="flex flex-wrap gap-3 max-sm:flex-col max-sm:items-stretch">
-          <Link className={cn(cta(), "max-sm:w-full")} href="/">
+        <div className="flex flex-col flex-wrap items-stretch gap-3 sm:flex-row">
+          <Link className={cn(cta(), "w-full sm:w-auto")} href="/">
             Return home
           </Link>
-          <Link className={cn(cta(), "max-sm:w-full")} href="/shop">
+          <Link className={cn(cta(), "w-full sm:w-auto")} href="/shop">
             Explore gear
           </Link>
         </div>
       </section>
-      <div className="max-md:min-h-[50svh]">
+      <div className="min-h-[50svh] md:min-h-auto">
         <Image
           className="h-full object-cover"
           src={panelImage.src}

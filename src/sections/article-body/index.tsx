@@ -83,7 +83,7 @@ function ProseBlockView({ block }: { block: ProseBlock }) {
       );
     case "pullquote":
       return (
-        <blockquote className="my-[2.4em] mr-[-8vw] ml-[-12vw] border-ink border-y py-11.25 pr-[8vw] pl-[12vw] text-article-pullquote text-signal-strong italic leading-copy max-md:mx-0 max-md:px-0">
+        <blockquote className="mx-0 my-[2.4em] border-ink border-y px-0 py-11.25 text-article-pullquote text-signal-strong italic leading-copy md:mr-[-8vw] md:ml-[-12vw] md:pr-[8vw] md:pl-[12vw]">
           <RichTextRuns runs={block.runs} />
         </blockquote>
       );
@@ -111,7 +111,7 @@ function ArticleAside({
 }) {
   if (index === 0) {
     return (
-      <aside className="text-caption text-text-muted max-md:border-border-subtle max-md:border-b max-md:pb-5">
+      <aside className="border-border-subtle border-b pb-5 text-caption text-text-muted md:border-b-0 md:pb-0">
         <p className={eyebrow()}>Route notes</p>
         <p>
           {article.location}
@@ -124,7 +124,7 @@ function ArticleAside({
     );
   }
   return (
-    <aside className="text-caption text-text-muted max-md:border-border-subtle max-md:border-b max-md:pb-5">
+    <aside className="border-border-subtle border-b pb-5 text-caption text-text-muted md:border-b-0 md:pb-0">
       <p className={eyebrow()}>Filed</p>
       <p>
         {article.plate}
@@ -160,7 +160,7 @@ function ArticleBody({
       {runs.map((run, index) => (
         <div key={runKey(run)}>
           {run.prose.length > 0 ? (
-            <div className="mx-auto grid w-full max-w-page grid-cols-article-body justify-center gap-article-gap px-page-gutter py-section-block-short max-md:grid-cols-1">
+            <div className="mx-auto grid w-full max-w-page grid-cols-1 justify-center gap-article-gap px-page-gutter py-section-block-short md:grid-cols-article-body">
               <ArticleAside article={article} index={index} />
               <div className="font-heading text-article-subheading leading-rich-copy">
                 {run.prose.map((block) => (

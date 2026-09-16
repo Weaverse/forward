@@ -32,7 +32,7 @@ const PLACEHOLDER = {
   ],
 };
 
-const IMAGE_CLASS = "h-190 object-cover max-md:h-[62svh]";
+const IMAGE_CLASS = "h-[62svh] object-cover md:h-190";
 
 /** A single product examined in depth: description, spec list, and image. */
 function ProductCaseStudy({
@@ -49,9 +49,9 @@ function ProductCaseStudy({
   return (
     <section
       {...elementAttributes(rest)}
-      className="grid grid-cols-split-75 bg-ink text-text-inverse max-md:grid-cols-1"
+      className="grid grid-cols-1 bg-ink text-text-inverse md:grid-cols-split-75"
     >
-      <div className="self-center p-[clamp(50px,7vw,110px)] max-md:order-2">
+      <div className="order-2 self-center p-[clamp(50px,7vw,110px)] md:order-none">
         <p className={eyebrow({ tone: "warm" })}>{eyebrowLabel}</p>
         <h2 className="text-balance font-heading text-field-case-title leading-field-case">
           {product?.title ?? PLACEHOLDER.title}

@@ -28,9 +28,9 @@ interface OrdersPageProps {
 }
 
 const ORDER_ROW_CLASS =
-  "max-sm:block max-sm:border-border-subtle max-sm:border-b max-sm:py-3.75";
+  "block border-border-subtle border-b py-3.75 sm:table-row sm:border-0 sm:py-0";
 const ORDER_CELL_CLASS =
-  "border-border-subtle border-b px-3 py-4.5 text-left max-sm:block max-sm:border-0 max-sm:px-0 max-sm:py-0.75 max-sm:before:text-field-meta max-sm:before:text-text-muted max-sm:before:uppercase max-sm:before:content-[attr(data-label)_':_']";
+  "block border-0 px-0 py-0.75 text-left before:text-field-meta before:text-text-muted before:uppercase before:content-[attr(data-label)_':_'] sm:table-cell sm:border-border-subtle sm:border-b sm:px-3 sm:py-4.5 sm:before:content-none";
 const ORDER_HEADING_CLASS =
   "border-border-subtle border-b px-3 pt-0 pb-4.5 text-left text-field-meta text-text-muted tracking-label uppercase";
 
@@ -70,7 +70,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
       </div>
       {profile.orders.length > 0 ? (
         <table className="w-full border-collapse">
-          <thead className="max-sm:hidden">
+          <thead className="hidden sm:table-header-group">
             <tr>
               <th className={ORDER_HEADING_CLASS}>Order</th>
               <th className={ORDER_HEADING_CLASS}>Date</th>

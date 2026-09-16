@@ -26,7 +26,7 @@ function EditorialOverlayHero({
   return (
     <section
       {...elementAttributes(rest)}
-      className="relative mt-5.5 mr-7 ml-7 min-h-[90svh] overflow-hidden text-text-inverse after:absolute after:inset-0 after:bg-field-testing-overlay after:content-[''] max-md:mx-2.5 max-md:mt-2.5 max-md:min-h-0"
+      className="relative mx-2.5 mt-2.5 min-h-0 overflow-hidden text-text-inverse after:absolute after:inset-0 after:bg-field-testing-overlay after:content-[''] md:mx-7 md:mt-5.5 md:min-h-[90svh]"
     >
       {resolved === null ? null : (
         <Image
@@ -39,7 +39,7 @@ function EditorialOverlayHero({
           priority
         />
       )}
-      <div className="relative z-1 max-w-205 p-[clamp(70px,9vw,150px)] max-md:px-page-gutter max-md:py-16.25">
+      <div className="relative z-1 max-w-205 px-page-gutter py-16.25 md:p-[clamp(70px,9vw,150px)]">
         {children}
       </div>
     </section>

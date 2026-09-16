@@ -38,7 +38,7 @@ const PLACEHOLDER_TILES = [
 ];
 
 const TILE_IMAGE_CLASS =
-  "aspect-4/5 object-cover md-up:max-h-[calc(var(--home-viewport-media)_-_44px)] short-desktop:max-h-[calc(var(--home-viewport-media)_-_32px)]";
+  "aspect-4/5 object-cover md:max-h-[calc(var(--home-viewport-media)_-_44px)] short-desktop:max-h-[calc(var(--home-viewport-media)_-_32px)]";
 const TILE_TITLE_CLASS =
   "mt-2.5 block text-caption font-bold short-desktop:mt-1 short-desktop:text-ui";
 
@@ -56,7 +56,7 @@ function KitCallout({
     <Section
       {...rest}
       containerClassName={cn(
-        "grid grid-cols-[0.55fr_1.45fr] items-end gap-15 max-md:grid-cols-1",
+        "grid grid-cols-1 items-end gap-15 md:grid-cols-[0.55fr_1.45fr]",
         VIEWPORT_SECTION_CLASS,
       )}
     >
@@ -74,7 +74,7 @@ function KitCallout({
           <span className={textLink()}>{linkLabel}</span>
         )}
       </div>
-      <div className="grid grid-cols-3 gap-3 max-md:gap-1.75">
+      <div className="grid grid-cols-3 gap-1.75 md:gap-3">
         {tiles.length > 0
           ? tiles.map((tile) => (
               <Link

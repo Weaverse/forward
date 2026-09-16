@@ -35,10 +35,10 @@ function FeaturedProducts({
   const products = loaderData?.products ?? [];
   return (
     <Section {...rest} aria-labelledby="home-featured-title">
-      <header className="mb-11.25 flex items-end justify-between gap-10 max-md:flex-col max-md:items-start max-md:gap-5">
+      <header className="mb-11.25 flex flex-col items-start justify-between gap-5 md:flex-row md:items-end md:gap-10">
         {children}
       </header>
-      <div className="grid grid-cols-4 gap-4.5 max-md:grid-cols-2 max-sm:gap-2.5">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4.5 md:grid-cols-4">
         {products.length > 0
           ? products.map((product, index) => (
               <ProductCard
@@ -69,7 +69,7 @@ function PlaceholderCard({ src }: { src: string }) {
         unoptimized
       />
       <div className="flex justify-between gap-4.5 border-ink border-t pt-3.5 pb-5.5">
-        <span className="font-heading text-card-title font-semibold text-text-muted max-sm:text-copy">
+        <span className="font-heading text-copy font-semibold text-text-muted sm:text-card-title">
           Product title
         </span>
         <span className="whitespace-nowrap text-label text-text-muted">

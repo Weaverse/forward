@@ -8,7 +8,7 @@ interface WordmarkProps {
 
 const WORDMARKS = {
   header: {
-    className: "block w-38.75 leading-none max-sm:w-29.25",
+    className: "block w-29.25 leading-none sm:w-38.75",
     src: "/images/brand/forward-wordmark-horizontal-moss.svg",
   },
   footer: {
@@ -16,7 +16,7 @@ const WORDMARKS = {
     src: "/images/brand/forward-wordmark-horizontal-reversed.svg",
   },
   mobile: {
-    className: "block w-30.5 leading-none max-xs:w-26",
+    className: "block w-26 leading-none xs:w-30.5",
     src: "/images/brand/forward-wordmark-horizontal-reversed.svg",
   },
 } as const;

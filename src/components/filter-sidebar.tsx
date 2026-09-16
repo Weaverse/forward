@@ -26,7 +26,7 @@ export function FilterSidebar({
     <div
       className={cn(
         "border-border-subtle border-t",
-        idPrefix === "desktop" && "max-md:hidden",
+        idPrefix === "desktop" && "hidden md:block",
       )}
     >
       {groups.map((group) => (

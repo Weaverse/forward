@@ -32,9 +32,9 @@ function SystemManifest({
   const resolvedImage = weaverseImage(image);
   return (
     <Section {...rest}>
-      <div className="grid grid-cols-[0.8fr_1.2fr] items-center gap-[clamp(50px,10vw,150px)] max-md:grid-cols-1">
+      <div className="grid grid-cols-1 items-center gap-[clamp(50px,10vw,150px)] md:grid-cols-[0.8fr_1.2fr]">
         {resolvedImage === null ? null : (
-          <div className="translate-y-20 shadow-collection-feature max-md:translate-y-0 max-md:shadow-collection-feature-mobile">
+          <div className="translate-y-0 shadow-collection-feature-mobile md:translate-y-20 md:shadow-collection-feature">
             <Image
               className="aspect-4/5 object-cover"
               src={resolvedImage.src}

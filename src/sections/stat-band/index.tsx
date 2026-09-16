@@ -16,12 +16,12 @@ function StatBand({ stats, ...rest }: StatBandProps) {
   return (
     <section
       {...elementAttributes(rest)}
-      className="grid grid-cols-3 bg-signal max-md:grid-cols-1"
+      className="grid grid-cols-1 bg-signal md:grid-cols-3"
     >
       {parseRows(stats, 2).map(([value, label]) => (
         <div
           key={label}
-          className="grid gap-1 border-ink border-r p-13.75 max-md:border-b max-md:px-page-gutter max-md:py-8.5"
+          className="grid gap-1 border-ink border-r border-b px-page-gutter py-8.5 md:border-b-0 md:p-13.75"
         >
           <strong className="font-heading text-display-fixed">{value}</strong>
           <span className="font-field-meta text-field-meta uppercase">

@@ -31,9 +31,9 @@ function CollectionHero({
   return (
     <section
       {...elementAttributes(rest)}
-      className="relative mt-5.5 mr-7 ml-7 grid min-h-page-min grid-cols-[1.3fr_0.7fr] items-stretch overflow-hidden bg-ink text-text-inverse max-md:mx-3 max-md:min-h-0 max-md:grid-cols-1"
+      className="relative mx-3 mt-5.5 grid min-h-0 grid-cols-1 items-stretch overflow-hidden bg-ink text-text-inverse md:mx-7 md:min-h-page-min md:grid-cols-[1.3fr_0.7fr]"
     >
-      <div className="relative min-w-0 overflow-hidden max-md:min-h-route-media-min">
+      <div className="relative min-h-route-media-min min-w-0 overflow-hidden md:min-h-auto">
         <Image
           className="absolute inset-0 h-full object-cover object-center saturate-75 contrast-105"
           src={collection.heroImage.src}
@@ -44,7 +44,7 @@ function CollectionHero({
           priority
         />
       </div>
-      <div className="relative z-2 flex flex-col justify-center bg-ink p-panel max-md:px-page-gutter max-md:pt-12 max-md:pb-14.5">
+      <div className="relative z-2 flex flex-col justify-center bg-ink px-page-gutter pt-12 pb-14.5 md:p-panel">
         <p className={eyebrow({ tone: "warm" })}>
           {eyebrowPrefix} {collection.fieldCode}
         </p>

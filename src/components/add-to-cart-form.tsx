@@ -30,10 +30,9 @@ interface AddToCartFormProps {
   tone?: Surface;
 }
 
-const ACTIONS_CLASS =
-  "mt-7.5 grid grid-cols-[112px_1fr] gap-2 max-sm:grid-cols-1";
+const ACTIONS_CLASS = "mt-7.5 grid grid-cols-1 gap-2 sm:grid-cols-[112px_1fr]";
 /* Every colour that has to read against the surface follows `tone`. */
-const quantityBox = cva("grid h-13 grid-cols-stepper border max-sm:h-12", {
+const quantityBox = cva("grid h-12 grid-cols-stepper border sm:h-13", {
   variants: {
     tone: { dark: "border-border-dark-strong", light: "border-ink" },
   },

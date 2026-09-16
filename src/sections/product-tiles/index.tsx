@@ -21,11 +21,11 @@ function ProductTiles({ loaderData, ...rest }: ProductTilesProps) {
   return (
     <section
       {...elementAttributes(rest)}
-      className="grid grid-cols-3 bg-ink max-md:grid-cols-1"
+      className="grid grid-cols-1 bg-ink md:grid-cols-3"
     >
       {tiles.map(({ product, image }) => (
         <Link
-          className="relative min-h-162.5 text-text-inverse max-md:min-h-150"
+          className="relative min-h-150 text-text-inverse md:min-h-162.5"
           href={`/products/${product.handle}`}
           key={product.handle}
         >

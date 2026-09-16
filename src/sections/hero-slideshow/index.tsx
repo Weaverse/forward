@@ -53,11 +53,11 @@ function HeroSlideshow({ children, stats, ...rest }: HeroSlideshowProps) {
   return (
     <section
       {...elementAttributes(rest)}
-      className="relative isolate grid min-h-[calc(100svh_-_var(--spacing-header)_-_var(--spacing-announcement))] grid-rows-[1fr_auto] overflow-hidden bg-ink text-text-inverse max-md:min-h-[calc(100svh_-_var(--spacing-header-compact)_-_var(--spacing-announcement))]"
+      className="relative isolate grid min-h-[calc(100svh_-_var(--spacing-header-compact)_-_var(--spacing-announcement))] grid-rows-[1fr_auto] overflow-hidden bg-ink text-text-inverse md:min-h-[calc(100svh_-_var(--spacing-header)_-_var(--spacing-announcement))]"
     >
       <div
         aria-hidden
-        className="-z-5 absolute inset-0 bg-[linear-gradient(90deg,rgb(17_19_15/0.9)_0%,rgb(17_19_15/0.55)_42%,rgb(17_19_15/0)_72%),linear-gradient(0deg,rgb(17_19_15/0.85)_0%,rgb(17_19_15/0)_45%)] max-md:bg-[linear-gradient(0deg,rgb(17_19_15/0.95)_0%,rgb(17_19_15/0.7)_55%,rgb(17_19_15/0.15)_100%)]"
+        className="-z-5 absolute inset-0 bg-[linear-gradient(0deg,rgb(17_19_15/0.95)_0%,rgb(17_19_15/0.7)_55%,rgb(17_19_15/0.15)_100%)] md:bg-[linear-gradient(90deg,rgb(17_19_15/0.9)_0%,rgb(17_19_15/0.55)_42%,rgb(17_19_15/0)_72%),linear-gradient(0deg,rgb(17_19_15/0.85)_0%,rgb(17_19_15/0)_45%)]"
       />
       {/* Every slide sits in the same cell, so the hero keeps the tallest
        * slide's height and never jumps between slides. */}
@@ -73,7 +73,7 @@ function HeroSlideshow({ children, stats, ...rest }: HeroSlideshowProps) {
       </div>
       {/* The right edge is reserved for the active slide's featured badge,
        * which the slide positions over this bar. */}
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] border-text-inverse/15 border-t bg-ink/45 backdrop-blur-md md-up:min-h-28 md-up:pr-80 max-md:grid-cols-1 max-md:pb-22">
+      <div className="grid grid-cols-1 border-text-inverse/15 border-t bg-ink/45 pb-22 backdrop-blur-md md:min-h-28 md:grid-cols-[minmax(0,1fr)_auto] md:pr-80 md:pb-0">
         <dl className="grid max-w-3xl grid-cols-3 content-center gap-6 px-page-gutter py-5">
           {rows.map(([value, label]) => (
             <div className="grid gap-1.5" key={label}>
@@ -85,7 +85,7 @@ function HeroSlideshow({ children, stats, ...rest }: HeroSlideshowProps) {
           ))}
         </dl>
         {slides.length > 1 ? (
-          <fieldset className="m-0 flex min-w-0 items-center gap-5 border-0 px-page-gutter py-6 max-md:pt-0">
+          <fieldset className="m-0 flex min-w-0 items-center gap-5 border-0 px-page-gutter pt-0 pb-6 md:pt-6">
             <legend className="sr-only">Hero slides</legend>
             {slides.map((slide, index) => (
               <button

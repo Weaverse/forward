@@ -79,7 +79,7 @@ function HeroSlide({
   return (
     <div
       {...elementAttributes(rest)}
-      className="flex min-w-0 max-w-6xl flex-col justify-end px-page-gutter pt-28 pb-14 [grid-area:1/1] max-md:pb-10"
+      className="flex min-w-0 max-w-6xl flex-col justify-end px-page-gutter pt-28 pb-10 [grid-area:1/1] md:pb-14"
     >
       {resolvedImage === null ? null : (
         <div
@@ -103,7 +103,7 @@ function HeroSlide({
         <p
           key={`tag-${phase}`}
           className={cn(
-            "absolute top-6 right-page-gutter z-10 m-0 bg-ink/55 px-3 py-2 font-field-meta text-micro uppercase backdrop-blur-md transition-opacity duration-300 starting:opacity-0 max-md:top-4 max-md:left-page-gutter",
+            "absolute top-4 right-page-gutter left-page-gutter z-10 m-0 bg-ink/55 px-3 py-2 font-field-meta text-micro uppercase backdrop-blur-md transition-opacity duration-300 starting:opacity-0 md:top-6 md:left-auto",
             fade,
           )}
         >
@@ -125,7 +125,7 @@ function HeroSlide({
       <FeaturedBadge
         key={`badge-${phase}`}
         className={cn(
-          "absolute right-0 bottom-0 z-10 h-28 w-80 border-text-inverse/15 border-l transition-[opacity,background-color] duration-300 starting:opacity-0 max-md:inset-x-0 max-md:h-22 max-md:w-auto max-md:border-t max-md:border-l-0 max-md:px-page-gutter",
+          "absolute inset-x-0 bottom-0 z-10 h-22 w-auto border-text-inverse/15 border-t px-page-gutter transition-[opacity,background-color] duration-300 starting:opacity-0 md:right-0 md:left-auto md:h-28 md:w-80 md:border-t-0 md:border-l md:px-0",
           fade,
         )}
         product={product}
@@ -196,7 +196,7 @@ function FeaturedBadge({
         <span className="font-field-meta text-micro text-text-dark-meta uppercase">
           Featured system
         </span>
-        <span className="line-clamp-2 text-balance font-heading text-lede leading-copy max-md:line-clamp-1">
+        <span className="line-clamp-1 text-balance font-heading text-lede leading-copy md:line-clamp-2">
           {product.title}
         </span>
       </span>

@@ -10,7 +10,7 @@ export const SHELL_SECTION_CLASS =
 
 /** Opt a section into the viewport-height media sizing used on Home. */
 export const VIEWPORT_SECTION_CLASS =
-  "md-up:[--home-viewport-pad:clamp(48px,5vw,96px)] md-up:[--home-viewport-media:calc(100svh_-_2_*_var(--home-viewport-pad))] md-up:py-(--home-viewport-pad) short-desktop:[--home-viewport-pad:clamp(8px,2svh,16px)]";
+  "md:[--home-viewport-pad:clamp(48px,5vw,96px)] md:[--home-viewport-media:calc(100svh_-_2_*_var(--home-viewport-pad))] md:py-(--home-viewport-pad) short-desktop:[--home-viewport-pad:clamp(8px,2svh,16px)]";
 
 export const eyebrow = cva(
   "mb-3.5 font-field-meta text-ui leading-meta font-medium",
@@ -40,12 +40,12 @@ export const sectionHeading = cva("", {
       /* The display scales the page mastheads use. Each one existed only as a
        * class string inside its section, which is why the shared `heading`
        * element could not express a hero and those sections stayed flat. */
-      hero: "m-0 text-balance font-heading text-home-hero leading-home-hero font-medium tracking-home-hero max-md:text-home-hero-mobile",
+      hero: "m-0 text-balance font-heading text-home-hero-mobile leading-home-hero font-medium tracking-home-hero md:text-home-hero",
       heroWide:
-        "m-0 text-balance font-heading text-display-wide leading-display-tightest tracking-display-tight max-md:text-display-mobile",
-      page: "m-0 text-balance font-heading text-page-display leading-heading font-medium tracking-heading max-md:text-page-display-mobile",
+        "m-0 text-balance font-heading text-display-mobile leading-display-tightest tracking-display-tight md:text-display-wide",
+      page: "m-0 text-balance font-heading text-page-display-mobile leading-heading font-medium tracking-heading md:text-page-display",
       collection:
-        "m-0 text-balance font-heading text-collection-display leading-heading font-medium tracking-heading max-md:text-page-display-mobile",
+        "m-0 text-balance font-heading text-page-display-mobile leading-heading font-medium tracking-heading md:text-collection-display",
       article:
         "m-0 text-balance font-heading text-article-display leading-heading font-medium tracking-heading",
       statement:

@@ -28,7 +28,7 @@ function ProductStrip({
   const products = loaderData?.products ?? [];
   return (
     <Section {...rest}>
-      <header className="mb-11.25 grid grid-cols-feature-row items-end gap-10 max-md:grid-cols-1 max-md:gap-5">
+      <header className="mb-11.25 grid grid-cols-1 items-end gap-5 md:grid-cols-feature-row md:gap-10">
         <div>
           <p className="m-0 max-w-copy-narrow font-field-meta text-ui leading-meta font-medium text-signal-strong tracking-field-meta uppercase">
             {eyebrowLabel}
@@ -39,7 +39,7 @@ function ProductStrip({
           {linkLabel}
         </Link>
       </header>
-      <div className="grid grid-cols-4 gap-4.5 max-lg:grid-cols-2 max-sm:grid-cols-2 max-sm:gap-2.5">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4.5 lg:grid-cols-4">
         {products.map((product) => (
           <ProductCard key={product.handle} product={product} />
         ))}

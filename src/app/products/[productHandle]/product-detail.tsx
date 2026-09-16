@@ -172,11 +172,11 @@ function GalleryModal({
         dialogRef.current?.close();
       }}
     >
-      <div className="grid h-14.5 grid-cols-[1fr_auto_auto] items-center gap-7.5 border-border-dark border-b px-5 font-field-meta text-micro uppercase max-md:grid-cols-lead-trailing">
+      <div className="grid h-14.5 grid-cols-lead-trailing items-center gap-7.5 border-border-dark border-b px-5 font-field-meta text-micro uppercase md:grid-cols-[1fr_auto_auto]">
         <span>
           {product.title} / {colorway.name}
         </span>
-        <span className="max-md:hidden">
+        <span className="hidden md:inline">
           {String(index + 1).padStart(2, "0")} /{" "}
           {String(images.length).padStart(2, "0")}
         </span>
@@ -189,7 +189,7 @@ function GalleryModal({
           Close ×
         </button>
       </div>
-      <div className="relative grid h-[calc(100svh-148px)] place-items-center px-20 py-4.5 max-md:h-[calc(100svh-138px)] max-md:px-12.5 max-md:py-3">
+      <div className="relative grid h-[calc(100svh-138px)] place-items-center px-12.5 py-3 md:h-[calc(100svh-148px)] md:px-20 md:py-4.5">
         <Image
           className="h-full w-auto max-w-full object-contain"
           key={image.src}
@@ -219,7 +219,7 @@ function GalleryModal({
           →
         </button>
       </div>
-      <fieldset className="flex h-22.5 justify-center gap-2 border-border-dark border-t p-2.25 max-md:h-20">
+      <fieldset className="flex h-20 justify-center gap-2 border-border-dark border-t p-2.25 md:h-22.5">
         <legend className="sr-only">Choose gallery image</legend>
         {images.map((entry, entryIndex) => (
           <button

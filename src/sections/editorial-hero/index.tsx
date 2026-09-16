@@ -36,12 +36,12 @@ function EditorialHero({
   return (
     <section
       {...elementAttributes(rest)}
-      className="mt-5.5 mr-7 ml-7 grid min-h-page-min grid-cols-split-90 bg-ink text-text-inverse max-md:mx-2.5 max-md:mt-2.5 max-md:min-h-0 max-md:grid-cols-1"
+      className="mx-2.5 mt-2.5 grid min-h-0 grid-cols-1 bg-ink text-text-inverse md:mx-7 md:mt-5.5 md:min-h-page-min md:grid-cols-split-90"
     >
       <div
         className={cn(
-          "flex flex-col justify-center p-panel-wide max-md:px-page-gutter max-md:py-13.75",
-          imageFirst && "order-2 max-md:order-1",
+          "flex flex-col justify-center px-page-gutter py-13.75 md:p-panel-wide",
+          imageFirst && "order-1 md:order-2",
         )}
       >
         {children}
@@ -49,8 +49,8 @@ function EditorialHero({
       {resolved === null ? null : (
         <Image
           className={cn(
-            "h-full object-cover saturate-72 max-md:h-home-media-mobile",
-            imageFirst && "order-1 max-md:order-2",
+            "h-home-media-mobile object-cover saturate-72 md:h-full",
+            imageFirst && "order-2 md:order-1",
           )}
           src={resolved.src}
           alt={resolved.alt}

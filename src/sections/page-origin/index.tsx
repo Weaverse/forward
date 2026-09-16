@@ -31,7 +31,7 @@ function PageOrigin({
   const resolvedImage = weaverseImage(image);
   return (
     <Section {...rest}>
-      <div className="grid grid-cols-split-75 items-start gap-20 max-md:grid-cols-1">
+      <div className="grid grid-cols-1 items-start gap-20 md:grid-cols-split-75">
         <div>
           <p className={eyebrow()}>{eyebrowLabel}</p>
           <h2 className={sectionHeading({ className: "whitespace-pre-line" })}>

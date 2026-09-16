@@ -21,7 +21,7 @@ function EditorialCallout({ children, ...rest }: EditorialCalloutProps) {
   return (
     <Section
       {...rest}
-      containerClassName="grid grid-cols-spec-row items-end gap-11.25 max-md:grid-cols-1"
+      containerClassName="grid grid-cols-1 items-end gap-11.25 md:grid-cols-spec-row"
     >
       {children}
     </Section>

@@ -21,7 +21,7 @@ function NumberedSequence({ children, steps, ...rest }: NumberedSequenceProps) {
   return (
     <Section
       {...rest}
-      containerClassName="grid grid-cols-split-70 gap-20 max-md:grid-cols-1"
+      containerClassName="grid grid-cols-1 gap-20 md:grid-cols-split-70"
     >
       <header>{children}</header>
       <ol className="m-0 list-none border-border-subtle border-t p-0">

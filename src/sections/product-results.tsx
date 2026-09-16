@@ -28,14 +28,14 @@ export function ProductResults({
       <h2 className="sr-only">Products</h2>
       {/* Mobile filters: the canonical drawer is a JS prototype, so
           Forward uses a no-JavaScript disclosure instead. */}
-      <details className="group/disclosure mb-6.5 hidden border border-ink max-md:block">
+      <details className="group/disclosure mb-6.5 block border border-ink md:hidden">
         <summary className="flex min-h-12 list-none items-center justify-between px-4 font-body text-micro font-medium tracking-label uppercase after:text-lg after:content-['+'] group-open/disclosure:after:content-['−'] [&::-webkit-details-marker]:hidden">
           Filters
         </summary>
         <FilterSidebar groups={filterGroups} idPrefix="mobile" />
       </details>
       {products.length > 0 ? (
-        <div className="grid grid-cols-3 gap-x-4.5 gap-y-14 max-lg:grid-cols-2 max-sm:gap-x-2.5 max-sm:gap-y-8.75">
+        <div className="grid grid-cols-2 gap-x-2.5 gap-y-8.75 sm:gap-x-4.5 sm:gap-y-14 lg:grid-cols-3">
           {products.map((product, index) => (
             <ProductCard
               key={product.handle}

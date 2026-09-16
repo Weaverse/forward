@@ -25,7 +25,7 @@ function PagePremise({ eyebrowLabel, ...rest }: PagePremiseProps) {
   const premise = page.sections[0];
   return (
     <Section {...rest}>
-      <div className="grid grid-cols-split-85 items-start gap-page-gap max-md:grid-cols-1">
+      <div className="grid grid-cols-1 items-start gap-page-gap md:grid-cols-split-85">
         <div>
           <p className={eyebrow()}>{eyebrowLabel}</p>
           {premise !== undefined ? (

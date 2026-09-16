@@ -102,7 +102,7 @@ export function CartView({ seedLines }: CartViewProps) {
           </div>
         </div>
       ) : lines.length > 0 ? (
-        <div className="grid grid-cols-cart gap-feature-gap py-section-block-compact max-md:grid-cols-1">
+        <div className="grid grid-cols-1 gap-feature-gap py-section-block-compact md:grid-cols-cart">
           <section
             className="border-border-subtle border-t"
             aria-label="Cart items"
@@ -166,7 +166,7 @@ export function CartView({ seedLines }: CartViewProps) {
                     </button>
                   </div>
                 </div>
-                <div className="font-bold whitespace-nowrap max-sm:col-start-2">
+                <div className="col-start-2 font-bold whitespace-nowrap sm:col-start-auto">
                   {formatMoney({
                     amount: line.unitPrice.amount * line.quantity,
                     currencyCode: "USD",
