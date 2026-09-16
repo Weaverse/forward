@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import ReactCountryFlag from "react-country-flag";
 
 import { Icon } from "@/components/icon";
 import { cn } from "@/lib/cn";
@@ -13,6 +14,23 @@ import {
 
 const CONTROL_CLASS =
   "inline-flex items-center gap-1.5 font-body text-ui font-ui tracking-control uppercase";
+
+/* The library always writes width/height inline, so utilities cannot size it. */
+const FLAG_DIMENSIONS = { width: "18px", height: "12px" } as const;
+
+/** Decorative: the label beside every flag already names the market. */
+function CountryFlag({ country }: { country: StorefrontCountry }) {
+  return (
+    <ReactCountryFlag
+      svg
+      countryCode={country.isoCode}
+      className="shrink-0 rounded-xs object-cover"
+      style={FLAG_DIMENSIONS}
+      alt=""
+      aria-hidden="true"
+    />
+  );
+}
 
 /**
  * Topbar market indicator for a store with a single published market. It
@@ -95,7 +113,7 @@ function CountrySelector() {
         aria-controls={open ? panelId : undefined}
         onClick={() => setOpen((current) => !current)}
       >
-        <Icon name="globe-hemisphere-west" size={14} />
+        <CountryFlag country={selected} />
         {countryControlLabel(selected)}
         <span className="sr-only">. Change shipping market</span>
         <Icon name={open ? "caret-up" : "caret-down"} size={12} />
@@ -119,7 +137,10 @@ function CountrySelector() {
                   }
                   onClick={() => choose(country)}
                 >
-                  {countryControlLabel(country)}
+                  <span className="inline-flex items-center gap-2">
+                    <CountryFlag country={country} />
+                    {countryControlLabel(country)}
+                  </span>
                   {country.isoCode === selected.isoCode ? (
                     <Icon name="check-circle" size={14} />
                   ) : null}

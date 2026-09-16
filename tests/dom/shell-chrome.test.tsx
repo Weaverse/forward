@@ -98,6 +98,25 @@ describe("market selector", () => {
     );
   });
 
+  it("flags every market and keeps the flags out of the accessible name", () => {
+    const { container } = render(<CountryControl />);
+
+    const flag = container.querySelector("img");
+    assert.ok(flag !== null);
+    assert.equal(flag.getAttribute("alt"), "");
+    assert.equal(flag.getAttribute("aria-hidden"), "true");
+    assert.match(
+      flag.getAttribute("src") ?? "",
+      new RegExp(`${ACTIVE_STOREFRONT_COUNTRY.isoCode.toLowerCase()}\\.svg$`),
+    );
+    assert.equal(
+      visibleText(screen.getByRole("button")).includes(
+        countryControlLabel(ACTIVE_STOREFRONT_COUNTRY),
+      ),
+      true,
+    );
+  });
+
   it("moves the marker to the chosen market and closes", async () => {
     const user = userEvent.setup();
     const other = AVAILABLE_STOREFRONT_COUNTRIES[1];
