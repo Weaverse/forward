@@ -181,3 +181,44 @@ export function currentCollectionIndex(
     -1,
   );
 }
+
+/** True when `href`, or any of its children, names the current page. */
+export function isBranchActive(pathname: string, item: NavItem): boolean {
+  return (
+    isActive(pathname, item.href) ||
+    item.children?.some((child) => isActive(pathname, child.href)) === true
+  );
+}
+
+/** Highlighted panel row: the current destination, or the first collection. */
+export function activeCollectionIndex(
+  pathname: string,
+  collections: readonly FieldIndexCollection[],
+): number {
+  return Math.max(currentCollectionIndex(pathname, collections), 0);
+}
+
+/**
+ * The Shop mega panel is an enhancement on merchant-owned navigation: drifted
+ * or missing data yields no panel instead of a failed render.
+ */
+export function fieldIndexCollections(
+  shopItem: NavItem | undefined,
+): readonly FieldIndexCollection[] | null {
+  if (shopItem === undefined) {
+    return null;
+  }
+  try {
+    return createFieldIndexCollections(shopItem);
+  } catch {
+    return null;
+  }
+}
+
+/** Account entry reports session state; every other destination keeps its label. */
+export function accountNavigationLabel(
+  item: NavItem,
+  signedIn: boolean,
+): string {
+  return item.href === "/account" && signedIn ? "Signed in" : item.label;
+}
