@@ -125,7 +125,7 @@ function HeroSlide({
       <FeaturedBadge
         key={`badge-${phase}`}
         className={cn(
-          "absolute inset-x-0 bottom-0 z-10 h-22 w-auto border-text-inverse/15 border-t px-page-gutter transition-[opacity,background-color] duration-300 starting:opacity-0 md:right-0 md:left-auto md:h-28 md:w-80 md:border-t-0 md:border-l md:px-0",
+          "absolute inset-x-0 bottom-0 z-10 h-22 w-auto border-text-inverse/15 border-t transition-[opacity,background-color] duration-300 starting:opacity-0 md:right-0 md:left-auto md:h-28 md:w-80 md:border-t-0 md:border-l md:px-2",
           fade,
         )}
         product={product}

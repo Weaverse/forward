@@ -53,7 +53,7 @@ function HeroSlideshow({ children, stats, ...rest }: HeroSlideshowProps) {
   return (
     <section
       {...elementAttributes(rest)}
-      className="relative isolate grid min-h-[calc(100svh_-_var(--spacing-header-compact)_-_var(--spacing-announcement))] grid-rows-[1fr_auto] overflow-hidden bg-ink text-text-inverse md:min-h-[calc(100svh_-_var(--spacing-header)_-_var(--spacing-announcement))]"
+      className="relative isolate grid min-h-[calc(100svh-var(--spacing-header-compact)-var(--spacing-announcement))] grid-rows-[1fr_auto] overflow-hidden bg-ink text-text-inverse md:min-h-[calc(100svh-var(--spacing-header)-var(--spacing-announcement))]"
     >
       <div
         aria-hidden
