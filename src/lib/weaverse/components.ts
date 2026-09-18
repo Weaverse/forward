@@ -45,6 +45,7 @@ import * as HomeHero from "@/sections/home-hero";
 import * as KitCallout from "@/sections/kit-callout";
 import * as MainProduct from "@/sections/main-product";
 import * as ProductBreadcrumb from "@/sections/main-product/breadcrumb";
+import * as ProductBuyButtons from "@/sections/main-product/buy-buttons";
 import * as ProductMeta from "@/sections/main-product/meta";
 import * as ProductPrices from "@/sections/main-product/prices";
 import * as ProductSummary from "@/sections/main-product/summary";
@@ -116,6 +117,7 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
   entry(ProductPrices),
   entry(ProductSummary),
   entry(ProductVariantSelector),
+  entry(ProductBuyButtons),
   entry(RelatedProducts),
 
   /* COLLECTION */

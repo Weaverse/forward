@@ -34,6 +34,7 @@ import { schema as heroSlide } from "@/sections/hero-slideshow/slide/schema";
 import { schema as homeHero } from "@/sections/home-hero/schema";
 import { schema as kitCallout } from "@/sections/kit-callout/schema";
 import { schema as productBreadcrumb } from "@/sections/main-product/breadcrumb/schema";
+import { schema as productBuyButtons } from "@/sections/main-product/buy-buttons/schema";
 import { schema as productMeta } from "@/sections/main-product/meta/schema";
 import { schema as productPrices } from "@/sections/main-product/prices/schema";
 import { schema as mainProduct } from "@/sections/main-product/schema";
@@ -88,6 +89,7 @@ export const SECTION_SCHEMAS: readonly SchemaType[] = [
   productPrices,
   productSummary,
   productVariantSelector,
+  productBuyButtons,
   relatedProducts,
 
   /* COLLECTION */
