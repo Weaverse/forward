@@ -47,6 +47,7 @@ import * as MainProduct from "@/sections/main-product";
 import * as ProductBreadcrumb from "@/sections/main-product/breadcrumb";
 import * as ProductBuyButtons from "@/sections/main-product/buy-buttons";
 import * as ProductCollapsibleDetails from "@/sections/main-product/collapsible-details";
+import * as ProductMedia from "@/sections/main-product/media";
 import * as ProductMeta from "@/sections/main-product/meta";
 import * as ProductPrices from "@/sections/main-product/prices";
 import * as ProductSummary from "@/sections/main-product/summary";
@@ -120,6 +121,7 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
   entry(ProductVariantSelector),
   entry(ProductBuyButtons),
   entry(ProductCollapsibleDetails),
+  entry(ProductMedia),
   entry(RelatedProducts),
 
   /* COLLECTION */
