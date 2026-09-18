@@ -39,6 +39,7 @@ import { schema as productPrices } from "@/sections/main-product/prices/schema";
 import { schema as mainProduct } from "@/sections/main-product/schema";
 import { schema as productSummary } from "@/sections/main-product/summary/schema";
 import { schema as productTitle } from "@/sections/main-product/title/schema";
+import { schema as productVariantSelector } from "@/sections/main-product/variant-selector/schema";
 import { schema as materialStandard } from "@/sections/material-standard/schema";
 import { schema as numberedSequence } from "@/sections/numbered-sequence/schema";
 import { schema as pageHero } from "@/sections/page-hero/schema";
@@ -86,6 +87,7 @@ export const SECTION_SCHEMAS: readonly SchemaType[] = [
   productTitle,
   productPrices,
   productSummary,
+  productVariantSelector,
   relatedProducts,
 
   /* COLLECTION */

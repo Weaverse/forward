@@ -49,6 +49,7 @@ import * as ProductMeta from "@/sections/main-product/meta";
 import * as ProductPrices from "@/sections/main-product/prices";
 import * as ProductSummary from "@/sections/main-product/summary";
 import * as ProductTitle from "@/sections/main-product/title";
+import * as ProductVariantSelector from "@/sections/main-product/variant-selector";
 import * as MaterialStandard from "@/sections/material-standard";
 import * as NumberedSequence from "@/sections/numbered-sequence";
 import * as PageHero from "@/sections/page-hero";
@@ -114,6 +115,7 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
   entry(ProductTitle),
   entry(ProductPrices),
   entry(ProductSummary),
+  entry(ProductVariantSelector),
   entry(RelatedProducts),
 
   /* COLLECTION */
