@@ -14,8 +14,7 @@
  *
  * - Header, Footer, announcement bar, and mini-cart, configured through theme
  *   settings and never composed.
- * - The PDP buy block and its `colorway`/`size` query state, the collection and
- *   Shop grid behavior, Cart, and `/account/**`.
+ * - The collection and Shop grid behavior, Cart, and `/account/**`.
  * - `index-header`, `journal-*`, `product-results`, `search-*`, and
  *   `policy-document`, extracted for code organization only.
  */

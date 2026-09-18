@@ -22,10 +22,16 @@ Forward is a fresh Next.js App Router storefront theme using
   never import the data source, and a section reused by more than one route
   takes its variations as props rather than forking into a near-copy.
 - Functional, stateful, and security-owned surfaces are not sections and stay
-  theme-owned: the PDP buy block and its `colorway`/`size` query state, the
-  collection and Shop grid behavior, Cart, and `/account/**`. Header and
-  Footer are theme-owned components configured through theme settings, never
-  Weaverse global sections.
+  theme-owned: the collection and Shop grid behavior, Cart, and
+  `/account/**`. Header and Footer are theme-owned components configured
+  through theme settings, never Weaverse global sections.
+- Approved change (2026-09-18): the PDP buy block is the composable
+  `main-product` section, split into `mp--media`, `mp--info` and one `mp--*`
+  child per element. The section shell alone owns the `colorway`/`size` query
+  state and shares the resolved selection through `MainProductContext`; all
+  cart logic stays inside the shared `AddToCartForm`. A `main-product` with no
+  children renders the default composition, so a product URL is never
+  without gallery, selection and add to cart.
 - Approved exception (2026-09-15): `product-spotlight` may embed the shared
   `AddToCartForm` (`src/components/add-to-cart-form.tsx`) with a selection held
   in component state. It never reads or writes the PDP's `colorway`/`size`
