@@ -44,6 +44,7 @@ import * as HeroSlide from "@/sections/hero-slideshow/slide";
 import * as HomeHero from "@/sections/home-hero";
 import * as KitCallout from "@/sections/kit-callout";
 import * as MainProduct from "@/sections/main-product";
+import * as ProductBreadcrumb from "@/sections/main-product/breadcrumb";
 import * as MaterialStandard from "@/sections/material-standard";
 import * as NumberedSequence from "@/sections/numbered-sequence";
 import * as PageHero from "@/sections/page-hero";
@@ -104,6 +105,7 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
 
   /* PRODUCT */
   entry(MainProduct),
+  entry(ProductBreadcrumb),
   entry(RelatedProducts),
 
   /* COLLECTION */
