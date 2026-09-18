@@ -46,6 +46,7 @@ import * as KitCallout from "@/sections/kit-callout";
 import * as MainProduct from "@/sections/main-product";
 import * as ProductBreadcrumb from "@/sections/main-product/breadcrumb";
 import * as ProductMeta from "@/sections/main-product/meta";
+import * as ProductTitle from "@/sections/main-product/title";
 import * as MaterialStandard from "@/sections/material-standard";
 import * as NumberedSequence from "@/sections/numbered-sequence";
 import * as PageHero from "@/sections/page-hero";
@@ -108,6 +109,7 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
   entry(MainProduct),
   entry(ProductBreadcrumb),
   entry(ProductMeta),
+  entry(ProductTitle),
   entry(RelatedProducts),
 
   /* COLLECTION */
