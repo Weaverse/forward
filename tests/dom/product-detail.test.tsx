@@ -12,10 +12,11 @@ import assert from "node:assert/strict";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { ProductDetail } from "@/app/products/[productHandle]/product-detail";
 import { getCartSnapshot } from "@/lib/demo-cart/store";
 import { formatMoney } from "@/lib/storefront/format";
 import type { Money, Product } from "@/lib/storefront/types";
+import { StorefrontDataProvider } from "@/lib/weaverse/data-context";
+import MainProduct from "@/sections/main-product";
 import { productByHandle, visibleText } from "./harness";
 import { currentRoute, setRoute } from "./preload";
 
@@ -39,7 +40,13 @@ function withVariants(
 
 function mountPdp(product: Product, query: string) {
   setRoute(`/products/${product.handle}`, query);
-  return render(<ProductDetail product={product} fieldRecord={null} />);
+  /* No children: the section renders its default composition, the same tree
+   * the route falls back to when a template does not place the section. */
+  return render(
+    <StorefrontDataProvider value={{ product }}>
+      <MainProduct />
+    </StorefrontDataProvider>,
+  );
 }
 
 function optionRowFor(label: string): HTMLElement {

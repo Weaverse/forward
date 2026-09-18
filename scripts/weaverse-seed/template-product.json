@@ -1,7 +1,7 @@
 {
   "pageType": "PRODUCT",
   "handle": "",
-  "description": "Product template. The buy block is theme-owned and renders above these sections.",
+  "description": "Product template. The buy block is the main-product section, expanded from its presets into media and info children.",
   "sections": [
     {
       "type": "main-product"
