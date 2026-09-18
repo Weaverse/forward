@@ -36,6 +36,7 @@ import { schema as kitCallout } from "@/sections/kit-callout/schema";
 import { schema as productBreadcrumb } from "@/sections/main-product/breadcrumb/schema";
 import { schema as productBuyButtons } from "@/sections/main-product/buy-buttons/schema";
 import { schema as productCollapsibleDetails } from "@/sections/main-product/collapsible-details/schema";
+import { schema as productInfo } from "@/sections/main-product/info/schema";
 import { schema as productMedia } from "@/sections/main-product/media/schema";
 import { schema as productMeta } from "@/sections/main-product/meta/schema";
 import { schema as productPrices } from "@/sections/main-product/prices/schema";
@@ -94,6 +95,7 @@ export const SECTION_SCHEMAS: readonly SchemaType[] = [
   productBuyButtons,
   productCollapsibleDetails,
   productMedia,
+  productInfo,
   relatedProducts,
 
   /* COLLECTION */
