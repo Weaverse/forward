@@ -22,9 +22,17 @@ Forward is a fresh Next.js App Router storefront theme using
   never import the data source, and a section reused by more than one route
   takes its variations as props rather than forking into a near-copy.
 - Functional, stateful, and security-owned surfaces are not sections and stay
-  theme-owned: the collection and Shop grid behavior, Cart, and
-  `/account/**`. Header and Footer are theme-owned components configured
-  through theme settings, never Weaverse global sections.
+  theme-owned: the Shop grid behavior, Cart, and `/account/**`. Header and
+  Footer are theme-owned components configured through theme settings, never
+  Weaverse global sections.
+- Approved change (2026-09-21): collection browsing is composed as the
+  `main-collection` tree — `mc--toolbar` and `mc--content`, with `mc--filters`
+  and `mc--product-grid` under content. Query state stays theme-owned: the
+  route parses and validates `category`, `activity` and `sort`, reads the
+  narrowed products through `getCollectionProducts`, and hands the result down
+  as `collectionBrowse`. A section never parses a param or decides what a
+  filter means, so reordering the tree cannot change which products a URL
+  selects. `collection-grid` is retired and superseded by `mc--product-grid`.
 - Approved change (2026-09-18): the PDP buy block is the composable
   `main-product` section, split into `mp--media`, `mp--info` and one `mp--*`
   child per element. The section shell alone owns the `colorway`/`size` query
