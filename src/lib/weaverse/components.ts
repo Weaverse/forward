@@ -14,7 +14,8 @@
  *
  * - Header, Footer, announcement bar, and mini-cart, configured through theme
  *   settings and never composed.
- * - The collection and Shop grid behavior, Cart, and `/account/**`.
+ * - The Shop grid behavior, Cart, and `/account/**`. Collection browsing is
+ *   composed, but its query state is resolved by the route.
  * - `index-header`, `journal-*`, `product-results`, `search-*`, and
  *   `policy-document`, extracted for code organization only.
  */
@@ -30,7 +31,6 @@ import * as SectionContent from "@/components/section-content";
 import * as Subheading from "@/components/subheading";
 import * as ArticleBody from "@/sections/article-body";
 import * as ArticleHeader from "@/sections/article-header";
-import * as CollectionGrid from "@/sections/collection-grid";
 import * as CollectionHero from "@/sections/collection-hero";
 import * as CollectionIndex from "@/sections/collection-index";
 import * as EditorialCallout from "@/sections/editorial-callout";
@@ -42,6 +42,11 @@ import * as HeroSlideshow from "@/sections/hero-slideshow";
 import * as HeroSlide from "@/sections/hero-slideshow/slide";
 import * as HomeHero from "@/sections/home-hero";
 import * as KitCallout from "@/sections/kit-callout";
+import * as MainCollection from "@/sections/main-collection";
+import * as CollectionContent from "@/sections/main-collection/content";
+import * as CollectionFilters from "@/sections/main-collection/filters";
+import * as CollectionProductGrid from "@/sections/main-collection/product-grid";
+import * as CollectionToolbar from "@/sections/main-collection/toolbar";
 import * as MainProduct from "@/sections/main-product";
 import * as ProductBreadcrumb from "@/sections/main-product/breadcrumb";
 import * as ProductBuyButtons from "@/sections/main-product/buy-buttons";
@@ -128,7 +133,11 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
   /* COLLECTION */
   entry(CollectionHero),
   entry(SystemManifest),
-  entry(CollectionGrid),
+  entry(MainCollection),
+  entry(CollectionToolbar),
+  entry(CollectionContent),
+  entry(CollectionFilters),
+  entry(CollectionProductGrid),
   entry(FieldPractice),
 
   /* ARTICLE */

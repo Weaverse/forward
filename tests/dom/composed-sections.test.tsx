@@ -2,6 +2,7 @@ import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { render } from "@testing-library/react";
 
+import { deriveFilterGroups } from "@/lib/storefront/catalog-facets";
 import { COLLECTION_FIXTURES } from "@/lib/storefront/fixtures/collections";
 import { JOURNAL_FIXTURES } from "@/lib/storefront/fixtures/journal";
 import { PAGE_FIXTURES } from "@/lib/storefront/fixtures/pages";
@@ -39,6 +40,20 @@ const ROUTE_CONTEXT: StorefrontDataContext = {
   article: JOURNAL_FIXTURES[0],
   collection: COLLECTION_FIXTURES[0],
   collectionProducts: PRODUCT_FIXTURES,
+  /* The collection route resolves filter and sort before any section renders,
+   * so the `mc--*` elements only ever see a result, never a raw query. */
+  collectionBrowse: {
+    facets: deriveFilterGroups({
+      pathname: "/shop/field-essentials",
+      params: new URLSearchParams(),
+      products: PRODUCT_FIXTURES,
+      filter: {},
+      showCounts: true,
+    }),
+    filter: {},
+    sort: "featured",
+    total: PRODUCT_FIXTURES.length,
+  },
   page: PAGE_FIXTURES[0],
   product: PRODUCT_FIXTURES[0],
   products: PRODUCT_FIXTURES,

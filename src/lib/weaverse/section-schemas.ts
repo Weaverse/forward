@@ -21,7 +21,6 @@ import { schema as sectionContent } from "@/components/section-content/schema";
 import { schema as subheading } from "@/components/subheading/schema";
 import { schema as articleBody } from "@/sections/article-body/schema";
 import { schema as articleHeader } from "@/sections/article-header/schema";
-import { schema as collectionGrid } from "@/sections/collection-grid/schema";
 import { schema as collectionHero } from "@/sections/collection-hero/schema";
 import { schema as collectionIndex } from "@/sections/collection-index/schema";
 import { schema as editorialCallout } from "@/sections/editorial-callout/schema";
@@ -33,6 +32,11 @@ import { schema as heroSlideshow } from "@/sections/hero-slideshow/schema";
 import { schema as heroSlide } from "@/sections/hero-slideshow/slide/schema";
 import { schema as homeHero } from "@/sections/home-hero/schema";
 import { schema as kitCallout } from "@/sections/kit-callout/schema";
+import { schema as collectionContent } from "@/sections/main-collection/content/schema";
+import { schema as collectionFilters } from "@/sections/main-collection/filters/schema";
+import { schema as collectionProductGrid } from "@/sections/main-collection/product-grid/schema";
+import { schema as mainCollection } from "@/sections/main-collection/schema";
+import { schema as collectionToolbar } from "@/sections/main-collection/toolbar/schema";
 import { schema as productBreadcrumb } from "@/sections/main-product/breadcrumb/schema";
 import { schema as productBuyButtons } from "@/sections/main-product/buy-buttons/schema";
 import { schema as productCollapsibleDetails } from "@/sections/main-product/collapsible-details/schema";
@@ -101,7 +105,11 @@ export const SECTION_SCHEMAS: readonly SchemaType[] = [
   /* COLLECTION */
   collectionHero,
   systemManifest,
-  collectionGrid,
+  mainCollection,
+  collectionToolbar,
+  collectionContent,
+  collectionFilters,
+  collectionProductGrid,
   fieldPractice,
 
   /* ARTICLE */
