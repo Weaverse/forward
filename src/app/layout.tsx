@@ -83,6 +83,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={cn(
         archivo.variable,
         manrope.variable,
