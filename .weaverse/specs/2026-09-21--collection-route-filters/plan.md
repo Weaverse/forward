@@ -21,15 +21,17 @@ normalized `Product` model. No Pilot source is translated.
 
 ```
 collection-hero          (unchanged — already the page header)
-main-collection          shell: layout + MainCollectionContext
-├─ mc--toolbar           count, sort control, mobile filter disclosure
+main-collection          shell: layout
+├─ mc--toolbar           count, sort control
 └─ mc--content           two-column wrapper
-   ├─ mc--filters        facet sidebar
+   ├─ mc--filters        desktop sidebar, mobile disclosure
    └─ mc--product-grid   grid, pagination, empty state
 ```
 
 `collection-grid` is retired; `mc--product-grid` supersedes it and nothing in
 the repository references it outside the two registries.
+The Studio preset supplies the complete child tree. `main-collection` renders
+only its configured children, with no implicit composition for an empty shell.
 
 ### Query contract
 
@@ -44,6 +46,7 @@ parameters `listProducts` already has, and both adapters run the existing
 `filterAndSortProducts` over normalized records, so live mode cannot drift from
 static mode. Facets are derived from the collection's *unfiltered* products so
 options never disappear mid-filter; counts are computed against the filter.
+The `mc--filters` count setting applies to both desktop and mobile facets.
 
 ### Pagination
 
@@ -58,7 +61,7 @@ with a `ponytail:` comment naming the ceiling.
 
 - `src/lib/storefront/catalog-facets.ts` — filter/sort parsing, facet
   derivation, href building; shared by `/shop` and the collection route
-- `src/sections/main-collection/index.tsx`, `schema.ts`, `context.ts`
+- `src/sections/main-collection/index.tsx`, `schema.ts`
 - `src/sections/main-collection/toolbar/index.tsx`, `schema.ts`
 - `src/sections/main-collection/content/index.tsx`, `schema.ts`
 - `src/sections/main-collection/filters/index.tsx`, `schema.ts`
@@ -70,7 +73,7 @@ with a `ponytail:` comment naming the ceiling.
 - `src/lib/storefront/data-source.ts` — `getCollectionProducts` signature,
   static implementation
 - `src/lib/storefront/shopify/data-source.ts` — same signature, live path
-- `src/lib/weaverse/data-context.tsx` — collection facets, filter, sort, total
+- `src/lib/weaverse/data-context.tsx` — collection facets, filter, sort
 - `src/lib/weaverse/components.ts`, `src/lib/weaverse/section-schemas.ts`
 - `src/app/shop/[collectionHandle]/page.tsx` — parse query, resolve products
 - `src/app/shop/page.tsx` — consume the shared facet module

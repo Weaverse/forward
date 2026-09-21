@@ -1,7 +1,7 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { Children, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
 
@@ -9,10 +9,6 @@ import {
   elementAttributes,
   type WeaverseElementProps,
 } from "../weaverse-element";
-import CollectionContent from "./content";
-import CollectionFilters from "./filters";
-import CollectionProductGrid from "./product-grid";
-import CollectionToolbar from "./toolbar";
 
 type Spacing = "compact" | "standard" | "roomy";
 
@@ -39,10 +35,6 @@ interface MainCollectionProps extends WeaverseElementProps {
  * route resolves and validates before any product is read, and it arrives here
  * through the storefront data context — so a merchant reordering this tree can
  * never change what a filter means or which products a URL selects.
- *
- * A collection URL must never lose its grid, so a section with no children —
- * the theme's own default, or a template seeded before this block existed —
- * renders the default composition.
  */
 function MainCollection({ children, spacing, ...rest }: MainCollectionProps) {
   const { collection } = useStorefrontContext();
@@ -50,21 +42,8 @@ function MainCollection({ children, spacing, ...rest }: MainCollectionProps) {
 
   return (
     <div {...elementAttributes(rest)} className={shell({ spacing })}>
-      {Children.count(children) > 0 ? children : <DefaultComposition />}
+      {children}
     </div>
-  );
-}
-
-/** What the section renders when it has no children of its own. */
-function DefaultComposition() {
-  return (
-    <>
-      <CollectionToolbar />
-      <CollectionContent>
-        <CollectionFilters />
-        <CollectionProductGrid />
-      </CollectionContent>
-    </>
   );
 }
 
