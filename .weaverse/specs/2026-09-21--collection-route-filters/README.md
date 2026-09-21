@@ -2,7 +2,7 @@
 
 | Field            | Value                                   |
 | ---------------- | --------------------------------------- |
-| **Status**       | in-progress                             |
+| **Status**       | completed                               |
 | **Owner**        | @hta218                                 |
 | **Issue**        | [#78](https://github.com/Weaverse/forward/issues/78) |
 | **Branch**       | `feat/collection-route-filters`         |
