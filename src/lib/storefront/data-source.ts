@@ -63,7 +63,11 @@ export interface StorefrontDataSource {
   getProduct(handle: string): Promise<Product | null>;
   listCollections(): Promise<readonly Collection[]>;
   getCollection(handle: string): Promise<Collection | null>;
-  getCollectionProducts(handle: string): Promise<readonly Product[] | null>;
+  getCollectionProducts(
+    handle: string,
+    filter?: ProductListFilter,
+    sort?: ProductSort,
+  ): Promise<readonly Product[] | null>;
   searchProducts(query: string): Promise<readonly Product[]>;
   listArticles(): Promise<readonly JournalArticle[]>;
   getArticle(handle: string): Promise<JournalArticle | null>;
@@ -111,6 +115,8 @@ export class StaticStorefrontDataSource implements StorefrontDataSource {
 
   async getCollectionProducts(
     handle: string,
+    filter: ProductListFilter = {},
+    sort: ProductSort = "featured",
   ): Promise<readonly Product[] | null> {
     const collection = await this.getCollection(handle);
     if (collection === null) {
@@ -121,7 +127,11 @@ export class StaticStorefrontDataSource implements StorefrontDataSource {
         this.getProduct(productHandle),
       ),
     );
-    return products.filter((product): product is Product => product !== null);
+    return filterAndSortProducts(
+      products.filter((product): product is Product => product !== null),
+      filter,
+      sort,
+    );
   }
 
   async searchProducts(query: string): Promise<readonly Product[]> {

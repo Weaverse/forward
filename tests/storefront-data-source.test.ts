@@ -83,6 +83,51 @@ describe("StaticStorefrontDataSource known handles", () => {
       }
     }
   });
+
+  it("narrows and orders a collection through the same normalized semantics", async () => {
+    /* The collection route hands filter and sort straight to this call, so
+     * the seam has to apply them rather than return the whole collection and
+     * leave a page to re-filter what it was given. */
+    const [collection] = await storefront.listCollections();
+    assert.ok(collection);
+    const all = await storefront.getCollectionProducts(collection.handle);
+    assert.ok(all);
+
+    const category = all[0]?.category;
+    assert.ok(category);
+    const narrowed = await storefront.getCollectionProducts(collection.handle, {
+      category,
+    });
+    assert.ok(narrowed);
+    assert.ok(narrowed.length <= all.length);
+    assert.deepEqual(
+      narrowed.map((product) => product.category),
+      narrowed.map(() => category),
+    );
+
+    const ascending = await storefront.getCollectionProducts(
+      collection.handle,
+      {},
+      "price-asc",
+    );
+    assert.ok(ascending);
+    const amounts = ascending.map((product) => product.price.amount);
+    assert.deepEqual(
+      amounts,
+      [...amounts].sort((a, b) => a - b),
+    );
+  });
+
+  it("returns nothing for a filter the collection cannot satisfy", async () => {
+    const [collection] = await storefront.listCollections();
+    assert.ok(collection);
+    assert.deepEqual(
+      await storefront.getCollectionProducts(collection.handle, {
+        activity: "no-such-activity",
+      }),
+      [],
+    );
+  });
 });
 
 describe("StaticStorefrontDataSource search", () => {

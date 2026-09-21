@@ -251,13 +251,15 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
 
   async getCollectionProducts(
     handle: string,
+    filter: ProductListFilter = {},
+    sort: ProductSort = "featured",
   ): Promise<readonly Product[] | null> {
     const collection = await this.getCollection(handle);
     if (collection === null) {
       return null;
     }
     const catalog = await this.#loadCatalog();
-    return collection.productHandles.map((productHandle) => {
+    const products = collection.productHandles.map((productHandle) => {
       const product = catalog.find((entry) => entry.handle === productHandle);
       if (product === undefined) {
         throw new ShopifyCatalogError(
@@ -266,6 +268,9 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
       }
       return product;
     });
+    /* The same normalized narrowing `/shop` runs, so a collection filtered
+     * live cannot drift from one filtered against fixtures. */
+    return filterAndSortProducts(products, filter, sort);
   }
 
   async getNavigation(): Promise<SiteNavigation> {
