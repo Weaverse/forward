@@ -1,5 +1,7 @@
 "use client";
 
+import type { CSSProperties } from "react";
+
 import { FilterSidebar } from "@/components/filter-sidebar";
 import { cn } from "@/lib/cn";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
@@ -19,11 +21,11 @@ interface CollectionFiltersProps extends WeaverseElementProps {
 }
 
 /**
- * The facet sidebar.
+ * The facet controls for mobile and desktop.
  *
  * Every row is an href the route already validated, so narrowing a collection
- * needs no JavaScript and every result is a URL a shopper can share. Hidden
- * below `lg`, where the toolbar's disclosure carries the same groups.
+ * needs no JavaScript and every result is a URL a shopper can share. Both
+ * layouts use this component's settings, so counts cannot diverge by viewport.
  */
 function CollectionFilters({
   heading,
@@ -40,12 +42,26 @@ function CollectionFilters({
   return (
     <div
       {...elementAttributes(rest)}
-      className="hidden w-full shrink-0 lg:block"
-      style={{ width: sidebarWidth ?? DEFAULT_SIDEBAR_WIDTH }}
+      className="w-full shrink-0 lg:w-[var(--collection-sidebar-width)]"
+      style={
+        {
+          "--collection-sidebar-width": `${sidebarWidth ?? DEFAULT_SIDEBAR_WIDTH}px`,
+        } as CSSProperties
+      }
     >
+      <details className="group/disclosure border-ink border-b lg:hidden">
+        <summary className="flex min-h-touch list-none items-center justify-between font-body text-micro font-medium tracking-label uppercase after:content-['+'] group-open/disclosure:after:content-['−'] [&::-webkit-details-marker]:hidden">
+          {heading ?? "Filters"}
+        </summary>
+        <FilterSidebar
+          groups={collectionBrowse.facets}
+          idPrefix="collection-mobile"
+          showCounts={showCounts !== false}
+        />
+      </details>
       <div
         className={cn(
-          "flex flex-col gap-4",
+          "hidden flex-col gap-4 lg:flex",
           sticky !== false && "sticky top-[calc(var(--spacing-header)+30px)]",
         )}
       >

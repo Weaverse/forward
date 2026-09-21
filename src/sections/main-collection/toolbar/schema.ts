@@ -27,7 +27,7 @@ export const schema = createSchema({
           label: "Stick below the header",
           defaultValue: true,
           helpText:
-            "Keeps the count, sort and mobile filter reachable while the grid scrolls.",
+            "Keeps the count and sort reachable while the grid scrolls.",
         },
       ],
     },

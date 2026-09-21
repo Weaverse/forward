@@ -3,7 +3,6 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
-import { FilterSidebar } from "@/components/filter-sidebar";
 import { cn } from "@/lib/cn";
 import { describeFilter, SORT_OPTIONS } from "@/lib/storefront/catalog-facets";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
@@ -20,9 +19,7 @@ interface CollectionToolbarProps extends WeaverseElementProps {
 }
 
 /**
- * The bar above the results: how many products matched, how they are ordered,
- * and — below the filter sidebar's breakpoint — the only way to reach the
- * facets at all.
+ * The bar above the results: how many products matched and how they are ordered.
  */
 function CollectionToolbar({
   showCount,
@@ -51,21 +48,6 @@ function CollectionToolbar({
             {describeFilter(collectionBrowse.filter)}
           </span>
         )}
-        {collectionBrowse.facets.length > 0 ? (
-          /* The sidebar is desktop-only, so small screens get the facets
-           * through a disclosure rather than losing them. */
-          <details className="group/disclosure lg:hidden">
-            <summary className="flex min-h-touch list-none items-center gap-2 font-body text-micro font-medium tracking-label uppercase after:content-['+'] group-open/disclosure:after:content-['−'] [&::-webkit-details-marker]:hidden">
-              Filter
-            </summary>
-            <div className="absolute inset-x-0 z-40 border-ink border-b bg-signal px-page-gutter pb-4">
-              <FilterSidebar
-                groups={collectionBrowse.facets}
-                idPrefix="collection-mobile"
-              />
-            </div>
-          </details>
-        ) : null}
       </div>
       {showSort === false ? null : (
         <Suspense fallback={null}>

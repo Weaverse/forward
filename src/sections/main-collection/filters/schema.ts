@@ -21,7 +21,7 @@ export const schema = createSchema({
           label: "Sidebar width",
           defaultValue: 288,
           configs: { min: 200, max: 400, step: 8, unit: "px" },
-          helpText: "Desktop only; below that the toolbar carries the facets.",
+          helpText: "Desktop only; mobile filters use the full row width.",
         },
         {
           type: "switch",
