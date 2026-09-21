@@ -107,7 +107,6 @@ export default async function CollectionPage(props: CollectionPageProps) {
           }),
           filter,
           sort,
-          total: catalog.length,
         },
       }}
       projectId={projectId}

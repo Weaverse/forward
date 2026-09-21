@@ -11,7 +11,10 @@ import {
   StorefrontDataProvider,
 } from "@/lib/weaverse/data-context";
 import MainCollection from "@/sections/main-collection";
+import CollectionContent from "@/sections/main-collection/content";
+import CollectionFilters from "@/sections/main-collection/filters";
 import CollectionProductGrid from "@/sections/main-collection/product-grid";
+import CollectionToolbar from "@/sections/main-collection/toolbar";
 
 import { setRoute } from "./preload";
 
@@ -42,7 +45,6 @@ function routeContext(
       }),
       filter,
       sort,
-      total: PRODUCT_FIXTURES.length,
     },
   };
 }
@@ -50,14 +52,19 @@ function routeContext(
 function renderBrowse(context: StorefrontDataContext) {
   return render(
     <StorefrontDataProvider value={context}>
-      <MainCollection />
+      <MainCollection>
+        <CollectionToolbar />
+        <CollectionContent>
+          <CollectionFilters />
+          <CollectionProductGrid />
+        </CollectionContent>
+      </MainCollection>
     </StorefrontDataProvider>,
   );
 }
 
-describe("collection browse default composition", () => {
-  it("renders toolbar, facets and grid when the section has no children", () => {
-    /* A collection URL must never lose its grid, whatever a template holds. */
+describe("collection browse composition", () => {
+  it("renders the toolbar, facets and grid supplied by Studio", () => {
     setRoute(PATH);
     const { container } = renderBrowse(routeContext());
 
@@ -82,6 +89,26 @@ describe("collection browse default composition", () => {
 });
 
 describe("collection facet links", () => {
+  it("applies the count setting to mobile and desktop filters", () => {
+    setRoute(PATH);
+    const { container, rerender } = render(
+      <StorefrontDataProvider value={routeContext()}>
+        <CollectionFilters showCounts={false} />
+      </StorefrontDataProvider>,
+    );
+
+    assert.notEqual(container.querySelector("details > summary"), null);
+    assert.ok(container.querySelectorAll("a[href*='activity=']").length > 1);
+    assert.equal(container.querySelectorAll(".tabular-nums").length, 0);
+
+    rerender(
+      <StorefrontDataProvider value={routeContext()}>
+        <CollectionFilters showCounts />
+      </StorefrontDataProvider>,
+    );
+    assert.ok(container.querySelectorAll(".tabular-nums").length > 1);
+  });
+
   it("points every facet at the current path with validated query state", () => {
     setRoute(PATH, "utm_source=newsletter");
     const { container } = renderBrowse(routeContext("utm_source=newsletter"));

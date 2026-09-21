@@ -52,7 +52,6 @@ const ROUTE_CONTEXT: StorefrontDataContext = {
     }),
     filter: {},
     sort: "featured",
-    total: PRODUCT_FIXTURES.length,
   },
   page: PAGE_FIXTURES[0],
   product: PRODUCT_FIXTURES[0],

@@ -26,8 +26,6 @@ export interface CollectionBrowse {
   facets: readonly FilterGroup[];
   filter: ProductListFilter;
   sort: ProductSort;
-  /** Products in the collection before the current filter. */
-  total: number;
 }
 
 /**
