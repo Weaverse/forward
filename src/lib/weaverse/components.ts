@@ -14,8 +14,7 @@
  *
  * - Header, Footer, announcement bar, and mini-cart, configured through theme
  *   settings and never composed.
- * - The PDP buy block and its `colorway`/`size` query state, the collection and
- *   Shop grid behavior, Cart, and `/account/**`.
+ * - The collection and Shop grid behavior, Cart, and `/account/**`.
  * - `index-header`, `journal-*`, `product-results`, `search-*`, and
  *   `policy-document`, extracted for code organization only.
  */
@@ -44,6 +43,16 @@ import * as HeroSlide from "@/sections/hero-slideshow/slide";
 import * as HomeHero from "@/sections/home-hero";
 import * as KitCallout from "@/sections/kit-callout";
 import * as MainProduct from "@/sections/main-product";
+import * as ProductBreadcrumb from "@/sections/main-product/breadcrumb";
+import * as ProductBuyButtons from "@/sections/main-product/buy-buttons";
+import * as ProductCollapsibleDetails from "@/sections/main-product/collapsible-details";
+import * as ProductInfo from "@/sections/main-product/info";
+import * as ProductMedia from "@/sections/main-product/media";
+import * as ProductMeta from "@/sections/main-product/meta";
+import * as ProductPrices from "@/sections/main-product/prices";
+import * as ProductSummary from "@/sections/main-product/summary";
+import * as ProductTitle from "@/sections/main-product/title";
+import * as ProductVariantSelector from "@/sections/main-product/variant-selector";
 import * as MaterialStandard from "@/sections/material-standard";
 import * as NumberedSequence from "@/sections/numbered-sequence";
 import * as PageHero from "@/sections/page-hero";
@@ -104,6 +113,16 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
 
   /* PRODUCT */
   entry(MainProduct),
+  entry(ProductBreadcrumb),
+  entry(ProductMeta),
+  entry(ProductTitle),
+  entry(ProductPrices),
+  entry(ProductSummary),
+  entry(ProductVariantSelector),
+  entry(ProductBuyButtons),
+  entry(ProductCollapsibleDetails),
+  entry(ProductMedia),
+  entry(ProductInfo),
   entry(RelatedProducts),
 
   /* COLLECTION */

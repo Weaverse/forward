@@ -33,7 +33,17 @@ import { schema as heroSlideshow } from "@/sections/hero-slideshow/schema";
 import { schema as heroSlide } from "@/sections/hero-slideshow/slide/schema";
 import { schema as homeHero } from "@/sections/home-hero/schema";
 import { schema as kitCallout } from "@/sections/kit-callout/schema";
+import { schema as productBreadcrumb } from "@/sections/main-product/breadcrumb/schema";
+import { schema as productBuyButtons } from "@/sections/main-product/buy-buttons/schema";
+import { schema as productCollapsibleDetails } from "@/sections/main-product/collapsible-details/schema";
+import { schema as productInfo } from "@/sections/main-product/info/schema";
+import { schema as productMedia } from "@/sections/main-product/media/schema";
+import { schema as productMeta } from "@/sections/main-product/meta/schema";
+import { schema as productPrices } from "@/sections/main-product/prices/schema";
 import { schema as mainProduct } from "@/sections/main-product/schema";
+import { schema as productSummary } from "@/sections/main-product/summary/schema";
+import { schema as productTitle } from "@/sections/main-product/title/schema";
+import { schema as productVariantSelector } from "@/sections/main-product/variant-selector/schema";
 import { schema as materialStandard } from "@/sections/material-standard/schema";
 import { schema as numberedSequence } from "@/sections/numbered-sequence/schema";
 import { schema as pageHero } from "@/sections/page-hero/schema";
@@ -76,6 +86,16 @@ export const SECTION_SCHEMAS: readonly SchemaType[] = [
 
   /* PRODUCT */
   mainProduct,
+  productBreadcrumb,
+  productMeta,
+  productTitle,
+  productPrices,
+  productSummary,
+  productVariantSelector,
+  productBuyButtons,
+  productCollapsibleDetails,
+  productMedia,
+  productInfo,
   relatedProducts,
 
   /* COLLECTION */

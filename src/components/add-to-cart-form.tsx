@@ -28,6 +28,10 @@ interface AddToCartFormProps {
   selection: ProductSelection;
   /** The surface behind the form: the PDP's ink panel, or a light section. */
   tone?: Surface;
+  addToCartText?: string;
+  soldOutText?: string;
+  /** The line under the buttons saying which cart this is. */
+  showCartNote?: boolean;
 }
 
 const ACTIONS_CLASS = "mt-7.5 grid grid-cols-1 gap-2 sm:grid-cols-[112px_1fr]";
@@ -68,6 +72,9 @@ function DemoAddToCartForm({
   product,
   selection,
   tone = "dark",
+  addToCartText = "Add to cart",
+  soldOutText = "Sold out",
+  showCartNote = true,
 }: AddToCartFormProps) {
   const [quantity, setQuantity] = useState(1);
   const [status, setStatus] = useState("");
@@ -138,7 +145,7 @@ function DemoAddToCartForm({
           disabled={!selection.variant.availableForSale}
           onClick={handleAdd}
         >
-          {selection.variant.availableForSale ? "Add to cart" : "Sold out"} ·{" "}
+          {selection.variant.availableForSale ? addToCartText : soldOutText} ·{" "}
           {formatMoney({
             amount: selection.variant.price.amount * quantity,
             currencyCode: "USD",
@@ -148,10 +155,12 @@ function DemoAddToCartForm({
       <p className={feedback({ tone })} role="status">
         {status}
       </p>
-      <p className={note({ tone })}>
-        Demo cart only — items stay in this browser and no checkout is
-        connected.
-      </p>
+      {showCartNote ? (
+        <p className={note({ tone })}>
+          Demo cart only — items stay in this browser and no checkout is
+          connected.
+        </p>
+      ) : null}
     </>
   );
 }
@@ -159,6 +168,9 @@ function DemoAddToCartForm({
 function ShopifyAddToCartForm({
   selection,
   tone = "dark",
+  addToCartText = "Add to cart",
+  soldOutText = "Sold out",
+  showCartNote = true,
 }: AddToCartFormProps) {
   const { formProps, pending, register, selectedVariant } =
     useShopifyProductForm();
@@ -253,8 +265,8 @@ function ShopifyAddToCartForm({
           {pending
             ? "Adding…"
             : selectedVariant?.availableForSale
-              ? "Add to cart"
-              : "Sold out"}{" "}
+              ? addToCartText
+              : soldOutText}{" "}
           ·{" "}
           {formatMoney({
             amount: selectedPrice * quantity,
@@ -265,10 +277,12 @@ function ShopifyAddToCartForm({
       <p className={feedback({ tone })} role="status" aria-live="polite">
         {pending ? "Updating your cart…" : ""}
       </p>
-      <p className={note({ tone })}>
-        Secure Shopify cart. Checkout is handed off to Shopify; no payment runs
-        on this page.
-      </p>
+      {showCartNote ? (
+        <p className={note({ tone })}>
+          Secure Shopify cart. Checkout is handed off to Shopify; no payment
+          runs on this page.
+        </p>
+      ) : null}
     </form>
   );
 }

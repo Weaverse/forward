@@ -71,10 +71,11 @@ export default async function ProductPage(props: ProductPageProps) {
   return (
     <>
       {/* The buy block is the one surface a product URL cannot be without. It
-       * is a section so Studio can place things around it, but a template that
-       * has not been seeded — or one a merchant removed it from — must not
-       * leave a product page with no gallery, no variant selection and no way
-       * to add to cart. So the route renders it when the page does not. */}
+       * is a section so Studio can compose and configure it, but a template
+       * that has not been seeded — or one a merchant removed it from — must
+       * not leave a product page with no gallery, no variant selection and no
+       * way to add to cart. So the route renders it, childless and therefore
+       * in its default composition, when the page does not. */}
       {pageRenders(page, "main-product") ? null : (
         <StorefrontDataProvider value={{ product }}>
           <MainProduct />
