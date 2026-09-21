@@ -136,6 +136,35 @@ test.describe("PDP zoom dialog", () => {
       ),
     ).not.toBe("hidden");
   });
+
+  test("fits the zoomed image between the header and the thumb strip", async ({
+    page,
+  }) => {
+    await gotoReady(page, PDP);
+    await page
+      .getByRole("region", { name: /gallery$/ })
+      .getByRole("button")
+      .nth(1)
+      .click();
+    const dialog = page.getByRole("dialog", { name: /image gallery$/ });
+    await expect(dialog).toBeVisible();
+
+    /* The dialog is the viewport: nothing may be parked below the fold. */
+    expect(
+      await dialog.evaluate((node) => node.scrollHeight - node.clientHeight),
+    ).toBeLessThanOrEqual(1);
+
+    const image = dialog.getByRole("img").first();
+    await expect(image).toBeVisible();
+    const thumbs = dialog.getByRole("group", { name: "Choose gallery image" });
+    const [shot, strip] = [await boxOf(image), await boxOf(thumbs)];
+    expect(shot && strip).toBeTruthy();
+    if (!shot || !strip) return;
+
+    /* The strip is drawn after the stage, so an unclipped image hides under
+       it rather than pushing it down. */
+    expect(shot.y + shot.height).toBeLessThanOrEqual(strip.y + 1);
+  });
 });
 
 test.describe("PDP option controls", () => {

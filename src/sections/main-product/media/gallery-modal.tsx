@@ -58,7 +58,7 @@ export function GalleryModal({
   return (
     <dialog
       ref={dialogRef}
-      className="m-0 h-svh max-h-none w-screen max-w-none border-0 bg-ink p-0 text-text-inverse backdrop:bg-black/94"
+      className="m-0 flex h-dvh max-h-none w-screen max-w-none flex-col overflow-hidden border-0 bg-ink p-0 text-text-inverse backdrop:bg-black/94"
       aria-label={`${product.title} image gallery`}
       onClose={onClose}
       onCancel={(event) => {
@@ -66,7 +66,7 @@ export function GalleryModal({
         dialogRef.current?.close();
       }}
     >
-      <div className="grid h-14.5 grid-cols-lead-trailing items-center gap-7.5 border-border-dark border-b px-5 font-field-meta text-micro uppercase md:grid-cols-[1fr_auto_auto]">
+      <div className="grid h-14.5 shrink-0 grid-cols-lead-trailing items-center gap-7.5 border-border-dark border-b px-5 font-field-meta text-micro uppercase md:grid-cols-[1fr_auto_auto]">
         <span>
           {product.title} / {colorway.name}
         </span>
@@ -83,19 +83,20 @@ export function GalleryModal({
           Close ×
         </button>
       </div>
-      <div className="relative grid h-[calc(100svh-138px)] place-items-center px-12.5 py-3 md:h-[calc(100svh-148px)] md:px-20 md:py-4.5">
-        <Image
-          className="h-full w-auto max-w-full object-contain"
-          key={image.src}
-          src={image.src}
-          alt={image.alt}
-          width={image.width}
-          height={image.height}
-          sizes="100vw"
-          priority
-        />
+      <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden px-12.5 py-3 md:px-20 md:py-4.5">
+        <div className="relative h-full w-full">
+          <Image
+            className="bg-transparent object-contain"
+            key={image.src}
+            src={image.src}
+            alt={image.alt}
+            fill
+            sizes="100vw"
+            priority
+          />
+        </div>
         <button
-          className="absolute top-1/2 left-4 h-14 w-12 bg-signal text-product-price text-ink"
+          className="absolute top-1/2 left-4 h-14 w-12 -translate-y-1/2 bg-signal text-product-price text-ink"
           type="button"
           onClick={() =>
             setIndex((current) => (current - 1 + images.length) % images.length)
@@ -105,7 +106,7 @@ export function GalleryModal({
           ←
         </button>
         <button
-          className="absolute top-1/2 right-4 h-14 w-12 bg-signal text-product-price text-ink"
+          className="absolute top-1/2 right-4 h-14 w-12 -translate-y-1/2 bg-signal text-product-price text-ink"
           type="button"
           onClick={() => setIndex((current) => (current + 1) % images.length)}
           aria-label="Next image"
@@ -113,7 +114,7 @@ export function GalleryModal({
           →
         </button>
       </div>
-      <fieldset className="flex h-20 justify-center gap-2 border-border-dark border-t p-2.25 md:h-22.5">
+      <fieldset className="flex h-20 shrink-0 justify-center gap-2 border-border-dark border-t p-2.25 md:h-22.5">
         <legend className="sr-only">Choose gallery image</legend>
         {images.map((entry, entryIndex) => (
           <button
