@@ -2,12 +2,33 @@
 
 import { createContext, type ReactNode, useContext } from "react";
 
+import type { FilterGroup } from "@/lib/storefront/catalog-facets";
 import type {
   Collection,
   JournalArticle,
   Product,
+  ProductListFilter,
+  ProductSort,
   StorePage,
 } from "@/lib/storefront/types";
+
+/**
+ * The resolved browse state of a collection page.
+ *
+ * Filtering is query state, and query state belongs to the route: it is what
+ * a shopper can bookmark and share, it has to be validated before it reaches
+ * the data source, and the products it selects are read on the server. The
+ * `main-collection` tree is presentation over this, so a section never parses
+ * a param or decides what a filter means.
+ */
+export interface CollectionBrowse {
+  /** Facet groups built from the collection before the current filter. */
+  facets: readonly FilterGroup[];
+  filter: ProductListFilter;
+  sort: ProductSort;
+  /** Products in the collection before the current filter. */
+  total: number;
+}
 
 /**
  * Storefront data the route supplies to a composed page.
@@ -25,7 +46,9 @@ import type {
 export interface StorefrontDataContext {
   article?: JournalArticle;
   collection?: Collection;
+  /** The collection's products after the route applied filter and sort. */
   collectionProducts?: readonly Product[];
+  collectionBrowse?: CollectionBrowse;
   page?: StorePage;
   product?: Product;
   products?: readonly Product[];
