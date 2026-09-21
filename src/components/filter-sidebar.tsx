@@ -1,26 +1,18 @@
 import Link from "next/link";
 
 import { cn } from "@/lib/cn";
-
-export interface FilterLink {
-  key: string;
-  label: string;
-  href: string;
-  selected: boolean;
-}
-
-export interface FilterGroup {
-  heading: string;
-  links: readonly FilterLink[];
-}
+import type { FilterGroup } from "@/lib/storefront/catalog-facets";
 
 /** Each filter row links to validated query state without requiring JavaScript. */
 export function FilterSidebar({
   groups,
   idPrefix,
+  showCounts = true,
 }: {
   groups: readonly FilterGroup[];
   idPrefix: string;
+  /** Counts still render only when the group was built with them. */
+  showCounts?: boolean;
 }) {
   return (
     <div
@@ -50,7 +42,10 @@ export function FilterSidebar({
                   className="size-3.25 flex-none rounded-full border border-border-subtle group-aria-[current=page]/check:border-ink group-aria-[current=page]/check:bg-signal"
                   aria-hidden="true"
                 />
-                {link.label}
+                <span className="flex-1">{link.label}</span>
+                {link.count === undefined || !showCounts ? null : (
+                  <span className="tabular-nums">{link.count}</span>
+                )}
               </Link>
             ))}
           </div>

@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import type { FilterGroup } from "@/components/filter-sidebar";
 import { FilterSidebar } from "@/components/filter-sidebar";
+import {
+  deriveFilterGroups,
+  describeFilter,
+  parseCatalogQuery,
+  SORT_OPTIONS,
+  toSearchParams,
+} from "@/lib/storefront/catalog-facets";
 import { storefront } from "@/lib/storefront/data-source";
-import type {
-  ProductCategory,
-  ProductListFilter,
-  ProductSort,
-} from "@/lib/storefront/types";
 import { IndexHeader } from "@/sections/index-header";
 import { ProductResults } from "@/sections/product-results";
 
@@ -18,106 +19,21 @@ export const metadata: Metadata = {
     "The complete Forward catalog: Weatherline Shell, Ridge 30 Field Pack, and Talus Trail Shoe.",
 };
 
-const CATEGORY_FILTERS: ReadonlyArray<{
-  value: ProductCategory | undefined;
-  label: string;
-}> = [
-  { value: undefined, label: "All categories" },
-  { value: "shells", label: "Shells" },
-  { value: "packs", label: "Packs" },
-  { value: "footwear", label: "Footwear" },
-];
-
-const SORT_OPTIONS: ReadonlyArray<{ value: ProductSort; label: string }> = [
-  { value: "featured", label: "Featured" },
-  { value: "price-asc", label: "Price low–high" },
-  { value: "price-desc", label: "Price high–low" },
-  { value: "name", label: "Name A–Z" },
-];
-
-function parseCategory(value: string | undefined): ProductCategory | undefined {
-  return value === "shells" || value === "packs" || value === "footwear"
-    ? value
-    : undefined;
-}
-
-function parseSort(value: string | undefined): ProductSort {
-  return value === "price-asc" || value === "price-desc" || value === "name"
-    ? value
-    : "featured";
-}
-
-function shopHref(
-  category: ProductCategory | undefined,
-  activity: string | undefined,
-  sort: ProductSort,
-): string {
-  const params = new URLSearchParams();
-  if (category !== undefined) {
-    params.set("category", category);
-  }
-  if (activity !== undefined) {
-    params.set("activity", activity);
-  }
-  if (sort !== "featured") {
-    params.set("sort", sort);
-  }
-  const query = params.toString();
-  return query.length > 0 ? `/shop?${query}` : "/shop";
-}
-
 interface ShopPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
-  const params = await searchParams;
-  const category = parseCategory(
-    typeof params.category === "string" ? params.category : undefined,
-  );
-  const sort = parseSort(
-    typeof params.sort === "string" ? params.sort : undefined,
-  );
+  const params = toSearchParams(await searchParams);
   const catalog = await storefront.listProducts();
-  const activities = [
-    ...new Set(catalog.flatMap((product) => product.activities)),
-  ];
-  const requestedActivity =
-    typeof params.activity === "string" ? params.activity : undefined;
-  const activity = activities.includes(requestedActivity ?? "")
-    ? requestedActivity
-    : undefined;
-  const filter: ProductListFilter = { category, activity };
+  const { filter, sort } = parseCatalogQuery(params, catalog);
   const products = await storefront.listProducts(filter, sort);
-
-  const filterGroups: readonly FilterGroup[] = [
-    {
-      heading: "Activity",
-      links: [
-        {
-          key: "all-activities",
-          label: "All activities",
-          href: shopHref(category, undefined, sort),
-          selected: activity === undefined,
-        },
-        ...activities.map((entry) => ({
-          key: entry,
-          label: entry,
-          href: shopHref(category, entry, sort),
-          selected: entry === activity,
-        })),
-      ],
-    },
-    {
-      heading: "Category",
-      links: CATEGORY_FILTERS.map((entry) => ({
-        key: entry.label,
-        label: entry.label,
-        href: shopHref(entry.value, activity, sort),
-        selected: entry.value === category,
-      })),
-    },
-  ];
+  const filterGroups = deriveFilterGroups({
+    pathname: "/shop",
+    params,
+    products: catalog,
+    filter,
+  });
 
   return (
     <>
@@ -136,8 +52,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         <div className="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-start">
           <span className="text-ui sm:text-copy-sm" aria-live="polite">
             {products.length} {products.length === 1 ? "product" : "products"}
-            {category !== undefined ? ` · ${category}` : ""}
-            {activity !== undefined ? ` · ${activity}` : ""}
+            {describeFilter(filter)}
           </span>
         </div>
         {/* Sorting stays a plain GET form so it works without JavaScript. */}
@@ -146,12 +61,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           method="get"
           action="/shop"
         >
-          {category !== undefined ? (
-            <input type="hidden" name="category" value={category} />
-          ) : null}
-          {activity !== undefined ? (
-            <input type="hidden" name="activity" value={activity} />
-          ) : null}
+          {filter.category === undefined ? null : (
+            <input type="hidden" name="category" value={filter.category} />
+          )}
+          {filter.activity === undefined ? null : (
+            <input type="hidden" name="activity" value={filter.activity} />
+          )}
           <label
             className="font-field-meta text-caption font-medium text-text-muted tracking-field-meta uppercase"
             htmlFor="sort-products"

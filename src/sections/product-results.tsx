@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { type FilterGroup, FilterSidebar } from "@/components/filter-sidebar";
+import { FilterSidebar } from "@/components/filter-sidebar";
 import { ProductCard } from "@/components/product-card";
 import {
   cta,
@@ -8,6 +8,7 @@ import {
   eyebrow,
   sectionHeading,
 } from "@/lib/presentation/variants";
+import type { FilterGroup } from "@/lib/storefront/catalog-facets";
 import type { Product } from "@/lib/storefront/types";
 
 interface ProductResultsProps {
