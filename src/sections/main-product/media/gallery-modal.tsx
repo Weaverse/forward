@@ -84,17 +84,16 @@ export function GalleryModal({
         </button>
       </div>
       <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden px-12.5 py-3 md:px-20 md:py-4.5">
-        <div className="relative h-full w-full">
-          <Image
-            className="bg-transparent object-contain"
-            key={image.src}
-            src={image.src}
-            alt={image.alt}
-            fill
-            sizes="100vw"
-            priority
-          />
-        </div>
+        <Image
+          className="h-full w-full bg-transparent object-contain"
+          key={image.src}
+          src={image.src}
+          alt={image.alt}
+          width={image.width}
+          height={image.height}
+          sizes="100vw"
+          priority
+        />
         <button
           className="absolute top-1/2 left-4 h-14 w-12 -translate-y-1/2 bg-signal text-product-price text-ink"
           type="button"
