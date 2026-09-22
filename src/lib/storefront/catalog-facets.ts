@@ -26,8 +26,8 @@ export interface FilterLink {
   label: string;
   href: string;
   selected: boolean;
-  /** Matches after this link is applied; omitted when counts are off. */
-  count?: number;
+  /** Products left after this link is applied. Rendering it is the view's call. */
+  count: number;
 }
 
 export interface FilterGroup {
@@ -35,11 +35,19 @@ export interface FilterGroup {
   links: readonly FilterLink[];
 }
 
-export const CATEGORY_LABELS: Readonly<Record<ProductCategory, string>> = {
+/**
+ * The category axis: declared order, display label, and the set of valid
+ * values, in one place. Key order is the order shoppers see — outerwear, then
+ * carry, then footwear — and `CATEGORIES` is what an unknown param is checked
+ * against, so the three cannot drift apart.
+ */
+const CATEGORY_LABELS: Readonly<Record<ProductCategory, string>> = {
   shells: "Shells",
   packs: "Packs",
   footwear: "Footwear",
 };
+
+const CATEGORIES = Object.keys(CATEGORY_LABELS) as readonly ProductCategory[];
 
 export const SORT_OPTIONS: ReadonlyArray<{
   value: ProductSort;
@@ -49,12 +57,6 @@ export const SORT_OPTIONS: ReadonlyArray<{
   { value: "price-asc", label: "Price low–high" },
   { value: "price-desc", label: "Price high–low" },
   { value: "name", label: "Name A–Z" },
-];
-
-const CATEGORY_ORDER: readonly ProductCategory[] = [
-  "shells",
-  "packs",
-  "footwear",
 ];
 
 const DEFAULT_SORT: ProductSort = "featured";
@@ -73,17 +75,13 @@ export function toSearchParams(
   return params;
 }
 
-export function parseProductCategory(
+function parseProductCategory(
   value: string | null | undefined,
 ): ProductCategory | undefined {
-  return value === "shells" || value === "packs" || value === "footwear"
-    ? value
-    : undefined;
+  return CATEGORIES.find((category) => category === value);
 }
 
-export function parseProductSort(
-  value: string | null | undefined,
-): ProductSort {
+function parseProductSort(value: string | null | undefined): ProductSort {
   return value === "price-asc" || value === "price-desc" || value === "name"
     ? value
     : DEFAULT_SORT;
@@ -95,7 +93,7 @@ export function parseProductSort(
  * An unknown activity would otherwise filter every product away and leave the
  * shopper on an empty grid with no way to tell why.
  */
-export function parseProductActivity(
+function parseProductActivity(
   value: string | null | undefined,
   available: readonly string[],
 ): string | undefined {
@@ -104,22 +102,15 @@ export function parseProductActivity(
     : undefined;
 }
 
-export function productActivities(
-  products: readonly Product[],
-): readonly string[] {
+function productActivities(products: readonly Product[]): readonly string[] {
   return [...new Set(products.flatMap((product) => product.activities))];
-}
-
-export interface CatalogQuery {
-  filter: ProductListFilter;
-  sort: ProductSort;
 }
 
 /** Resolves validated filter and sort state from a page's query string. */
 export function parseCatalogQuery(
   params: URLSearchParams,
   products: readonly Product[],
-): CatalogQuery {
+): { filter: ProductListFilter; sort: ProductSort } {
   return {
     filter: {
       category: parseProductCategory(params.get("category")),
@@ -161,14 +152,16 @@ export interface FilterGroupOptions {
   /** The unfiltered set these facets describe. */
   products: readonly Product[];
   filter: ProductListFilter;
-  showCounts?: boolean;
 }
 
-function countMatching(
-  products: readonly Product[],
-  filter: ProductListFilter,
-): number {
-  return products.filter((product) => matchesFilter(product, filter)).length;
+/** One narrowable axis, so both are built by the same code path. */
+interface FacetDimension {
+  param: "activity" | "category";
+  heading: string;
+  resetKey: string;
+  resetLabel: string;
+  values: readonly string[];
+  label: (value: string) => string;
 }
 
 /**
@@ -177,73 +170,59 @@ function countMatching(
  * A dimension with fewer than two distinct values is left out: a "Category"
  * group listing the one category every product in a collection shares is a row
  * of controls that cannot change the result.
+ *
+ * A count keeps the *other* axis and replaces its own, so it answers "how many
+ * are left if I click this" rather than "how many exist".
  */
 export function deriveFilterGroups({
   pathname,
   params,
   products,
   filter,
-  showCounts = false,
 }: FilterGroupOptions): readonly FilterGroup[] {
-  const activities = productActivities(products);
-  /* Declared order, not alphabetical: the category axis reads
-   * outerwear -> carry -> footwear, and that is the order shoppers see. */
   const present = new Set(products.map((product) => product.category));
-  const categories = CATEGORY_ORDER.filter((category) => present.has(category));
+  const dimensions: readonly FacetDimension[] = [
+    {
+      param: "activity",
+      heading: "Activity",
+      resetKey: "all-activities",
+      resetLabel: "All activities",
+      values: productActivities(products),
+      label: (value) => value,
+    },
+    {
+      param: "category",
+      heading: "Category",
+      resetKey: "all-categories",
+      resetLabel: "All categories",
+      values: CATEGORIES.filter((category) => present.has(category)),
+      label: (value) => CATEGORY_LABELS[value as ProductCategory],
+    },
+  ];
 
   /* Page 1 again: a narrower result rarely still has the page you were on. */
-  const href = (updates: Readonly<Record<string, string | undefined>>) =>
-    catalogHref(pathname, params, { ...updates, page: undefined });
-  const count = (next: ProductListFilter) =>
-    showCounts ? countMatching(products, next) : undefined;
+  const link = (dimension: FacetDimension, value: string | undefined) => ({
+    key: value ?? dimension.resetKey,
+    label: value === undefined ? dimension.resetLabel : dimension.label(value),
+    href: catalogHref(pathname, params, {
+      [dimension.param]: value,
+      page: undefined,
+    }),
+    selected: filter[dimension.param] === value,
+    count: products.filter((product) =>
+      matchesFilter(product, { ...filter, [dimension.param]: value }),
+    ).length,
+  });
 
-  const groups: FilterGroup[] = [];
-
-  if (activities.length > 1) {
-    groups.push({
-      heading: "Activity",
+  return dimensions
+    .filter((dimension) => dimension.values.length > 1)
+    .map((dimension) => ({
+      heading: dimension.heading,
       links: [
-        {
-          key: "all-activities",
-          label: "All activities",
-          href: href({ activity: undefined }),
-          selected: filter.activity === undefined,
-          count: count({ category: filter.category }),
-        },
-        ...activities.map((activity) => ({
-          key: activity,
-          label: activity,
-          href: href({ activity }),
-          selected: activity === filter.activity,
-          count: count({ category: filter.category, activity }),
-        })),
+        link(dimension, undefined),
+        ...dimension.values.map((value) => link(dimension, value)),
       ],
-    });
-  }
-
-  if (categories.length > 1) {
-    groups.push({
-      heading: "Category",
-      links: [
-        {
-          key: "all-categories",
-          label: "All categories",
-          href: href({ category: undefined }),
-          selected: filter.category === undefined,
-          count: count({ activity: filter.activity }),
-        },
-        ...categories.map((category) => ({
-          key: category,
-          label: CATEGORY_LABELS[category],
-          href: href({ category }),
-          selected: category === filter.category,
-          count: count({ activity: filter.activity, category }),
-        })),
-      ],
-    });
-  }
-
-  return groups;
+    }));
 }
 
 /** Human summary of the active narrowing, for a results count line. */
