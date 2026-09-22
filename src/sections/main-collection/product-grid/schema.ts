@@ -37,12 +37,6 @@ export const schema = createSchema({
       inputs: [
         {
           type: "text",
-          name: "emptyHeading",
-          label: "Clear-filters label",
-          defaultValue: "Clear filters",
-        },
-        {
-          type: "text",
           name: "emptyBody",
           label: "Message",
           defaultValue: "Nothing in this collection matches that filter.",
