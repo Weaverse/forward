@@ -1,9 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
+import { SortForm } from "@/components/sort-form";
 import { cn } from "@/lib/cn";
-import { describeFilter, SORT_OPTIONS } from "@/lib/storefront/catalog-facets";
+import {
+  clearFiltersHref,
+  hasAppliedFilters,
+} from "@/lib/storefront/filter-params";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
 
 import {
@@ -18,7 +23,12 @@ interface CollectionToolbarProps extends WeaverseElementProps {
 }
 
 /**
- * The bar above the results: how many products matched and how they are ordered.
+ * The bar above the results: how many products this page shows, a way to drop
+ * every applied facet, and the order control.
+ *
+ * The count is the page, not the collection: with cursor paging the total is
+ * a separate question the store was not asked, and claiming one would be a
+ * guess.
  */
 function CollectionToolbar({
   showCount,
@@ -26,13 +36,14 @@ function CollectionToolbar({
   sticky,
   ...rest
 }: CollectionToolbarProps) {
-  const { collectionProducts, collectionBrowse } = useStorefrontContext();
+  const { collectionProducts, browse } = useStorefrontContext();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  if (collectionProducts === undefined || collectionBrowse === undefined) {
+  const params = useSearchParams();
+  if (collectionProducts === undefined || browse === undefined) {
     return null;
   }
   const count = collectionProducts.length;
+  const filtered = hasAppliedFilters(params);
 
   return (
     <div
@@ -46,74 +57,26 @@ function CollectionToolbar({
         {showCount === false ? null : (
           <span className="text-ui sm:text-copy-sm" aria-live="polite">
             {count} {count === 1 ? "product" : "products"}
-            {describeFilter(collectionBrowse.filter)}
           </span>
         )}
+        {filtered ? (
+          <Link
+            className="font-body text-micro font-medium tracking-label text-text-muted uppercase underline underline-offset-4 hover:text-ink"
+            href={clearFiltersHref(pathname, params)}
+          >
+            Clear filters
+          </Link>
+        ) : null}
       </div>
       {showSort === false ? null : (
         <SortForm
-          sort={collectionBrowse.sort}
+          sort={browse.sort}
           pathname={pathname}
-          searchParams={searchParams}
+          params={params}
+          id="sort-collection"
         />
       )}
     </div>
-  );
-}
-
-/**
- * Sorting as a plain GET form, so it works with no JavaScript.
- *
- * Every param the form does not own travels as a hidden input: the active
- * filter has to survive a re-sort, and so does anything else on the URL.
- */
-function SortForm({
-  sort,
-  pathname,
-  searchParams,
-}: {
-  sort: string;
-  pathname: string;
-  searchParams: URLSearchParams;
-}) {
-  const preserved = [...searchParams.entries()].filter(
-    ([key]) => key !== "sort" && key !== "page",
-  );
-
-  return (
-    <form
-      className="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-start"
-      method="get"
-      action={pathname}
-    >
-      {preserved.map(([key, value]) => (
-        <input key={key} type="hidden" name={key} value={value} />
-      ))}
-      <label
-        className="font-field-meta text-caption font-medium text-text-muted tracking-field-meta uppercase"
-        htmlFor="sort-collection"
-      >
-        Sort
-      </label>
-      <select
-        className="min-h-touch flex-1 rounded-none border border-ink bg-transparent py-0 pr-9.5 pl-3.5 font-body text-micro font-bold uppercase sm:flex-initial"
-        id="sort-collection"
-        name="sort"
-        defaultValue={sort}
-      >
-        {SORT_OPTIONS.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <button
-        className="min-h-touch border border-ink bg-transparent px-3.5 font-body text-micro font-extrabold tracking-label uppercase hover:bg-surface-subtle"
-        type="submit"
-      >
-        Apply
-      </button>
-    </form>
   );
 }
 

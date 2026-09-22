@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-
-import {
-  deriveFilterGroups,
-  parseCatalogQuery,
-  toSearchParams,
-} from "@/lib/storefront/catalog-facets";
 import { storefront } from "@/lib/storefront/data-source";
+import {
+  AFTER_PARAM,
+  BEFORE_PARAM,
+  parseFilterParams,
+  SORT_PARAM,
+  toSearchParams,
+} from "@/lib/storefront/filter-params";
+import { parseProductSort } from "@/lib/storefront/sort";
 import { WeaversePage } from "@/lib/weaverse/page";
 import {
   loadWeaversePage,
@@ -62,12 +64,23 @@ export default async function CollectionPage(props: CollectionPageProps) {
   const { collectionHandle } = await props.params;
   const searchParams = await props.searchParams;
   const params = toSearchParams(searchParams);
-  const [collection, catalog, page, projectId] = await Promise.all([
+  const pathname = `/shop/${collectionHandle}`;
+  const sort = parseProductSort(params.get(SORT_PARAM));
+
+  const [collection, page, weaversePage, projectId] = await Promise.all([
     storefront.getCollection(collectionHandle),
-    storefront.getCollectionProducts(collectionHandle),
+    /* The store narrows, orders and pages. Facet shapes travel from the URL
+     * into the query untouched, so a filter the merchant enabled after this
+     * code shipped still works. */
+    storefront.getCollectionPage(collectionHandle, {
+      filters: parseFilterParams(params),
+      sort,
+      after: params.get(AFTER_PARAM) ?? undefined,
+      before: params.get(BEFORE_PARAM) ?? undefined,
+    }),
     loadWeaversePage({
       handle: collectionHandle,
-      pathname: `/shop/${collectionHandle}`,
+      pathname,
       searchParams,
       type: "COLLECTION",
     }),
@@ -75,38 +88,20 @@ export default async function CollectionPage(props: CollectionPageProps) {
   ]);
   if (
     collection === null ||
-    catalog === null ||
     page === null ||
+    weaversePage === null ||
     projectId === null
   ) {
     notFound();
   }
 
-  /* Parsed against this collection's own products: an activity the collection
-   * does not carry is not a filter, it is an empty grid with no way back. */
-  const { filter, sort } = parseCatalogQuery(params, catalog);
-  const products = await storefront.getCollectionProducts(
-    collectionHandle,
-    filter,
-    sort,
-  );
-
   return (
     <WeaversePage
-      data={page}
+      data={weaversePage}
       dataContext={{
         collection,
-        collectionProducts: products ?? [],
-        collectionBrowse: {
-          facets: deriveFilterGroups({
-            pathname: `/shop/${collectionHandle}`,
-            params,
-            products: catalog,
-            filter,
-          }),
-          filter,
-          sort,
-        },
+        collectionProducts: page.products,
+        browse: { filters: page.filters, sort, pageInfo: page.pageInfo },
       }}
       projectId={projectId}
     />

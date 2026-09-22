@@ -23,13 +23,6 @@ export const schema = createSchema({
           },
           helpText: "Desktop only; the grid is always two columns on mobile.",
         },
-        {
-          type: "range",
-          name: "pageSize",
-          label: "Products per page",
-          defaultValue: 12,
-          configs: { min: 4, max: 48, step: 4 },
-        },
       ],
     },
     {
@@ -39,7 +32,7 @@ export const schema = createSchema({
           type: "text",
           name: "emptyBody",
           label: "Message",
-          defaultValue: "Nothing in this collection matches that filter.",
+          defaultValue: "Nothing here matches that filter.",
         },
       ],
     },

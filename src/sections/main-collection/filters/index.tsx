@@ -1,8 +1,8 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 
-import { FilterSidebar } from "@/components/filter-sidebar";
+import { FacetList } from "@/components/facet-list";
 import { cn } from "@/lib/cn";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
 
@@ -21,11 +21,11 @@ interface CollectionFiltersProps extends WeaverseElementProps {
 }
 
 /**
- * The facet controls for mobile and desktop.
+ * The facet controls, for mobile and desktop.
  *
- * Every row is an href the route already validated, so narrowing a collection
- * needs no JavaScript and every result is a URL a shopper can share. Both
- * layouts use this component's settings, so counts cannot diverge by viewport.
+ * Whatever the store returned is what renders — enable a filter in Search &
+ * Discovery and it appears here with no theme change. Nothing is shown when
+ * the store exposes no facets for this collection.
  */
 function CollectionFilters({
   heading,
@@ -34,10 +34,21 @@ function CollectionFilters({
   sticky,
   ...rest
 }: CollectionFiltersProps) {
-  const { collectionBrowse } = useStorefrontContext();
-  if (collectionBrowse === undefined || collectionBrowse.facets.length === 0) {
+  const { browse } = useStorefrontContext();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  if (browse === undefined || browse.filters.length === 0) {
     return null;
   }
+  const facets = (idPrefix: string) => (
+    <FacetList
+      filters={browse.filters}
+      pathname={pathname}
+      params={params}
+      idPrefix={idPrefix}
+      showCounts={showCounts !== false}
+    />
+  );
 
   return (
     <div
@@ -46,18 +57,14 @@ function CollectionFilters({
       style={
         {
           "--collection-sidebar-width": `${sidebarWidth ?? DEFAULT_SIDEBAR_WIDTH}px`,
-        } as CSSProperties
+        } as React.CSSProperties
       }
     >
       <details className="group/disclosure border-ink border-b lg:hidden">
         <summary className="flex min-h-touch list-none items-center justify-between font-body text-micro font-medium tracking-label uppercase after:content-['+'] group-open/disclosure:after:content-['−'] [&::-webkit-details-marker]:hidden">
           {heading ?? "Filters"}
         </summary>
-        <FilterSidebar
-          groups={collectionBrowse.facets}
-          idPrefix="collection-mobile"
-          showCounts={showCounts !== false}
-        />
+        {facets("collection-mobile")}
       </details>
       <div
         className={cn(
@@ -68,11 +75,7 @@ function CollectionFilters({
         <h2 className="font-body text-micro font-extrabold tracking-label uppercase">
           {heading ?? "Filters"}
         </h2>
-        <FilterSidebar
-          groups={collectionBrowse.facets}
-          idPrefix="collection-desktop"
-          showCounts={showCounts !== false}
-        />
+        {facets("collection-desktop")}
       </div>
     </div>
   );
