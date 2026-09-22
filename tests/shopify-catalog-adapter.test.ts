@@ -4,10 +4,6 @@ import path from "node:path";
 import { describe, it } from "node:test";
 
 import {
-  CANONICAL_PRODUCT_HANDLES,
-  CATALOG_PRESENTATION_PROFILES,
-} from "../src/lib/storefront/catalog-presentation.ts";
-import {
   createStorefrontDataSource,
   StaticStorefrontDataSource,
   type StorefrontDataSource,
@@ -331,7 +327,12 @@ describe("Hydrogen catalog client seam", () => {
       return Response.json({
         data:
           calls === 1
-            ? { products: { nodes: [], pageInfo: { hasNextPage: false } } }
+            ? {
+                products: {
+                  nodes: [{ handle: "broken" }],
+                  pageInfo: { hasNextPage: false },
+                },
+              }
             : catalogResponse().data,
       });
     };
@@ -368,14 +369,29 @@ describe("catalog mapping", () => {
     assert.equal(shell.handle, "weatherline-shell");
     assert.equal(shell.title, "Weatherline Shell");
     assert.deepEqual(shell.price, { amount: 248, currencyCode: "USD" });
-    assert.equal(shell.category, "shells");
-    assert.deepEqual([...shell.activities], ["alpine", "trail", "camp"]);
+    assert.equal(shell.category, "Outerwear");
+    /* Tags verbatim, minus the ownership marker and ops bookkeeping. */
+    assert.deepEqual(
+      [...shell.activities],
+      [
+        "alpine",
+        "breathable",
+        "field-system",
+        "hiking",
+        "layering",
+        "outerwear",
+        "shell-jacket",
+        "technical-outdoor",
+        "waterproof",
+        "windproof",
+      ],
+    );
+    /* Related products are the store's other items of the same type. */
     assert.deepEqual(
       [...shell.relatedHandles],
-      ["traverse-grid-fleece", "ridge-30-field-pack"],
+      ["traverse-grid-fleece", "drift-insulated-vest"],
     );
     assert.ok(shell.subtitle.length > 0);
-    assert.ok(shell.repair.length > 0);
     assert.ok(shell.description.includes("three-layer shell"));
     assert.ok(shell.description.includes("days on foot. The Weatherline"));
 
@@ -475,23 +491,27 @@ describe("catalog mapping", () => {
       assert.ok(product.colorways.length > 0);
       for (const colorway of product.colorways) {
         assert.ok(colorway.name.length > 0);
-        assert.match(colorway.swatchColor, /^#[0-9a-f]{6}$/);
+        /* Null whenever the store published no native swatch, which is the
+         * common case; the selector then renders the colorway image. */
+        if (colorway.swatchColor !== null) {
+          assert.match(colorway.swatchColor, /^#[0-9a-f]{6}$/i);
+        }
       }
     }
   });
 
-  it("keeps canonical colorway ids and full Shopify Color display names", () => {
+  it("derives colorway ids from the Color values the store published", () => {
     const products = mapped();
     assert.deepEqual(
       products.map((product) => product.colorways.map((entry) => entry.id)),
       [
-        ["charcoal", "claystone"],
+        ["charcoal-moss", "claystone-charcoal"],
         ["moss-charcoal", "claystone-bone"],
         ["charcoal-signal", "dune-moss"],
-        ["charcoal", "dune"],
+        ["charcoal-moss-tan", "dune-charcoal"],
         ["moss-charcoal", "claystone-dune"],
         ["charcoal-signal", "dune-moss"],
-        ["charcoal", "limestone"],
+        ["charcoal-moss-gum", "limestone-clay-moss"],
         ["charcoal-gum", "limestone-moss"],
         ["charcoal-moss", "dune-claystone"],
       ],
@@ -667,7 +687,7 @@ describe("catalog mapping failures", () => {
         delete map["Claystone / Charcoal"];
         product.colorwayMediaMap.value = JSON.stringify(map);
       }),
-      "one complete approved key set",
+      "must cover every Color value",
     );
 
     await assertRejectsCatalog(
@@ -676,7 +696,7 @@ describe("catalog mapping failures", () => {
         map["Fictional / Colour"] = map["Charcoal / Moss"];
         product.colorwayMediaMap.value = JSON.stringify(map);
       }),
-      "one complete approved key set",
+      "must cover every Color value",
     );
 
     await assertRejectsCatalog(
@@ -687,25 +707,50 @@ describe("catalog mapping failures", () => {
           "Claystone / Charcoal": map["Claystone / Charcoal"],
         });
       }),
-      "one complete approved key set",
+      "must cover every Color value",
     );
   });
 
-  it("rejects a Color value with no approved colorway mapping", async () => {
-    await assertRejectsCatalog(
+  it("accepts any Color value the store publishes", async () => {
+    /* There is no approved colour list any more: rename a colourway in
+     * Shopify and it ships, as long as its media map keeps up. */
+    const products = mapCatalogResult(
       catalogResponseWith("weatherline-shell", (product) => {
-        product.options[0].optionValues[1].name = "Unapproved / Colour";
+        product.options[0].optionValues[1].name = "Ember / Slate";
         const map = JSON.parse(product.colorwayMediaMap.value);
-        map["Unapproved / Colour"] = map["Claystone / Charcoal"];
+        map["Ember / Slate"] = map["Claystone / Charcoal"];
         delete map["Claystone / Charcoal"];
         product.colorwayMediaMap.value = JSON.stringify(map);
         for (const variant of product.variants.nodes) {
           if (variant.selectedOptions[0].value === "Claystone / Charcoal") {
-            variant.selectedOptions[0].value = "Unapproved / Colour";
+            variant.selectedOptions[0].value = "Ember / Slate";
           }
         }
       }),
-      "no approved colorway mapping",
+    );
+    const shell = products.find(
+      (product) => product.handle === "weatherline-shell",
+    );
+    assert.deepEqual(
+      shell?.colorways.map((colorway) => [colorway.id, colorway.name]),
+      [
+        ["charcoal-moss", "Charcoal / Moss"],
+        ["ember-slate", "Ember / Slate"],
+      ],
+    );
+  });
+
+  it("rejects a Color value the media map does not cover", async () => {
+    await assertRejectsCatalog(
+      catalogResponseWith("weatherline-shell", (product) => {
+        product.options[0].optionValues[1].name = "Ember / Slate";
+        for (const variant of product.variants.nodes) {
+          if (variant.selectedOptions[0].value === "Claystone / Charcoal") {
+            variant.selectedOptions[0].value = "Ember / Slate";
+          }
+        }
+      }),
+      "must cover every Color value",
     );
   });
 
@@ -719,13 +764,23 @@ describe("catalog mapping failures", () => {
     );
   });
 
-  it("resolves Color labels by own key only", async () => {
+  it("resolves Color labels by own key only", () => {
+    /* A store may legitimately name a colour "constructor". The media map is
+     * a Map, so such a label must resolve to its own entry and never to a
+     * prototype member. */
     for (const label of ["constructor", "toString", "__proto__"]) {
-      await assertRejectsCatalog(
+      const products = mapCatalogResult(
         catalogResponseWith("weatherline-shell", (product) => {
           product.options[0].optionValues[1].name = label;
           const map = JSON.parse(product.colorwayMediaMap.value);
-          map[label] = map["Claystone / Charcoal"];
+          /* Plain assignment of "__proto__" hits the prototype setter and
+           * never becomes an own key, so define it explicitly. */
+          Object.defineProperty(map, label, {
+            value: map["Claystone / Charcoal"],
+            configurable: true,
+            enumerable: true,
+            writable: true,
+          });
           delete map["Claystone / Charcoal"];
           product.colorwayMediaMap.value = JSON.stringify(map);
           for (const variant of product.variants.nodes) {
@@ -734,8 +789,12 @@ describe("catalog mapping failures", () => {
             }
           }
         }),
-        "no approved colorway mapping",
       );
+      const shell = products.find(
+        (product) => product.handle === "weatherline-shell",
+      );
+      assert.equal(shell?.colorways[1]?.name, label);
+      assert.ok((shell?.colorways[1]?.images.primary.src.length ?? 0) > 0);
     }
   });
 
@@ -902,7 +961,7 @@ describe("catalog mapping failures", () => {
     assert.equal(weatherline?.variants.length, 10);
     assert.deepEqual(weatherline?.variants[0], {
       id: "gid://shopify/ProductVariant/1000",
-      colorwayId: "charcoal",
+      colorwayId: "charcoal-moss",
       selectedOptions: [{ name: "Size", value: "XS" }],
       price: { amount: 248, currencyCode: "USD" },
       compareAtPrice: { amount: 248, currencyCode: "USD" },
@@ -914,47 +973,46 @@ describe("catalog mapping failures", () => {
     );
   });
 
-  it("rejects incomplete option values and variant matrices", async () => {
-    await assertRejectsCatalog(
+  it("takes whatever option matrix the store publishes", () => {
+    /* Option values and variant order are the merchant's. A store that drops
+     * a size, adds one, or reorders its colours must keep working. */
+    const trimmed = mapCatalogResult(
       catalogResponseWith("weatherline-shell", (product) => {
         const size = product.options[1];
         assert.equal(size?.name, "Size");
-        size.optionValues.pop();
+        const dropped = size.optionValues.pop();
+        product.variants.nodes = product.variants.nodes.filter(
+          (variant: { selectedOptions: { value: string }[] }) =>
+            variant.selectedOptions[1]?.value !== dropped.name,
+        );
       }),
-      "canonical option contract",
     );
+    const shell = trimmed.find(
+      (product) => product.handle === "weatherline-shell",
+    );
+    assert.deepEqual(shell?.options[0]?.values, ["XS", "S", "M", "L"]);
+    assert.equal(shell?.variants.length, 8);
 
-    await assertRejectsCatalog(
+    const reordered = mapCatalogResult(
       catalogResponseWith("weatherline-shell", (product) => {
-        product.variants.nodes.pop();
+        product.options[0].optionValues.reverse();
+        product.variants.nodes.reverse();
       }),
-      "exactly 10 canonical option combinations",
     );
-
-    await assertRejectsCatalog(
-      catalogResponseWith("ridge-30-field-pack", (product) => {
-        product.options.push({
-          name: "Size",
-          optionValues: [{ name: "One size" }],
-        });
-      }),
-      "unsupported non-Color product options",
+    assert.deepEqual(
+      reordered
+        .find((product) => product.handle === "weatherline-shell")
+        ?.colorways.map((colorway) => colorway.id),
+      ["claystone-charcoal", "charcoal-moss"],
     );
   });
 
-  it("rejects non-canonical Color and variant order", async () => {
+  it("still rejects a variant naming an option value the product lacks", async () => {
     await assertRejectsCatalog(
       catalogResponseWith("weatherline-shell", (product) => {
-        product.options[0].optionValues.reverse();
+        product.variants.nodes[0].selectedOptions[1].value = "XXL";
       }),
-      "Color values are not in canonical order",
-    );
-
-    await assertRejectsCatalog(
-      catalogResponseWith("weatherline-shell", (product) => {
-        product.variants.nodes.reverse();
-      }),
-      "variants are not in canonical option order",
+      "unknown Size value",
     );
   });
 
@@ -965,7 +1023,7 @@ describe("catalog mapping failures", () => {
     assert.equal(weatherline?.variants.length, 10);
     assert.equal(
       weatherline?.variants[0]?.id,
-      "demo:weatherline-shell:charcoal:XS",
+      "demo:weatherline-shell:charcoal-moss:XS",
     );
     assert.equal(weatherline?.variants[0]?.availableForSale, true);
   });
@@ -988,19 +1046,34 @@ describe("catalog mapping failures", () => {
     );
   });
 
-  it("rejects unsupported product handles and missing canonical products", async () => {
-    await assertRejectsCatalog(
+  it("ships whatever products the store returns", async () => {
+    /* No approved-handle list: a product renamed or added in Shopify must
+     * appear, and a store with fewer products is a smaller store, not a
+     * failure. */
+    const renamed = mapCatalogResult(
       catalogResponseWith("weatherline-shell", (product) => {
         product.handle = "surprise-product";
       }),
-      "not an approved Forward product",
     );
+    assert.ok(renamed.some((product) => product.handle === "surprise-product"));
 
     const withoutShoe = catalogResponse();
     withoutShoe.data.products.nodes = withoutShoe.data.products.nodes.filter(
       (node) => node.handle !== "talus-trail-shoe",
     );
-    await assertRejectsCatalog(withoutShoe, "missing the approved product");
+    const remaining = mapCatalogResult(withoutShoe);
+    assert.equal(remaining.length, 8);
+    assert.ok(
+      remaining.every((product) => product.handle !== "talus-trail-shoe"),
+    );
+  });
+
+  it("still rejects a duplicate product handle", async () => {
+    const duplicated = catalogResponse();
+    const first = duplicated.data.products.nodes[0];
+    assert.ok(first !== undefined);
+    duplicated.data.products.nodes.push(structuredClone(first));
+    await assertRejectsCatalog(duplicated, "duplicate product handle");
   });
 
   it("fails on GraphQL errors and on truncated bounded pages", async () => {
@@ -1050,14 +1123,20 @@ describe("ShopifyCatalogDataSource", () => {
     assert.notEqual(await source.getProduct("weatherline-shell"), null);
   });
 
-  it("keeps canonical product order regardless of API order", async () => {
-    const reversed = catalogResponse();
-    reversed.data.products.nodes.reverse();
-    const source = shopifySource(reversed);
-    assert.deepEqual(
-      (await source.listProducts()).map((product) => product.handle),
-      [...CANONICAL_PRODUCT_HANDLES],
+  it("keeps the order the store returned", async () => {
+    /* Ordering is the merchant's, expressed through the sort the route asked
+     * for. The adapter no longer re-sorts into a theme-declared sequence. */
+    const response = catalogResponse();
+    const forward = (await shopifySource(response).listProducts()).map(
+      (product) => product.handle,
     );
+    const reversedResponse = catalogResponse();
+    reversedResponse.data.products.nodes.reverse();
+    const reversed = (await shopifySource(reversedResponse).listProducts()).map(
+      (product) => product.handle,
+    );
+
+    assert.deepEqual(reversed, [...forward].reverse());
   });
 
   it("maps canonical Shopify collections with local presentation", async () => {
@@ -1068,7 +1147,11 @@ describe("ShopifyCatalogDataSource", () => {
       ["forward", "outerwear", "packs", "footwear"],
     );
     for (const collection of collections) {
-      assert.ok(collection.heroImage.src.startsWith("/images/"));
+      /* Live collections carry the store's own image; a store that set none
+       * yields null and the hero renders without it. */
+      if (collection.heroImage !== null) {
+        assert.ok(collection.heroImage.src.length > 0);
+      }
       const products = await source.getCollectionProducts(collection.handle);
       assert.deepEqual(
         products?.map((product) => product.handle),
@@ -1099,29 +1182,32 @@ describe("ShopifyCatalogDataSource", () => {
       ["talus-trail-shoe", "scree-approach-shoe"],
     );
 
-    const byActivity = await source.searchProducts("camp");
+    /* Tags are searchable because they are what the store says about a
+     * product; "layering" is a tag on the three outerwear pieces. */
+    const byTag = await source.searchProducts("layering");
     assert.deepEqual(
-      byActivity.map((product) => product.handle),
-      [
-        "weatherline-shell",
-        "drift-insulated-vest",
-        "waypoint-sling-6",
-        "talus-trail-shoe",
-        "camp-recovery-clog",
-      ],
+      byTag.map((product) => product.handle),
+      ["weatherline-shell", "traverse-grid-fleece", "drift-insulated-vest"],
+    );
+
+    /* So is the product type. */
+    const byType = await source.searchProducts("footwear");
+    assert.deepEqual(
+      byType.map((product) => product.handle),
+      ["talus-trail-shoe", "scree-approach-shoe", "camp-recovery-clog"],
     );
   });
 
   it("preserves normalized filter and sort semantics over live products", async () => {
     const source = shopifySource();
     assert.deepEqual(
-      (await source.listProducts({ category: "packs" })).map(
+      (await source.listProducts({ category: "Packs" })).map(
         (product) => product.handle,
       ),
       ["ridge-30-field-pack", "approach-18-day-pack", "waypoint-sling-6"],
     );
     assert.deepEqual(
-      (await source.listProducts({ activity: "alpine" })).map(
+      (await source.listProducts({ activity: "hiking" })).map(
         (product) => product.handle,
       ),
       [
@@ -1130,6 +1216,7 @@ describe("ShopifyCatalogDataSource", () => {
         "drift-insulated-vest",
         "ridge-30-field-pack",
         "approach-18-day-pack",
+        "talus-trail-shoe",
         "scree-approach-shoe",
       ],
     );
@@ -1160,8 +1247,10 @@ describe("ShopifyCatalogDataSource", () => {
       ],
     );
     assert.deepEqual(
-      (await source.listProducts()).map((product) => product.handle),
-      [...CANONICAL_PRODUCT_HANDLES],
+      (await source.listProducts()).map((product) => product.handle).sort(),
+      (await new StaticStorefrontDataSource().listProducts())
+        .map((product) => product.handle)
+        .sort(),
     );
   });
 
@@ -1351,55 +1440,54 @@ describe("catalog revalidation window", () => {
 /* Contract guards                                                            */
 /* -------------------------------------------------------------------------- */
 
-describe("catalog presentation profile", () => {
-  it("covers exactly the canonical handles in canonical order", () => {
-    assert.deepEqual(
-      CATALOG_PRESENTATION_PROFILES.map((profile) => profile.handle),
-      [...CANONICAL_PRODUCT_HANDLES],
-    );
-  });
+describe("store-driven presentation", () => {
+  /* What the profiles table used to assert, restated as rules over live data:
+   * nothing here may depend on a theme-side list of approved products. */
 
-  it("never maps two Color labels of one product to the same colorway id", () => {
-    for (const profile of CATALOG_PRESENTATION_PROFILES) {
-      const ids = Object.values(profile.colorways).map(
-        (colorway) => colorway.id,
-      );
+  it("derives a unique, slug-shaped colorway id per Color value", async () => {
+    for (const product of await new StaticStorefrontDataSource().listProducts()) {
+      const ids = product.colorways.map((colorway) => colorway.id);
+      assert.ok(ids.length > 0, `${product.handle} has no colorway`);
       assert.equal(
         new Set(ids).size,
         ids.length,
-        `${profile.handle} maps two Color labels to one colorway id`,
+        `${product.handle} maps two Color values to one id`,
       );
-      assert.ok(ids.length > 0);
+      for (const id of ids) {
+        assert.match(id, /^[a-z0-9]+(?:-[a-z0-9]+)*$/, product.handle);
+      }
     }
   });
 
-  it("matches the static catalog on every presentation-owned field", async () => {
-    const staticProducts =
-      await new StaticStorefrontDataSource().listProducts();
-    const byHandle = new Map<string, Product>(
-      staticProducts.map((product) => [product.handle, product]),
-    );
-    for (const profile of CATALOG_PRESENTATION_PROFILES) {
-      const product = byHandle.get(profile.handle);
-      assert.ok(product !== undefined, `missing ${profile.handle}`);
-      assert.equal(product.category, profile.category);
-      assert.equal(product.subtitle, profile.subtitle);
-      assert.equal(product.repair, profile.repair);
-      assert.deepEqual([...product.activities], [...profile.activities]);
-      assert.deepEqual(
-        [...product.relatedHandles],
-        [...profile.relatedHandles],
-      );
-      assert.deepEqual(
-        product.colorways.map((colorway) => colorway.id),
-        Object.values(profile.colorways).map((colorway) => colorway.id),
-      );
-      assert.deepEqual(
-        product.colorways.map((colorway) => colorway.swatchColor),
-        Object.values(profile.colorways).map(
-          (colorway) => colorway.swatchColor,
-        ),
-      );
+  it("carries the store's product type and tags verbatim", async () => {
+    for (const product of await new StaticStorefrontDataSource().listProducts()) {
+      assert.ok(product.category.length > 0, `${product.handle} has no type`);
+      assert.ok(product.activities.length > 0, `${product.handle} has no tags`);
+      /* Infrastructure tags are the store's bookkeeping, never shopper copy. */
+      for (const tag of product.activities) {
+        assert.doesNotMatch(tag, /:/, `${product.handle} leaks an ops tag`);
+      }
+    }
+  });
+
+  it("takes a swatch only when the store published one", async () => {
+    for (const product of await new StaticStorefrontDataSource().listProducts()) {
+      for (const colorway of product.colorways) {
+        if (colorway.swatchColor !== null) {
+          assert.match(colorway.swatchColor, /^#[0-9a-f]{6}$/i);
+        }
+      }
+    }
+  });
+
+  it("relates a product only to same-type products, never itself", async () => {
+    const products = await new StaticStorefrontDataSource().listProducts();
+    const byHandle = new Map(products.map((entry) => [entry.handle, entry]));
+    for (const product of products) {
+      for (const handle of product.relatedHandles) {
+        assert.notEqual(handle, product.handle, "related to itself");
+        assert.equal(byHandle.get(handle)?.category, product.category);
+      }
     }
   });
 });

@@ -491,11 +491,10 @@ describe("Shopify navigation mapping", () => {
     }
   });
 
-  it("rejects missing, paginated, or contaminated canonical collections", () => {
+  it("rejects a paginated or malformed collections page", () => {
+    /* Membership is the merchant's, so it is never rejected. A truncated or
+     * shapeless page still is: it would silently hide collections. */
     const cases = [
-      navigationResponseWith((draft) => {
-        draft.data.collections.nodes.pop();
-      }),
       navigationResponseWith((draft) => {
         draft.data.collections.pageInfo.hasNextPage = true;
       }),
@@ -504,9 +503,9 @@ describe("Shopify navigation mapping", () => {
           undefined as unknown as boolean;
       }),
       navigationResponseWith((draft) => {
-        const outerwear = draft.data.collections.nodes[1];
-        assert.ok(outerwear !== undefined);
-        outerwear.products.nodes = [{ handle: "talus-trail-shoe" }];
+        const first = draft.data.collections.nodes[0];
+        assert.ok(first !== undefined);
+        first.handle = undefined as unknown as string;
       }),
     ];
     for (const response of cases) {
@@ -514,7 +513,9 @@ describe("Shopify navigation mapping", () => {
     }
   });
 
-  it("ignores unrelated published collections without exposing them", () => {
+  it("exposes every collection the store publishes, in its order", () => {
+    /* A theme that only surfaced four approved handles could not run on
+     * another store. Whatever the merchant published is what ships. */
     const response = navigationResponseWith((draft) => {
       const first = draft.data.collections.nodes[0];
       assert.ok(first !== undefined);
@@ -524,10 +525,22 @@ describe("Shopify navigation mapping", () => {
         title: "Home page",
       });
     });
-    assert.deepEqual(
-      mapped(response).collections.map((collection) => collection.handle),
-      ["forward", "outerwear", "packs", "footwear"],
+    assert.deepEqual(mapped(response).collections[0]?.handle, "frontpage");
+    assert.equal(
+      mapped(response).collections.length,
+      response.data.collections.nodes.length,
     );
+  });
+
+  it("drops a collection's membership only when the store did", () => {
+    const response = navigationResponseWith((draft) => {
+      const outerwear = draft.data.collections.nodes[1];
+      assert.ok(outerwear !== undefined);
+      outerwear.products.nodes = [{ handle: "talus-trail-shoe" }];
+    });
+    assert.deepEqual(mapped(response).collections[1]?.productHandles, [
+      "talus-trail-shoe",
+    ]);
   });
 });
 
@@ -715,9 +728,11 @@ describe("Shopify navigation data source", () => {
     }
   });
 
-  it("falls back to canonical collection structure without hiding the live menu", async () => {
+  it("falls back to the static collection structure without hiding the live menu", async () => {
+    /* A truncated page is still a hard failure: it would silently drop
+     * collections. A store simply having fewer of them is not. */
     const response = navigationResponseWith((draft) => {
-      draft.data.collections.nodes.pop();
+      draft.data.collections.pageInfo.hasNextPage = true;
     });
     const collectionObserved: ShopifyCatalogError[] = [];
     const navigationObserved: ShopifyCatalogError[] = [];
@@ -750,7 +765,7 @@ describe("Shopify navigation data source", () => {
 
   it("reports a collection fallback that begins after an initial live read", async () => {
     const malformed = navigationResponseWith((draft) => {
-      draft.data.collections.nodes.pop();
+      draft.data.collections.pageInfo.hasNextPage = true;
     });
     const observed: ShopifyCatalogError[] = [];
     let reads = 0;

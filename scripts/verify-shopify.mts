@@ -20,10 +20,6 @@ import {
   createShopifyRequestContext,
   createStorefrontClient,
 } from "@shopify/hydrogen";
-import {
-  CANONICAL_PRODUCT_HANDLES,
-  getCatalogPresentationProfile,
-} from "../src/lib/storefront/catalog-presentation.ts";
 import { createStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
 import { isShopifyProductImageUrl } from "../src/lib/storefront/image-source.ts";
 import {
@@ -263,48 +259,14 @@ try {
   const products = await storefront.listProducts();
 
   check(
-    "adapter returns the canonical catalog in order",
-    products.length === CANONICAL_PRODUCT_HANDLES.length &&
-      products.every(
-        (product, index) => product.handle === CANONICAL_PRODUCT_HANDLES[index],
-      ),
+    "adapter returns a non-empty catalog with unique handles",
+    products.length > 0 &&
+      new Set(products.map((product) => product.handle)).size ===
+        products.length,
     products.map((product) => product.handle).join(", "),
   );
 
   for (const product of products) {
-    const profile = getCatalogPresentationProfile(product.handle);
-    const expectedOptionValues = profile?.optionValues;
-    const optionsMatch =
-      expectedOptionValues === undefined
-        ? product.options.length === 0
-        : product.options.length === 1 &&
-          product.options[0]?.name === "Size" &&
-          JSON.stringify(product.options[0].values) ===
-            JSON.stringify(expectedOptionValues);
-    const optionSelections =
-      expectedOptionValues === undefined
-        ? [[]]
-        : expectedOptionValues.map((value) => [{ name: "Size", value }]);
-    const expectedVariants =
-      profile === null
-        ? []
-        : Object.values(profile.colorways).flatMap((colorway) =>
-            optionSelections.map((selectedOptions) => ({
-              colorwayId: colorway.id,
-              selectedOptions,
-            })),
-          );
-    const variantsMatchOrder =
-      product.variants.length === expectedVariants.length &&
-      product.variants.every((variant, index) => {
-        const expected = expectedVariants[index];
-        return (
-          expected !== undefined &&
-          variant.colorwayId === expected.colorwayId &&
-          JSON.stringify(variant.selectedOptions) ===
-            JSON.stringify(expected.selectedOptions)
-        );
-      });
     check(
       `${product.handle} money`,
       product.price.currencyCode === "USD" &&
@@ -314,26 +276,35 @@ try {
     );
 
     check(
-      `${product.handle} options`,
-      profile !== null && optionsMatch,
+      `${product.handle} presentation from the store`,
+      product.category.length > 0 && product.activities.length > 0,
+      `type "${product.category}", ${product.activities.length} tags`,
+    );
+
+    /* Every published Color value must resolve to exactly one colorway, and
+     * every variant must point at one of them. */
+    const colorwayIds = new Set(product.colorways.map((entry) => entry.id));
+    check(
+      `${product.handle} colorways`,
+      colorwayIds.size === product.colorways.length &&
+        product.variants.every((variant) =>
+          colorwayIds.has(variant.colorwayId),
+        ),
+      product.colorways.map((entry) => entry.name).join(", "),
+    );
+
+    const optionValueCount = product.options.reduce(
+      (total, option) => total * option.values.length,
+      1,
+    );
+    check(
+      `${product.handle} variant matrix`,
+      product.variants.length === product.colorways.length * optionValueCount,
       product.options.length === 0
         ? "no non-Color options"
         : product.options
             .map((option) => `${option.name} x${option.values.length}`)
             .join(", "),
-    );
-    check(
-      `${product.handle} variant order`,
-      profile !== null && variantsMatchOrder,
-      `${product.variants.length} canonical combinations in order`,
-    );
-
-    const colorwayIds = product.colorways.map((colorway) => colorway.id);
-    check(
-      `${product.handle} colorways`,
-      new Set(colorwayIds).size === colorwayIds.length &&
-        colorwayIds.length > 0,
-      colorwayIds.join(", "),
     );
 
     const mediaOk = product.colorways.every((colorway) =>

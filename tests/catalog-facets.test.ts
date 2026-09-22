@@ -12,6 +12,13 @@ import { PRODUCT_FIXTURES } from "../src/lib/storefront/fixtures/products.ts";
 
 const PATH = "/shop/field-essentials";
 
+/* Category values are the store's own product types, so the expectations are
+   read from the catalog rather than spelled out here. */
+const CATEGORY = PRODUCT_FIXTURES[0]?.category as string;
+const OTHER_CATEGORY = PRODUCT_FIXTURES.map((p) => p.category).find(
+  (c) => c !== CATEGORY,
+) as string;
+
 function groups(query: string, products = PRODUCT_FIXTURES) {
   const params = new URLSearchParams(query);
   const { filter } = parseCatalogQuery(params, products);
@@ -25,10 +32,13 @@ describe("catalog query parsing", () => {
       parseCatalogQuery(params, PRODUCT_FIXTURES).filter.category,
       undefined,
     );
+    assert.ok(CATEGORY && OTHER_CATEGORY);
     assert.equal(
-      parseCatalogQuery(new URLSearchParams("category=packs"), PRODUCT_FIXTURES)
-        .filter.category,
-      "packs",
+      parseCatalogQuery(
+        new URLSearchParams(`category=${encodeURIComponent(CATEGORY)}`),
+        PRODUCT_FIXTURES,
+      ).filter.category,
+      CATEGORY,
     );
   });
 
@@ -91,20 +101,23 @@ describe("facet links", () => {
   });
 
   it("marks exactly one link per group as selected", () => {
-    for (const group of groups("category=packs")) {
+    for (const group of groups(`category=${encodeURIComponent(CATEGORY)}`)) {
       assert.equal(group.links.filter((link) => link.selected).length, 1);
     }
   });
 
   it("offers a way back to the unfiltered view", () => {
-    const [activities] = groups("category=packs");
+    const [activities] = groups(`category=${encodeURIComponent(CATEGORY)}`);
     assert.ok(activities);
     const reset = activities.links.find(
       (link) => link.key === "all-activities",
     );
     assert.ok(reset);
     /* Clearing one dimension must not clear the other. */
-    assert.match(reset.href, /category=packs/);
+    assert.match(
+      reset.href,
+      new RegExp(`category=${encodeURIComponent(CATEGORY)}`),
+    );
     assert.doesNotMatch(reset.href, /activity=/);
   });
 
@@ -119,7 +132,9 @@ describe("facet links", () => {
   });
 
   it("counts against the other active dimension, not the whole catalog", () => {
-    const params = new URLSearchParams("category=packs");
+    const params = new URLSearchParams(
+      `category=${encodeURIComponent(CATEGORY)}`,
+    );
     const { filter } = parseCatalogQuery(params, PRODUCT_FIXTURES);
     const [activities] = deriveFilterGroups({
       pathname: PATH,
@@ -131,7 +146,8 @@ describe("facet links", () => {
     const all = activities.links.find((link) => link.key === "all-activities");
     assert.equal(
       all?.count,
-      PRODUCT_FIXTURES.filter((product) => product.category === "packs").length,
+      PRODUCT_FIXTURES.filter((product) => product.category === CATEGORY)
+        .length,
     );
   });
 
@@ -166,8 +182,8 @@ describe("describeFilter", () => {
   it("names the active dimensions and nothing else", () => {
     assert.equal(describeFilter({}), "");
     assert.equal(
-      describeFilter({ category: "packs", activity: "hiking" }),
-      " · Packs · hiking",
+      describeFilter({ category: CATEGORY, activity: "hiking" }),
+      ` · ${CATEGORY} · hiking`,
     );
   });
 });

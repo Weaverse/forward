@@ -1,8 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-
-import { CANONICAL_PRODUCT_HANDLES } from "../src/lib/storefront/catalog-presentation.ts";
 import { StaticStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
+import { PRODUCT_FIXTURES } from "../src/lib/storefront/fixtures/products.ts";
 import {
   CONTENT_ARTICLE_HANDLES,
   CONTENT_PAGE_HANDLES,
@@ -36,7 +35,7 @@ describe("StaticStorefrontDataSource known handles", () => {
     const products = await storefront.listProducts();
     assert.deepEqual(
       products.map((product) => product.handle),
-      [...CANONICAL_PRODUCT_HANDLES],
+      PRODUCT_FIXTURES.map((product) => product.handle),
     );
     for (const product of products) {
       const found = await storefront.getProduct(product.handle);

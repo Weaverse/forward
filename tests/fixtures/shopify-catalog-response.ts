@@ -27,6 +27,8 @@ interface ProductSpec {
   handle: string;
   title: string;
   productType: string;
+  /** Shopify tags, as the seeded store publishes them. */
+  tags: readonly string[];
   description: string;
   price: string;
   colorways: readonly ColorwaySpec[];
@@ -43,6 +45,18 @@ const PRODUCT_SPECS: readonly ProductSpec[] = [
     handle: "weatherline-shell",
     title: "Weatherline Shell",
     productType: "Outerwear",
+    tags: [
+      "alpine",
+      "breathable",
+      "field-system",
+      "hiking",
+      "layering",
+      "outerwear",
+      "shell-jacket",
+      "technical-outdoor",
+      "waterproof",
+      "windproof",
+    ],
     description:
       "A lightweight three-layer shell designed for exposed ridgelines, fast weather shifts, and long days on foot.\nThe Weatherline Shell balances storm protection with an articulated fit that stays quiet and mobile under a pack.",
     price: "248.0",
@@ -70,6 +84,18 @@ const PRODUCT_SPECS: readonly ProductSpec[] = [
     handle: "traverse-grid-fleece",
     title: "Traverse Grid Fleece",
     productType: "Outerwear",
+    tags: [
+      "breathable",
+      "cool-weather",
+      "field-system",
+      "fleece",
+      "hiking",
+      "layering",
+      "midlayer",
+      "moisture-management",
+      "outerwear",
+      "technical-outdoor",
+    ],
     description:
       "A breathable grid-fleece midlayer built for high-output movement and fast temperature changes.\nThe Traverse Grid Fleece vents under load, dries quickly, and layers cleanly beneath a shell.",
     price: "148.0",
@@ -97,6 +123,18 @@ const PRODUCT_SPECS: readonly ProductSpec[] = [
     handle: "drift-insulated-vest",
     title: "Drift Insulated Vest",
     productType: "Outerwear",
+    tags: [
+      "cold-weather",
+      "field-system",
+      "hiking",
+      "insulated-vest",
+      "layering",
+      "outerwear",
+      "packable",
+      "synthetic-insulation",
+      "technical-outdoor",
+      "wind-resistant",
+    ],
     description:
       "A packable synthetic-insulation layer for exposed starts, stops, and cold transitions.\nThe Drift Insulated Vest adds core warmth without limiting arm movement, then compresses into a pack lid.",
     price: "188.0",
@@ -124,6 +162,17 @@ const PRODUCT_SPECS: readonly ProductSpec[] = [
     handle: "ridge-30-field-pack",
     title: "Ridge 30 Field Pack",
     productType: "Packs",
+    tags: [
+      "30l",
+      "backpack",
+      "day-hike",
+      "field-system",
+      "hiking",
+      "load-carry",
+      "packs",
+      "technical-outdoor",
+      "trail",
+    ],
     description:
       "A stable 30-liter field pack for moving light without sacrificing access or durability.\nThe Ridge 30 keeps the load close, separates wet essentials, and opens quickly when conditions change.",
     price: "198.0",
@@ -150,6 +199,17 @@ const PRODUCT_SPECS: readonly ProductSpec[] = [
     handle: "approach-18-day-pack",
     title: "Approach 18 Day Pack",
     productType: "Packs",
+    tags: [
+      "18l",
+      "backpack",
+      "daypack",
+      "field-system",
+      "hiking",
+      "lightweight",
+      "packs",
+      "scrambling",
+      "technical-outdoor",
+    ],
     description:
       "A close-body 18-liter pack for short technical days and fast access.\nThe Approach 18 stays stable on scrambling terrain and opens without coming off your back.",
     price: "148.0",
@@ -176,6 +236,17 @@ const PRODUCT_SPECS: readonly ProductSpec[] = [
     handle: "waypoint-sling-6",
     title: "Waypoint Sling 6",
     productType: "Packs",
+    tags: [
+      "6l",
+      "everyday-carry",
+      "field-system",
+      "lightweight",
+      "organization",
+      "packs",
+      "sling",
+      "technical-outdoor",
+      "travel",
+    ],
     description:
       "A compact 6-liter carry for travel, daily field essentials, and quick organization.\nThe Waypoint Sling 6 keeps documents, tools, and a light layer within reach of one hand.",
     price: "98.0",
@@ -202,6 +273,17 @@ const PRODUCT_SPECS: readonly ProductSpec[] = [
     handle: "talus-trail-shoe",
     title: "Talus Trail Shoe",
     productType: "Footwear",
+    tags: [
+      "all-terrain",
+      "cushioned",
+      "field-system",
+      "footwear",
+      "grip",
+      "hiking",
+      "technical-outdoor",
+      "trail",
+      "trail-shoe",
+    ],
     description:
       "A precise trail shoe tuned for mixed rock, loose dirt, and long technical descents.\nThe Talus combines a protected upper, confident edge control, and enough cushioning for sustained mileage.",
     price: "168.0",
@@ -229,6 +311,17 @@ const PRODUCT_SPECS: readonly ProductSpec[] = [
     handle: "scree-approach-shoe",
     title: "Scree Approach Shoe",
     productType: "Footwear",
+    tags: [
+      "approach-shoe",
+      "field-system",
+      "footwear",
+      "grip",
+      "hiking",
+      "rubber-rand",
+      "scrambling",
+      "technical-outdoor",
+      "technical-terrain",
+    ],
     description:
       "A precise low-profile approach shoe for rock, mixed trail, and technical transitions.\nThe Scree edges confidently, protects the forefoot, and keeps ground feel close underfoot.",
     price: "158.0",
@@ -256,6 +349,17 @@ const PRODUCT_SPECS: readonly ProductSpec[] = [
     handle: "camp-recovery-clog",
     title: "Camp Recovery Clog",
     productType: "Footwear",
+    tags: [
+      "camp",
+      "comfort",
+      "cushioned",
+      "field-system",
+      "footwear",
+      "recovery",
+      "slip-on",
+      "technical-outdoor",
+      "weather-tolerant",
+    ],
     description:
       "Easy-on recovery and camp footwear with durable traction and weather-tolerant materials.\nThe Camp Recovery Clog stays warm underfoot and handles wet ground without complaint.",
     price: "118.0",
@@ -373,7 +477,7 @@ function buildProduct(spec: ProductSpec) {
       .map((paragraph) => `<p>${paragraph}</p>`)
       .join(""),
     productType: spec.productType,
-    tags: ["forward", "managed-by:forward-seed"],
+    tags: ["forward", ...spec.tags, "managed-by:forward-seed"],
     options,
     variants: { pageInfo: { hasNextPage: false }, nodes: variantNodes },
     media: { pageInfo: { hasNextPage: false }, nodes: mediaNodes },

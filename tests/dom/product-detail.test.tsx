@@ -55,7 +55,7 @@ function optionRowFor(label: string): HTMLElement {
 
 describe("selected variant truth", () => {
   it("honours the exact colorway and size named by the URL", () => {
-    mountPdp(SHELL, "colorway=claystone&size=L");
+    mountPdp(SHELL, "colorway=claystone-charcoal&size=L");
 
     assert.ok(
       screen.getByRole("heading", { level: 1, name: SHELL.title }),
@@ -76,21 +76,21 @@ describe("selected variant truth", () => {
   });
 
   it("owns its own URL and rewrites an incomplete selection to the canonical one", () => {
-    mountPdp(SHELL, "colorway=claystone");
+    mountPdp(SHELL, "colorway=claystone-charcoal");
 
     assert.deepEqual(currentRoute().replaced, [
-      "/products/weatherline-shell?colorway=claystone&size=XS",
+      "/products/weatherline-shell?colorway=claystone-charcoal&size=XS",
     ]);
   });
 
   it("keeps unrelated query state while replacing selection state", async () => {
     const user = userEvent.setup();
-    mountPdp(SHELL, "utm_source=field&colorway=charcoal&size=XS");
+    mountPdp(SHELL, "utm_source=field&colorway=charcoal-moss&size=XS");
 
     const sizes = optionRowFor("Size");
     assert.equal(
       within(sizes).getByRole("link", { name: "M" }).getAttribute("href"),
-      "/products/weatherline-shell?utm_source=field&colorway=charcoal&size=M",
+      "/products/weatherline-shell?utm_source=field&colorway=charcoal-moss&size=M",
     );
     await user.click(within(sizes).getByRole("link", { name: "M" }));
   });
@@ -100,14 +100,14 @@ describe("selected variant truth", () => {
       index === 3 ? { ...variant, price: USD(199.5) } : variant,
     );
 
-    const regular = mountPdp(priced, "colorway=charcoal&size=XS");
+    const regular = mountPdp(priced, "colorway=charcoal-moss&size=XS");
     assert.match(
       visibleText(regular.container),
       new RegExp(`Price ${money(248)}`),
     );
     regular.unmount();
 
-    mountPdp(priced, "colorway=charcoal&size=L");
+    mountPdp(priced, "colorway=charcoal-moss&size=L");
     assert.match(
       visibleText(document.body),
       new RegExp(`Price ${money(199.5)}`),
@@ -122,7 +122,7 @@ describe("sale semantics", () => {
         ? { ...variant, price: USD(199.5), compareAtPrice: USD(248) }
         : variant,
     );
-    const { container } = mountPdp(onSale, "colorway=charcoal&size=L");
+    const { container } = mountPdp(onSale, "colorway=charcoal-moss&size=L");
 
     const struck = container.querySelector("del");
     assert.ok(struck !== null, "a real sale needs a semantic del");
@@ -145,7 +145,7 @@ describe("sale semantics", () => {
         ...variant,
         compareAtPrice,
       }));
-      const view = mountPdp(product, "colorway=charcoal&size=XS");
+      const view = mountPdp(product, "colorway=charcoal-moss&size=XS");
 
       assert.equal(view.container.querySelector("del"), null);
       assert.doesNotMatch(visibleText(view.container), /On sale|Regular price/);
@@ -163,7 +163,7 @@ describe("sold-out truth", () => {
     const product = withVariants(SHELL, (variant, index) =>
       index === 3 ? { ...variant, availableForSale: false } : variant,
     );
-    mountPdp(product, "colorway=charcoal&size=L");
+    mountPdp(product, "colorway=charcoal-moss&size=L");
 
     const sizes = optionRowFor("Size");
     const soldOut = within(sizes).getByTitle("L is unavailable");
@@ -181,20 +181,23 @@ describe("sold-out truth", () => {
 
   it("marks a fully sold-out colorway while keeping it a working deep link", () => {
     const product = withVariants(SHELL, (variant) =>
-      variant.colorwayId === "claystone"
+      variant.colorwayId === "claystone-charcoal"
         ? { ...variant, availableForSale: false }
         : variant,
     );
-    mountPdp(product, "colorway=charcoal&size=XS");
+    mountPdp(product, "colorway=charcoal-moss&size=XS");
 
     const link = screen.getByRole("link", {
       name: "Claystone / Charcoal colorway (sold out)",
     });
-    assert.match(link.getAttribute("href") ?? "", /colorway=claystone/);
+    assert.match(
+      link.getAttribute("href") ?? "",
+      /colorway=claystone-charcoal/,
+    );
   });
 
   it("labels every buyable option value readably", () => {
-    mountPdp(SHELL, "colorway=charcoal&size=XS");
+    mountPdp(SHELL, "colorway=charcoal-moss&size=XS");
 
     const sizes = optionRowFor("Size");
     assert.deepEqual(
@@ -215,7 +218,7 @@ describe("sold-out truth", () => {
 
 describe("gallery", () => {
   it("exposes every media as a named zoom control with a full-width hint on 1 and 4+", () => {
-    const { container } = mountPdp(SHELL, "colorway=charcoal&size=XS");
+    const { container } = mountPdp(SHELL, "colorway=charcoal-moss&size=XS");
     const gallery = screen.getByRole("region", {
       name: `${SHELL.title} gallery`,
     });
@@ -250,7 +253,7 @@ describe("gallery", () => {
 
   it("opens a named modal, steps through media, and restores the trigger", async () => {
     const user = userEvent.setup();
-    mountPdp(SHELL, "colorway=charcoal&size=XS");
+    mountPdp(SHELL, "colorway=charcoal-moss&size=XS");
     const gallery = screen.getByRole("region", {
       name: `${SHELL.title} gallery`,
     });
@@ -283,7 +286,7 @@ describe("gallery", () => {
 describe("add to cart identity", () => {
   it("adds the exact selected variant with its colorway, size, and deep link", async () => {
     const user = userEvent.setup();
-    mountPdp(SHELL, "colorway=claystone&size=L");
+    mountPdp(SHELL, "colorway=claystone-charcoal&size=L");
 
     await user.click(screen.getByRole("button", { name: "Increase quantity" }));
     await user.click(screen.getByRole("button", { name: /^Add to cart/ }));
@@ -299,12 +302,12 @@ describe("add to cart identity", () => {
       })),
       [
         {
-          variantId: "demo:weatherline-shell:claystone:L",
+          variantId: "demo:weatherline-shell:claystone-charcoal:L",
           productHandle: "weatherline-shell",
-          colorwayId: "claystone",
+          colorwayId: "claystone-charcoal",
           selectedOptions: { Size: "L" },
           quantity: 2,
-          href: "/products/weatherline-shell?colorway=claystone&size=L",
+          href: "/products/weatherline-shell?colorway=claystone-charcoal&size=L",
         },
       ],
     );
@@ -319,7 +322,7 @@ describe("add to cart identity", () => {
       ...variant,
       availableForSale: false,
     }));
-    mountPdp(product, "colorway=charcoal&size=XS");
+    mountPdp(product, "colorway=charcoal-moss&size=XS");
 
     const atc = screen.getByRole("button", { name: /^Sold out/ });
     assert.equal(atc.hasAttribute("disabled"), true);
