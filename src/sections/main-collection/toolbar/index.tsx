@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 
 import { cn } from "@/lib/cn";
 import { describeFilter, SORT_OPTIONS } from "@/lib/storefront/catalog-facets";
@@ -28,6 +27,8 @@ function CollectionToolbar({
   ...rest
 }: CollectionToolbarProps) {
   const { collectionProducts, collectionBrowse } = useStorefrontContext();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   if (collectionProducts === undefined || collectionBrowse === undefined) {
     return null;
   }
@@ -50,9 +51,11 @@ function CollectionToolbar({
         )}
       </div>
       {showSort === false ? null : (
-        <Suspense fallback={null}>
-          <SortForm sort={collectionBrowse.sort} />
-        </Suspense>
+        <SortForm
+          sort={collectionBrowse.sort}
+          pathname={pathname}
+          searchParams={searchParams}
+        />
       )}
     </div>
   );
@@ -64,9 +67,15 @@ function CollectionToolbar({
  * Every param the form does not own travels as a hidden input: the active
  * filter has to survive a re-sort, and so does anything else on the URL.
  */
-function SortForm({ sort }: { sort: string }) {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+function SortForm({
+  sort,
+  pathname,
+  searchParams,
+}: {
+  sort: string;
+  pathname: string;
+  searchParams: URLSearchParams;
+}) {
   const preserved = [...searchParams.entries()].filter(
     ([key]) => key !== "sort" && key !== "page",
   );
