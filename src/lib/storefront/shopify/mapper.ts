@@ -14,6 +14,7 @@
 
 import { isShopifyProductImageUrl } from "../image-source";
 import type {
+  CollectionProductsPage,
   ColorwayImages,
   Money,
   Product,
@@ -21,6 +22,8 @@ import type {
   ProductOption,
   ProductVariant,
   SpecRow,
+  StorefrontFilter,
+  StorefrontFilterType,
   StorefrontImage,
 } from "../types";
 import type { CatalogQueryResult } from "./client";
@@ -953,4 +956,97 @@ export function mapCatalogResult(
       .map((entry) => entry.handle)
       .slice(0, RELATED_PRODUCT_LIMIT),
   }));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Collection page                                                            */
+/* -------------------------------------------------------------------------- */
+
+const FILTER_TYPES = new Set<StorefrontFilterType>([
+  "LIST",
+  "PRICE_RANGE",
+  "BOOLEAN",
+]);
+
+function mapStorefrontFilter(value: unknown, index: number): StorefrontFilter {
+  const context = `collection filter ${index}`;
+  const record = asRecord(value, context);
+  const type = asText(record.type, `${context} type`);
+  if (!FILTER_TYPES.has(type as StorefrontFilterType)) {
+    fail(`${context} has unsupported type "${type}".`);
+  }
+  return {
+    id: asText(record.id, `${context} id`),
+    label: asText(record.label, `${context} label`),
+    type: type as StorefrontFilterType,
+    values: asArray(record.values, `${context} values`).map(
+      (entry, valueIndex) => {
+        const valueContext = `${context} value ${valueIndex}`;
+        const valueRecord = asRecord(entry, valueContext);
+        const count = valueRecord.count;
+        if (!Number.isInteger(count) || (count as number) < 0) {
+          fail(`${valueContext} has no usable count.`);
+        }
+        return {
+          id: asText(valueRecord.id, `${valueContext} id`),
+          label: asText(valueRecord.label, `${valueContext} label`),
+          count: count as number,
+          /* Opaque on purpose: this is Shopify's own ProductFilter JSON and
+           * it travels to the URL and back untouched. */
+          input: asText(valueRecord.input, `${valueContext} input`),
+        };
+      },
+    ),
+  };
+}
+
+function optionalCursor(value: unknown, context: string): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  return asText(value, context);
+}
+
+/**
+ * Validates one page of a collection.
+ *
+ * `null` means the store has no such collection, which the route turns into a
+ * 404. An unknown handle is not an error.
+ */
+export function mapCollectionProductsResult(
+  result: CatalogQueryResult,
+): CollectionProductsPage | null {
+  if (Array.isArray(result.errors) && result.errors.length > 0) {
+    fail(
+      `Storefront API returned ${result.errors.length} GraphQL error(s) for the collection query.`,
+    );
+  }
+  const data = asRecord(result.data, "collection response data");
+  if (data.collection === null || data.collection === undefined) {
+    return null;
+  }
+  const collection = asRecord(data.collection, "collection");
+  const products = asRecord(collection.products, "collection products");
+  const pageInfo = asRecord(products.pageInfo, "collection products pageInfo");
+
+  return {
+    products: asArray(products.nodes, "collection product nodes").map(
+      (node, index) => mapProduct(node, index),
+    ),
+    filters: asArray(products.filters, "collection filters").map(
+      mapStorefrontFilter,
+    ),
+    pageInfo: {
+      hasNextPage: pageInfo.hasNextPage === true,
+      hasPreviousPage: pageInfo.hasPreviousPage === true,
+      startCursor: optionalCursor(
+        pageInfo.startCursor,
+        "collection products startCursor",
+      ),
+      endCursor: optionalCursor(
+        pageInfo.endCursor,
+        "collection products endCursor",
+      ),
+    },
+  };
 }
