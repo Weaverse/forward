@@ -7,11 +7,10 @@ import type { FilterGroup } from "@/lib/storefront/catalog-facets";
 export function FilterSidebar({
   groups,
   idPrefix,
-  showCounts = true,
+  showCounts = false,
 }: {
   groups: readonly FilterGroup[];
   idPrefix: string;
-  /** Counts still render only when the group was built with them. */
   showCounts?: boolean;
 }) {
   return (
@@ -43,9 +42,9 @@ export function FilterSidebar({
                   aria-hidden="true"
                 />
                 <span className="flex-1">{link.label}</span>
-                {link.count === undefined || !showCounts ? null : (
+                {showCounts ? (
                   <span className="tabular-nums">{link.count}</span>
-                )}
+                ) : null}
               </Link>
             ))}
           </div>

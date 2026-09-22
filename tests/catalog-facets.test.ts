@@ -126,7 +126,6 @@ describe("facet links", () => {
       params,
       products: PRODUCT_FIXTURES,
       filter,
-      showCounts: true,
     });
     assert.ok(activities);
     const all = activities.links.find((link) => link.key === "all-activities");
@@ -136,11 +135,11 @@ describe("facet links", () => {
     );
   });
 
-  it("omits counts unless the page asked for them", () => {
+  it("counts every link, leaving the decision to render them to the view", () => {
     const [group] = groups("");
     assert.ok(group);
     assert.equal(
-      group.links.every((link) => link.count === undefined),
+      group.links.every((link) => typeof link.count === "number"),
       true,
     );
   });
