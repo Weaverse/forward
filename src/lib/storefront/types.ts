@@ -195,9 +195,67 @@ export interface DemoCartSeedLine {
   quantity: number;
 }
 
+/**
+ * One value of a storefront facet.
+ *
+ * `input` is Shopify's own `ProductFilter` JSON for this value. The theme
+ * never builds or interprets it — it round-trips through the URL and back into
+ * the query — so a facet the merchant enables later works with no code change.
+ */
+export interface StorefrontFilterValue {
+  id: string;
+  label: string;
+  /** Products remaining if this value is applied. */
+  count: number;
+  input: string;
+}
+
+export type StorefrontFilterType = "LIST" | "PRICE_RANGE" | "BOOLEAN";
+
+/** A facet exactly as the store exposes it. */
+export interface StorefrontFilter {
+  id: string;
+  label: string;
+  type: StorefrontFilterType;
+  values: readonly StorefrontFilterValue[];
+}
+
+/** One page of a collection, with the facets the store offers for it. */
+export interface CollectionProductsPage {
+  products: readonly Product[];
+  filters: readonly StorefrontFilter[];
+  pageInfo: {
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor: string | null;
+    endCursor: string | null;
+  };
+}
+
+/** How a route asks for a page of a collection. */
+export interface CollectionProductsQuery {
+  /** Opaque Shopify `ProductFilter` objects, parsed from the URL. */
+  filters?: readonly unknown[];
+  sort?: ProductSort;
+  /** Cursor paging; `startCursor` reads backwards. */
+  endCursor?: string;
+  startCursor?: string;
+  pageBy?: number;
+}
+
 export interface ProductListFilter {
   category?: ProductCategory;
   activity?: string;
 }
 
-export type ProductSort = "featured" | "price-asc" | "price-desc" | "name";
+/**
+ * Sort options, each one a Shopify sort key rather than a theme invention.
+ * `featured` is the merchant's own collection order.
+ */
+export type ProductSort =
+  | "featured"
+  | "price-asc"
+  | "price-desc"
+  | "name"
+  | "best-selling"
+  | "newest";
