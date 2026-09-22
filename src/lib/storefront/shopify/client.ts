@@ -17,17 +17,25 @@ import {
 } from "@shopify/hydrogen";
 import type { ProductFilter } from "@shopify/hydrogen/storefront-api-types";
 import { unstable_cache } from "next/cache";
-import type { CollectionSortKey } from "../sort";
+import type { CatalogSortKey, CollectionSortKey } from "../sort";
 import {
+  ALL_PRODUCTS_CACHE_KEY,
   CATALOG_CACHE_KEY,
   CATALOG_REVALIDATE_SECONDS,
   COLLECTION_CACHE_KEY,
   NAVIGATION_CACHE_KEY,
 } from "./cache-policy";
-import { COLLECTION_PRODUCTS_QUERY } from "./collection-query";
+import {
+  ALL_PRODUCTS_QUERY,
+  COLLECTION_PRODUCTS_QUERY,
+} from "./collection-query";
 import type { ShopifyCatalogConfig } from "./env";
 import { ShopifyCatalogError, safeErrorLabel } from "./errors";
-import { mapCatalogResult, mapCollectionProductsResult } from "./mapper";
+import {
+  mapAllProductsResult,
+  mapCatalogResult,
+  mapCollectionProductsResult,
+} from "./mapper";
 import {
   FOOTER_MENU_HANDLE,
   NAVIGATION_COLLECTION_LIMIT,
@@ -68,6 +76,15 @@ export interface CollectionQueryVariables {
 
 export type CollectionQueryExecutor = (
   variables: CollectionQueryVariables,
+) => Promise<CatalogQueryResult>;
+
+export type AllProductsQueryExecutor = (
+  variables: Omit<
+    CollectionQueryVariables,
+    "handle" | "sortKey" | "filters"
+  > & {
+    sortKey: CatalogSortKey;
+  },
 ) => Promise<CatalogQueryResult>;
 
 export interface NavigationQueryResult {
@@ -341,6 +358,73 @@ export function createCollectionQueryExecutor(
         config.storeDomain,
         variables.handle,
         JSON.stringify(variables.filters),
+        variables.sortKey,
+        String(variables.reverse),
+        String(variables.first ?? ""),
+        String(variables.last ?? ""),
+        variables.startCursor ?? "",
+        variables.endCursor ?? "",
+      ],
+      { revalidate: CATALOG_REVALIDATE_SECONDS },
+    )();
+}
+
+/** Builds the all-products page executor; the catalog read, but paged. */
+export function createAllProductsQueryExecutor(
+  config: ShopifyCatalogConfig,
+  options: CatalogQueryExecutorOptions = {},
+): AllProductsQueryExecutor {
+  const client = createStorefrontReadClient(config);
+
+  const execute: AllProductsQueryExecutor = async (variables) => {
+    try {
+      const { data, errors } = await client.graphql(ALL_PRODUCTS_QUERY, {
+        variables: {
+          query: CATALOG_PRODUCT_FILTER,
+          sortKey: variables.sortKey,
+          reverse: variables.reverse,
+          first: variables.first ?? null,
+          last: variables.last ?? null,
+          startCursor: variables.startCursor ?? null,
+          endCursor: variables.endCursor ?? null,
+          variantFirst: CATALOG_VARIANT_LIMIT,
+          mediaFirst: CATALOG_MEDIA_LIMIT,
+        },
+      });
+      const graphQLErrors = readGraphQLErrors(errors, "catalog");
+      if (graphQLErrors.length > 0) {
+        throw new ShopifyCatalogError(
+          `Storefront API products response contained ${graphQLErrors.length} error(s).`,
+        );
+      }
+      if (data == null) {
+        throw new ShopifyCatalogError(
+          "Storefront API products response did not contain data.",
+        );
+      }
+      const result = { data };
+      mapAllProductsResult(result);
+      return result;
+    } catch (error) {
+      if (error instanceof ShopifyCatalogError) {
+        throw error;
+      }
+      throw new ShopifyCatalogError(
+        `Storefront API products request failed (${safeErrorLabel(error)}).`,
+      );
+    }
+  };
+
+  if (options.useNextCache === false) {
+    return execute;
+  }
+
+  return async (variables) =>
+    unstable_cache(
+      () => execute(variables),
+      [
+        ALL_PRODUCTS_CACHE_KEY,
+        config.storeDomain,
         variables.sortKey,
         String(variables.reverse),
         String(variables.first ?? ""),

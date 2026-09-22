@@ -1026,27 +1026,41 @@ export function mapCollectionProductsResult(
     return null;
   }
   const collection = asRecord(data.collection, "collection");
-  const products = asRecord(collection.products, "collection products");
-  const pageInfo = asRecord(products.pageInfo, "collection products pageInfo");
+  return mapProductsConnection(collection.products);
+}
+
+/** One page of the whole catalog, shaped exactly like a collection page. */
+export function mapAllProductsResult(
+  result: CatalogQueryResult,
+): CollectionProductsPage {
+  if (Array.isArray(result.errors) && result.errors.length > 0) {
+    fail(
+      `Storefront API returned ${result.errors.length} GraphQL error(s) for the products query.`,
+    );
+  }
+  const data = asRecord(result.data, "products response data");
+  return mapProductsConnection(data.products);
+}
+
+function mapProductsConnection(value: unknown): CollectionProductsPage {
+  const products = asRecord(value, "products connection");
+  const pageInfo = asRecord(products.pageInfo, "products pageInfo");
 
   return {
-    products: asArray(products.nodes, "collection product nodes").map(
-      (node, index) => mapProduct(node, index),
+    products: asArray(products.nodes, "product nodes").map((node, index) =>
+      mapProduct(node, index),
     ),
-    filters: asArray(products.filters, "collection filters").map(
-      mapStorefrontFilter,
-    ),
+    /* Absent outside a collection: the API accepts no filters there, so a
+     * catalog page carries none. */
+    filters:
+      products.filters === undefined || products.filters === null
+        ? []
+        : asArray(products.filters, "product filters").map(mapStorefrontFilter),
     pageInfo: {
       hasNextPage: pageInfo.hasNextPage === true,
       hasPreviousPage: pageInfo.hasPreviousPage === true,
-      startCursor: optionalCursor(
-        pageInfo.startCursor,
-        "collection products startCursor",
-      ),
-      endCursor: optionalCursor(
-        pageInfo.endCursor,
-        "collection products endCursor",
-      ),
+      startCursor: optionalCursor(pageInfo.startCursor, "products startCursor"),
+      endCursor: optionalCursor(pageInfo.endCursor, "products endCursor"),
     },
   };
 }

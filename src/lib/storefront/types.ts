@@ -237,9 +237,9 @@ export interface CollectionProductsQuery {
   /** Opaque Shopify `ProductFilter` objects, parsed from the URL. */
   filters?: readonly unknown[];
   sort?: ProductSort;
-  /** Cursor paging; `startCursor` reads backwards. */
-  endCursor?: string;
-  startCursor?: string;
+  /** Cursor paging; `before` reads backwards. */
+  after?: string;
+  before?: string;
   pageBy?: number;
 }
 

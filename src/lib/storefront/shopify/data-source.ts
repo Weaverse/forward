@@ -15,7 +15,7 @@ import {
   searchNormalizedProducts,
 } from "../catalog-query";
 import type { StorefrontDataSource } from "../data-source";
-import { collectionSortArguments } from "../sort";
+import { catalogSortArguments, collectionSortArguments } from "../sort";
 import type {
   Collection,
   CollectionProductsPage,
@@ -32,6 +32,7 @@ import type {
 } from "../types";
 import { CATALOG_REVALIDATE_SECONDS } from "./cache-policy";
 import type {
+  AllProductsQueryExecutor,
   CatalogQueryExecutor,
   CollectionQueryExecutor,
   NavigationQueryExecutor,
@@ -40,7 +41,11 @@ import { COLLECTION_PAGE_SIZE } from "./collection-query";
 import type { ContentQueryExecutor } from "./content-client";
 import type { MappedContentResult } from "./content-mapper";
 import { ShopifyCatalogError, safeErrorLabel } from "./errors";
-import { mapCatalogResult, mapCollectionProductsResult } from "./mapper";
+import {
+  mapAllProductsResult,
+  mapCatalogResult,
+  mapCollectionProductsResult,
+} from "./mapper";
 import {
   mapCollectionsResult,
   mapFooterMenuResult,
@@ -57,6 +62,7 @@ export interface ShopifyCatalogDataSourceOptions {
   execute: CatalogQueryExecutor;
   /** Absent in unit tests that only exercise the whole-catalog read. */
   executeCollection?: CollectionQueryExecutor;
+  executeAllProducts?: AllProductsQueryExecutor;
   executeContent?: ContentQueryExecutor;
   executeNavigation: NavigationQueryExecutor;
   /** Configured store origin used to reject cross-store menu URLs. */
@@ -94,6 +100,7 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   readonly #base: StorefrontDataSource;
   readonly #execute: CatalogQueryExecutor;
   readonly #executeCollection: CollectionQueryExecutor | null;
+  readonly #executeAllProducts: AllProductsQueryExecutor | null;
   readonly #executeContent: ContentQueryExecutor | null;
   readonly #executeNavigation: NavigationQueryExecutor;
   readonly #storeDomain: string;
@@ -117,6 +124,7 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     this.#base = options.base;
     this.#execute = options.execute;
     this.#executeCollection = options.executeCollection ?? null;
+    this.#executeAllProducts = options.executeAllProducts ?? null;
     this.#executeContent = options.executeContent ?? null;
     this.#executeNavigation = options.executeNavigation;
     this.#storeDomain = options.storeDomain;
@@ -304,7 +312,7 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     );
     const pageBy = query.pageBy ?? COLLECTION_PAGE_SIZE;
     /* A start cursor reads backwards, which Shopify expresses as `last`. */
-    const backwards = query.startCursor !== undefined;
+    const backwards = query.before !== undefined;
     return mapCollectionProductsResult(
       await this.#executeCollection({
         handle,
@@ -312,8 +320,28 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
         sortKey,
         reverse,
         ...(backwards
-          ? { last: pageBy, startCursor: query.startCursor }
-          : { first: pageBy, endCursor: query.endCursor }),
+          ? { last: pageBy, startCursor: query.before }
+          : { first: pageBy, endCursor: query.after }),
+      }),
+    );
+  }
+
+  async getProductsPage(
+    query: CollectionProductsQuery = {},
+  ): Promise<CollectionProductsPage> {
+    if (this.#executeAllProducts === null) {
+      return this.#base.getProductsPage(query);
+    }
+    const { sortKey, reverse } = catalogSortArguments(query.sort ?? "featured");
+    const pageBy = query.pageBy ?? COLLECTION_PAGE_SIZE;
+    const backwards = query.before !== undefined;
+    return mapAllProductsResult(
+      await this.#executeAllProducts({
+        sortKey,
+        reverse,
+        ...(backwards
+          ? { last: pageBy, startCursor: query.before }
+          : { first: pageBy, endCursor: query.after }),
       }),
     );
   }

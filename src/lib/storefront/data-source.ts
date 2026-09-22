@@ -39,6 +39,7 @@ import {
 } from "./product-filters";
 import {
   type CatalogQueryExecutorOptions,
+  createAllProductsQueryExecutor,
   createCatalogQueryExecutor,
   createCollectionQueryExecutor,
   createNavigationQueryExecutor,
@@ -87,6 +88,15 @@ export interface StorefrontDataSource {
     handle: string,
     query?: CollectionProductsQuery,
   ): Promise<CollectionProductsPage | null>;
+  /**
+   * One page of the whole catalog, in the same shape a collection page has.
+   *
+   * Most stores expose no facets at the catalog level, so this is ordinarily
+   * sort and paging only — but whatever the store does return is carried.
+   */
+  getProductsPage(
+    query?: CollectionProductsQuery,
+  ): Promise<CollectionProductsPage>;
   searchProducts(query: string): Promise<readonly Product[]>;
   listArticles(): Promise<readonly JournalArticle[]>;
   getArticle(handle: string): Promise<JournalArticle | null>;
@@ -132,8 +142,8 @@ export function localCollectionPage(
     query.sort ?? "featured",
   );
   const pageBy = query.pageBy ?? DEFAULT_PAGE_BY;
-  const after = decodeCursor(query.endCursor);
-  const before = decodeCursor(query.startCursor);
+  const after = decodeCursor(query.after);
+  const before = decodeCursor(query.before);
   const start =
     after !== null
       ? after + 1
@@ -219,6 +229,18 @@ export class StaticStorefrontDataSource implements StorefrontDataSource {
     return localCollectionPage(all, query);
   }
 
+  async getProductsPage(
+    query: CollectionProductsQuery = {},
+  ): Promise<CollectionProductsPage> {
+    /* The Storefront API accepts no filters outside a collection, so neither
+     * does this: both modes agree the catalog level is sort and paging only. */
+    const page = localCollectionPage(PRODUCT_FIXTURES, {
+      ...query,
+      filters: [],
+    });
+    return { ...page, filters: [] };
+  }
+
   async searchProducts(query: string): Promise<readonly Product[]> {
     return searchNormalizedProducts(PRODUCT_FIXTURES, query);
   }
@@ -282,6 +304,7 @@ export function createStorefrontDataSource(
     base,
     execute: createCatalogQueryExecutor(config, options),
     executeCollection: createCollectionQueryExecutor(config, options),
+    executeAllProducts: createAllProductsQueryExecutor(config, options),
     executeContent: createContentQueryExecutor(config, options),
     executeNavigation: createNavigationQueryExecutor(config, options),
     storeDomain: config.storeDomain,

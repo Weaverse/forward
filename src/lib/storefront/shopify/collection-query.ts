@@ -66,3 +66,48 @@ export const COLLECTION_PRODUCTS_QUERY = gql(`
   }
   ${PRODUCT_FIELDS_FRAGMENT}
 `);
+
+/**
+ * One page of the whole catalog.
+ *
+ * The Storefront API accepts no `filters` argument outside a collection, so
+ * the catalog level is sort and paging only. Faceted browsing is a collection
+ * feature, and the theme does not pretend otherwise by offering controls that
+ * could not be applied.
+ */
+export const ALL_PRODUCTS_QUERY = gql(`
+  query ForwardAllProducts(
+    $first: Int
+    $last: Int
+    $startCursor: String
+    $endCursor: String
+    $query: String
+    $sortKey: ProductSortKeys
+    $reverse: Boolean
+    $variantFirst: Int!
+    $mediaFirst: Int!
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    products(
+      first: $first
+      last: $last
+      before: $startCursor
+      after: $endCursor
+      query: $query
+      sortKey: $sortKey
+      reverse: $reverse
+    ) {
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      nodes {
+        ...ForwardProductFields
+      }
+    }
+  }
+  ${PRODUCT_FIELDS_FRAGMENT}
+`);
