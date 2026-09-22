@@ -1,4 +1,3 @@
-import { CANONICAL_PRODUCT_HANDLES } from "./catalog-presentation";
 import type { StorefrontImage } from "./types";
 
 export type CanonicalCollectionHandle =
@@ -29,7 +28,9 @@ export const COLLECTION_PRESENTATION_PROFILES = [
       width: 2000,
       height: 1333,
     },
-    productHandles: CANONICAL_PRODUCT_HANDLES,
+    /* Empty means "every product the store returns"; the data source
+     * fills it, so the complete collection cannot fall behind the catalog. */
+    productHandles: [],
   },
   {
     handle: "outerwear",

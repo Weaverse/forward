@@ -1,8 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-
-import { CANONICAL_PRODUCT_HANDLES } from "../src/lib/storefront/catalog-presentation.ts";
 import { StaticStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
+import { PRODUCT_FIXTURES } from "../src/lib/storefront/fixtures/products.ts";
 import {
   CONTENT_ARTICLE_HANDLES,
   CONTENT_PAGE_HANDLES,
@@ -36,7 +35,7 @@ describe("StaticStorefrontDataSource known handles", () => {
     const products = await storefront.listProducts();
     assert.deepEqual(
       products.map((product) => product.handle),
-      [...CANONICAL_PRODUCT_HANDLES],
+      PRODUCT_FIXTURES.map((product) => product.handle),
     );
     for (const product of products) {
       const found = await storefront.getProduct(product.handle);
@@ -82,6 +81,51 @@ describe("StaticStorefrontDataSource known handles", () => {
         assert.ok(collection.productHandles.includes(product.handle));
       }
     }
+  });
+
+  it("narrows and orders a collection through the same normalized semantics", async () => {
+    /* The collection route hands filter and sort straight to this call, so
+     * the seam has to apply them rather than return the whole collection and
+     * leave a page to re-filter what it was given. */
+    const [collection] = await storefront.listCollections();
+    assert.ok(collection);
+    const all = await storefront.getCollectionProducts(collection.handle);
+    assert.ok(all);
+
+    const category = all[0]?.category;
+    assert.ok(category);
+    const narrowed = await storefront.getCollectionProducts(collection.handle, {
+      category,
+    });
+    assert.ok(narrowed);
+    assert.ok(narrowed.length <= all.length);
+    assert.deepEqual(
+      narrowed.map((product) => product.category),
+      narrowed.map(() => category),
+    );
+
+    const ascending = await storefront.getCollectionProducts(
+      collection.handle,
+      {},
+      "price-asc",
+    );
+    assert.ok(ascending);
+    const amounts = ascending.map((product) => product.price.amount);
+    assert.deepEqual(
+      amounts,
+      [...amounts].sort((a, b) => a - b),
+    );
+  });
+
+  it("returns nothing for a filter the collection cannot satisfy", async () => {
+    const [collection] = await storefront.listCollections();
+    assert.ok(collection);
+    assert.deepEqual(
+      await storefront.getCollectionProducts(collection.handle, {
+        activity: "no-such-activity",
+      }),
+      [],
+    );
   });
 });
 

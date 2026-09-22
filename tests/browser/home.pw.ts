@@ -7,7 +7,7 @@
  * alignment, and reduced motion.
  */
 
-import { CATALOG_PRESENTATION_PROFILES } from "../../src/lib/storefront/catalog-presentation.ts";
+import { PRODUCT_FIXTURES } from "../../src/lib/storefront/fixtures/products.ts";
 import { boxOf, expect, gotoReady, SHOPIFY_MODE, test } from "./fixtures.ts";
 
 /** Headings the theme owns, at their exact position in the page outline. */
@@ -21,11 +21,9 @@ const FIXED_HEADINGS: Readonly<Record<number, string>> = {
 };
 
 function subtitleFor(handle: string): string {
-  const profile = CATALOG_PRESENTATION_PROFILES.find(
-    (entry) => entry.handle === handle,
-  );
-  if (profile === undefined) throw new Error(`no profile for ${handle}`);
-  return profile.subtitle;
+  const product = PRODUCT_FIXTURES.find((entry) => entry.handle === handle);
+  if (product === undefined) throw new Error(`no product for ${handle}`);
+  return product.subtitle;
 }
 
 test.describe("Home composition", () => {

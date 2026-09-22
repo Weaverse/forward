@@ -4,10 +4,29 @@ import { createContext, type ReactNode, useContext } from "react";
 
 import type {
   Collection,
+  CollectionProductsPage,
   JournalArticle,
   Product,
+  ProductSort,
+  StorefrontFilter,
   StorePage,
 } from "@/lib/storefront/types";
+
+/**
+ * The resolved browse state of a catalog page.
+ *
+ * Filtering, ordering and paging are query state, and query state belongs to
+ * the route: it is what a shopper bookmarks and shares, it is untrusted until
+ * validated, and it selects which products are read on the server. The facets
+ * are the store's own — the theme declares none — so a section renders
+ * whatever the store offered and never decides what a filter means.
+ */
+export interface CatalogBrowse {
+  /** Facets exactly as the store exposed them for this result. */
+  filters: readonly StorefrontFilter[];
+  sort: ProductSort;
+  pageInfo: CollectionProductsPage["pageInfo"];
+}
 
 /**
  * Storefront data the route supplies to a composed page.
@@ -25,7 +44,9 @@ import type {
 export interface StorefrontDataContext {
   article?: JournalArticle;
   collection?: Collection;
+  /** The page of products the route resolved, already narrowed and ordered. */
   collectionProducts?: readonly Product[];
+  browse?: CatalogBrowse;
   page?: StorePage;
   product?: Product;
   products?: readonly Product[];

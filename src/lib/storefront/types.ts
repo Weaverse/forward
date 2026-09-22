@@ -31,8 +31,11 @@ export interface ColorwayImages {
 export interface ProductColorway {
   id: string;
   name: string;
-  /** Solid swatch color rendered by PLP/PDP colorway selectors. */
-  swatchColor: string;
+  /**
+   * Shopify's own swatch colour when the merchant set one, otherwise `null`.
+   * Most stores set none, so selectors fall back to the colorway image.
+   */
+  swatchColor: string | null;
   images: ColorwayImages;
 }
 
@@ -64,7 +67,11 @@ export interface SpecRow {
   value: string;
 }
 
-export type ProductCategory = "shells" | "packs" | "footwear";
+/**
+ * The store's own product type, verbatim. It is a label the merchant controls,
+ * not a taxonomy the theme declares, so it is an open string.
+ */
+export type ProductCategory = string;
 
 export interface Product {
   handle: string;
@@ -87,10 +94,15 @@ export interface Product {
 export interface Collection {
   handle: string;
   title: string;
-  /** Short field-report style code, e.g. "FG-01". */
+  /**
+   * Short field-report style code from the `forward.field_code` metafield.
+   * Empty when the store sets none; the hero then omits the eyebrow code.
+   */
   fieldCode: string;
+  /** The store's own description; empty when the merchant wrote none. */
   description: string;
-  heroImage: StorefrontImage;
+  /** The collection image, or `null` when the store has not set one. */
+  heroImage: StorefrontImage | null;
   productHandles: readonly string[];
 }
 
@@ -183,9 +195,67 @@ export interface DemoCartSeedLine {
   quantity: number;
 }
 
+/**
+ * One value of a storefront facet.
+ *
+ * `input` is Shopify's own `ProductFilter` JSON for this value. The theme
+ * never builds or interprets it — it round-trips through the URL and back into
+ * the query — so a facet the merchant enables later works with no code change.
+ */
+export interface StorefrontFilterValue {
+  id: string;
+  label: string;
+  /** Products remaining if this value is applied. */
+  count: number;
+  input: string;
+}
+
+export type StorefrontFilterType = "LIST" | "PRICE_RANGE" | "BOOLEAN";
+
+/** A facet exactly as the store exposes it. */
+export interface StorefrontFilter {
+  id: string;
+  label: string;
+  type: StorefrontFilterType;
+  values: readonly StorefrontFilterValue[];
+}
+
+/** One page of a collection, with the facets the store offers for it. */
+export interface CollectionProductsPage {
+  products: readonly Product[];
+  filters: readonly StorefrontFilter[];
+  pageInfo: {
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor: string | null;
+    endCursor: string | null;
+  };
+}
+
+/** How a route asks for a page of a collection. */
+export interface CollectionProductsQuery {
+  /** Opaque Shopify `ProductFilter` objects, parsed from the URL. */
+  filters?: readonly unknown[];
+  sort?: ProductSort;
+  /** Cursor paging; `before` reads backwards. */
+  after?: string;
+  before?: string;
+  pageBy?: number;
+}
+
 export interface ProductListFilter {
   category?: ProductCategory;
   activity?: string;
 }
 
-export type ProductSort = "featured" | "price-asc" | "price-desc" | "name";
+/**
+ * Sort options, each one a Shopify sort key rather than a theme invention.
+ * `featured` is the merchant's own collection order.
+ */
+export type ProductSort =
+  | "featured"
+  | "price-asc"
+  | "price-desc"
+  | "name"
+  | "best-selling"
+  | "newest";
