@@ -103,7 +103,6 @@ export default async function CollectionPage(props: CollectionPageProps) {
             params,
             products: catalog,
             filter,
-            showCounts: true,
           }),
           filter,
           sort,

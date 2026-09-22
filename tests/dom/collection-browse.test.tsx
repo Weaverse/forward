@@ -41,7 +41,6 @@ function routeContext(
         params: new URLSearchParams(query),
         products: PRODUCT_FIXTURES,
         filter,
-        showCounts: true,
       }),
       filter,
       sort,

@@ -48,7 +48,6 @@ const ROUTE_CONTEXT: StorefrontDataContext = {
       params: new URLSearchParams(),
       products: PRODUCT_FIXTURES,
       filter: {},
-      showCounts: true,
     }),
     filter: {},
     sort: "featured",
