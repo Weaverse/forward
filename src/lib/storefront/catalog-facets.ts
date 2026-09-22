@@ -35,20 +35,6 @@ export interface FilterGroup {
   links: readonly FilterLink[];
 }
 
-/**
- * The category axis: declared order, display label, and the set of valid
- * values, in one place. Key order is the order shoppers see — outerwear, then
- * carry, then footwear — and `CATEGORIES` is what an unknown param is checked
- * against, so the three cannot drift apart.
- */
-const CATEGORY_LABELS: Readonly<Record<ProductCategory, string>> = {
-  shells: "Shells",
-  packs: "Packs",
-  footwear: "Footwear",
-};
-
-const CATEGORIES = Object.keys(CATEGORY_LABELS) as readonly ProductCategory[];
-
 export const SORT_OPTIONS: ReadonlyArray<{
   value: ProductSort;
   label: string;
@@ -75,10 +61,11 @@ export function toSearchParams(
   return params;
 }
 
-function parseProductCategory(
-  value: string | null | undefined,
-): ProductCategory | undefined {
-  return CATEGORIES.find((category) => category === value);
+/** Categories the page actually offers, in the store's own order. */
+function productCategories(
+  products: readonly Product[],
+): readonly ProductCategory[] {
+  return [...new Set(products.map((product) => product.category))];
 }
 
 function parseProductSort(value: string | null | undefined): ProductSort {
@@ -88,9 +75,9 @@ function parseProductSort(value: string | null | undefined): ProductSort {
 }
 
 /**
- * Parses an activity only when the page actually offers it.
+ * Parses a value only when the page actually offers it.
  *
- * An unknown activity would otherwise filter every product away and leave the
+ * An unknown value would otherwise filter every product away and leave the
  * shopper on an empty grid with no way to tell why.
  */
 function parseProductActivity(
@@ -113,7 +100,10 @@ export function parseCatalogQuery(
 ): { filter: ProductListFilter; sort: ProductSort } {
   return {
     filter: {
-      category: parseProductCategory(params.get("category")),
+      category: parseProductActivity(
+        params.get("category"),
+        productCategories(products),
+      ),
       activity: parseProductActivity(
         params.get("activity"),
         productActivities(products),
@@ -180,7 +170,7 @@ export function deriveFilterGroups({
   products,
   filter,
 }: FilterGroupOptions): readonly FilterGroup[] {
-  const present = new Set(products.map((product) => product.category));
+  const categories = productCategories(products);
   const dimensions: readonly FacetDimension[] = [
     {
       param: "activity",
@@ -195,8 +185,8 @@ export function deriveFilterGroups({
       heading: "Category",
       resetKey: "all-categories",
       resetLabel: "All categories",
-      values: CATEGORIES.filter((category) => present.has(category)),
-      label: (value) => CATEGORY_LABELS[value as ProductCategory],
+      values: categories,
+      label: (value) => value,
     },
   ];
 
@@ -227,10 +217,7 @@ export function deriveFilterGroups({
 
 /** Human summary of the active narrowing, for a results count line. */
 export function describeFilter(filter: ProductListFilter): string {
-  return [
-    filter.category === undefined ? null : CATEGORY_LABELS[filter.category],
-    filter.activity ?? null,
-  ]
+  return [filter.category ?? null, filter.activity ?? null]
     .filter((entry): entry is string => entry !== null)
     .map((entry) => ` · ${entry}`)
     .join("");

@@ -5,18 +5,13 @@
  * so an unexpected shape must fail loudly here rather than degrade into
  * plausible-looking output.
  *
- * Ownership split:
- * - Shopify owns identity, copy, price, options, media, and the five `forward`
- *   metafields;
- * - `catalog-presentation.ts` owns plate, category, activities, subtitle,
- *   repair copy, related-handle order, colorway IDs, and swatch colors.
+ * Every field comes from the store. Category is `productType`, activities are
+ * the product's tags, the subtitle is its first `forward.highlights` entry,
+ * colorway ids are derived from the published Color values, and swatch colours
+ * are Shopify's own when the merchant set them. Nothing here consults a
+ * theme-side table of approved products.
  */
 
-import {
-  CANONICAL_PRODUCT_HANDLES,
-  type CatalogPresentationProfile,
-  getCatalogPresentationProfile,
-} from "../catalog-presentation";
 import { isShopifyProductImageUrl } from "../image-source";
 import type {
   ColorwayImages,
@@ -34,6 +29,31 @@ import { CATALOG_OWNERSHIP_TAG } from "./queries";
 
 /** Shopify option that becomes colorways instead of a normalized option. */
 const COLOR_OPTION_NAME = "Color";
+
+/** How many same-type products a PDP offers as related. */
+const RELATED_PRODUCT_LIMIT = 4;
+
+/**
+ * Tags the storefront never shows a shopper: the ownership marker and any
+ * `namespace:value` bookkeeping tag a seeding or ops tool wrote.
+ */
+function isInfrastructureTag(tag: string): boolean {
+  return tag === CATALOG_OWNERSHIP_TAG || tag.includes(":");
+}
+
+/**
+ * A colorway id derived from the Color value the store actually publishes.
+ *
+ * It is a URL segment (`?colorway=`), so it has to be stable and readable
+ * without a theme-side table deciding what each label is "really" called.
+ */
+function colorwayId(label: string): string {
+  const slug = label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug.length > 0 ? slug : "default";
+}
 
 /** The normalized model is USD-only. */
 const REQUIRED_CURRENCY_CODE = "USD";
@@ -170,13 +190,11 @@ interface MappedOptions {
   colorLabels: readonly string[];
   /** Every non-Color option, in Shopify order. */
   options: readonly ProductOption[];
+  /** Native Shopify swatch colour per Color label, `null` when unset. */
+  swatches: ReadonlyMap<string, string | null>;
 }
 
-function mapOptions(
-  value: unknown,
-  handle: string,
-  profile: CatalogPresentationProfile,
-): MappedOptions {
+function mapOptions(value: unknown, handle: string): MappedOptions {
   const nodes = asArray(value, `${handle} options`);
   if (nodes.length === 0) {
     fail(`${handle} has no product options.`);
@@ -184,17 +202,20 @@ function mapOptions(
 
   let colorLabels: readonly string[] | undefined;
   const options: ProductOption[] = [];
+  const swatches = new Map<string, string | null>();
 
   for (const [index, node] of nodes.entries()) {
     const context = `${handle} option ${index}`;
     const record = asRecord(node, context);
     const name = asText(record.name, `${context} name`);
-    const values = asArray(record.optionValues, `${context} optionValues`).map(
-      (entry, valueIndex) =>
-        asText(
-          asRecord(entry, `${context} value ${valueIndex}`).name,
-          `${context} value ${valueIndex} name`,
-        ),
+    const valueRecords = asArray(
+      record.optionValues,
+      `${context} optionValues`,
+    ).map((entry, valueIndex) =>
+      asRecord(entry, `${context} value ${valueIndex}`),
+    );
+    const values = valueRecords.map((entry, valueIndex) =>
+      asText(entry.name, `${context} value ${valueIndex} name`),
     );
     if (values.length === 0) {
       fail(`${context} has no values.`);
@@ -208,6 +229,19 @@ function mapOptions(
         fail(`${handle} has more than one ${COLOR_OPTION_NAME} option.`);
       }
       colorLabels = values;
+      /* Shopify's own swatch when the merchant set one. Most stores have
+       * none, and the selector falls back to the colorway image. */
+      for (const [valueIndex, entry] of valueRecords.entries()) {
+        const swatch = entry.swatch;
+        const color =
+          swatch === null || swatch === undefined
+            ? null
+            : asRecord(swatch, `${context} value ${valueIndex} swatch`).color;
+        swatches.set(
+          values[valueIndex] as string,
+          typeof color === "string" && color.length > 0 ? color : null,
+        );
+      }
       continue;
     }
     options.push({ name, values });
@@ -216,33 +250,7 @@ function mapOptions(
   if (colorLabels === undefined) {
     fail(`${handle} has no ${COLOR_OPTION_NAME} option.`);
   }
-  const expectedColorLabels = Object.keys(profile.colorways);
-  if (colorLabels.some((label) => !Object.hasOwn(profile.colorways, label))) {
-    fail(`${handle} has no approved colorway mapping.`);
-  }
-  if (
-    colorLabels.length !== expectedColorLabels.length ||
-    colorLabels.some((label, index) => label !== expectedColorLabels[index])
-  ) {
-    fail(`${handle} ${COLOR_OPTION_NAME} values are not in canonical order.`);
-  }
-  const expectedValues = profile.optionValues;
-  if (expectedValues === undefined) {
-    if (options.length !== 0) {
-      fail(`${handle} has unsupported non-Color product options.`);
-    }
-  } else {
-    const size = options[0];
-    if (
-      options.length !== 1 ||
-      size?.name !== "Size" ||
-      size.values.length !== expectedValues.length ||
-      size.values.some((entry, index) => entry !== expectedValues[index])
-    ) {
-      fail(`${handle} Size values do not match the canonical option contract.`);
-    }
-  }
-  return { colorLabels, options };
+  return { colorLabels, options, swatches };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -362,51 +370,44 @@ function mapColorways(
   colorLabels: readonly string[],
   mediaMap: ReadonlyMap<string, readonly string[]>,
   images: ReadonlyMap<string, StorefrontImage>,
-  profile: CatalogPresentationProfile,
+  handle: string,
+  swatches: ReadonlyMap<string, string | null>,
 ): readonly ProductColorway[] {
-  const handle = profile.handle;
   const seenIds = new Set<string>();
-  const presentations = colorLabels.map((label) => {
-    /* Own-key lookup only: a live Color label such as "constructor" must not
-       resolve through the prototype chain. */
-    const presentation = Object.hasOwn(profile.colorways, label)
-      ? profile.colorways[label]
-      : undefined;
-    if (presentation === undefined) {
-      fail(
-        `${handle} ${COLOR_OPTION_NAME} value "${label}" has no approved colorway mapping.`,
-      );
+  for (const label of colorLabels) {
+    const id = colorwayId(label);
+    if (seenIds.has(id)) {
+      fail(`${handle} has two ${COLOR_OPTION_NAME} values with the same id.`);
     }
-    if (seenIds.has(presentation.id)) {
-      fail(`${handle} maps more than one colorway to id ${presentation.id}.`);
-    }
-    seenIds.add(presentation.id);
-    return { label, presentation };
-  });
+    seenIds.add(id);
+  }
 
-  const usesDisplayLabels =
-    mediaMap.size === presentations.length &&
-    presentations.every(({ label }) => mediaMap.has(label));
-  const usesColorwayIds =
-    mediaMap.size === presentations.length &&
-    presentations.every(({ presentation }) => mediaMap.has(presentation.id));
+  /* The media map may be keyed by Color label or by the derived id; a store
+   * writes whichever reads better in the metafield editor. */
+  const covers = (key: (label: string) => string) =>
+    mediaMap.size === colorLabels.length &&
+    colorLabels.every((label) => mediaMap.has(key(label)));
+  const usesDisplayLabels = covers((label) => label);
+  const usesColorwayIds = covers(colorwayId);
   if (!usesDisplayLabels && !usesColorwayIds) {
     fail(
-      `${handle} forward.colorway_media_map must use one complete approved key set: Color display values or colorway ids.`,
+      `${handle} forward.colorway_media_map must cover every ${COLOR_OPTION_NAME} value, keyed by display value or by colorway id.`,
     );
   }
 
   const usedMediaIds = new Set<string>();
-  const colorways = presentations.map(({ label, presentation }) => {
-    const mapKey = usesDisplayLabels ? label : presentation.id;
-    const ids = mediaMap.get(mapKey);
+  const colorways = colorLabels.map((label) => {
+    const id = colorwayId(label);
+    const ids = mediaMap.get(usesDisplayLabels ? label : id);
     if (ids === undefined) {
-      fail(`${handle} forward.colorway_media_map is missing key "${mapKey}".`);
+      fail(`${handle} forward.colorway_media_map is missing key "${label}".`);
     }
     return {
-      id: presentation.id,
+      id,
       name: label,
-      swatchColor: presentation.swatchColor,
+      /* Null unless the merchant set a native swatch; the selector then
+       * falls back to this colorway's own image. */
+      swatchColor: swatches.get(label) ?? null,
       images: buildColorwayImages(
         ids,
         images,
@@ -416,6 +417,8 @@ function mapColorways(
     };
   });
 
+  /* Media the map never claimed means the product ships images no colorway
+   * shows, which is a broken map rather than a store with extra photos. */
   if (usedMediaIds.size !== images.size) {
     fail(`${handle} has unreferenced MediaImage nodes.`);
   }
@@ -674,7 +677,6 @@ function mapVariants(
   handle: string,
   colorLabels: readonly string[],
   options: readonly ProductOption[],
-  profile: CatalogPresentationProfile,
 ): MappedVariants {
   const connection = asRecord(value, `${handle} variants`);
   const pageInfo = asRecord(connection.pageInfo, `${handle} variants pageInfo`);
@@ -751,11 +753,6 @@ function mapVariants(
     ) {
       fail(`${context} references an unknown ${COLOR_OPTION_NAME} value.`);
     }
-    const presentationColorway = profile.colorways[color.value];
-    if (presentationColorway === undefined) {
-      fail(`${context} has no approved colorway mapping.`);
-    }
-
     const selectedOptions = selectedOptionRecords.slice(1);
     for (const [optionIndex, selected] of selectedOptions.entries()) {
       const option = options[optionIndex];
@@ -765,7 +762,7 @@ function mapVariants(
     }
 
     const selectionKey = [
-      presentationColorway.id,
+      colorwayId(color.value),
       ...selectedOptions.map(({ name, value }) => `${name}:${value}`),
     ].join("\u001f");
     if (selections.has(selectionKey)) {
@@ -779,7 +776,7 @@ function mapVariants(
     }
     variants.push({
       id,
-      colorwayId: presentationColorway.id,
+      colorwayId: colorwayId(color.value),
       selectedOptions,
       price,
       compareAtPrice: mapNullableMoney(
@@ -793,46 +790,6 @@ function mapVariants(
   if (minimum === undefined) {
     fail(`${handle} has no usable variant price.`);
   }
-  for (const colorway of Object.values(profile.colorways)) {
-    if (!variants.some((variant) => variant.colorwayId === colorway.id)) {
-      fail(`${handle} has no approved colorway mapping for ${colorway.id}.`);
-    }
-  }
-  const expectedVariantCount =
-    Object.keys(profile.colorways).length * (profile.optionValues?.length ?? 1);
-  if (variants.length !== expectedVariantCount) {
-    fail(
-      `${handle} must expose exactly ${expectedVariantCount} canonical option combinations.`,
-    );
-  }
-  const combinations = optionCombinations(options);
-  const expectedVariantOrder = Object.values(profile.colorways).flatMap(
-    (colorway) =>
-      combinations.map((selectedOptions) => ({
-        colorwayId: colorway.id,
-        selectedOptions,
-      })),
-  );
-  const orderMismatch = variants.some((variant, index) => {
-    const expected = expectedVariantOrder[index];
-    return (
-      expected === undefined ||
-      variant.colorwayId !== expected.colorwayId ||
-      variant.selectedOptions.length !== expected.selectedOptions.length ||
-      variant.selectedOptions.some((selected, optionIndex) => {
-        const expectedOption = expected.selectedOptions[optionIndex];
-        return (
-          expectedOption === undefined ||
-          selected.name !== expectedOption.name ||
-          selected.value !== expectedOption.value
-        );
-      })
-    );
-  });
-  if (orderMismatch) {
-    fail(`${handle} variants are not in canonical option order.`);
-  }
-
   return { price: minimum, variants };
 }
 
@@ -844,13 +801,6 @@ function mapProduct(node: unknown, index: number): Product {
   const record = asRecord(node, `catalog product ${index}`);
   const handle = asText(record.handle, `catalog product ${index} handle`);
 
-  const profile = getCatalogPresentationProfile(handle);
-  if (profile === null) {
-    fail(
-      `Catalog product "${handle}" is not an approved Forward product in this slice.`,
-    );
-  }
-
   const tags = asArray(record.tags, `${handle} tags`).map((tag, tagIndex) =>
     asText(tag, `${handle} tag ${tagIndex}`),
   );
@@ -859,7 +809,7 @@ function mapProduct(node: unknown, index: number): Product {
   }
 
   asText(record.id, `${handle} id`);
-  asText(record.productType, `${handle} productType`);
+  const productType = asText(record.productType, `${handle} productType`);
   const title = asText(record.title, `${handle} title`);
   // Validate both Storefront fields. `descriptionHtml` preserves paragraph
   // boundaries that Shopify removes from the plain `description` string.
@@ -871,13 +821,12 @@ function mapProduct(node: unknown, index: number): Product {
     fail(`${handle} description has no readable text.`);
   }
 
-  const { colorLabels, options } = mapOptions(record.options, handle, profile);
+  const { colorLabels, options, swatches } = mapOptions(record.options, handle);
   const { price, variants } = mapVariants(
     record.variants,
     handle,
     colorLabels,
     options,
-    profile,
   );
 
   const images = mapMediaImages(record.media, handle);
@@ -889,9 +838,15 @@ function mapProduct(node: unknown, index: number): Product {
     ),
     handle,
   );
-  const colorways = mapColorways(colorLabels, mediaMap, images, profile);
+  const colorways = mapColorways(
+    colorLabels,
+    mediaMap,
+    images,
+    handle,
+    swatches,
+  );
 
-  validateHighlights(
+  const highlights = validateHighlights(
     readMetafieldValue(
       record.highlights,
       METAFIELD_TYPES.highlights,
@@ -929,19 +884,24 @@ function mapProduct(node: unknown, index: number): Product {
   return {
     handle,
     title,
-    subtitle: profile.subtitle,
-    category: profile.category,
-    activities: profile.activities,
+    /* The store's own lead highlight. There is no `subtitle` field in the
+     * Storefront API and inventing a metafield for one every merchant would
+     * have to fill is worse than using the line they already wrote. */
+    subtitle: highlights[0] ?? "",
+    category: productType,
+    activities: tags.filter((tag) => !isInfrastructureTag(tag)),
     price,
     description: descriptionParagraphs.join(" "),
     detailParagraphs: [...descriptionParagraphs, ...materialParagraphs],
     specs,
     care,
-    repair: profile.repair,
+    /* Repair is brand policy, identical for every product, so it is a theme
+     * setting rather than a field each product would have to repeat. */
+    repair: "",
     colorways,
     options,
     variants,
-    relatedHandles: profile.relatedHandles,
+    relatedHandles: [],
   };
 }
 
@@ -978,11 +938,19 @@ export function mapCatalogResult(
     mapped.set(product.handle, product);
   }
 
-  return CANONICAL_PRODUCT_HANDLES.map((handle) => {
-    const product = mapped.get(handle);
-    if (product === undefined) {
-      fail(`The live catalog is missing the approved product "${handle}".`);
-    }
-    return product;
-  });
+  /* Related products are the store's other items of the same product type.
+   * It is a rule over live data rather than a per-handle list the theme keeps,
+   * so a product added in Shopify is related to its siblings immediately. */
+  const catalog = [...mapped.values()];
+  return catalog.map((product) => ({
+    ...product,
+    relatedHandles: catalog
+      .filter(
+        (entry) =>
+          entry.handle !== product.handle &&
+          entry.category === product.category,
+      )
+      .map((entry) => entry.handle)
+      .slice(0, RELATED_PRODUCT_LIMIT),
+  }));
 }

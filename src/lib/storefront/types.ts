@@ -31,8 +31,11 @@ export interface ColorwayImages {
 export interface ProductColorway {
   id: string;
   name: string;
-  /** Solid swatch color rendered by PLP/PDP colorway selectors. */
-  swatchColor: string;
+  /**
+   * Shopify's own swatch colour when the merchant set one, otherwise `null`.
+   * Most stores set none, so selectors fall back to the colorway image.
+   */
+  swatchColor: string | null;
   images: ColorwayImages;
 }
 
@@ -64,7 +67,11 @@ export interface SpecRow {
   value: string;
 }
 
-export type ProductCategory = "shells" | "packs" | "footwear";
+/**
+ * The store's own product type, verbatim. It is a label the merchant controls,
+ * not a taxonomy the theme declares, so it is an open string.
+ */
+export type ProductCategory = string;
 
 export interface Product {
   handle: string;
@@ -87,10 +94,15 @@ export interface Product {
 export interface Collection {
   handle: string;
   title: string;
-  /** Short field-report style code, e.g. "FG-01". */
+  /**
+   * Short field-report style code from the `forward.field_code` metafield.
+   * Empty when the store sets none; the hero then omits the eyebrow code.
+   */
   fieldCode: string;
+  /** The store's own description; empty when the merchant wrote none. */
   description: string;
-  heroImage: StorefrontImage;
+  /** The collection image, or `null` when the store has not set one. */
+  heroImage: StorefrontImage | null;
   productHandles: readonly string[];
 }
 

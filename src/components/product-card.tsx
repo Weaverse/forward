@@ -6,6 +6,7 @@ import { useId, useState } from "react";
 
 import { formatMoney } from "@/lib/storefront/format";
 import {
+  colorwaySwatchStyle,
   productColorwayHref,
   resolveColorway,
 } from "@/lib/storefront/product-state";
@@ -86,7 +87,7 @@ export function ProductCard({ product, priority }: ProductCardProps) {
               >
                 <span
                   className="size-3 border border-black/25"
-                  style={{ backgroundColor: entry.swatchColor }}
+                  style={colorwaySwatchStyle(entry)}
                 />
               </span>
             </label>
