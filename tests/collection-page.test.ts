@@ -77,7 +77,7 @@ describe("collection page", () => {
 
     const second = await source.getCollectionPage("forward", {
       pageBy: 4,
-      endCursor: first.pageInfo.endCursor ?? undefined,
+      after: first.pageInfo.endCursor ?? undefined,
     });
     assert.ok(second);
     assert.equal(second.pageInfo.hasPreviousPage, true);
@@ -88,7 +88,7 @@ describe("collection page", () => {
 
     const back = await source.getCollectionPage("forward", {
       pageBy: 4,
-      startCursor: second.pageInfo.startCursor ?? undefined,
+      before: second.pageInfo.startCursor ?? undefined,
     });
     assert.deepEqual(
       back?.products.map((product) => product.handle),

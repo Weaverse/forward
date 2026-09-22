@@ -2,11 +2,11 @@ import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { render } from "@testing-library/react";
 
-import { deriveFilterGroups } from "@/lib/storefront/catalog-facets";
 import { COLLECTION_FIXTURES } from "@/lib/storefront/fixtures/collections";
 import { JOURNAL_FIXTURES } from "@/lib/storefront/fixtures/journal";
 import { PAGE_FIXTURES } from "@/lib/storefront/fixtures/pages";
 import { PRODUCT_FIXTURES } from "@/lib/storefront/fixtures/products";
+import { synthesizeProductFilters } from "@/lib/storefront/product-filters";
 import { WEAVERSE_COMPONENTS } from "@/lib/weaverse/components";
 import {
   type StorefrontDataContext,
@@ -40,17 +40,17 @@ const ROUTE_CONTEXT: StorefrontDataContext = {
   article: JOURNAL_FIXTURES[0],
   collection: COLLECTION_FIXTURES[0],
   collectionProducts: PRODUCT_FIXTURES,
-  /* The collection route resolves filter and sort before any section renders,
-   * so the `mc--*` elements only ever see a result, never a raw query. */
-  collectionBrowse: {
-    facets: deriveFilterGroups({
-      pathname: "/shop/field-essentials",
-      params: new URLSearchParams(),
-      products: PRODUCT_FIXTURES,
-      filter: {},
-    }),
-    filter: {},
+  /* The route resolves filters, order and paging before any section renders,
+   * so the `mc--*` and `ap--*` elements only ever see a result. */
+  browse: {
+    filters: synthesizeProductFilters(PRODUCT_FIXTURES),
     sort: "featured",
+    pageInfo: {
+      hasNextPage: false,
+      hasPreviousPage: false,
+      startCursor: null,
+      endCursor: null,
+    },
   },
   page: PAGE_FIXTURES[0],
   product: PRODUCT_FIXTURES[0],
