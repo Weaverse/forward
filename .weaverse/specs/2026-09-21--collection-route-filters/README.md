@@ -19,6 +19,14 @@
 >
 > Good, now `/work` it. The goal is to finish; when done, commit in multiple commits, one commit per child element. Then push and open a PR.
 
+## Follow-up
+
+Superseded in the same branch by
+[2026-09-22 store-driven catalog](../2026-09-22--store-driven-catalog/README.md):
+the Activity and Category facets this spec introduced were theme constants that
+existed in no Shopify store, and were replaced by the Storefront API's own
+filter connection.
+
 ## Summary
 
 `/shop/<collectionHandle>` handed all rendering to Weaverse and parsed no query

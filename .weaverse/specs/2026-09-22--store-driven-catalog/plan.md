@@ -44,15 +44,37 @@ a merchant enabling a filter in Search & Discovery gets it with no code change.
 
 ## Ordered slices
 
-1. Break the profile dependency in `mapProduct`; widen `ProductCategory`.
+1. Break the profile dependency in `mapProduct`; widen `ProductCategory`. Done.
 2. Re-author `fixtures/products.ts` as literal data; re-source
-   `collection-presentation.ts`.
+   `collection-presentation.ts`. Done.
 3. Per-collection query with `filters`, `sortKey`, `reverse`, cursors; new
-   mapper for the filter connection.
+   mapper for the filter connection. Done.
 4. Route + `mc--filters`/`mc--toolbar`/`mc--product-grid` onto native facets;
-   retire `catalog-facets.ts`'s invented dimensions.
-5. `/shop` to `ALL_PRODUCTS` composition, sort-only.
-6. Suites and scripts that import the retired module.
+   retire `catalog-facets.ts`'s invented dimensions. Done.
+5. `/shop` to `ALL_PRODUCTS` composition, sort-only. Done.
+6. Suites, scripts, seeds and `AGENTS.md`. Done.
+
+## What the API decided
+
+Two findings changed the shape of the work after the plan was written.
+
+`QueryRoot.products` accepts no `filters` argument — only `first`, `after`,
+`last`, `before`, `reverse`, `sortKey` and `query`. Faceted browsing is a
+collection feature, so `/shop` is sort and paging only. This is why Pilot's
+`/products` is sort-only too, and the theme does not offer controls that could
+not be applied.
+
+`TITLE` exists in both `ProductCollectionSortKeys` and `ProductSortKeys`, so
+every sort option maps to a real key and none is applied after the fact.
+
+## Field sourcing, as shipped
+
+Colorway ids derive from the published Color values, so `?colorway=` changed
+(`charcoal` became `charcoal-moss`). Old links still resolve to the product and
+fall back to its first colorway. Swatches use Shopify's native option swatch
+when the merchant set one, and the colorway's own image otherwise — this store
+sets none. `repair` is empty until it becomes a theme setting; the store has no
+source for it.
 
 ## Files and folders touched
 

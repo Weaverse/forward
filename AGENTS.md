@@ -15,6 +15,16 @@ Forward is a fresh Next.js App Router storefront theme using
   Nothing in this repository is a translation of Pilot source.
 - The existing static Forward POC is a visual reference only; do not copy its implementation wholesale.
 - Storefront completeness is defined by `.weaverse/specs/2026-08-05--static-demo-productionization/README.md` and the Shopify route contract.
+- The catalog is the store's. No theme-side table decides which products are
+  approved, what category or activities they have, or which facets exist:
+  `category` is `productType`, `activities` are the product's tags, colorway
+  ids derive from the published Color values, related products are the store's
+  other items of the same type, and facets come from the Storefront API's own
+  filter connection. A facet value's `input` is opaque Shopify JSON that
+  round-trips through the URL untouched, so a filter a merchant enables in
+  Search & Discovery works with no code change. Sort options are Shopify sort
+  keys. Never reintroduce an approved-handle allowlist or a presentation
+  profile table — both made the theme unable to run on another store.
 - Build the theme before making deployment or demo-integration decisions.
 - Routes compose named sections from `src/sections/`; they do not inline
   section markup. A section is pure presentation: every piece of content and
@@ -22,17 +32,20 @@ Forward is a fresh Next.js App Router storefront theme using
   never import the data source, and a section reused by more than one route
   takes its variations as props rather than forking into a near-copy.
 - Functional, stateful, and security-owned surfaces are not sections and stay
-  theme-owned: the Shop grid behavior, Cart, and `/account/**`. Header and
-  Footer are theme-owned components configured through theme settings, never
-  Weaverse global sections.
-- Approved change (2026-09-21): collection browsing is composed as the
-  `main-collection` tree — `mc--toolbar` and `mc--content`, with `mc--filters`
-  and `mc--product-grid` under content. Query state stays theme-owned: the
-  route parses and validates `category`, `activity` and `sort`, reads the
-  narrowed products through `getCollectionProducts`, and hands the result down
-  as `collectionBrowse`. A section never parses a param or decides what a
-  filter means, so reordering the tree cannot change which products a URL
-  selects. `collection-grid` is retired and superseded by `mc--product-grid`.
+  theme-owned: Cart and `/account/**`. Header and Footer are theme-owned
+  components configured through theme settings, never Weaverse global sections.
+- Approved change (2026-09-22): catalog browsing is composed. A collection is
+  the `main-collection` tree — `mc--toolbar` and `mc--content`, with
+  `mc--filters` and `mc--product-grid` under content — and `/shop` is the
+  `ALL_PRODUCTS` page type with the `all-products` tree (`ap--toolbar`,
+  `ap--product-grid`). Query state stays theme-owned: the route validates the
+  facet params, the sort and the cursor, reads one page through
+  `getCollectionPage`/`getProductsPage`, and hands the result down as `browse`.
+  A section never parses a param or decides what a filter means, so reordering
+  the tree cannot change which products a URL selects. `/shop` renders the
+  theme's own composition when the project has no `ALL_PRODUCTS` template, so
+  the route is never empty. `collection-grid`, `catalog-facets.ts`,
+  `FilterSidebar` and `product-results` are retired.
 - Approved change (2026-09-18): the PDP buy block is the composable
   `main-product` section, split into `mp--media`, `mp--info` and one `mp--*`
   child per element. The section shell alone owns the `colorway`/`size` query
@@ -81,8 +94,12 @@ Forward is a fresh Next.js App Router storefront theme using
 - Mode selection is explicit and fails closed: no Shopify environment selects
   the static adapter, a complete environment selects the Shopify adapter, and
   a partial environment throws a sanitized configuration error. Product data
-  never falls back in Shopify mode. Only validated navigation and canonical
-  collection structure may use their explicit deterministic safeguards.
+  never falls back in Shopify mode. Only validated navigation and collection
+  structure may use their explicit deterministic safeguards. Failing closed is
+  about malformed data, not about unfamiliar data: a product the theme has not
+  seen, a colour it does not recognise, a collection it did not expect and a
+  facet it has no renderer for are all ordinary, and only a truncated page, a
+  broken shape or a media map that does not cover its colours is an error.
 - Server catalog reads use `PRIVATE_STOREFRONT_API_TOKEN` with the Hydrogen
   `private_no_buyer_context` client. The private token must never reach browser
   code, props, logs, errors, tests, fixtures, or Git. Environment access stays
@@ -154,6 +171,7 @@ Credential-dependent gates are never part of `check`:
   runs the live build/route/read-only gates for both account-disabled and
   account-enabled states.
 - `bun run verify:shopify` is the opt-in live read-only catalog verification.
+  It asserts rules that hold for any store, never a fixed catalog.
 - `bun run test:browser` aggregates `test:browser:static`,
   `test:browser:live-account-disabled`, and `test:browser:live-account-enabled`
   against fresh production builds. It fails when a required credential matrix
