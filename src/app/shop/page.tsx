@@ -1,103 +1,92 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
-import { FilterSidebar } from "@/components/filter-sidebar";
-import {
-  deriveFilterGroups,
-  describeFilter,
-  parseCatalogQuery,
-  SORT_OPTIONS,
-  toSearchParams,
-} from "@/lib/storefront/catalog-facets";
 import { storefront } from "@/lib/storefront/data-source";
-import { IndexHeader } from "@/sections/index-header";
-import { ProductResults } from "@/sections/product-results";
+import {
+  AFTER_PARAM,
+  BEFORE_PARAM,
+  SORT_PARAM,
+  toSearchParams,
+} from "@/lib/storefront/filter-params";
+import { parseProductSort } from "@/lib/storefront/sort";
+import { StorefrontDataProvider } from "@/lib/weaverse/data-context";
+import { WeaversePage } from "@/lib/weaverse/page";
+import { pageRenders } from "@/lib/weaverse/page-payload";
+import {
+  loadWeaversePage,
+  type SearchParams,
+  weaverseProjectId,
+} from "@/lib/weaverse/server";
+import AllProducts, { AllProductsHeader } from "@/sections/all-products";
+import AllProductsGrid from "@/sections/all-products/product-grid";
+import AllProductsToolbar from "@/sections/all-products/toolbar";
 
 export const metadata: Metadata = {
   title: "Shop",
-  description:
-    "The complete Forward catalog: Weatherline Shell, Ridge 30 Field Pack, and Talus Trail Shoe.",
+  description: "Every product this store publishes.",
 };
 
 interface ShopPageProps {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: Promise<SearchParams>;
 }
 
-export default async function ShopPage({ searchParams }: ShopPageProps) {
-  const params = toSearchParams(await searchParams);
-  const catalog = await storefront.listProducts();
-  const { filter, sort } = parseCatalogQuery(params, catalog);
-  const products = await storefront.listProducts(filter, sort);
-  const filterGroups = deriveFilterGroups({
-    pathname: "/shop",
-    params,
-    products: catalog,
-    filter,
-  });
+/**
+ * Shop — the whole catalog.
+ *
+ * Order and paging are query state the route validates before any product is
+ * read; the composed `all-products` tree below is presentation over the page
+ * the store returned. The Storefront API accepts no filters outside a
+ * collection, so this route is sort and paging only — faceted browsing lives
+ * on `/shop/<collectionHandle>`.
+ */
+export default async function ShopPage(props: ShopPageProps) {
+  const searchParams = await props.searchParams;
+  const params = toSearchParams(searchParams);
+  const sort = parseProductSort(params.get(SORT_PARAM));
+
+  const [page, weaversePage, projectId] = await Promise.all([
+    storefront.getProductsPage({
+      sort,
+      after: params.get(AFTER_PARAM) ?? undefined,
+      before: params.get(BEFORE_PARAM) ?? undefined,
+    }),
+    loadWeaversePage({
+      pathname: "/shop",
+      searchParams,
+      type: "ALL_PRODUCTS",
+    }),
+    Promise.resolve(weaverseProjectId()),
+  ]);
+  const dataContext = {
+    products: page.products,
+    browse: { filters: page.filters, sort, pageInfo: page.pageInfo },
+  };
 
   return (
     <>
-      <IndexHeader
-        breadcrumb={
-          <>
-            <Link href="/">Home</Link> / Shop
-          </>
-        }
-        eyebrowLabel="Explore / All equipment"
-        heading="Field goods for moving outside."
-        lede="A compact system of weather protection, carry, and footwear. Designed to work hard together and age well apart."
-      />
-
-      <div className="sticky top-header-compact z-30 flex min-h-18 flex-col items-start justify-between gap-2.5 border-ink border-y bg-signal px-page-gutter py-3 sm:flex-row sm:items-center sm:gap-0 sm:py-2 md:top-header">
-        <div className="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-start">
-          <span className="text-ui sm:text-copy-sm" aria-live="polite">
-            {products.length} {products.length === 1 ? "product" : "products"}
-            {describeFilter(filter)}
-          </span>
-        </div>
-        {/* Sorting stays a plain GET form so it works without JavaScript. */}
-        <form
-          className="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-start"
-          method="get"
-          action="/shop"
-        >
-          {filter.category === undefined ? null : (
-            <input type="hidden" name="category" value={filter.category} />
-          )}
-          {filter.activity === undefined ? null : (
-            <input type="hidden" name="activity" value={filter.activity} />
-          )}
-          <label
-            className="font-field-meta text-caption font-medium text-text-muted tracking-field-meta uppercase"
-            htmlFor="sort-products"
-          >
-            Sort
-          </label>
-          <select
-            className="min-h-touch flex-1 rounded-none border border-ink bg-transparent py-0 pr-9.5 pl-3.5 font-body text-micro font-bold uppercase sm:flex-initial"
-            id="sort-products"
-            name="sort"
-            defaultValue={sort}
-          >
-            {SORT_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <button
-            className="min-h-touch border border-ink bg-transparent px-3.5 font-body text-micro font-extrabold tracking-label uppercase hover:bg-surface-subtle"
-            type="submit"
-          >
-            Apply
-          </button>
-        </form>
-      </div>
-
-      <div className="mx-auto grid w-full max-w-page grid-cols-1 gap-9 px-page-gutter pt-15.5 pb-25 md:grid-cols-media-row">
-        <FilterSidebar groups={filterGroups} idPrefix="desktop" />
-        <ProductResults filterGroups={filterGroups} products={products} />
-      </div>
+      {/* The catalog is the one thing this URL cannot be without. It is a
+       * section so Studio can compose and configure it, but a project with no
+       * ALL_PRODUCTS template yet — or one a merchant removed the block from —
+       * must not leave Shop empty. So the route renders it when the page does
+       * not. */}
+      {pageRenders(weaversePage, "all-products") ? null : (
+        <StorefrontDataProvider value={dataContext}>
+          <AllProductsHeader
+            heading="All products"
+            lede="Every product this store publishes."
+          />
+          <AllProducts>
+            <AllProductsToolbar />
+            <AllProductsGrid />
+          </AllProducts>
+        </StorefrontDataProvider>
+      )}
+      {weaversePage === null || projectId === null ? null : (
+        <WeaversePage
+          data={weaversePage}
+          dataContext={dataContext}
+          projectId={projectId}
+        />
+      )}
     </>
   );
 }

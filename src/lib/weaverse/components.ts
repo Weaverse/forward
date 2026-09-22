@@ -14,10 +14,10 @@
  *
  * - Header, Footer, announcement bar, and mini-cart, configured through theme
  *   settings and never composed.
- * - The Shop grid behavior, Cart, and `/account/**`. Collection browsing is
- *   composed, but its query state is resolved by the route.
- * - `index-header`, `journal-*`, `product-results`, `search-*`, and
- *   `policy-document`, extracted for code organization only.
+ * - Cart and `/account/**`. Catalog browsing is composed, but its query state
+ *   is resolved by the route.
+ * - `index-header`, `journal-*`, `search-*`, and `policy-document`, extracted
+ *   for code organization only.
  */
 
 import type { WeaverseNextComponent } from "@weaverse/next";
@@ -29,6 +29,9 @@ import * as Main from "@/components/main";
 import * as Paragraph from "@/components/paragraph";
 import * as SectionContent from "@/components/section-content";
 import * as Subheading from "@/components/subheading";
+import * as AllProducts from "@/sections/all-products";
+import * as AllProductsGrid from "@/sections/all-products/product-grid";
+import * as AllProductsToolbar from "@/sections/all-products/toolbar";
 import * as ArticleBody from "@/sections/article-body";
 import * as ArticleHeader from "@/sections/article-header";
 import * as CollectionHero from "@/sections/collection-hero";
@@ -139,6 +142,11 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
   entry(CollectionFilters),
   entry(CollectionProductGrid),
   entry(FieldPractice),
+
+  /* ALL_PRODUCTS */
+  entry(AllProducts),
+  entry(AllProductsToolbar),
+  entry(AllProductsGrid),
 
   /* ARTICLE */
   entry(ArticleHeader),
