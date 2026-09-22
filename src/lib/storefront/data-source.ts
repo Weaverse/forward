@@ -34,16 +34,24 @@ import { PAGE_FIXTURES } from "./fixtures/pages";
 import { POLICY_FIXTURES } from "./fixtures/policies";
 import { PRODUCT_FIXTURES } from "./fixtures/products";
 import {
+  applyProductFilters,
+  synthesizeProductFilters,
+} from "./product-filters";
+import {
   type CatalogQueryExecutorOptions,
   createCatalogQueryExecutor,
+  createCollectionQueryExecutor,
   createNavigationQueryExecutor,
 } from "./shopify/client";
 import { createContentQueryExecutor } from "./shopify/content-client";
 import { ShopifyCatalogDataSource } from "./shopify/data-source";
 import { type EnvSource, readShopifyCatalogConfig } from "./shopify/env";
 import type { ShopifyCatalogError } from "./shopify/errors";
+import { sortProductsLocally } from "./sort-local";
 import type {
   Collection,
+  CollectionProductsPage,
+  CollectionProductsQuery,
   DemoCartSeedLine,
   JournalArticle,
   Policy,
@@ -68,6 +76,17 @@ export interface StorefrontDataSource {
     filter?: ProductListFilter,
     sort?: ProductSort,
   ): Promise<readonly Product[] | null>;
+  /**
+   * One page of a collection, with the facets the store offers for it.
+   *
+   * This is the read a browsing route makes: the shopper's filters, order and
+   * cursor go in, and the products plus the store's own facet list come back.
+   * `null` means no such collection.
+   */
+  getCollectionPage(
+    handle: string,
+    query?: CollectionProductsQuery,
+  ): Promise<CollectionProductsPage | null>;
   searchProducts(query: string): Promise<readonly Product[]>;
   listArticles(): Promise<readonly JournalArticle[]>;
   getArticle(handle: string): Promise<JournalArticle | null>;
@@ -85,6 +104,55 @@ export interface StorefrontDataSourceOptions
   onNavigationFallback?: (error: ShopifyCatalogError) => void;
   onFooterFallback?: (error: ShopifyCatalogError) => void;
   onCollectionFallback?: (error: ShopifyCatalogError) => void;
+}
+
+const DEFAULT_PAGE_BY = 12;
+
+function decodeCursor(cursor: string | undefined): number | null {
+  if (cursor === undefined) {
+    return null;
+  }
+  const index = Number.parseInt(cursor, 10);
+  return Number.isInteger(index) && index >= 0 ? index : null;
+}
+
+/**
+ * One page of an already-resolved product list, shaped like a live response.
+ *
+ * Shared by the static data source and by any collection the Shopify adapter
+ * could not read live, so both answer a route identically.
+ */
+export function localCollectionPage(
+  all: readonly Product[],
+  query: CollectionProductsQuery,
+): CollectionProductsPage {
+  const filters = synthesizeProductFilters(all);
+  const narrowed = sortProductsLocally(
+    applyProductFilters(all, query.filters ?? []),
+    query.sort ?? "featured",
+  );
+  const pageBy = query.pageBy ?? DEFAULT_PAGE_BY;
+  const after = decodeCursor(query.endCursor);
+  const before = decodeCursor(query.startCursor);
+  const start =
+    after !== null
+      ? after + 1
+      : before !== null
+        ? Math.max(0, before - pageBy)
+        : 0;
+  const products = narrowed.slice(start, start + pageBy);
+
+  return {
+    products,
+    filters,
+    pageInfo: {
+      hasPreviousPage: start > 0,
+      hasNextPage: start + products.length < narrowed.length,
+      startCursor: products.length > 0 ? String(start) : null,
+      endCursor:
+        products.length > 0 ? String(start + products.length - 1) : null,
+    },
+  };
 }
 
 /** Fixture-backed implementation; the no-credential default. */
@@ -132,6 +200,23 @@ export class StaticStorefrontDataSource implements StorefrontDataSource {
       filter,
       sort,
     );
+  }
+
+  /**
+   * The same page a live collection read would return, computed locally.
+   *
+   * Cursors are the index of the last item on the page, which is opaque to
+   * callers exactly as a Shopify cursor is.
+   */
+  async getCollectionPage(
+    handle: string,
+    query: CollectionProductsQuery = {},
+  ): Promise<CollectionProductsPage | null> {
+    const all = await this.getCollectionProducts(handle);
+    if (all === null) {
+      return null;
+    }
+    return localCollectionPage(all, query);
   }
 
   async searchProducts(query: string): Promise<readonly Product[]> {
@@ -196,6 +281,7 @@ export function createStorefrontDataSource(
   return new ShopifyCatalogDataSource({
     base,
     execute: createCatalogQueryExecutor(config, options),
+    executeCollection: createCollectionQueryExecutor(config, options),
     executeContent: createContentQueryExecutor(config, options),
     executeNavigation: createNavigationQueryExecutor(config, options),
     storeDomain: config.storeDomain,
