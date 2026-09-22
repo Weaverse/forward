@@ -13,9 +13,13 @@ import type { DemoCartSeedLine } from "../types";
 export const DEMO_CART_SEED: readonly DemoCartSeedLine[] = [
   {
     productHandle: "weatherline-shell",
-    colorwayId: "claystone",
+    colorwayId: "claystone-charcoal",
     size: "M",
     quantity: 1,
   },
-  { productHandle: "ridge-30-field-pack", colorwayId: "charcoal", quantity: 1 },
+  {
+    productHandle: "ridge-30-field-pack",
+    colorwayId: "charcoal-moss-tan",
+    quantity: 1,
+  },
 ] as const;
