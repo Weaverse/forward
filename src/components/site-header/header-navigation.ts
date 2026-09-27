@@ -26,7 +26,9 @@ const DESTINATION_OWNED_PARAMS: readonly {
   params: readonly string[];
 }[] = [
   { prefix: "/search", params: ["q"] },
-  { prefix: "/shop", params: ["category", "activity", "sort"] },
+  /* Order carries across collections; facets do not — each collection offers
+   * its own, so a facet value from one names nothing in the next. */
+  { prefix: "/shop", params: ["sort"] },
 ];
 
 function ownedParams(path: string): readonly string[] {

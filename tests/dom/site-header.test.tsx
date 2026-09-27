@@ -284,10 +284,10 @@ describe("header query ownership", () => {
       screen.getByRole("navigation", { name: "Shop collections" }),
     ).getAllByRole("link");
     assert.deepEqual(hrefs(shopLinks), [
-      "/shop?sort=name&category=packs",
-      "/shop/outerwear?sort=name&category=packs",
-      "/shop/packs?sort=name&category=packs",
-      "/shop/footwear?sort=name&category=packs",
+      "/shop?sort=name",
+      "/shop/outerwear?sort=name",
+      "/shop/packs?sort=name",
+      "/shop/footwear?sort=name",
     ]);
   });
 
