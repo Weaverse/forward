@@ -60,10 +60,9 @@ export interface ShopifyCatalogDataSourceOptions {
   /** Static implementation backing every not-yet-live domain. */
   base: StorefrontDataSource;
   execute: CatalogQueryExecutor;
-  /** Absent in unit tests that only exercise the whole-catalog read. */
-  executeCollection?: CollectionQueryExecutor;
-  executeAllProducts?: AllProductsQueryExecutor;
-  executeContent?: ContentQueryExecutor;
+  executeCollection: CollectionQueryExecutor;
+  executeAllProducts: AllProductsQueryExecutor;
+  executeContent: ContentQueryExecutor;
   executeNavigation: NavigationQueryExecutor;
   /** Configured store origin used to reject cross-store menu URLs. */
   storeDomain: string;
@@ -93,9 +92,9 @@ interface ContentCacheEntry {
 export class ShopifyCatalogDataSource implements StorefrontDataSource {
   readonly #base: StorefrontDataSource;
   readonly #execute: CatalogQueryExecutor;
-  readonly #executeCollection: CollectionQueryExecutor | null;
-  readonly #executeAllProducts: AllProductsQueryExecutor | null;
-  readonly #executeContent: ContentQueryExecutor | null;
+  readonly #executeCollection: CollectionQueryExecutor;
+  readonly #executeAllProducts: AllProductsQueryExecutor;
+  readonly #executeContent: ContentQueryExecutor;
   readonly #executeNavigation: NavigationQueryExecutor;
   readonly #storeDomain: string;
   readonly #mainMenuHandle: string;
@@ -111,9 +110,9 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   constructor(options: ShopifyCatalogDataSourceOptions) {
     this.#base = options.base;
     this.#execute = options.execute;
-    this.#executeCollection = options.executeCollection ?? null;
-    this.#executeAllProducts = options.executeAllProducts ?? null;
-    this.#executeContent = options.executeContent ?? null;
+    this.#executeCollection = options.executeCollection;
+    this.#executeAllProducts = options.executeAllProducts;
+    this.#executeContent = options.executeContent;
     this.#executeNavigation = options.executeNavigation;
     this.#storeDomain = options.storeDomain;
     this.#mainMenuHandle = options.mainMenuHandle;
@@ -153,10 +152,7 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     return mapCollectionsResult(await this.#executeNavigation());
   }
 
-  async #loadContent(): Promise<MappedContentResult | null> {
-    if (this.#executeContent === null) {
-      return null;
-    }
+  async #loadContent(): Promise<MappedContentResult> {
     if (!this.#useProcessCache) {
       return this.#executeContent();
     }
@@ -246,9 +242,6 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     handle: string,
     query: CollectionProductsQuery = {},
   ): Promise<CollectionProductsPage | null> {
-    if (this.#executeCollection === null) {
-      return this.#base.getCollectionPage(handle, query);
-    }
     const { sortKey, reverse } = collectionSortArguments(
       query.sort ?? "featured",
     );
@@ -271,9 +264,6 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   async getProductsPage(
     query: CollectionProductsQuery = {},
   ): Promise<CollectionProductsPage> {
-    if (this.#executeAllProducts === null) {
-      return this.#base.getProductsPage(query);
-    }
     const { sortKey, reverse } = catalogSortArguments(query.sort ?? "featured");
     const pageBy = query.pageBy ?? COLLECTION_PAGE_SIZE;
     const backwards = query.before !== undefined;
@@ -310,48 +300,30 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   /* ---- Shopify-owned content reads ------------------------------------- */
 
   async listArticles(): Promise<readonly JournalArticle[]> {
-    const content = await this.#loadContent();
-    return content === null ? this.#base.listArticles() : content.articles;
+    return (await this.#loadContent()).articles;
   }
 
   async getArticle(handle: string): Promise<JournalArticle | null> {
-    const content = await this.#loadContent();
-    return (
-      (content === null
-        ? null
-        : content.articles.find((article) => article.handle === handle)) ??
-      (content === null ? this.#base.getArticle(handle) : null)
-    );
+    const { articles } = await this.#loadContent();
+    return articles.find((article) => article.handle === handle) ?? null;
   }
 
   async listPages(): Promise<readonly StorePage[]> {
-    const content = await this.#loadContent();
-    return content === null ? this.#base.listPages() : content.pages;
+    return (await this.#loadContent()).pages;
   }
 
   async getPage(handle: string): Promise<StorePage | null> {
-    const content = await this.#loadContent();
-    return (
-      (content === null
-        ? null
-        : content.pages.find((page) => page.handle === handle)) ??
-      (content === null ? this.#base.getPage(handle) : null)
-    );
+    const { pages } = await this.#loadContent();
+    return pages.find((page) => page.handle === handle) ?? null;
   }
 
   async listPolicies(): Promise<readonly Policy[]> {
-    const content = await this.#loadContent();
-    return content === null ? this.#base.listPolicies() : content.policies;
+    return (await this.#loadContent()).policies;
   }
 
   async getPolicy(handle: string): Promise<Policy | null> {
-    const content = await this.#loadContent();
-    return (
-      (content === null
-        ? null
-        : content.policies.find((policy) => policy.handle === handle)) ??
-      (content === null ? this.#base.getPolicy(handle) : null)
-    );
+    const { policies } = await this.#loadContent();
+    return policies.find((policy) => policy.handle === handle) ?? null;
   }
 
   async getThemeContent(): Promise<ThemeContent> {

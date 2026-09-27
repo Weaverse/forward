@@ -550,3 +550,14 @@ export function syntheticMediaIds(
   }
   return ids;
 }
+
+async function unread(): Promise<never> {
+  throw new Error("This test does not exercise that Shopify read.");
+}
+
+/** The executors a test does not exercise; reading one fails the test. */
+export const UNREAD_EXECUTORS = {
+  executeCollection: unread,
+  executeAllProducts: unread,
+  executeContent: unread,
+};

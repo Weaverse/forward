@@ -36,6 +36,7 @@ import {
   catalogResponse,
   catalogResponseWith,
   syntheticMediaIds,
+  UNREAD_EXECUTORS,
 } from "./fixtures/shopify-catalog-response.ts";
 import { navigationResponse } from "./fixtures/shopify-navigation-response.ts";
 
@@ -51,6 +52,7 @@ function shopifySource(
   response: CatalogQueryResult = catalogResponse(),
 ): ShopifyCatalogDataSource {
   return new ShopifyCatalogDataSource({
+    ...UNREAD_EXECUTORS,
     base: new StaticStorefrontDataSource(),
     execute: async () => response,
     executeNavigation: async () => navigationResponse(),
@@ -1285,7 +1287,7 @@ describe("ShopifyCatalogDataSource", () => {
     }
   });
 
-  it("keeps theme presentation static while reporting honest Shopify mode status", async () => {
+  it("keeps theme presentation static and reads content only from the store", async () => {
     const source = shopifySource();
     const base: StorefrontDataSource = new StaticStorefrontDataSource();
 
@@ -1311,14 +1313,15 @@ describe("ShopifyCatalogDataSource", () => {
     );
     assert.equal(liveTheme.footerStatus, "");
     assert.match(staticTheme.footerStatus, /Not a live store/i);
-    assert.deepEqual(await source.listArticles(), await base.listArticles());
-    assert.deepEqual(await source.listPages(), await base.listPages());
-    assert.deepEqual(await source.listPolicies(), await base.listPolicies());
-    assert.equal(await source.getArticle("does-not-exist"), null);
+    /* Content is always a live read: nothing falls back to fixtures. */
+    await assert.rejects(() => source.listArticles());
+    await assert.rejects(() => source.listPages());
+    await assert.rejects(() => source.listPolicies());
   });
 
   it("fails closed instead of falling back to fixtures", async () => {
     const failing = new ShopifyCatalogDataSource({
+      ...UNREAD_EXECUTORS,
       base: new StaticStorefrontDataSource(),
       execute: async () => {
         throw new ShopifyCatalogError("Storefront API catalog request failed.");
@@ -1352,6 +1355,7 @@ describe("catalog revalidation window", () => {
     let calls = 0;
     let clock = 0;
     const source = new ShopifyCatalogDataSource({
+      ...UNREAD_EXECUTORS,
       base: new StaticStorefrontDataSource(),
       execute: async () => {
         calls += 1;
@@ -1381,6 +1385,7 @@ describe("catalog revalidation window", () => {
   it("deduplicates concurrent catalog reads", async () => {
     let calls = 0;
     const source = new ShopifyCatalogDataSource({
+      ...UNREAD_EXECUTORS,
       base: new StaticStorefrontDataSource(),
       execute: async () => {
         calls += 1;
@@ -1401,6 +1406,7 @@ describe("catalog revalidation window", () => {
   it("lets the Next-cached executor own production reuse", async () => {
     let calls = 0;
     const source = new ShopifyCatalogDataSource({
+      ...UNREAD_EXECUTORS,
       base: new StaticStorefrontDataSource(),
       execute: async () => {
         calls += 1;

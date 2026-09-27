@@ -13,7 +13,10 @@ import {
   mapNavigationResult,
 } from "../src/lib/storefront/shopify/navigation-mapper.ts";
 import { FOOTER_MENU_HANDLE } from "../src/lib/storefront/shopify/navigation-query.ts";
-import { catalogResponse } from "./fixtures/shopify-catalog-response.ts";
+import {
+  catalogResponse,
+  UNREAD_EXECUTORS,
+} from "./fixtures/shopify-catalog-response.ts";
 import {
   navigationResponse,
   navigationResponseWith,
@@ -96,6 +99,7 @@ function shopifySource(
   base = new StaticStorefrontDataSource(),
 ) {
   return new ShopifyCatalogDataSource({
+    ...UNREAD_EXECUTORS,
     base,
     execute: async () => catalogResponse(),
     executeNavigation,
