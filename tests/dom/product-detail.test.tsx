@@ -17,6 +17,16 @@ import { formatMoney } from "@/lib/storefront/format";
 import type { Money, Product } from "@/lib/storefront/types";
 import { StorefrontDataProvider } from "@/lib/weaverse/data-context";
 import MainProduct from "@/sections/main-product";
+import ProductBreadcrumb from "@/sections/main-product/breadcrumb";
+import ProductBuyButtons from "@/sections/main-product/buy-buttons";
+import ProductCollapsibleDetails from "@/sections/main-product/collapsible-details";
+import ProductInfo from "@/sections/main-product/info";
+import ProductMedia from "@/sections/main-product/media";
+import ProductMeta from "@/sections/main-product/meta";
+import ProductPrices from "@/sections/main-product/prices";
+import ProductSummary from "@/sections/main-product/summary";
+import ProductTitle from "@/sections/main-product/title";
+import ProductVariantSelector from "@/sections/main-product/variant-selector";
 import { productByHandle, visibleText } from "./harness";
 import { currentRoute, setRoute } from "./preload";
 
@@ -40,11 +50,22 @@ function withVariants(
 
 function mountPdp(product: Product, query: string) {
   setRoute(`/products/${product.handle}`, query);
-  /* No children: the section renders its default composition, the same tree
-   * the route falls back to when a template does not place the section. */
+  /* The tree the section's preset seeds into a template. */
   return render(
     <StorefrontDataProvider value={{ product }}>
-      <MainProduct />
+      <MainProduct>
+        <ProductMedia />
+        <ProductInfo>
+          <ProductBreadcrumb />
+          <ProductMeta />
+          <ProductTitle />
+          <ProductPrices />
+          <ProductSummary />
+          <ProductVariantSelector />
+          <ProductBuyButtons />
+          <ProductCollapsibleDetails />
+        </ProductInfo>
+      </MainProduct>
     </StorefrontDataProvider>,
   );
 }
