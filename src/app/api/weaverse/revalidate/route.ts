@@ -24,6 +24,9 @@ export const { POST } = createWeaverseNextRevalidateHandler({
     _request: Request,
     requestContext?: WeaverseNextRequestContext,
   ) => {
+    if (requestContext === undefined) {
+      throw new Error("Studio sent no valid route context to revalidate.");
+    }
     const client = await revalidateServerClient(requestContext);
     if (client === null) {
       throw new Error("Weaverse is not configured for this deployment.");

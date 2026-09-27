@@ -128,27 +128,12 @@ export async function loadWeaversePage({
 }
 
 /**
- * Loads published-mode theme settings once per request.
- *
- * Memoized with React `cache()` so the root layout and any metadata function
- * share a single fetch per request. This adds no cross-request caching, so
- * design-mode reads — which the SDK forces to `no-store` — stay fresh.
- */
-/**
- * Builds a client for the Studio revalidation handler.
- *
- * When the handler supplies a validated request context, the loader re-runs
- * with the live page's exact route identity. Without one — an older Studio
- * bridge — fall back to a bare client so the edit still resolves rather than
- * failing outright.
+ * Builds a client for the Studio revalidation handler, re-running the loader
+ * with the live page's exact route identity.
  */
 export async function revalidateServerClient(
-  requestContext?: WeaverseNextRequestContext,
+  requestContext: WeaverseNextRequestContext,
 ): Promise<WeaverseNextServerClient | null> {
-  if (requestContext === undefined) {
-    return await createServerClient("/", undefined);
-  }
-
   const config = readWeaverseConfig(process.env);
   if (config === null) {
     return null;
@@ -170,6 +155,13 @@ export function weaverseProjectId(): string | null {
   return readWeaverseConfig(process.env)?.projectId ?? null;
 }
 
+/**
+ * Loads published-mode theme settings once per request.
+ *
+ * Memoized with React `cache()` so the root layout and any metadata function
+ * share a single fetch per request. This adds no cross-request caching, so
+ * design-mode reads — which the SDK forces to `no-store` — stay fresh.
+ */
 export const loadWeaverseThemeSettings = cache(
   async (): Promise<WeaverseNextThemeSettingsResponse | null> => {
     try {
