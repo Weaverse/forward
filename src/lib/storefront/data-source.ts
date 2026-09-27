@@ -47,7 +47,6 @@ import {
 import { createContentQueryExecutor } from "./shopify/content-client";
 import { ShopifyCatalogDataSource } from "./shopify/data-source";
 import { type EnvSource, readShopifyCatalogConfig } from "./shopify/env";
-import type { ShopifyCatalogError } from "./shopify/errors";
 import { sortProductsLocally } from "./sort-local";
 import type {
   Collection,
@@ -109,12 +108,7 @@ export interface StorefrontDataSource {
   getDemoCartSeed(): Promise<readonly DemoCartSeedLine[]>;
 }
 
-export interface StorefrontDataSourceOptions
-  extends CatalogQueryExecutorOptions {
-  onNavigationFallback?: (error: ShopifyCatalogError) => void;
-  onFooterFallback?: (error: ShopifyCatalogError) => void;
-  onCollectionFallback?: (error: ShopifyCatalogError) => void;
-}
+export type StorefrontDataSourceOptions = CatalogQueryExecutorOptions;
 
 const DEFAULT_PAGE_BY = 12;
 
@@ -309,9 +303,6 @@ export function createStorefrontDataSource(
     executeNavigation: createNavigationQueryExecutor(config, options),
     storeDomain: config.storeDomain,
     mainMenuHandle: config.mainMenuHandle,
-    onCollectionFallback: options.onCollectionFallback,
-    onFooterFallback: options.onFooterFallback,
-    onNavigationFallback: options.onNavigationFallback,
     useProcessCache: !useNextCache,
   });
 }

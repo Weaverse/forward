@@ -93,9 +93,11 @@ Forward is a fresh Next.js App Router storefront theme using
   queries, or raw Shopify shapes directly in pages or components.
 - Mode selection is explicit and fails closed: no Shopify environment selects
   the static adapter, a complete environment selects the Shopify adapter, and
-  a partial environment throws a sanitized configuration error. Product data
-  never falls back in Shopify mode. Only validated navigation and collection
-  structure may use their explicit deterministic safeguards. Failing closed is
+  a partial environment throws a sanitized configuration error. Nothing falls
+  back to fixtures in Shopify mode — products, collections and menus alike.
+  Menus are the merchant's as arranged: a menu the store has not set up is
+  empty, and a link to another origin or to a route the theme lacks is left
+  out. Failing closed is
   about malformed data, not about unfamiliar data: a product the theme has not
   seen, a colour it does not recognise, a collection it did not expect and a
   facet it has no renderer for are all ordinary, and only a truncated page, a

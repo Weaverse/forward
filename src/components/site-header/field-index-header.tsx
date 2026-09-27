@@ -7,7 +7,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Icon, type IconName } from "@/components/icon";
 import { Wordmark } from "@/components/wordmark";
 import { cn } from "@/lib/cn";
-import type { NavItem } from "@/lib/storefront/types";
+import type { Collection, NavItem } from "@/lib/storefront/types";
 import { AboutIndexPanel } from "./about-index-panel";
 import { CartCount } from "./cart-count";
 import { CountryControl } from "./country-control";
@@ -17,6 +17,7 @@ import {
   activeCollectionIndex,
   createHeaderNavigationHref,
   fieldIndexCollections,
+  findShopItem,
   isActive,
   isBranchActive,
 } from "./header-navigation";
@@ -39,6 +40,8 @@ const SCROLL_THRESHOLD = 8;
 
 export interface FieldIndexHeaderProps {
   announcement: string;
+  /** The store's collections, which dress the Shop panel's rows. */
+  collections: readonly Collection[];
   primary: readonly NavItem[];
   queryString?: string;
   utility: readonly NavItem[];
@@ -46,16 +49,21 @@ export interface FieldIndexHeaderProps {
 
 export function FieldIndexHeader({
   announcement,
+  collections: storeCollections,
   primary,
   queryString = "",
   utility,
 }: FieldIndexHeaderProps) {
   const pathname = usePathname();
-  const shopItem = primary.find((item) => item.href === "/shop");
+  const shopItem = findShopItem(primary);
+  /* The other branch with links under it opens the index panel. */
   const aboutItem = primary.find(
-    (item) => item.href === "/pages/about-forward",
+    (item) =>
+      item !== shopItem &&
+      item.href !== "/search" &&
+      (item.children?.length ?? 0) > 0,
   );
-  const collections = fieldIndexCollections(shopItem);
+  const collections = fieldIndexCollections(shopItem, storeCollections);
   const aboutHasPanel = (aboutItem?.children?.length ?? 0) > 0;
   const [desktopOpen, setDesktopOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -77,7 +85,7 @@ export function FieldIndexHeader({
 
   const searchItem = primary.find((item) => item.href === "/search");
   const primaryLinks = primary.filter(
-    (item) => item.href !== "/shop" && item.href !== "/search",
+    (item) => item !== shopItem && item.href !== "/search",
   );
   const utilityLinks = utility.filter((item) => item.href !== "/cart");
   const accountAvailable = utilityLinks.some(
@@ -134,9 +142,12 @@ export function FieldIndexHeader({
     setAboutOpen(false);
     setMobileOpen(false);
     setActiveIndex(
-      activeCollectionIndex(pathname, fieldIndexCollections(shopItem) ?? []),
+      activeCollectionIndex(
+        pathname,
+        fieldIndexCollections(shopItem, storeCollections) ?? [],
+      ),
     );
-  }, [pathname, shopItem]);
+  }, [pathname, shopItem, storeCollections]);
 
   useEffect(() => {
     if (!desktopOpen && !aboutOpen) {

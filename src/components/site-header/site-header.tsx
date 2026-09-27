@@ -10,9 +10,10 @@ import { QueryPreservingFieldIndexHeader } from "./query-preserving-field-index-
  * reader's Suspense fallback so static pages never bail out to client rendering.
  */
 export async function SiteHeader() {
-  const [navigation, themeContent] = await Promise.all([
+  const [navigation, themeContent, collections] = await Promise.all([
     storefront.getNavigation(),
     storefront.getThemeContent(),
+    storefront.listCollections(),
   ]);
 
   const accountEnabled = getCustomerAccountRuntime() !== null;
@@ -25,6 +26,7 @@ export async function SiteHeader() {
       fallback={
         <FieldIndexHeader
           announcement={themeContent.announcement}
+          collections={collections}
           primary={navigation.primary}
           utility={utility}
         />
@@ -32,6 +34,7 @@ export async function SiteHeader() {
     >
       <QueryPreservingFieldIndexHeader
         announcement={themeContent.announcement}
+        collections={collections}
         primary={navigation.primary}
         utility={utility}
       />

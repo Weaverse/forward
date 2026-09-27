@@ -51,10 +51,7 @@ export function FieldIndexPanel({
         <span>{String(collections.length).padStart(2, "0")} systems</span>
       </div>
       <div className="grid min-h-92 grid-cols-[minmax(0,1.18fr)_minmax(360px,0.82fr)]">
-        <nav
-          className="grid grid-rows-[repeat(3,1fr)]"
-          aria-label="Shop collections"
-        >
+        <nav className="grid auto-rows-fr" aria-label="Shop collections">
           {collections.map((collection, index) => (
             <Link
               key={collection.id}
@@ -88,21 +85,20 @@ export function FieldIndexPanel({
           ))}
         </nav>
         <figure className="relative min-h-92 overflow-hidden bg-ink after:absolute after:inset-0 after:bg-field-index-overlay after:content-['']">
-          <Image
-            key={active.id}
-            src={active.image.src}
-            alt={active.image.alt}
-            fill
-            className="animate-shell-image object-cover motion-reduce:animate-none"
-            sizes="42vw"
-          />
+          {active.image === null ? null : (
+            <Image
+              key={active.id}
+              src={active.image.src}
+              alt={active.image.alt}
+              fill
+              className="animate-shell-image object-cover motion-reduce:animate-none"
+              sizes="42vw"
+            />
+          )}
           <figcaption className="absolute right-7 bottom-6 left-7 z-1 flex items-end justify-between gap-6 text-text-inverse">
             <span className="font-body text-micro tracking-label">
-              {active.coordinate}
+              {active.fieldCode}
             </span>
-            <p className="m-0 max-w-65 text-right font-heading text-card-title leading-copy">
-              {active.fieldNote}
-            </p>
           </figcaption>
         </figure>
       </div>

@@ -40,7 +40,7 @@ import type {
 import { COLLECTION_PAGE_SIZE } from "./collection-query";
 import type { ContentQueryExecutor } from "./content-client";
 import type { MappedContentResult } from "./content-mapper";
-import { ShopifyCatalogError, safeErrorLabel } from "./errors";
+import { ShopifyCatalogError } from "./errors";
 import {
   mapAllProductsResult,
   mapCatalogResult,
@@ -69,12 +69,6 @@ export interface ShopifyCatalogDataSourceOptions {
   storeDomain: string;
   /** Selected Shopify primary-menu handle. */
   mainMenuHandle: string;
-  /** Injectable sanitized observer for navigation fallback events. */
-  onNavigationFallback?: (error: ShopifyCatalogError) => void;
-  /** Injectable sanitized observer for Footer-menu fallback events. */
-  onFooterFallback?: (error: ShopifyCatalogError) => void;
-  /** Injectable sanitized observer for collection-structure fallback events. */
-  onCollectionFallback?: (error: ShopifyCatalogError) => void;
   /**
    * Standalone verifier/test fallback only. Production routes leave this false
    * so every read reaches the Next Data Cache and registers its dependency.
@@ -105,9 +99,6 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   readonly #executeNavigation: NavigationQueryExecutor;
   readonly #storeDomain: string;
   readonly #mainMenuHandle: string;
-  readonly #onNavigationFallback: (error: ShopifyCatalogError) => void;
-  readonly #onFooterFallback: (error: ShopifyCatalogError) => void;
-  readonly #onCollectionFallback: (error: ShopifyCatalogError) => void;
   readonly #useProcessCache: boolean;
   readonly #ttlMs: number;
   readonly #now: () => number;
@@ -116,9 +107,6 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   #inFlight: Promise<readonly Product[]> | null = null;
   #contentCached: ContentCacheEntry | null = null;
   #contentInFlight: Promise<MappedContentResult> | null = null;
-  #navigationFallbackReported = false;
-  #footerFallbackReported = false;
-  #collectionFallbackReported = false;
 
   constructor(options: ShopifyCatalogDataSourceOptions) {
     this.#base = options.base;
@@ -129,45 +117,10 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     this.#executeNavigation = options.executeNavigation;
     this.#storeDomain = options.storeDomain;
     this.#mainMenuHandle = options.mainMenuHandle;
-    this.#onCollectionFallback =
-      options.onCollectionFallback ??
-      ((error) => {
-        console.warn(
-          `[storefront] using static collection-structure fallback (${safeErrorLabel(error)}).`,
-        );
-      });
-    this.#onNavigationFallback =
-      options.onNavigationFallback ??
-      ((error) => {
-        console.warn(
-          `[storefront] using static main-navigation fallback (${safeErrorLabel(error)}).`,
-        );
-      });
-    this.#onFooterFallback =
-      options.onFooterFallback ??
-      ((error) => {
-        console.warn(
-          `[storefront] using static footer-navigation fallback (${safeErrorLabel(error)}).`,
-        );
-      });
     this.#useProcessCache = options.useProcessCache ?? true;
     this.#ttlMs =
       options.ttlMs ?? CATALOG_REVALIDATE_SECONDS * MILLISECONDS_PER_SECOND;
     this.#now = options.now ?? Date.now;
-  }
-
-  #reportNavigationFallback(error: ShopifyCatalogError): void {
-    if (!this.#navigationFallbackReported) {
-      this.#onNavigationFallback(error);
-      this.#navigationFallbackReported = true;
-    }
-  }
-
-  #reportFooterFallback(error: ShopifyCatalogError): void {
-    if (!this.#footerFallbackReported) {
-      this.#onFooterFallback(error);
-      this.#footerFallbackReported = true;
-    }
   }
 
   async #loadCatalog(): Promise<readonly Product[]> {
@@ -197,18 +150,7 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   }
 
   async #loadCollections(): Promise<readonly Collection[]> {
-    try {
-      return mapCollectionsResult(await this.#executeNavigation());
-    } catch (error) {
-      if (!(error instanceof ShopifyCatalogError)) {
-        throw error;
-      }
-      if (!this.#collectionFallbackReported) {
-        this.#onCollectionFallback(error);
-        this.#collectionFallbackReported = true;
-      }
-      return this.#base.listCollections();
-    }
+    return mapCollectionsResult(await this.#executeNavigation());
   }
 
   async #loadContent(): Promise<MappedContentResult | null> {
@@ -346,57 +288,22 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     );
   }
 
+  /**
+   * The store's own menus. Search and the utility links are the theme's own
+   * destinations rather than menu entries, so they come from the theme.
+   */
   async getNavigation(): Promise<SiteNavigation> {
-    const base = await this.#base.getNavigation();
-    let result: Awaited<ReturnType<NavigationQueryExecutor>>;
-    try {
-      result = await this.#executeNavigation();
-    } catch (error) {
-      if (!(error instanceof ShopifyCatalogError)) {
-        throw error;
-      }
-      this.#reportNavigationFallback(error);
-      this.#reportFooterFallback(error);
-      return base;
-    }
-
-    let primary: SiteNavigation["primary"];
-    try {
-      const mappedPrimary = mapMainMenuResult(
-        result,
-        this.#storeDomain,
-        this.#mainMenuHandle,
-      );
-      const search = base.primary.filter((item) => item.href === "/search");
-      if (search.length !== 1) {
-        throw new ShopifyCatalogError(
-          "Theme navigation must define exactly one Search destination.",
-        );
-      }
-      primary = [...mappedPrimary, ...search];
-    } catch (error) {
-      if (!(error instanceof ShopifyCatalogError)) {
-        throw error;
-      }
-      this.#reportNavigationFallback(error);
-      primary = base.primary;
-    }
-
-    let footerColumns: SiteNavigation["footerColumns"];
-    try {
-      footerColumns = mapFooterMenuResult(result, this.#storeDomain);
-    } catch (error) {
-      if (!(error instanceof ShopifyCatalogError)) {
-        throw error;
-      }
-      this.#reportFooterFallback(error);
-      footerColumns = base.footerColumns;
-    }
-
+    const [theme, result] = await Promise.all([
+      this.#base.getNavigation(),
+      this.#executeNavigation(),
+    ]);
     return {
-      primary,
-      utility: base.utility,
-      footerColumns,
+      primary: [
+        ...mapMainMenuResult(result, this.#storeDomain, this.#mainMenuHandle),
+        ...theme.primary.filter((item) => item.href === "/search"),
+      ],
+      utility: theme.utility,
+      footerColumns: mapFooterMenuResult(result, this.#storeDomain),
     };
   }
 
