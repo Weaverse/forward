@@ -57,11 +57,8 @@ const StorefrontData = createContext<StorefrontDataContext>({});
 /**
  * Supplies route-loaded storefront data to the sections below it.
  *
- * `WeaversePage` wraps the renderer in this, and a route's own fallback wraps
- * the same sections in it directly. That is the point: a section reads its
- * resource from one place whether Weaverse composed the page or the theme
- * rendered it from its own defaults, so the credential-free storefront and the
- * composed one run the same component code.
+ * `WeaversePage` wraps the renderer in this, so every section reads its
+ * resource from one place whatever template it was composed into.
  */
 export function StorefrontDataProvider({
   children,

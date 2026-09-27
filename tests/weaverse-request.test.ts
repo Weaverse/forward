@@ -1,8 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import type { WeaverseNextLoaderData } from "@weaverse/next";
-import { hasAuthoredSections } from "../src/lib/weaverse/page-payload.ts";
 import { buildRequestContext } from "../src/lib/weaverse/request-info.ts";
 
 /**
@@ -11,51 +9,6 @@ import { buildRequestContext } from "../src/lib/weaverse/request-info.ts";
  * opening a page rather than by any gate, because a storefront-facing check
  * cannot see a field the storefront does not read.
  */
-
-/** A minimal loader payload carrying exactly the item list under test. */
-function page(items: unknown): WeaverseNextLoaderData {
-  return { page: { items } } as unknown as WeaverseNextLoaderData;
-}
-
-describe("hasAuthoredSections", () => {
-  it("rejects the Builder's shared default template", () => {
-    /* The exact payload that rendered a blank page: a real page id and a root
-     * with no children. Matching on the id containing "fallback" passed it. */
-    assert.equal(
-      hasAuthoredSections(
-        page([{ id: "01a07f60", type: "main", children: [] }]),
-      ),
-      false,
-    );
-  });
-
-  it("rejects an empty item list, a missing page, and a null payload", () => {
-    assert.equal(hasAuthoredSections(page([])), false);
-    assert.equal(hasAuthoredSections({} as WeaverseNextLoaderData), false);
-    assert.equal(hasAuthoredSections(null), false);
-    assert.equal(hasAuthoredSections(undefined), false);
-  });
-
-  it("accepts a root that carries authored sections", () => {
-    assert.equal(
-      hasAuthoredSections(
-        page([
-          { id: "root", type: "main", children: [{ id: "a" }, { id: "b" }] },
-          { id: "a", type: "editorial-hero" },
-          { id: "b", type: "stat-band" },
-        ]),
-      ),
-      true,
-    );
-  });
-
-  it("ignores a children value that is not an array", () => {
-    assert.equal(
-      hasAuthoredSections(page([{ id: "root", children: "two" }])),
-      false,
-    );
-  });
-});
 
 describe("buildRequestContext", () => {
   const headers = new Headers({ host: "forward.example" });

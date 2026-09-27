@@ -48,9 +48,7 @@ Forward is a fresh Next.js App Router storefront theme using
   `main-product` section, split into `mp--media`, `mp--info` and one `mp--*`
   child per element. The section shell alone owns the `colorway`/`size` query
   state and shares the resolved selection through `MainProductContext`; all
-  cart logic stays inside the shared `AddToCartForm`. A `main-product` with no
-  children renders the default composition, so a product URL is never
-  without gallery, selection and add to cart.
+  cart logic stays inside the shared `AddToCartForm`.
 - Approved exception (2026-09-15): `product-spotlight` may embed the shared
   `AddToCartForm` (`src/components/add-to-cart-form.tsx`) with a selection held
   in component state. It never reads or writes the PDP's `colorway`/`size`
@@ -62,9 +60,10 @@ Forward is a fresh Next.js App Router storefront theme using
   the module. Sections that are *not* Weaverse components keep named exports.
   The registry in `src/lib/weaverse/components.ts` is the only list the SDK
   sees; a component absent from it cannot be composed.
-- A Weaverse project always ships its default templates, so a route never
-  renders its own copy of a section the page omits. A route with no Weaverse
-  page answers `notFound()`.
+- A Weaverse project always ships its default templates. A page renders
+  exactly as authored — an empty template renders empty — and no route or
+  section substitutes a default composition for what the page omits. A route
+  with no Weaverse page answers `notFound()`.
 - Theme settings live one group per file under `src/lib/weaverse/settings/`,
   each declared `as const satisfies WeaverseNextThemeSchemaGroup`.
   `settings/types.ts` derives `ThemeSettings` from those declarations, so
