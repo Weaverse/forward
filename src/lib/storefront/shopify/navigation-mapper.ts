@@ -8,6 +8,7 @@ import type {
 import type { NavigationQueryResult } from "./client";
 import { ShopifyCatalogError } from "./errors";
 import { FOOTER_MENU_HANDLE } from "./navigation-query";
+import { toThemePath } from "./theme-routes";
 
 export interface NavigationSnapshot {
   primary: readonly NavItem[];
@@ -67,33 +68,6 @@ function readStorePath(value: unknown, context: string, storeDomain: string) {
     return null;
   }
   return url.pathname.replace(/\/$/, "") || "/";
-}
-
-/**
- * Shopify storefront paths and the theme routes that serve them.
- *
- * The theme has one journal, so every blog maps onto it. A path with no route
- * here maps to `null`, and the menu leaves that link out rather than render a
- * dead one.
- */
-const THEME_ROUTES: readonly [RegExp, (match: RegExpMatchArray) => string][] = [
-  [/^\/$/, () => "/"],
-  [/^\/collections\/all$/, () => "/shop"],
-  [/^\/collections\/([^/]+)$/, (match) => `/shop/${match[1]}`],
-  [/^\/blogs\/[^/]+$/, () => "/journal"],
-  [/^\/blogs\/[^/]+\/([^/]+)$/, (match) => `/journal/${match[1]}`],
-  [/^\/(shop|journal|products|pages|policies)(\/[^/]+)?$/, (match) => match[0]],
-  [/^\/(search|account|cart)$/, (match) => match[0]],
-];
-
-function toThemePath(path: string): string | null {
-  for (const [pattern, route] of THEME_ROUTES) {
-    const match = path.match(pattern);
-    if (match !== null) {
-      return route(match);
-    }
-  }
-  return null;
 }
 
 /**
