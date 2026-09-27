@@ -18,15 +18,17 @@ export function JournalLead({ linkLabel, article }: JournalLeadProps) {
       href={`/journal/${article.handle}`}
     >
       <div className="order-1 m-6 min-h-state-min md:order-2 md:min-h-auto">
-        <Image
-          className="h-full object-cover"
-          src={article.heroImage.src}
-          alt={article.heroImage.alt}
-          width={article.heroImage.width}
-          height={article.heroImage.height}
-          sizes="(min-width: 820px) 66vw, 100vw"
-          priority
-        />
+        {article.heroImage === null ? null : (
+          <Image
+            className="h-full object-cover"
+            src={article.heroImage.src}
+            alt={article.heroImage.alt}
+            width={article.heroImage.width}
+            height={article.heroImage.height}
+            sizes="(min-width: 820px) 66vw, 100vw"
+            priority
+          />
+        )}
       </div>
       <div className="order-2 flex flex-col justify-center p-[clamp(36px,6vw,90px)] md:order-1">
         <p className={eyebrow({ tone: "warm" })}>

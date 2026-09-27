@@ -9,7 +9,7 @@ import type { CatalogQueryExecutorOptions } from "./client";
 import { type MappedContentResult, mapContentResult } from "./content-mapper";
 import {
   CONTENT_ARTICLE_LIMIT,
-  CONTENT_BLOG_HANDLE,
+  CONTENT_PAGE_LIMIT,
   CONTENT_QUERY,
 } from "./content-query";
 import type { ShopifyCatalogConfig } from "./env";
@@ -62,8 +62,8 @@ export function createContentQueryExecutor(
     try {
       const { data, errors } = await client.graphql(CONTENT_QUERY, {
         variables: {
+          pageFirst: CONTENT_PAGE_LIMIT,
           articleFirst: CONTENT_ARTICLE_LIMIT,
-          blogHandle: CONTENT_BLOG_HANDLE,
         },
       });
       const graphQLErrors = readGraphQLErrors(errors);

@@ -58,30 +58,16 @@ function policy(
   return { handle, title, body };
 }
 
+interface Connection {
+  pageInfo: { hasNextPage: boolean };
+  // biome-ignore lint/suspicious/noExplicitAny: synthetic GraphQL payload
+  nodes: any[];
+}
+
 export interface ContentResponse {
   data: {
-    // biome-ignore lint/suspicious/noExplicitAny: synthetic GraphQL payload
-    aboutForward: any;
-    // biome-ignore lint/suspicious/noExplicitAny: synthetic GraphQL payload
-    fieldRepair: any;
-    // biome-ignore lint/suspicious/noExplicitAny: synthetic GraphQL payload
-    shippingReturns: any;
-    // biome-ignore lint/suspicious/noExplicitAny: synthetic GraphQL payload
-    contact: any;
-    // biome-ignore lint/suspicious/noExplicitAny: synthetic GraphQL payload
-    materialsAndCare: any;
-    // biome-ignore lint/suspicious/noExplicitAny: synthetic GraphQL payload
-    fitAndSizing: any;
-    // biome-ignore lint/suspicious/noExplicitAny: synthetic GraphQL payload
-    fieldTesting: any;
-    blog: {
-      handle: string;
-      articles: {
-        pageInfo: { hasNextPage: boolean };
-        // biome-ignore lint/suspicious/noExplicitAny: synthetic GraphQL payload
-        nodes: any[];
-      };
-    } | null;
+    pages: Connection;
+    articles: Connection;
     shop: {
       privacyPolicy: unknown;
       refundPolicy: unknown;
@@ -155,62 +141,64 @@ export function contentResponse(): ContentResponse {
   );
   return {
     data: {
-      aboutForward,
-      fieldRepair,
-      shippingReturns,
-      contact,
-      materialsAndCare,
-      fitAndSizing,
-      fieldTesting,
-      blog: {
-        handle: "field-notes",
-        articles: {
-          pageInfo: { hasNextPage: false },
-          nodes: [
-            article(
-              "layering-for-moving-weather",
-              "Layering for Moving Weather",
-              "How to layer for long climbs, fast descents, and uncertain forecasts.",
-              "2026-07-24",
-              "<p>Weather changes quickly when the route climbs above the trees.</p><p>Begin the climb slightly cool so the first hour does not soak your midlayer.</p>",
-            ),
-            article(
-              "packing-thirty-liters-for-a-long-day",
-              "Packing Thirty Liters for a Long Day",
-              "The honest pack list for a full mountain day.",
-              "2026-06-10",
-              "<p>Thirty liters gives enough margin for weather, food, and the unexpected.</p><p>Count the layers, water, shelter margin, and repair kit first.</p>",
-            ),
-            article(
-              "reading-the-trail-underfoot",
-              "Reading the Trail Underfoot",
-              "Foot placement, pace, and terrain cues for moving efficiently.",
-              "2026-05-08",
-              "<p>Terrain speaks early if you look down often enough.</p><p>Small shifts in texture usually tell you more than the color of the trail.</p>",
-            ),
-            article(
-              "how-we-test-a-shell-before-calling-it-weatherproof",
-              "How We Test a Shell Before Calling It Weatherproof",
-              "Hose tests, hill days, and the point where a seam decides everything.",
-              "2026-04-22",
-              "<p>A shell is not weatherproof because a lab number says so.</p><p>We wear the same pattern through wet hill days until a seam or a cuff tells us the truth.</p>",
-            ),
-            article(
-              "a-two-day-kit-built-around-nine-kilograms",
-              "A Two-Day Kit Built Around Nine Kilograms",
-              "The overnight list that fits a thirty-liter pack without leaving margin behind.",
-              "2026-03-19",
-              "<p>Nine kilograms is the weight where an overnight still moves like a day.</p><p>Everything on the list earns its place twice: once on the back, once in use.</p>",
-            ),
-            article(
-              "repair-notes-what-five-years-of-use-should-look-like",
-              "Repair Notes: What Five Years of Use Should Look Like",
-              "Wear patterns, honest failures, and the repairs that keep gear in service.",
-              "2026-02-11",
-              "<p>Five years of honest use leaves marks worth reading.</p><p>Most of what comes through the workshop is wear, not failure, and wear is repairable.</p>",
-            ),
-          ],
-        },
+      pages: {
+        pageInfo: { hasNextPage: false },
+        nodes: [
+          aboutForward,
+          fieldRepair,
+          shippingReturns,
+          contact,
+          materialsAndCare,
+          fitAndSizing,
+          fieldTesting,
+        ],
+      },
+      articles: {
+        pageInfo: { hasNextPage: false },
+        nodes: [
+          article(
+            "layering-for-moving-weather",
+            "Layering for Moving Weather",
+            "How to layer for long climbs, fast descents, and uncertain forecasts.",
+            "2026-07-24",
+            "<p>Weather changes quickly when the route climbs above the trees.</p><p>Begin the climb slightly cool so the first hour does not soak your midlayer.</p>",
+          ),
+          article(
+            "packing-thirty-liters-for-a-long-day",
+            "Packing Thirty Liters for a Long Day",
+            "The honest pack list for a full mountain day.",
+            "2026-06-10",
+            "<p>Thirty liters gives enough margin for weather, food, and the unexpected.</p><p>Count the layers, water, shelter margin, and repair kit first.</p>",
+          ),
+          article(
+            "reading-the-trail-underfoot",
+            "Reading the Trail Underfoot",
+            "Foot placement, pace, and terrain cues for moving efficiently.",
+            "2026-05-08",
+            "<p>Terrain speaks early if you look down often enough.</p><p>Small shifts in texture usually tell you more than the color of the trail.</p>",
+          ),
+          article(
+            "how-we-test-a-shell-before-calling-it-weatherproof",
+            "How We Test a Shell Before Calling It Weatherproof",
+            "Hose tests, hill days, and the point where a seam decides everything.",
+            "2026-04-22",
+            "<p>A shell is not weatherproof because a lab number says so.</p><p>We wear the same pattern through wet hill days until a seam or a cuff tells us the truth.</p>",
+          ),
+          article(
+            "a-two-day-kit-built-around-nine-kilograms",
+            "A Two-Day Kit Built Around Nine Kilograms",
+            "The overnight list that fits a thirty-liter pack without leaving margin behind.",
+            "2026-03-19",
+            "<p>Nine kilograms is the weight where an overnight still moves like a day.</p><p>Everything on the list earns its place twice: once on the back, once in use.</p>",
+          ),
+          article(
+            "repair-notes-what-five-years-of-use-should-look-like",
+            "Repair Notes: What Five Years of Use Should Look Like",
+            "Wear patterns, honest failures, and the repairs that keep gear in service.",
+            "2026-02-11",
+            "<p>Five years of honest use leaves marks worth reading.</p><p>Most of what comes through the workshop is wear, not failure, and wear is repairable.</p>",
+          ),
+        ],
       },
       shop: {
         privacyPolicy: policy(
@@ -272,20 +260,18 @@ export function contentResponseWithLiquidPrivacy(): ContentResponse {
 
 export function contentResponseWithScript(): ContentResponse {
   return contentResponseWith((response) => {
-    if (response.data.blog !== null) {
-      response.data.blog.articles.nodes.splice(0, 1, {
-        ...response.data.blog.articles.nodes[0],
-        contentHtml:
-          "<p>Safe start.</p><script>alert('nope')</script><p>Unsafe end.</p>",
-      });
-    }
+    response.data.articles.nodes[0] = {
+      ...response.data.articles.nodes[0],
+      contentHtml:
+        "<p>Safe start.</p><script>alert('nope')</script><p>Unsafe end.</p>",
+    };
   });
 }
 
 export function contentResponseWithEventHandler(): ContentResponse {
   return contentResponseWith((response) => {
-    response.data.aboutForward = {
-      ...response.data.aboutForward,
+    response.data.pages.nodes[0] = {
+      ...response.data.pages.nodes[0],
       body: '<p onclick="alert(1)">Unsafe paragraph.</p>',
     };
   });
@@ -293,8 +279,8 @@ export function contentResponseWithEventHandler(): ContentResponse {
 
 export function contentResponseWithUnapprovedAttribute(): ContentResponse {
   return contentResponseWith((response) => {
-    response.data.aboutForward = {
-      ...response.data.aboutForward,
+    response.data.pages.nodes[0] = {
+      ...response.data.pages.nodes[0],
       body: '<p class="marketing-copy">Styled paragraph.</p>',
     };
   });

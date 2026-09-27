@@ -48,9 +48,11 @@ export function PolicyDocument({
           ) : null}
         </aside>
         <div className="font-heading text-article-subheading leading-rich-copy">
-          <p className="mb-prose-block max-w-lede text-lede leading-lede text-text-muted">
-            {policy.summary}
-          </p>
+          {policy.summary === "" ? null : (
+            <p className="mb-prose-block max-w-lede text-lede leading-lede text-text-muted">
+              {policy.summary}
+            </p>
+          )}
           {policy.sections.map((section) => (
             <section key={section.heading}>
               <h2 className="mt-prose-section mb-prose-subhead text-balance text-article-heading leading-copy-tight font-medium">

@@ -29,9 +29,11 @@ export function IndexHeader({
             {heading}
           </h1>
         </div>
-        <p className="m-0 max-w-full justify-self-start text-lede leading-lede text-text-dark-lede md:max-w-lede md:justify-self-end">
-          {lede}
-        </p>
+        {lede === "" ? null : (
+          <p className="m-0 max-w-full justify-self-start text-lede leading-lede text-text-dark-lede md:max-w-lede md:justify-self-end">
+            {lede}
+          </p>
+        )}
       </div>
     </header>
   );

@@ -13,6 +13,7 @@ import type {
   RichTextRun,
 } from "../types";
 import { ShopifyCatalogError } from "./errors";
+import { toThemePath } from "./theme-routes";
 
 interface ParsedRichTextBlock {
   type: "heading" | "paragraph" | "pullquote";
@@ -77,15 +78,9 @@ const CANONICAL_INTERNAL_ROUTE_PATTERNS = [
   /^\/account(?:$|\/)/,
 ] as const;
 
-const CANONICAL_COLLECTION_ROUTE_MAP = new Map<string, string>([
-  ["/collections/forward", "/shop"],
-  ["/collections/outerwear", "/shop/outerwear"],
-  ["/collections/packs", "/shop/packs"],
-  ["/collections/footwear", "/shop/footwear"],
-]);
-
+/** A Shopify path becomes its theme route; a theme route stays as it is. */
 function normalizeCanonicalHref(href: string): string {
-  return CANONICAL_COLLECTION_ROUTE_MAP.get(href) ?? href;
+  return toThemePath(href) ?? href;
 }
 
 function fail(message: string): never {
@@ -429,26 +424,26 @@ function collectSections(
   return sections.filter((section) => section.paragraphs.length > 0);
 }
 
+/**
+ * A page body as an intro and its headed sections.
+ *
+ * The intro is the first paragraph, or the store's summary when the body opens
+ * with none. Paragraphs under no heading form one untitled section, and an
+ * empty body is an empty page.
+ */
 export function parsePageHtml(
   body: string,
   bodySummary: string | undefined,
   context: string,
-  fallbackHeadings: readonly string[],
 ): { intro: string; sections: readonly PageSection[] } {
+  if (body.trim().length === 0) {
+    return { intro: bodySummary?.trim() ?? "", sections: [] };
+  }
   const blocks = extractBlocks(body, context);
-  const introFromSummary = bodySummary?.trim();
   const firstParagraph = blocks.find(
     (block) => block.type === "paragraph",
   )?.text;
-  const intro =
-    firstParagraph ??
-    (introFromSummary && introFromSummary.length > 0
-      ? introFromSummary
-      : undefined);
-
-  if (intro === undefined || intro.length === 0) {
-    fail(`${context} intro is missing.`);
-  }
+  const intro = firstParagraph ?? bodySummary?.trim() ?? "";
 
   const sections: PageSection[] = [];
   let current: PageSection | null = null;
@@ -460,38 +455,20 @@ export function parsePageHtml(
       sections.push(current);
       continue;
     }
-
     if (!introConsumed && firstParagraph === block.text && current === null) {
       introConsumed = true;
       continue;
     }
-
-    if (current !== null) {
-      current.paragraphs = [...current.paragraphs, block.runs];
+    if (current === null) {
+      current = { heading: "", paragraphs: [] };
+      sections.push(current);
     }
+    current.paragraphs = [...current.paragraphs, block.runs];
   }
 
-  const populatedSections = sections.filter(
-    (section) => section.paragraphs.length > 0,
-  );
-  if (populatedSections.length > 0) {
-    return { intro, sections: populatedSections };
-  }
-
-  const remainingParagraphs = blocks
-    .filter((block) => block.type !== "heading")
-    .slice(1);
-  if (remainingParagraphs.length !== fallbackHeadings.length) {
-    fail(
-      `${context} paragraph structure does not match its presentation profile.`,
-    );
-  }
   return {
     intro,
-    sections: remainingParagraphs.map((paragraph, index) => ({
-      heading: fallbackHeadings[index] ?? "",
-      paragraphs: [paragraph.runs],
-    })),
+    sections: sections.filter((section) => section.paragraphs.length > 0),
   };
 }
 

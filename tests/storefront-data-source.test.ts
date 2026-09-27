@@ -2,10 +2,6 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { StaticStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
 import { PRODUCT_FIXTURES } from "../src/lib/storefront/fixtures/products.ts";
-import {
-  CONTENT_ARTICLE_HANDLES,
-  CONTENT_PAGE_HANDLES,
-} from "../src/lib/storefront/shopify/content-query.ts";
 
 const storefront = new StaticStorefrontDataSource();
 
@@ -61,11 +57,26 @@ describe("StaticStorefrontDataSource known handles", () => {
     ]);
     assert.deepEqual(
       (await storefront.listPages()).map((page) => page.handle),
-      [...CONTENT_PAGE_HANDLES],
+      [
+        "about-forward",
+        "field-repair",
+        "shipping-returns",
+        "contact",
+        "materials-and-care",
+        "fit-and-sizing",
+        "field-testing",
+      ],
     );
     assert.deepEqual(
       (await storefront.listArticles()).map((article) => article.handle),
-      [...CONTENT_ARTICLE_HANDLES],
+      [
+        "layering-for-moving-weather",
+        "packing-thirty-liters-for-a-long-day",
+        "reading-the-trail-underfoot",
+        "how-we-test-a-shell-before-calling-it-weatherproof",
+        "a-two-day-kit-built-around-nine-kilograms",
+        "repair-notes-what-five-years-of-use-should-look-like",
+      ],
     );
   });
 

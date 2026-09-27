@@ -22,11 +22,6 @@ import {
 } from "@shopify/hydrogen";
 import { createStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
 import { isShopifyProductImageUrl } from "../src/lib/storefront/image-source.ts";
-import {
-  CONTENT_ARTICLE_HANDLES,
-  CONTENT_PAGE_HANDLES,
-  CONTENT_POLICY_HANDLES,
-} from "../src/lib/storefront/shopify/content-query.ts";
 import { readShopifyCatalogConfig } from "../src/lib/storefront/shopify/env.ts";
 import { safeErrorLabel } from "../src/lib/storefront/shopify/errors.ts";
 import { SHOP_IDENTITY_QUERY } from "../src/lib/storefront/shopify/queries.ts";
@@ -90,6 +85,33 @@ const CANONICAL_FOOTER_COLUMNS = [
       { href: "/policies/terms-of-service", label: "Terms" },
     ],
   },
+] as const;
+
+/** The Forward demo store's published content; the theme reads any store's. */
+const CANONICAL_PAGE_HANDLES = [
+  "about-forward",
+  "field-repair",
+  "shipping-returns",
+  "contact",
+  "materials-and-care",
+  "fit-and-sizing",
+  "field-testing",
+] as const;
+
+const CANONICAL_ARTICLE_HANDLES = [
+  "layering-for-moving-weather",
+  "packing-thirty-liters-for-a-long-day",
+  "reading-the-trail-underfoot",
+  "how-we-test-a-shell-before-calling-it-weatherproof",
+  "a-two-day-kit-built-around-nine-kilograms",
+  "repair-notes-what-five-years-of-use-should-look-like",
+] as const;
+
+const CANONICAL_POLICY_HANDLES = [
+  "privacy-policy",
+  "refund-policy",
+  "shipping-policy",
+  "terms-of-service",
 ] as const;
 
 const MEDIA_ROLES = ["primary", "alternate", "detail", "context"] as const;
@@ -367,18 +389,16 @@ try {
   const pages = await storefront.listPages();
   const articles = await storefront.listArticles();
 
+  const pageHandles = new Set(pages.map((page) => page.handle));
+  const articleHandles = new Set(articles.map((article) => article.handle));
   check(
-    "approved live page handles",
-    pages.length === CONTENT_PAGE_HANDLES.length &&
-      pages.every((page, index) => page.handle === CONTENT_PAGE_HANDLES[index]),
+    "every canonical page is published",
+    CANONICAL_PAGE_HANDLES.every((handle) => pageHandles.has(handle)),
     pages.map((page) => `${page.handle}:${page.title}`).join(", "),
   );
   check(
-    "approved live article handles",
-    articles.length === CONTENT_ARTICLE_HANDLES.length &&
-      articles.every(
-        (article, index) => article.handle === CONTENT_ARTICLE_HANDLES[index],
-      ),
+    "every canonical article is published",
+    CANONICAL_ARTICLE_HANDLES.every((handle) => articleHandles.has(handle)),
     articles.map((article) => `${article.handle}:${article.title}`).join(", "),
   );
   check(
@@ -389,11 +409,10 @@ try {
 
   const policies = await storefront.listPolicies();
   check(
-    "approved live policy handles",
-    policies.length === CONTENT_POLICY_HANDLES.length &&
-      policies.every(
-        (policy, index) => policy.handle === CONTENT_POLICY_HANDLES[index],
-      ),
+    "every canonical policy is published",
+    CANONICAL_POLICY_HANDLES.every((handle) =>
+      policies.some((policy) => policy.handle === handle),
+    ),
     policies.map((policy) => `${policy.handle}:${policy.title}`).join(", "),
   );
   check(

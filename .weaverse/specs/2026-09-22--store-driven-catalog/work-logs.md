@@ -26,3 +26,20 @@
   `src/lib/storefront/{data-source,image-source}.ts`,
   `src/lib/storefront/fixtures/collections.ts`,
   `src/components/site-header/**`, `scripts/verify-shopify.mts`, and their tests.
+
+## 2026-09-27 — @hta218 (content)
+
+- Content is store-driven: the query reads every page (`pages`) and every
+  article across blogs (`articles`, newest first) instead of seven aliased
+  pages and one approved blog, and `content-presentation.ts` is gone.
+  - Article plate counts from the oldest, reading time comes from word count,
+    the image is the article's own, and location/coordinates are the optional
+    `forward.location` / `forward.coordinates` metafields.
+  - Pages carry no eyebrow or image (the page hero uses its settings);
+    unheaded paragraphs form one untitled section. Policies have no summary.
+  - An entry whose body the parser refuses is left out (its route 404s)
+    instead of failing the whole content read; the live store's
+    `data-sharing-opt-out` page is the case that proved it.
+- Shopify path → theme route mapping is shared by menus and content links
+  (`shopify/theme-routes.ts`); `/collections/<any>` maps to `/shop/<any>`.
+- Header links carry only `sort` into `/shop/**`: facets are per collection.

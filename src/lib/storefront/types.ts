@@ -121,9 +121,12 @@ export interface JournalArticle {
   plate: string;
   publishedAt: string;
   readingMinutes: number;
+  /** From the optional `forward.location` metafield; empty when unset. */
   location: string;
+  /** From the optional `forward.coordinates` metafield; empty when unset. */
   coordinates: string;
-  heroImage: StorefrontImage;
+  /** The article's own image, or `null` when it has none. */
+  heroImage: StorefrontImage | null;
   body: readonly ArticleBlock[];
 }
 

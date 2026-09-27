@@ -33,7 +33,7 @@ function PageValues({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
         {sections.map((section, index) => (
           <article
-            key={section.heading}
+            key={`${section.heading}:${richTextParagraphKey(section.paragraphs[0] ?? [])}`}
             className={cn(
               "col-auto min-h-82.5 border border-ink bg-transparent p-[clamp(34px,5vw,70px)] sm:col-span-6",
               index % 2 === 1 &&
@@ -43,9 +43,11 @@ function PageValues({
             <span className="font-field-meta text-ui font-medium text-signal-strong tracking-field-meta">
               {String(index + 1).padStart(2, "0")} / {eyebrowSuffix}
             </span>
-            <h2 className="mt-12.5 mb-4.5 text-balance font-heading text-heading-3 leading-subheading font-medium tracking-heading">
-              {section.heading}
-            </h2>
+            {section.heading === "" ? null : (
+              <h2 className="mt-12.5 mb-4.5 text-balance font-heading text-heading-3 leading-subheading font-medium tracking-heading">
+                {section.heading}
+              </h2>
+            )}
             {section.paragraphs.map((paragraph) => (
               <p
                 key={`${section.heading}:${richTextParagraphKey(paragraph)}`}

@@ -1,82 +1,59 @@
 import { gql } from "@shopify/hydrogen";
 
-export const CONTENT_PAGE_HANDLES = [
-  "about-forward",
-  "field-repair",
-  "shipping-returns",
-  "contact",
-  "materials-and-care",
-  "fit-and-sizing",
-  "field-testing",
-] as const;
+/*
+ * ponytail: one bounded read per list. A store past either bound fails the
+ * content read (a truncated list would silently hide content); cursor paging
+ * is the upgrade when a store outgrows it.
+ */
+export const CONTENT_PAGE_LIMIT = 100;
+export const CONTENT_ARTICLE_LIMIT = 100;
 
-export const CONTENT_BLOG_HANDLE = "field-notes" as const;
-
-export const CONTENT_ARTICLE_HANDLES = [
-  "layering-for-moving-weather",
-  "packing-thirty-liters-for-a-long-day",
-  "reading-the-trail-underfoot",
-  "how-we-test-a-shell-before-calling-it-weatherproof",
-  "a-two-day-kit-built-around-nine-kilograms",
-  "repair-notes-what-five-years-of-use-should-look-like",
-] as const;
-
-export const CONTENT_POLICY_HANDLES = [
-  "privacy-policy",
-  "refund-policy",
-  "shipping-policy",
-  "terms-of-service",
-] as const;
-
-export const CONTENT_ARTICLE_LIMIT = 10;
-
-const PAGE_FIELDS = `
-  handle
-  title
-  bodySummary
-  body
-`;
-
+/**
+ * Every page and article the store publishes, plus its policies.
+ *
+ * The theme has one journal, so articles are read across all blogs, newest
+ * first. Location and coordinates are optional `forward.*` article
+ * metafields; a store that sets neither renders articles without them.
+ */
 export const CONTENT_QUERY = gql(`
   query ForwardContent(
+    $pageFirst: Int!
     $articleFirst: Int!
-    $blogHandle: String!
     $country: CountryCode
     $language: LanguageCode
   ) @inContext(country: $country, language: $language) {
-    aboutForward: page(handle: "about-forward") {
-      ${PAGE_FIELDS}
+    pages(first: $pageFirst) {
+      pageInfo {
+        hasNextPage
+      }
+      nodes {
+        handle
+        title
+        bodySummary
+        body
+      }
     }
-    fieldRepair: page(handle: "field-repair") {
-      ${PAGE_FIELDS}
-    }
-    shippingReturns: page(handle: "shipping-returns") {
-      ${PAGE_FIELDS}
-    }
-    contact: page(handle: "contact") {
-      ${PAGE_FIELDS}
-    }
-    materialsAndCare: page(handle: "materials-and-care") {
-      ${PAGE_FIELDS}
-    }
-    fitAndSizing: page(handle: "fit-and-sizing") {
-      ${PAGE_FIELDS}
-    }
-    fieldTesting: page(handle: "field-testing") {
-      ${PAGE_FIELDS}
-    }
-    blog(handle: $blogHandle) {
-      handle
-      articles(first: $articleFirst) {
-        pageInfo {
-          hasNextPage
+    articles(first: $articleFirst, sortKey: PUBLISHED_AT, reverse: true) {
+      pageInfo {
+        hasNextPage
+      }
+      nodes {
+        handle
+        title
+        excerpt
+        contentHtml
+        publishedAt
+        image {
+          url
+          width
+          height
+          altText
         }
-        nodes {
-          handle
-          title
-          excerpt
-          contentHtml
-          publishedAt
+        location: metafield(namespace: "forward", key: "location") {
+          value
+        }
+        coordinates: metafield(namespace: "forward", key: "coordinates") {
+          value
         }
       }
     }

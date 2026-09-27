@@ -50,14 +50,16 @@ function RepairAndJournal({
       </article>
       {article !== undefined ? (
         <article className="grid min-h-0 grid-cols-1 bg-surface-subtle p-0 md:min-h-140 md:grid-cols-split-90">
-          <Image
-            className="h-full max-h-[55svh] object-cover md:max-h-none"
-            src={article.heroImage.src}
-            alt={article.heroImage.alt}
-            width={article.heroImage.width}
-            height={article.heroImage.height}
-            sizes="(min-width: 820px) 45vw, 100vw"
-          />
+          {article.heroImage === null ? null : (
+            <Image
+              className="h-full max-h-[55svh] object-cover md:max-h-none"
+              src={article.heroImage.src}
+              alt={article.heroImage.alt}
+              width={article.heroImage.width}
+              height={article.heroImage.height}
+              sizes="(min-width: 820px) 45vw, 100vw"
+            />
+          )}
           <div className="self-center p-11.25">
             <p className={eyebrow()}>{journalEyebrowLabel}</p>
             <h2
