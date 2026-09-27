@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 import { storefront } from "@/lib/storefront/data-source";
 import {
@@ -8,17 +9,12 @@ import {
   toSearchParams,
 } from "@/lib/storefront/filter-params";
 import { parseProductSort } from "@/lib/storefront/sort";
-import { StorefrontDataProvider } from "@/lib/weaverse/data-context";
 import { WeaversePage } from "@/lib/weaverse/page";
-import { pageRenders } from "@/lib/weaverse/page-payload";
 import {
   loadWeaversePage,
   type SearchParams,
   weaverseProjectId,
 } from "@/lib/weaverse/server";
-import AllProducts, { AllProductsHeader } from "@/sections/all-products";
-import AllProductsGrid from "@/sections/all-products/product-grid";
-import AllProductsToolbar from "@/sections/all-products/toolbar";
 
 export const metadata: Metadata = {
   title: "Shop",
@@ -56,37 +52,18 @@ export default async function ShopPage(props: ShopPageProps) {
     }),
     Promise.resolve(weaverseProjectId()),
   ]);
-  const dataContext = {
-    products: page.products,
-    browse: { filters: page.filters, sort, pageInfo: page.pageInfo },
-  };
+  if (weaversePage === null || projectId === null) {
+    notFound();
+  }
 
   return (
-    <>
-      {/* The catalog is the one thing this URL cannot be without. It is a
-       * section so Studio can compose and configure it, but a project with no
-       * ALL_PRODUCTS template yet — or one a merchant removed the block from —
-       * must not leave Shop empty. So the route renders it when the page does
-       * not. */}
-      {pageRenders(weaversePage, "all-products") ? null : (
-        <StorefrontDataProvider value={dataContext}>
-          <AllProductsHeader
-            heading="All products"
-            lede="Every product this store publishes."
-          />
-          <AllProducts>
-            <AllProductsToolbar />
-            <AllProductsGrid />
-          </AllProducts>
-        </StorefrontDataProvider>
-      )}
-      {weaversePage === null || projectId === null ? null : (
-        <WeaversePage
-          data={weaversePage}
-          dataContext={dataContext}
-          projectId={projectId}
-        />
-      )}
-    </>
+    <WeaversePage
+      data={weaversePage}
+      dataContext={{
+        products: page.products,
+        browse: { filters: page.filters, sort, pageInfo: page.pageInfo },
+      }}
+      projectId={projectId}
+    />
   );
 }

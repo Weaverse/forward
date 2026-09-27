@@ -29,11 +29,12 @@ main-product                 section shell: grid, gallery side, panel width;
 
 ## Safeguards
 
-- A `main-product` with no children (the route fallback, or a template seeded
-  before this change) renders the default composition, so a product URL is
-  never without gallery, selection and add to cart.
-- Every setting has a code default equal to its schema default, because the
-  route fallback renders without Weaverse.
+- A `main-product` with no children (a template seeded before this change)
+  renders the default composition, so a product URL is never without gallery,
+  selection and add to cart.
+- Every setting has a code default equal to its schema default.
+- (2026-09-27) The route no longer renders `main-product` itself when the page
+  omits it: a Weaverse project always ships its default templates.
 
 ## Files
 

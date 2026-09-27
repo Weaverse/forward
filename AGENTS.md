@@ -42,9 +42,7 @@ Forward is a fresh Next.js App Router storefront theme using
   facet params, the sort and the cursor, reads one page through
   `getCollectionPage`/`getProductsPage`, and hands the result down as `browse`.
   A section never parses a param or decides what a filter means, so reordering
-  the tree cannot change which products a URL selects. `/shop` renders the
-  theme's own composition when the project has no `ALL_PRODUCTS` template, so
-  the route is never empty. `collection-grid`, `catalog-facets.ts`,
+  the tree cannot change which products a URL selects. `collection-grid`, `catalog-facets.ts`,
   `FilterSidebar` and `product-results` are retired.
 - Approved change (2026-09-18): the PDP buy block is the composable
   `main-product` section, split into `mp--media`, `mp--info` and one `mp--*`
@@ -64,6 +62,9 @@ Forward is a fresh Next.js App Router storefront theme using
   the module. Sections that are *not* Weaverse components keep named exports.
   The registry in `src/lib/weaverse/components.ts` is the only list the SDK
   sees; a component absent from it cannot be composed.
+- A Weaverse project always ships its default templates, so a route never
+  renders its own copy of a section the page omits. A route with no Weaverse
+  page answers `notFound()`.
 - Theme settings live one group per file under `src/lib/weaverse/settings/`,
   each declared `as const satisfies WeaverseNextThemeSchemaGroup`.
   `settings/types.ts` derives `ThemeSettings` from those declarations, so

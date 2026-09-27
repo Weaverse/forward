@@ -3,8 +3,6 @@
 import { cva } from "class-variance-authority";
 import type { ReactNode } from "react";
 
-import { sectionHeading } from "@/lib/presentation/variants";
-
 import {
   elementAttributes,
   type WeaverseElementProps,
@@ -35,24 +33,6 @@ function AllProducts({ children, spacing, ...rest }: AllProductsProps) {
   return (
     <div {...elementAttributes(rest)} className={shell({ spacing })}>
       {children}
-    </div>
-  );
-}
-
-/** The page header, for the theme's own fallback composition. */
-export function AllProductsHeader({
-  heading,
-  lede,
-}: {
-  heading: string;
-  lede: string;
-}) {
-  return (
-    <div className="mx-auto w-full max-w-page px-page-gutter pt-15.5 pb-10">
-      <h1 className={sectionHeading({ size: "page" })}>{heading}</h1>
-      <p className="mt-5 max-w-lede text-lede leading-lede text-text-muted">
-        {lede}
-      </p>
     </div>
   );
 }
