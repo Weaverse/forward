@@ -14,8 +14,12 @@
 /** The exact Shopify CDN hostname that serves this store's owned media. */
 export const SHOPIFY_IMAGE_HOSTNAME = "cdn.shopify.com";
 
-/** Exact public CDN tenant path for the owned Forward Shopify store files. */
-export const SHOPIFY_IMAGE_PATH_PREFIX = "/s/files/1/0978/4757/4828/files/";
+/**
+ * Exact public CDN tenant path for the owned Forward Shopify store. Scoped to
+ * the tenant rather than its `files/` folder: collection images are served
+ * from the sibling `collections/` folder.
+ */
+export const SHOPIFY_IMAGE_PATH_PREFIX = "/s/files/1/0978/4757/4828/";
 
 const LOCAL_PRODUCT_IMAGE_PATTERN = /^\/images\/products\/[a-z0-9-]+\.webp$/;
 

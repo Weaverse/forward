@@ -917,7 +917,7 @@ describe("catalog mapping failures", () => {
       "https://cdn.shopify.com:8443/s/files/1/0978/4757/4828/files/a.webp",
       "https://cdn.shopify.com/s/files/9/9999/9999/9999/files/foreign.webp",
       "https://user:password@cdn.shopify.com/s/files/1/0978/4757/4828/files/a.webp",
-      "https://cdn.shopify.com/s/files/1/0978/4757/4828/files/%2e%2e/foreign.webp",
+      "https://cdn.shopify.com/s/files/1/0978/4757/4828/%2e%2e/9999/foreign.webp",
       "https://cdn.shopify.com/s/files/1/0978/4757/4828/files/%252e%252e/foreign.webp",
     ]) {
       await assertRejectsCatalog(
@@ -927,6 +927,19 @@ describe("catalog mapping failures", () => {
         "not an owned Shopify CDN media URL",
       );
     }
+  });
+
+  it("allows collection images from the owned CDN tenant", () => {
+    assert.ok(
+      isAllowedProductImageSrc(
+        "https://cdn.shopify.com/s/files/1/0978/4757/4828/collections/hero.webp?v=1",
+      ),
+    );
+    assert.ok(
+      !isAllowedProductImageSrc(
+        "https://cdn.shopify.com/s/files/9/9999/9999/9999/collections/hero.webp",
+      ),
+    );
   });
 
   it("rejects invalid and non-USD money", async () => {

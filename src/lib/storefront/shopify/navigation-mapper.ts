@@ -2,6 +2,7 @@ import {
   COLLECTION_PRESENTATION_PROFILES,
   type CollectionPresentationProfile,
 } from "../collection-presentation";
+import { isShopifyProductImageUrl } from "../image-source";
 import type {
   Collection,
   FooterColumn,
@@ -355,6 +356,11 @@ function mapCollectionImage(
   }
   const record = asRecord(value, `${context} image`);
   const src = asText(record.url, `${context} image url`);
+  /* Next Image only serves the owned CDN tenant; anything else would crash
+   * the render, and the hero already handles a collection with no image. */
+  if (!isShopifyProductImageUrl(src)) {
+    return null;
+  }
   const width = record.width;
   const height = record.height;
   if (
