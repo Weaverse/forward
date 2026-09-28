@@ -1,7 +1,13 @@
 # Forward static-demo productionization
 
 Date: 2026-08-05
-Status: approved for implementation
+Status: deprecated (2026-09-28)
+
+> Static mode was removed by [#81](https://github.com/Weaverse/forward/issues/81)
+> (`.weaverse/specs/2026-09-28--remove-static-mode/`). Forward always runs against
+> a real Shopify store; the static-catalog, demo-cart and credential-free parts
+> of this spec no longer apply. Its page-surface expectations still describe
+> what the storefront must cover.
 Shared contract: `0.4-draft`
 
 ## Goal
