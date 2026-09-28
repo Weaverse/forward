@@ -8,7 +8,7 @@
  */
 
 import { PRODUCT_FIXTURES } from "../fixtures/storefront/products.ts";
-import { boxOf, expect, gotoReady, SHOPIFY_MODE, test } from "./fixtures.ts";
+import { boxOf, expect, gotoReady, test } from "./fixtures.ts";
 
 /** Headings the theme owns, at their exact position in the page outline. */
 const FIXED_HEADINGS: Readonly<Record<number, string>> = {
@@ -84,14 +84,6 @@ test.describe("Home composition", () => {
       const sizes = await image.getAttribute("sizes");
       expect(alt, `image ${index} has no alternative`).toBeTruthy();
       expect(sizes, `image ${index} has no sizes hint`).toBeTruthy();
-      if (!SHOPIFY_MODE) {
-        await image.scrollIntoViewIfNeeded();
-        await expect(image).toHaveJSProperty("complete", true);
-        expect(
-          await image.evaluate((node: HTMLImageElement) => node.naturalWidth),
-          `image ${index} did not load`,
-        ).toBeGreaterThan(0);
-      }
     }
   });
 

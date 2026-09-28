@@ -1,12 +1,7 @@
 /**
- * Build/route/smoke verification per credential matrix
- * (`bun run verify:static`, `bun run verify:live`).
+ * Build/route/smoke verification against the live store (`bun run verify:live`).
  *
- * `verify:static` strips every Shopify catalog, cart, and account credential
- * in a script-owned child environment and proves the storefront still builds
- * and serves its full route contract from the deterministic static catalog.
- *
- * `verify:live` requires the complete live catalog configuration, runs the
+ * It requires the complete live catalog configuration, runs the
  * read-only Shopify catalog verification, and then exercises the route and
  * HTTP smoke contract twice: once with accounts explicitly disabled and once
  * with the complete account configuration. A missing required input fails the
@@ -36,14 +31,7 @@ async function buildAndVerify(child: ChildEnvironment): Promise<void> {
 }
 
 try {
-  if (mode === "static") {
-    await buildAndVerify(
-      buildChildEnvironment("static", { NEXT_TELEMETRY_DISABLED: "1" }),
-    );
-    console.log(
-      "\nverify:static: the credential-free storefront built and served its full route contract.",
-    );
-  } else if (mode === "live") {
+  if (mode === "live") {
     const disabled = buildChildEnvironment("live-account-disabled", {
       NEXT_TELEMETRY_DISABLED: "1",
     });
@@ -61,7 +49,7 @@ try {
     );
   } else {
     throw new Error(
-      `unknown verify mode ${JSON.stringify(mode ?? "")}; expected static or live`,
+      `unknown verify mode ${JSON.stringify(mode ?? "")}; expected live`,
     );
   }
 } catch (error) {

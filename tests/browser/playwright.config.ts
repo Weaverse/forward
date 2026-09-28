@@ -20,8 +20,8 @@ import { defineConfig, devices } from "@playwright/test";
 
 const SPEC_DIR = path.dirname(fileURLToPath(import.meta.url));
 
-const MATRIX = process.env.FORWARD_MATRIX ?? "static";
-const PORT = Number(process.env.FORWARD_BROWSER_PORT ?? "4991");
+const MATRIX = process.env.FORWARD_MATRIX ?? "live-account-disabled";
+const PORT = Number(process.env.FORWARD_BROWSER_PORT ?? "4992");
 const OUTPUT_ROOT = path.join(
   process.cwd(),
   ".forward-browser",
