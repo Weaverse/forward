@@ -38,15 +38,17 @@ export function JournalGrid({
             className="col-span-full sm:col-span-6 md:col-span-4"
           >
             <Link href={`/journal/${article.handle}`}>
-              <Image
-                className="mb-4.5 aspect-4/3 object-cover"
-                src={article.heroImage.src}
-                alt={article.heroImage.alt}
-                width={article.heroImage.width}
-                height={article.heroImage.height}
-                sizes="(min-width: 820px) 34vw, 100vw"
-                loading="lazy"
-              />
+              {article.heroImage === null ? null : (
+                <Image
+                  className="mb-4.5 aspect-4/3 object-cover"
+                  src={article.heroImage.src}
+                  alt={article.heroImage.alt}
+                  width={article.heroImage.width}
+                  height={article.heroImage.height}
+                  sizes="(min-width: 820px) 34vw, 100vw"
+                  loading="lazy"
+                />
+              )}
               <p className="mb-3.5 font-field-meta text-ui leading-meta font-medium text-text-muted tracking-field-meta uppercase">
                 {article.plate} · {article.readingMinutes} min read
               </p>

@@ -1,179 +1,14 @@
-import {
-  COLLECTION_PRESENTATION_PROFILES,
-  type CollectionPresentationProfile,
-} from "../collection-presentation";
-import type { Collection, FooterColumn, NavItem } from "../types";
+import { isShopifyProductImageUrl } from "../image-source";
+import type {
+  Collection,
+  FooterColumn,
+  NavItem,
+  StorefrontImage,
+} from "../types";
 import type { NavigationQueryResult } from "./client";
 import { ShopifyCatalogError } from "./errors";
 import { FOOTER_MENU_HANDLE } from "./navigation-query";
-
-interface ExpectedMenuItem {
-  label: string;
-  href: string;
-  sourcePaths: readonly string[];
-  children?: readonly ExpectedMenuItem[];
-}
-
-const EXPECTED_MENU = [
-  {
-    label: "Shop",
-    href: "/shop",
-    sourcePaths: ["/shop", "/collections/forward"],
-    children: [
-      {
-        label: "Shop all",
-        href: "/shop",
-        sourcePaths: ["/shop", "/collections/forward"],
-      },
-      {
-        label: "Outerwear",
-        href: "/shop/outerwear",
-        sourcePaths: ["/shop/outerwear", "/collections/outerwear"],
-      },
-      {
-        label: "Packs",
-        href: "/shop/packs",
-        sourcePaths: ["/shop/packs", "/collections/packs"],
-      },
-      {
-        label: "Footwear",
-        href: "/shop/footwear",
-        sourcePaths: ["/shop/footwear", "/collections/footwear"],
-      },
-    ],
-  },
-  {
-    label: "Field Notes",
-    href: "/journal",
-    sourcePaths: ["/journal", "/blogs/field-notes"],
-  },
-  {
-    label: "About",
-    href: "/pages/about-forward",
-    sourcePaths: ["/pages/about-forward"],
-    children: [
-      {
-        label: "Materials & Care",
-        href: "/pages/materials-and-care",
-        sourcePaths: ["/pages/materials-and-care"],
-      },
-      {
-        label: "Fit & Sizing",
-        href: "/pages/fit-and-sizing",
-        sourcePaths: ["/pages/fit-and-sizing"],
-      },
-      {
-        label: "Field Testing",
-        href: "/pages/field-testing",
-        sourcePaths: ["/pages/field-testing"],
-      },
-      {
-        label: "Field Repair",
-        href: "/pages/field-repair",
-        sourcePaths: ["/pages/field-repair"],
-      },
-      {
-        label: "Shipping & Returns",
-        href: "/pages/shipping-returns",
-        sourcePaths: ["/pages/shipping-returns"],
-      },
-      {
-        label: "Contact",
-        href: "/pages/contact",
-        sourcePaths: ["/pages/contact"],
-      },
-    ],
-  },
-] as const satisfies readonly ExpectedMenuItem[];
-
-const EXPECTED_FOOTER_MENU = [
-  {
-    label: "Shop",
-    href: "/shop",
-    sourcePaths: ["/shop", "/collections/forward"],
-    children: [
-      {
-        label: "All products",
-        href: "/shop",
-        sourcePaths: ["/shop", "/collections/forward"],
-      },
-      {
-        label: "Outerwear",
-        href: "/shop/outerwear",
-        sourcePaths: ["/shop/outerwear", "/collections/outerwear"],
-      },
-      {
-        label: "Packs",
-        href: "/shop/packs",
-        sourcePaths: ["/shop/packs", "/collections/packs"],
-      },
-      {
-        label: "Footwear",
-        href: "/shop/footwear",
-        sourcePaths: ["/shop/footwear", "/collections/footwear"],
-      },
-    ],
-  },
-  {
-    label: "Company",
-    href: "/pages/about-forward",
-    sourcePaths: ["/pages/about-forward"],
-    children: [
-      {
-        label: "About Forward",
-        href: "/pages/about-forward",
-        sourcePaths: ["/pages/about-forward"],
-      },
-      {
-        label: "Field Repair",
-        href: "/pages/field-repair",
-        sourcePaths: ["/pages/field-repair"],
-      },
-      {
-        label: "Shipping & Returns",
-        href: "/pages/shipping-returns",
-        sourcePaths: ["/pages/shipping-returns"],
-      },
-      {
-        label: "Contact",
-        href: "/pages/contact",
-        sourcePaths: ["/pages/contact"],
-      },
-    ],
-  },
-  {
-    label: "Support",
-    href: "/account",
-    sourcePaths: ["/account"],
-    children: [
-      {
-        label: "Account",
-        href: "/account",
-        sourcePaths: ["/account"],
-      },
-      {
-        label: "Shipping",
-        href: "/policies/shipping-policy",
-        sourcePaths: ["/policies/shipping-policy"],
-      },
-      {
-        label: "Returns",
-        href: "/policies/refund-policy",
-        sourcePaths: ["/policies/return-policy", "/policies/refund-policy"],
-      },
-      {
-        label: "Privacy",
-        href: "/policies/privacy-policy",
-        sourcePaths: ["/policies/privacy-policy"],
-      },
-      {
-        label: "Terms",
-        href: "/policies/terms-of-service",
-        sourcePaths: ["/policies/terms-of-service"],
-      },
-    ],
-  },
-] as const satisfies readonly ExpectedMenuItem[];
+import { toThemePath } from "./theme-routes";
 
 export interface NavigationSnapshot {
   primary: readonly NavItem[];
@@ -205,79 +40,84 @@ function asText(value: unknown, context: string): string {
   return value.trim();
 }
 
-function readInternalPath(
-  value: unknown,
-  context: string,
-  storeDomain: string,
-): string {
+/**
+ * The path a menu URL names on this store, or `null` when it points anywhere
+ * else. Query and fragment state are dropped: a menu link names a
+ * destination, never the state a shopper carries into it.
+ */
+function readStorePath(value: unknown, context: string, storeDomain: string) {
   const raw = asText(value, `${context} url`);
   if (raw.startsWith("//")) {
-    fail(`${context} url must be relative or use an explicit HTTPS origin.`);
-  }
-  if (raw.includes("?") || raw.includes("#")) {
-    fail(`${context} url must not include query or fragment delimiters.`);
+    return null;
   }
   let url: URL;
   try {
     url = new URL(raw, "https://forward-navigation.invalid");
   } catch {
-    return fail(`${context} url is invalid.`);
+    return null;
   }
-  const isSyntheticRelativeOrigin =
-    url.hostname === "forward-navigation.invalid" &&
-    raw.startsWith("/") &&
-    !raw.startsWith("//");
-  const isConfiguredStoreOrigin =
+  const isRelative =
+    url.hostname === "forward-navigation.invalid" && raw.startsWith("/");
+  const isStoreOrigin =
     url.protocol === "https:" &&
     url.hostname === storeDomain.toLowerCase() &&
     url.username.length === 0 &&
     url.password.length === 0 &&
     url.port.length === 0;
-  if (!isSyntheticRelativeOrigin && !isConfiguredStoreOrigin) {
-    fail(`${context} url must target the configured Shopify store.`);
+  if (!isRelative && !isStoreOrigin) {
+    return null;
   }
-  if (url.search.length > 0 || url.hash.length > 0) {
-    fail(`${context} url must not include query or fragment state.`);
-  }
-  const path = url.pathname.replace(/\/$/, "") || "/";
-  return path;
+  return url.pathname.replace(/\/$/, "") || "/";
 }
 
+/**
+ * One menu entry exactly as the merchant arranged it.
+ *
+ * The query reads two levels of items, so only a top-level entry maps its
+ * children. An entry the theme has no route for is `null`, with its children.
+ */
 function mapMenuItem(
   value: unknown,
-  expected: ExpectedMenuItem,
   context: string,
   storeDomain: string,
-): NavItem {
+  withChildren: boolean,
+): NavItem | null {
   const record = asRecord(value, context);
   const label = asText(record.title, `${context} title`);
-  if (label !== expected.label) {
-    fail(`${context} title must be "${expected.label}".`);
+  const path = readStorePath(record.url, context, storeDomain);
+  const href = path === null ? null : toThemePath(path);
+  if (href === null) {
+    return null;
   }
-  const sourcePath = readInternalPath(record.url, context, storeDomain);
-  if (!expected.sourcePaths.includes(sourcePath)) {
-    fail(`${context} url does not map to ${expected.href}.`);
-  }
+  const children = withChildren
+    ? mapMenuItems(record.items, `${context} child`, storeDomain, false)
+    : [];
+  return children.length === 0 ? { href, label } : { href, label, children };
+}
 
-  const rawChildren = asArray(record.items, `${context} items`);
-  const expectedChildren = expected.children ?? [];
-  if (rawChildren.length !== expectedChildren.length) {
-    fail(
-      `${context} must contain exactly ${expectedChildren.length} children.`,
-    );
-  }
-  const children = expectedChildren.map((child, index) =>
-    mapMenuItem(
-      rawChildren[index],
-      child,
-      `${context} child ${index}`,
-      storeDomain,
-    ),
-  );
+function mapMenuItems(
+  value: unknown,
+  context: string,
+  storeDomain: string,
+  withChildren: boolean,
+): readonly NavItem[] {
+  return asArray(value, `${context} items`)
+    .map((item, index) =>
+      mapMenuItem(item, `${context} ${index}`, storeDomain, withChildren),
+    )
+    .filter((item): item is NavItem => item !== null);
+}
 
-  return children.length === 0
-    ? { href: expected.href, label }
-    : { href: expected.href, label, children };
+/** A menu's top-level items, or none when the store has no such menu. */
+function readMenuItems(value: unknown, menuHandle: string): unknown {
+  if (value === null || value === undefined) {
+    return [];
+  }
+  const menu = asRecord(value, `Shopify menu "${menuHandle}"`);
+  if (menu.handle !== menuHandle) {
+    fail(`Shopify returned the wrong menu for "${menuHandle}".`);
+  }
+  return menu.items;
 }
 
 function mapMenu(
@@ -285,102 +125,107 @@ function mapMenu(
   storeDomain: string,
   menuHandle: string,
 ): readonly NavItem[] {
-  if (value === null || value === undefined) {
-    fail(`Shopify menu "${menuHandle}" is missing.`);
-  }
-  const menu = asRecord(value, `Shopify menu "${menuHandle}"`);
-  if (menu.handle !== menuHandle) {
-    fail(`Shopify returned the wrong menu handle.`);
-  }
-  const items = asArray(menu.items, `Shopify menu "${menuHandle}" items`);
-  if (items.length !== EXPECTED_MENU.length) {
-    fail(`Shopify menu "${menuHandle}" must contain exactly three items.`);
-  }
-  return EXPECTED_MENU.map((expected, index) =>
-    mapMenuItem(
-      items[index],
-      expected,
-      `Shopify menu item ${index}`,
-      storeDomain,
-    ),
+  return mapMenuItems(
+    readMenuItems(value, menuHandle),
+    "Shopify menu item",
+    storeDomain,
+    true,
   );
 }
 
+/**
+ * The footer menu's top-level items are column headings, so a heading needs
+ * no destination of its own — only its links do.
+ */
 function mapFooterMenu(
   value: unknown,
   storeDomain: string,
 ): readonly FooterColumn[] {
-  if (value === null || value === undefined) {
-    fail(`Shopify menu "${FOOTER_MENU_HANDLE}" is missing.`);
-  }
-  const menu = asRecord(value, `Shopify menu "${FOOTER_MENU_HANDLE}"`);
-  if (menu.handle !== FOOTER_MENU_HANDLE) {
-    fail("Shopify returned the wrong footer menu handle.");
-  }
-  const items = asArray(
-    menu.items,
-    `Shopify menu "${FOOTER_MENU_HANDLE}" items`,
-  );
-  if (items.length !== EXPECTED_FOOTER_MENU.length) {
-    fail(
-      `Shopify menu "${FOOTER_MENU_HANDLE}" must contain exactly three columns.`,
-    );
-  }
-  return EXPECTED_FOOTER_MENU.map((expected, index) => {
-    const mapped = mapMenuItem(
-      items[index],
-      expected,
-      `Shopify footer column ${index}`,
-      storeDomain,
-    );
-    if (mapped.children === undefined) {
-      fail(`Shopify footer column ${index} must contain navigation links.`);
-    }
-    return { heading: mapped.label, links: mapped.children };
+  return asArray(
+    readMenuItems(value, FOOTER_MENU_HANDLE),
+    "Shopify footer columns",
+  ).map((item, index) => {
+    const context = `Shopify footer column ${index}`;
+    const record = asRecord(item, context);
+    return {
+      heading: asText(record.title, `${context} title`),
+      links: mapMenuItems(record.items, `${context} link`, storeDomain, false),
+    };
   });
 }
 
-function mapCollection(
+function mapCollectionImage(
   value: unknown,
-  profile: CollectionPresentationProfile,
-): Collection {
-  const context = `Shopify collection "${profile.handle}"`;
+  title: string,
+  context: string,
+): StorefrontImage | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  const record = asRecord(value, `${context} image`);
+  const src = asText(record.url, `${context} image url`);
+  /* Next Image only serves the owned CDN tenant; anything else would crash
+   * the render, and the hero already handles a collection with no image. */
+  if (!isShopifyProductImageUrl(src)) {
+    return null;
+  }
+  const width = record.width;
+  const height = record.height;
+  if (
+    !Number.isInteger(width) ||
+    !Number.isInteger(height) ||
+    (width as number) <= 0 ||
+    (height as number) <= 0
+  ) {
+    fail(`${context} image has no usable intrinsic dimensions.`);
+  }
+  const altText = record.altText;
+  return {
+    src,
+    alt: typeof altText === "string" && altText.length > 0 ? altText : title,
+    width: width as number,
+    height: height as number,
+  };
+}
+
+/**
+ * A collection exactly as the store publishes it.
+ *
+ * Title, image and membership are the merchant's. Description and field code
+ * are optional: a store that sets neither renders a collection without them
+ * rather than borrowing copy the theme invented.
+ */
+function mapCollection(value: unknown, index: number): Collection {
+  const context = `Shopify collection ${index}`;
   const record = asRecord(value, context);
-  if (record.handle !== profile.handle) {
-    fail(`${context} returned the wrong handle.`);
-  }
-  const title = asText(record.title, `${context} title`);
-  if (title !== profile.title) {
-    fail(`${context} title must be "${profile.title}".`);
-  }
+  const handle = asText(record.handle, `${context} handle`);
+  const title = asText(record.title, `Shopify collection "${handle}" title`);
   const products = asRecord(record.products, `${context} products`);
-  const pageInfo = asRecord(products.pageInfo, `${context} products pageInfo`);
-  if (pageInfo.hasNextPage !== false) {
-    fail(`${context} products page must be complete and unpaginated.`);
-  }
   const productHandles = asArray(
     products.nodes,
     `${context} product nodes`,
-  ).map((entry, index) =>
+  ).map((entry, productIndex) =>
     asText(
-      asRecord(entry, `${context} product ${index}`).handle,
-      `${context} product ${index} handle`,
+      asRecord(entry, `${context} product ${productIndex}`).handle,
+      `${context} product ${productIndex} handle`,
     ),
   );
-  if (
-    productHandles.length !== profile.productHandles.length ||
-    productHandles.some(
-      (handle, index) => handle !== profile.productHandles[index],
-    )
-  ) {
-    fail(`${context} product membership/order does not match the contract.`);
-  }
+  const description = record.description;
+  const fieldCodeRecord = record.fieldCode;
+  const fieldCode =
+    fieldCodeRecord === null || fieldCodeRecord === undefined
+      ? ""
+      : asText(
+          asRecord(fieldCodeRecord, `${context} field code`).value,
+          `${context} field code value`,
+        );
+
   return {
-    handle: profile.handle,
+    handle,
     title,
-    description: profile.description,
-    fieldCode: profile.fieldCode,
-    heroImage: profile.heroImage,
+    description: typeof description === "string" ? description : "",
+    fieldCode,
+    heroImage: mapCollectionImage(record.image, title, context),
     productHandles,
   };
 }
@@ -407,13 +252,8 @@ function mapCollections(value: unknown): readonly Collection[] {
     }
     byHandle.set(handle, node);
   }
-  return COLLECTION_PRESENTATION_PROFILES.map((profile) => {
-    const node = byHandle.get(profile.handle);
-    if (node === undefined) {
-      fail(`Shopify collection "${profile.handle}" is missing.`);
-    }
-    return mapCollection(node, profile);
-  });
+  /* Every collection the store publishes, in the store's order. */
+  return nodes.map((node, index) => mapCollection(node, index));
 }
 
 type NavigationRootField = "menu" | "footerMenu" | "collections";

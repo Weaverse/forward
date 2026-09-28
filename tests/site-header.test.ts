@@ -12,11 +12,11 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
-  createFieldIndexCollections,
   createHeaderNavigationHref,
   currentCollectionIndex,
-  FIELD_INDEX_PRESENTATION,
+  fieldIndexCollections,
 } from "../src/components/site-header/header-navigation.ts";
+import { COLLECTION_FIXTURES } from "../src/lib/storefront/fixtures/collections.ts";
 import { NAVIGATION_FIXTURE } from "../src/lib/storefront/fixtures/navigation.ts";
 
 describe("canonical header presentation", () => {
@@ -38,7 +38,7 @@ describe("canonical header presentation", () => {
     );
   });
 
-  it("maps the nested Shop fixture into four approved local-image systems", () => {
+  it("dresses the static Shop fixture with its collections", () => {
     const shop = NAVIGATION_FIXTURE.primary.find(
       (item) => item.href === "/shop",
     );
@@ -49,36 +49,26 @@ describe("canonical header presentation", () => {
       { href: "/shop/packs", label: "Packs" },
       { href: "/shop/footwear", label: "Footwear" },
     ]);
-    const collections = createFieldIndexCollections(shop);
+    const collections = fieldIndexCollections(shop, COLLECTION_FIXTURES) ?? [];
     assert.deepEqual(
-      collections.map(({ id, index, label, href }) => ({
-        id,
-        index,
-        label,
-        href,
-      })),
+      collections.map(({ index, label, href }) => ({ index, label, href })),
       [
-        { id: "forward", index: "00", label: "Shop all", href: "/shop" },
-        {
-          id: "outerwear",
-          index: "01",
-          label: "Outerwear",
-          href: "/shop/outerwear",
-        },
-        { id: "packs", index: "02", label: "Packs", href: "/shop/packs" },
-        {
-          id: "footwear",
-          index: "03",
-          label: "Footwear",
-          href: "/shop/footwear",
-        },
+        { index: "00", label: "Shop all", href: "/shop" },
+        { index: "01", label: "Outerwear", href: "/shop/outerwear" },
+        { index: "02", label: "Packs", href: "/shop/packs" },
+        { index: "03", label: "Footwear", href: "/shop/footwear" },
       ],
     );
-    assert.equal(FIELD_INDEX_PRESENTATION.length, 4);
-    for (const collection of collections) {
-      assert.match(collection.image.src, /^\/images\/editorial\/.+\.webp$/);
+    /* `/shop` is the whole catalog, not a collection, so its row has no
+     * collection to borrow copy or an image from. */
+    assert.equal(collections[0]?.image, null);
+    for (const collection of collections.slice(1)) {
+      assert.match(
+        collection.image?.src ?? "",
+        /^\/images\/editorial\/.+\.webp$/,
+      );
       assert.ok(collection.description.length >= 30);
-      assert.ok(collection.fieldNote.length >= 30);
+      assert.ok(collection.fieldCode.length > 0);
     }
   });
 
@@ -87,7 +77,7 @@ describe("canonical header presentation", () => {
       (item) => item.href === "/shop",
     );
     assert.ok(shop !== undefined);
-    const collections = createFieldIndexCollections(shop);
+    const collections = fieldIndexCollections(shop, COLLECTION_FIXTURES) ?? [];
 
     assert.equal(currentCollectionIndex("/shop", collections), 0);
     assert.equal(currentCollectionIndex("/shop/outerwear", collections), 1);

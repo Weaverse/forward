@@ -10,29 +10,37 @@
  * contracts when malformed remote data would otherwise take down routes.
  */
 
-import {
-  filterAndSortProducts,
-  searchNormalizedProducts,
-} from "../catalog-query";
+import { searchNormalizedProducts } from "../catalog-query";
 import type { StorefrontDataSource } from "../data-source";
+import { catalogSortArguments, collectionSortArguments } from "../sort";
 import type {
   Collection,
+  CollectionProductsPage,
+  CollectionProductsQuery,
   DemoCartSeedLine,
   JournalArticle,
   Policy,
   Product,
-  ProductListFilter,
-  ProductSort,
   SiteNavigation,
   StorePage,
   ThemeContent,
 } from "../types";
 import { CATALOG_REVALIDATE_SECONDS } from "./cache-policy";
-import type { CatalogQueryExecutor, NavigationQueryExecutor } from "./client";
+import type {
+  AllProductsQueryExecutor,
+  CatalogQueryExecutor,
+  CollectionQueryExecutor,
+  NavigationQueryExecutor,
+} from "./client";
+import { COLLECTION_PAGE_SIZE } from "./collection-query";
 import type { ContentQueryExecutor } from "./content-client";
 import type { MappedContentResult } from "./content-mapper";
-import { ShopifyCatalogError, safeErrorLabel } from "./errors";
-import { mapCatalogResult } from "./mapper";
+import { ShopifyCatalogError } from "./errors";
+import {
+  mapAllProductsResult,
+  mapCatalogResult,
+  mapCollectionProductsResult,
+} from "./mapper";
 import {
   mapCollectionsResult,
   mapFooterMenuResult,
@@ -47,18 +55,14 @@ export interface ShopifyCatalogDataSourceOptions {
   /** Static implementation backing every not-yet-live domain. */
   base: StorefrontDataSource;
   execute: CatalogQueryExecutor;
-  executeContent?: ContentQueryExecutor;
+  executeCollection: CollectionQueryExecutor;
+  executeAllProducts: AllProductsQueryExecutor;
+  executeContent: ContentQueryExecutor;
   executeNavigation: NavigationQueryExecutor;
   /** Configured store origin used to reject cross-store menu URLs. */
   storeDomain: string;
   /** Selected Shopify primary-menu handle. */
   mainMenuHandle: string;
-  /** Injectable sanitized observer for navigation fallback events. */
-  onNavigationFallback?: (error: ShopifyCatalogError) => void;
-  /** Injectable sanitized observer for Footer-menu fallback events. */
-  onFooterFallback?: (error: ShopifyCatalogError) => void;
-  /** Injectable sanitized observer for collection-structure fallback events. */
-  onCollectionFallback?: (error: ShopifyCatalogError) => void;
   /**
    * Standalone verifier/test fallback only. Production routes leave this false
    * so every read reaches the Next Data Cache and registers its dependency.
@@ -83,13 +87,12 @@ interface ContentCacheEntry {
 export class ShopifyCatalogDataSource implements StorefrontDataSource {
   readonly #base: StorefrontDataSource;
   readonly #execute: CatalogQueryExecutor;
-  readonly #executeContent: ContentQueryExecutor | null;
+  readonly #executeCollection: CollectionQueryExecutor;
+  readonly #executeAllProducts: AllProductsQueryExecutor;
+  readonly #executeContent: ContentQueryExecutor;
   readonly #executeNavigation: NavigationQueryExecutor;
   readonly #storeDomain: string;
   readonly #mainMenuHandle: string;
-  readonly #onNavigationFallback: (error: ShopifyCatalogError) => void;
-  readonly #onFooterFallback: (error: ShopifyCatalogError) => void;
-  readonly #onCollectionFallback: (error: ShopifyCatalogError) => void;
   readonly #useProcessCache: boolean;
   readonly #ttlMs: number;
   readonly #now: () => number;
@@ -98,56 +101,20 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   #inFlight: Promise<readonly Product[]> | null = null;
   #contentCached: ContentCacheEntry | null = null;
   #contentInFlight: Promise<MappedContentResult> | null = null;
-  #navigationFallbackReported = false;
-  #footerFallbackReported = false;
-  #collectionFallbackReported = false;
 
   constructor(options: ShopifyCatalogDataSourceOptions) {
     this.#base = options.base;
     this.#execute = options.execute;
-    this.#executeContent = options.executeContent ?? null;
+    this.#executeCollection = options.executeCollection;
+    this.#executeAllProducts = options.executeAllProducts;
+    this.#executeContent = options.executeContent;
     this.#executeNavigation = options.executeNavigation;
     this.#storeDomain = options.storeDomain;
     this.#mainMenuHandle = options.mainMenuHandle;
-    this.#onCollectionFallback =
-      options.onCollectionFallback ??
-      ((error) => {
-        console.warn(
-          `[storefront] using static collection-structure fallback (${safeErrorLabel(error)}).`,
-        );
-      });
-    this.#onNavigationFallback =
-      options.onNavigationFallback ??
-      ((error) => {
-        console.warn(
-          `[storefront] using static main-navigation fallback (${safeErrorLabel(error)}).`,
-        );
-      });
-    this.#onFooterFallback =
-      options.onFooterFallback ??
-      ((error) => {
-        console.warn(
-          `[storefront] using static footer-navigation fallback (${safeErrorLabel(error)}).`,
-        );
-      });
     this.#useProcessCache = options.useProcessCache ?? true;
     this.#ttlMs =
       options.ttlMs ?? CATALOG_REVALIDATE_SECONDS * MILLISECONDS_PER_SECOND;
     this.#now = options.now ?? Date.now;
-  }
-
-  #reportNavigationFallback(error: ShopifyCatalogError): void {
-    if (!this.#navigationFallbackReported) {
-      this.#onNavigationFallback(error);
-      this.#navigationFallbackReported = true;
-    }
-  }
-
-  #reportFooterFallback(error: ShopifyCatalogError): void {
-    if (!this.#footerFallbackReported) {
-      this.#onFooterFallback(error);
-      this.#footerFallbackReported = true;
-    }
   }
 
   async #loadCatalog(): Promise<readonly Product[]> {
@@ -177,24 +144,10 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   }
 
   async #loadCollections(): Promise<readonly Collection[]> {
-    try {
-      return mapCollectionsResult(await this.#executeNavigation());
-    } catch (error) {
-      if (!(error instanceof ShopifyCatalogError)) {
-        throw error;
-      }
-      if (!this.#collectionFallbackReported) {
-        this.#onCollectionFallback(error);
-        this.#collectionFallbackReported = true;
-      }
-      return this.#base.listCollections();
-    }
+    return mapCollectionsResult(await this.#executeNavigation());
   }
 
-  async #loadContent(): Promise<MappedContentResult | null> {
-    if (this.#executeContent === null) {
-      return null;
-    }
+  async #loadContent(): Promise<MappedContentResult> {
     if (!this.#useProcessCache) {
       return this.#executeContent();
     }
@@ -221,11 +174,8 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
 
   /* ---- Shopify-owned catalog reads ------------------------------------- */
 
-  async listProducts(
-    filter: ProductListFilter = {},
-    sort: ProductSort = "featured",
-  ): Promise<readonly Product[]> {
-    return filterAndSortProducts(await this.#loadCatalog(), filter, sort);
+  async listProducts(): Promise<readonly Product[]> {
+    return this.#loadCatalog();
   }
 
   async getProduct(handle: string): Promise<Product | null> {
@@ -268,105 +218,99 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     });
   }
 
+  /**
+   * One page of a collection, read live.
+   *
+   * The shopper's filters, order and cursor become query variables, so the
+   * store does the narrowing and returns the facets it offers for the result.
+   * Nothing here decides what a filter means.
+   */
+  async getCollectionPage(
+    handle: string,
+    query: CollectionProductsQuery = {},
+  ): Promise<CollectionProductsPage | null> {
+    const { sortKey, reverse } = collectionSortArguments(
+      query.sort ?? "featured",
+    );
+    const pageBy = query.pageBy ?? COLLECTION_PAGE_SIZE;
+    /* A start cursor reads backwards, which Shopify expresses as `last`. */
+    const backwards = query.before !== undefined;
+    return mapCollectionProductsResult(
+      await this.#executeCollection({
+        handle,
+        filters: query.filters ?? [],
+        sortKey,
+        reverse,
+        ...(backwards
+          ? { last: pageBy, startCursor: query.before }
+          : { first: pageBy, endCursor: query.after }),
+      }),
+    );
+  }
+
+  async getProductsPage(
+    query: CollectionProductsQuery = {},
+  ): Promise<CollectionProductsPage> {
+    const { sortKey, reverse } = catalogSortArguments(query.sort ?? "featured");
+    const pageBy = query.pageBy ?? COLLECTION_PAGE_SIZE;
+    const backwards = query.before !== undefined;
+    return mapAllProductsResult(
+      await this.#executeAllProducts({
+        sortKey,
+        reverse,
+        ...(backwards
+          ? { last: pageBy, startCursor: query.before }
+          : { first: pageBy, endCursor: query.after }),
+      }),
+    );
+  }
+
+  /**
+   * The store's own menus. Search and the utility links are the theme's own
+   * destinations rather than menu entries, so they come from the theme.
+   */
   async getNavigation(): Promise<SiteNavigation> {
-    const base = await this.#base.getNavigation();
-    let result: Awaited<ReturnType<NavigationQueryExecutor>>;
-    try {
-      result = await this.#executeNavigation();
-    } catch (error) {
-      if (!(error instanceof ShopifyCatalogError)) {
-        throw error;
-      }
-      this.#reportNavigationFallback(error);
-      this.#reportFooterFallback(error);
-      return base;
-    }
-
-    let primary: SiteNavigation["primary"];
-    try {
-      const mappedPrimary = mapMainMenuResult(
-        result,
-        this.#storeDomain,
-        this.#mainMenuHandle,
-      );
-      const search = base.primary.filter((item) => item.href === "/search");
-      if (search.length !== 1) {
-        throw new ShopifyCatalogError(
-          "Theme navigation must define exactly one Search destination.",
-        );
-      }
-      primary = [...mappedPrimary, ...search];
-    } catch (error) {
-      if (!(error instanceof ShopifyCatalogError)) {
-        throw error;
-      }
-      this.#reportNavigationFallback(error);
-      primary = base.primary;
-    }
-
-    let footerColumns: SiteNavigation["footerColumns"];
-    try {
-      footerColumns = mapFooterMenuResult(result, this.#storeDomain);
-    } catch (error) {
-      if (!(error instanceof ShopifyCatalogError)) {
-        throw error;
-      }
-      this.#reportFooterFallback(error);
-      footerColumns = base.footerColumns;
-    }
-
+    const [theme, result] = await Promise.all([
+      this.#base.getNavigation(),
+      this.#executeNavigation(),
+    ]);
     return {
-      primary,
-      utility: base.utility,
-      footerColumns,
+      primary: [
+        ...mapMainMenuResult(result, this.#storeDomain, this.#mainMenuHandle),
+        ...theme.primary.filter((item) => item.href === "/search"),
+      ],
+      utility: theme.utility,
+      footerColumns: mapFooterMenuResult(result, this.#storeDomain),
     };
   }
 
   /* ---- Shopify-owned content reads ------------------------------------- */
 
   async listArticles(): Promise<readonly JournalArticle[]> {
-    const content = await this.#loadContent();
-    return content === null ? this.#base.listArticles() : content.articles;
+    return (await this.#loadContent()).articles;
   }
 
   async getArticle(handle: string): Promise<JournalArticle | null> {
-    const content = await this.#loadContent();
-    return (
-      (content === null
-        ? null
-        : content.articles.find((article) => article.handle === handle)) ??
-      (content === null ? this.#base.getArticle(handle) : null)
-    );
+    const { articles } = await this.#loadContent();
+    return articles.find((article) => article.handle === handle) ?? null;
   }
 
   async listPages(): Promise<readonly StorePage[]> {
-    const content = await this.#loadContent();
-    return content === null ? this.#base.listPages() : content.pages;
+    return (await this.#loadContent()).pages;
   }
 
   async getPage(handle: string): Promise<StorePage | null> {
-    const content = await this.#loadContent();
-    return (
-      (content === null
-        ? null
-        : content.pages.find((page) => page.handle === handle)) ??
-      (content === null ? this.#base.getPage(handle) : null)
-    );
+    const { pages } = await this.#loadContent();
+    return pages.find((page) => page.handle === handle) ?? null;
   }
 
   async listPolicies(): Promise<readonly Policy[]> {
-    const content = await this.#loadContent();
-    return content === null ? this.#base.listPolicies() : content.policies;
+    return (await this.#loadContent()).policies;
   }
 
   async getPolicy(handle: string): Promise<Policy | null> {
-    const content = await this.#loadContent();
-    return (
-      (content === null
-        ? null
-        : content.policies.find((policy) => policy.handle === handle)) ??
-      (content === null ? this.#base.getPolicy(handle) : null)
-    );
+    const { policies } = await this.#loadContent();
+    return policies.find((policy) => policy.handle === handle) ?? null;
   }
 
   async getThemeContent(): Promise<ThemeContent> {

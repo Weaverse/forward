@@ -4,6 +4,8 @@
  * option resolves to one exact purchasable variant.
  */
 
+import type { CSSProperties } from "react";
+
 import type {
   Money,
   Product,
@@ -181,4 +183,21 @@ export function productColorwayHref(
   const first = product.colorways[0];
   if (first !== undefined && colorwayId === first.id) return base;
   return `${base}?${COLORWAY_PARAM}=${encodeURIComponent(colorwayId)}`;
+}
+
+/**
+ * How a colorway swatch is painted.
+ *
+ * A store that set a native Shopify swatch gets that colour. Most stores set
+ * none, so the colorway's own product image stands in — which is what the
+ * shopper is choosing anyway, and needs nothing configured to look right.
+ */
+export function colorwaySwatchStyle(colorway: ProductColorway): CSSProperties {
+  return colorway.swatchColor === null
+    ? {
+        backgroundImage: `url(${colorway.images.primary.src})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }
+    : { backgroundColor: colorway.swatchColor };
 }

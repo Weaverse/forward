@@ -6,12 +6,19 @@ import { COLLECTION_FIXTURES } from "@/lib/storefront/fixtures/collections";
 import { JOURNAL_FIXTURES } from "@/lib/storefront/fixtures/journal";
 import { PAGE_FIXTURES } from "@/lib/storefront/fixtures/pages";
 import { PRODUCT_FIXTURES } from "@/lib/storefront/fixtures/products";
+import { synthesizeProductFilters } from "@/lib/storefront/product-filters";
+import { resolveProductSelection } from "@/lib/storefront/product-state";
+import type { Product } from "@/lib/storefront/types";
 import { WEAVERSE_COMPONENTS } from "@/lib/weaverse/components";
 import {
   type StorefrontDataContext,
   StorefrontDataProvider,
 } from "@/lib/weaverse/data-context";
 import EditorialHero from "@/sections/editorial-hero";
+import {
+  MainProductContext,
+  type MainProductState,
+} from "@/sections/main-product/context";
 import { elementAttributes } from "@/sections/weaverse-element";
 
 /**
@@ -39,9 +46,29 @@ const ROUTE_CONTEXT: StorefrontDataContext = {
   article: JOURNAL_FIXTURES[0],
   collection: COLLECTION_FIXTURES[0],
   collectionProducts: PRODUCT_FIXTURES,
+  /* The route resolves filters, order and paging before any section renders,
+   * so the `mc--*` and `ap--*` elements only ever see a result. */
+  browse: {
+    filters: synthesizeProductFilters(PRODUCT_FIXTURES),
+    sort: "featured",
+    pageInfo: {
+      hasNextPage: false,
+      hasPreviousPage: false,
+      startCursor: null,
+      endCursor: null,
+    },
+  },
   page: PAGE_FIXTURES[0],
   product: PRODUCT_FIXTURES[0],
   products: PRODUCT_FIXTURES,
+};
+
+const MAIN_PRODUCT = ROUTE_CONTEXT.product as Product;
+const MAIN_PRODUCT_STATE: MainProductState = {
+  product: MAIN_PRODUCT,
+  selection: resolveProductSelection(MAIN_PRODUCT, undefined),
+  currentParams: new URLSearchParams(),
+  galleryPosition: "right",
 };
 
 describe("composed sections tolerate merchant-cleared settings", () => {
@@ -119,9 +146,18 @@ describe("composed components are addressable by Studio", () => {
    * looks fine, so only this assertion catches it. */
   for (const [type, Component] of COMPOSED) {
     it(`forwards the runtime identity attributes on ${type}`, () => {
+      const element = <Component data-wv-id="item-1" data-wv-type={type} />;
       const { container } = render(
         <StorefrontDataProvider value={ROUTE_CONTEXT}>
-          <Component data-wv-id="item-1" data-wv-type={type} />
+          {/* An `mp--*` child only renders inside its `main-product` shell,
+           * which provides the resolved selection. */}
+          {type.startsWith("mp--") ? (
+            <MainProductContext value={MAIN_PRODUCT_STATE}>
+              {element}
+            </MainProductContext>
+          ) : (
+            element
+          )}
         </StorefrontDataProvider>,
       );
 

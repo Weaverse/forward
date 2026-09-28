@@ -2,11 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
-import {
-  createFieldIndexCollections,
-  FIELD_INDEX_PRESENTATION,
-} from "../src/components/site-header/header-navigation.ts";
-import { COLLECTION_PRESENTATION_PROFILES } from "../src/lib/storefront/collection-presentation.ts";
+import { fieldIndexCollections } from "../src/components/site-header/header-navigation.ts";
 import { StaticStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
 import { createNavigationQueryExecutor } from "../src/lib/storefront/shopify/client.ts";
 import { ShopifyCatalogDataSource } from "../src/lib/storefront/shopify/data-source.ts";
@@ -17,33 +13,25 @@ import {
   mapNavigationResult,
 } from "../src/lib/storefront/shopify/navigation-mapper.ts";
 import { FOOTER_MENU_HANDLE } from "../src/lib/storefront/shopify/navigation-query.ts";
-import { catalogResponse } from "./fixtures/shopify-catalog-response.ts";
+import {
+  catalogResponse,
+  UNREAD_EXECUTORS,
+} from "./fixtures/shopify-catalog-response.ts";
 import {
   navigationResponse,
   navigationResponseWith,
-  type ShopifyMenuItemFixture,
 } from "./fixtures/shopify-navigation-response.ts";
 
 const SYNTHETIC_STORE_DOMAIN = "forward-test-shop.myshopify.com";
 const SYNTHETIC_STORE_ORIGIN = `https://${SYNTHETIC_STORE_DOMAIN}`;
 
-/** Canonical upstream `main-menu` with `Shop all` as its first Shop child. */
-function targetShopMenuResponse(
-  mutate: (shopChildren: ShopifyMenuItemFixture[]) => void = () => undefined,
-) {
-  return navigationResponseWith((draft) => {
-    const shop = draft.data.menu?.items[0];
-    assert.ok(shop !== undefined);
-    mutate(shop.items);
-  });
-}
-
+/** The fixture menu as the theme routes it: every collection under `/shop`. */
 const expectedPrimary = [
   {
-    href: "/shop",
+    href: "/shop/forward",
     label: "Shop",
     children: [
-      { href: "/shop", label: "Shop all" },
+      { href: "/shop/forward", label: "Shop all" },
       { href: "/shop/outerwear", label: "Outerwear" },
       { href: "/shop/packs", label: "Packs" },
       { href: "/shop/footwear", label: "Footwear" },
@@ -75,7 +63,7 @@ const expectedFooterColumns = [
   {
     heading: "Shop",
     links: [
-      { href: "/shop", label: "All products" },
+      { href: "/shop/forward", label: "All products" },
       ...expectedPrimary[0].children.slice(1),
     ],
   },
@@ -104,11 +92,17 @@ function mappedFooter(response = navigationResponse()) {
   return mapFooterMenuResult(response, SYNTHETIC_STORE_DOMAIN);
 }
 
-function shopifySource(response = navigationResponse()) {
+function shopifySource(
+  executeNavigation: () => Promise<
+    ReturnType<typeof navigationResponse>
+  > = async () => navigationResponse(),
+  base = new StaticStorefrontDataSource(),
+) {
   return new ShopifyCatalogDataSource({
-    base: new StaticStorefrontDataSource(),
+    ...UNREAD_EXECUTORS,
+    base,
     execute: async () => catalogResponse(),
-    executeNavigation: async () => response,
+    executeNavigation,
     storeDomain: SYNTHETIC_STORE_DOMAIN,
     mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
   });
@@ -119,6 +113,19 @@ class StaticWithoutFooterNavigation extends StaticStorefrontDataSource {
     const navigation = await super.getNavigation();
     return { ...navigation, footerColumns: [] };
   }
+}
+
+/** A response whose GraphQL errors are scoped to one root field, or none. */
+function withErrors(path?: string) {
+  const response = navigationResponse() as ReturnType<
+    typeof navigationResponse
+  > & { errors: Array<{ message: string; path?: string[] }> };
+  response.errors = [
+    path === undefined
+      ? { message: "synthetic unscoped failure" }
+      : { message: "synthetic scoped failure", path: [path] },
+  ];
+  return response;
 }
 
 describe("Hydrogen navigation client seam", () => {
@@ -225,139 +232,110 @@ describe("Hydrogen navigation client seam", () => {
 });
 
 describe("Shopify navigation mapping", () => {
-  it("maps the approved two-level menu and canonical collection routes", () => {
+  it("maps the store's menu and every collection it publishes", () => {
     const snapshot = mapped();
     assert.deepEqual(snapshot.primary, expectedPrimary);
     assert.deepEqual(
-      snapshot.collections.map(({ handle, productHandles }) => ({
-        handle,
-        productHandles,
-      })),
-      [
-        {
-          handle: "forward",
-          productHandles: [
-            "weatherline-shell",
-            "traverse-grid-fleece",
-            "drift-insulated-vest",
-            "ridge-30-field-pack",
-            "approach-18-day-pack",
-            "waypoint-sling-6",
-            "talus-trail-shoe",
-            "scree-approach-shoe",
-            "camp-recovery-clog",
-          ],
-        },
-        {
-          handle: "outerwear",
-          productHandles: [
-            "weatherline-shell",
-            "traverse-grid-fleece",
-            "drift-insulated-vest",
-          ],
-        },
-        {
-          handle: "packs",
-          productHandles: [
-            "ridge-30-field-pack",
-            "approach-18-day-pack",
-            "waypoint-sling-6",
-          ],
-        },
-        {
-          handle: "footwear",
-          productHandles: [
-            "talus-trail-shoe",
-            "scree-approach-shoe",
-            "camp-recovery-clog",
-          ],
-        },
-      ],
+      snapshot.collections.map((collection) => collection.handle),
+      ["forward", "outerwear", "packs", "footwear"],
     );
   });
 
-  it("maps every Footer column from the exact accepted nested footer menu", () => {
+  it("maps every Footer column from the store's footer menu", () => {
     assert.equal(FOOTER_MENU_HANDLE, "footer");
     assert.deepEqual(mappedFooter(), expectedFooterColumns);
   });
 
-  it("rejects a missing or null footer menu", () => {
+  it("maps a menu the store has not set up to no links", () => {
     const missing = navigationResponse() as unknown as {
       data: Record<string, unknown>;
     };
     delete missing.data.footerMenu;
-    const nullMenu = navigationResponseWith((draft) => {
-      draft.data.footerMenu = null;
-    });
-    assert.throws(() => mappedFooter(missing as never), ShopifyCatalogError);
-    assert.throws(() => mappedFooter(nullMenu), ShopifyCatalogError);
+    assert.deepEqual(mappedFooter(missing as never), []);
+    assert.deepEqual(
+      mappedFooter(
+        navigationResponseWith((draft) => {
+          draft.data.footerMenu = null;
+        }),
+      ),
+      [],
+    );
+    assert.deepEqual(
+      mapped(
+        navigationResponseWith((draft) => {
+          draft.data.menu = null;
+        }),
+      ).primary,
+      [],
+    );
   });
 
-  it("rejects wrong footer handle, count, order, label, route, nesting, query, and hash", () => {
+  it("rejects a menu answered under the wrong handle", () => {
+    const response = navigationResponseWith((draft) => {
+      assert.ok(draft.data.footerMenu !== null);
+      draft.data.footerMenu.handle = "forward-footer";
+    });
+    assert.throws(() => mappedFooter(response), ShopifyCatalogError);
+  });
+
+  it("keeps whatever the merchant arranged: order, labels and size", () => {
+    const response = navigationResponseWith((draft) => {
+      const shop = draft.data.menu?.items[0];
+      assert.ok(shop !== undefined);
+      shop.items.reverse();
+      const first = shop.items[0];
+      assert.ok(first !== undefined);
+      first.title = "Trail shoes";
+      shop.items.push({
+        id: "gid://shopify/MenuItem/accessories",
+        title: "Accessories",
+        url: `${SYNTHETIC_STORE_ORIGIN}/collections/accessories`,
+        items: [],
+      });
+      draft.data.footerMenu?.items.pop();
+    });
+    assert.deepEqual(mapped(response).primary[0]?.children, [
+      { href: "/shop/footwear", label: "Trail shoes" },
+      { href: "/shop/packs", label: "Packs" },
+      { href: "/shop/outerwear", label: "Outerwear" },
+      { href: "/shop/forward", label: "Shop all" },
+      { href: "/shop/accessories", label: "Accessories" },
+    ]);
+    assert.equal(mappedFooter(response).length, 2);
+  });
+
+  it("routes Shopify paths onto the theme's own routes", () => {
     const cases = [
-      navigationResponseWith((draft) => {
-        assert.ok(draft.data.footerMenu !== null);
-        draft.data.footerMenu.handle = "forward-footer";
-      }),
-      navigationResponseWith((draft) => {
-        draft.data.footerMenu?.items.pop();
-      }),
-      navigationResponseWith((draft) => {
-        draft.data.footerMenu?.items.reverse();
-      }),
-      navigationResponseWith((draft) => {
-        const item = draft.data.footerMenu?.items[0];
-        assert.ok(item !== undefined);
-        item.title = "About";
-      }),
-      navigationResponseWith((draft) => {
-        const item = draft.data.footerMenu?.items[1];
-        assert.ok(item !== undefined);
-        item.url = "/pages/repairs";
-      }),
-      navigationResponseWith((draft) => {
-        const item = draft.data.footerMenu?.items[2];
-        assert.ok(item !== undefined);
-        item.items.push({
-          id: "gid://shopify/MenuItem/unexpected-child",
-          title: "Unexpected",
-          url: "/pages/contact",
-          items: [],
-        });
-      }),
-      navigationResponseWith((draft) => {
-        const item = draft.data.footerMenu?.items[2];
-        assert.ok(item !== undefined);
-        item.url = "/pages/shipping-returns?from=footer";
-      }),
-      navigationResponseWith((draft) => {
+      ["/", "/"],
+      ["/collections/all", "/shop"],
+      ["/collections/packs", "/shop/packs"],
+      ["/products/talus-trail-shoe", "/products/talus-trail-shoe"],
+      ["/blogs/field-notes", "/journal"],
+      ["/blogs/field-notes/layering", "/journal/layering"],
+      ["/policies/refund-policy", "/policies/refund-policy"],
+      ["/search", "/search"],
+      ["/pages/contact#form", "/pages/contact"],
+      ["/pages/contact?from=footer", "/pages/contact"],
+      [`${SYNTHETIC_STORE_ORIGIN}/pages/contact/`, "/pages/contact"],
+    ] as const;
+    for (const [url, href] of cases) {
+      const response = navigationResponseWith((draft) => {
         const item = draft.data.footerMenu?.items[1]?.items[3];
         assert.ok(item !== undefined);
-        item.url = "/pages/contact#form";
-      }),
-      navigationResponseWith((draft) => {
-        const item = draft.data.footerMenu?.items[1]?.items[3];
-        assert.ok(item !== undefined);
-        item.url = "/pages/contact?";
-      }),
-      navigationResponseWith((draft) => {
-        const item = draft.data.footerMenu?.items[1]?.items[3];
-        assert.ok(item !== undefined);
-        item.url = "/pages/contact#";
-      }),
-    ];
-    for (const response of cases) {
-      assert.throws(() => mappedFooter(response), ShopifyCatalogError);
+        item.url = url;
+      });
+      assert.equal(mappedFooter(response)[1]?.links[3]?.href, href, url);
     }
   });
 
-  it("rejects cross-store, non-HTTPS, protocol-relative, credentialed, and non-default-port footer URLs", () => {
+  it("leaves out links to other origins or to routes the theme lacks", () => {
     const urls = [
       "https://different-shop.myshopify.com/pages/contact",
       `http://${SYNTHETIC_STORE_DOMAIN}/pages/contact`,
       `//${SYNTHETIC_STORE_DOMAIN}/pages/contact`,
       `https://user:password@${SYNTHETIC_STORE_DOMAIN}/pages/contact`,
       `https://${SYNTHETIC_STORE_DOMAIN}:8443/pages/contact`,
+      "/apps/loyalty",
     ];
     for (const url of urls) {
       const response = navigationResponseWith((draft) => {
@@ -365,137 +343,41 @@ describe("Shopify navigation mapping", () => {
         assert.ok(item !== undefined);
         item.url = url;
       });
-      assert.throws(() => mappedFooter(response), ShopifyCatalogError);
+      assert.deepEqual(
+        mappedFooter(response)[1]?.links,
+        expectedCompanyLinks.slice(0, 3),
+        url,
+      );
     }
   });
 
-  it("maps the canonical upstream Shop tree that starts with Shop all", () => {
-    assert.equal(targetShopMenuResponse().data.menu?.items[0]?.items.length, 4);
-    assert.deepEqual(mapped(targetShopMenuResponse()).primary, expectedPrimary);
-  });
-
-  it("rejects the legacy upstream Shop tree after the live cutover", () => {
-    const response = navigationResponseWith((draft) => {
-      draft.data.menu?.items[0]?.items.shift();
-    });
-    assert.equal(response.data.menu?.items[0]?.items.length, 3);
-    assert.throws(() => mapped(response), ShopifyCatalogError);
-  });
-
-  it("rejects Shop trees outside the canonical upstream shape", () => {
-    const cases = [
-      targetShopMenuResponse((children) => {
-        const shopAll = children[0];
-        assert.ok(shopAll !== undefined);
-        shopAll.title = "All products";
-      }),
-      targetShopMenuResponse((children) => {
-        const shopAll = children[0];
-        assert.ok(shopAll !== undefined);
-        children.splice(0, 1);
-        children.push(shopAll);
-      }),
-      targetShopMenuResponse((children) => {
-        const shopAll = children[0];
-        assert.ok(shopAll !== undefined);
-        shopAll.url = `${SYNTHETIC_STORE_ORIGIN}/collections/outerwear`;
-      }),
-      targetShopMenuResponse((children) => {
-        const shopAll = children[0];
-        assert.ok(shopAll !== undefined);
-        shopAll.url = `${SYNTHETIC_STORE_ORIGIN}/collections/forward?view=all`;
-      }),
-      targetShopMenuResponse((children) => {
-        const shopAll = children[0];
-        assert.ok(shopAll !== undefined);
-        shopAll.items.push({
-          id: "gid://shopify/MenuItem/shop-all-deeper",
-          title: "Too deep",
-          url: `${SYNTHETIC_STORE_ORIGIN}/collections/forward`,
-          items: [],
-        });
-      }),
-      targetShopMenuResponse((children) => {
-        children.push({
-          id: "gid://shopify/MenuItem/accessories",
-          title: "Accessories",
-          url: `${SYNTHETIC_STORE_ORIGIN}/collections/accessories`,
-          items: [],
-        });
-      }),
-      navigationResponseWith((draft) => {
-        draft.data.menu?.items[0]?.items.pop();
-      }),
-      navigationResponseWith((draft) => {
-        const shop = draft.data.menu?.items[0];
-        assert.ok(shop !== undefined);
-        shop.items.unshift({
-          id: "gid://shopify/MenuItem/shop-all-wrong-route",
-          title: "Shop all",
-          url: `${SYNTHETIC_STORE_ORIGIN}/pages/about-forward`,
-          items: [],
-        });
-      }),
-    ];
-    for (const response of cases) {
-      assert.throws(() => mapped(response), ShopifyCatalogError);
-    }
-  });
-
-  it("rejects a flat Shop menu instead of guessing parentage", () => {
+  it("drops an entry the theme cannot route together with its children", () => {
     const response = navigationResponseWith((draft) => {
       const shop = draft.data.menu?.items[0];
       assert.ok(shop !== undefined);
-      draft.data.menu?.items.splice(1, 0, ...shop.items);
-      shop.items = [];
+      shop.url = "https://example.com/catalog";
     });
-    assert.throws(() => mapped(response), ShopifyCatalogError);
+    assert.deepEqual(mapped(response).primary, expectedPrimary.slice(1));
   });
 
-  it("rejects wrong labels, order, URLs, and deeper nesting", () => {
-    const cases = [
-      navigationResponseWith((draft) => {
-        const child = draft.data.menu?.items[0]?.items[0];
-        assert.ok(child !== undefined);
-        child.title = "Field Gear";
-      }),
-      navigationResponseWith((draft) => {
-        const children = draft.data.menu?.items[0]?.items;
-        assert.ok(children !== undefined);
-        children.reverse();
-      }),
-      navigationResponseWith((draft) => {
-        const child = draft.data.menu?.items[0]?.items[0];
-        assert.ok(child !== undefined);
-        child.url = "https://example.com/collections/outerwear";
-      }),
-      navigationResponseWith((draft) => {
-        const child = draft.data.menu?.items[0]?.items[0];
-        assert.ok(child !== undefined);
-        child.url =
-          "https://different-shop.myshopify.com/collections/outerwear";
-      }),
-      navigationResponseWith((draft) => {
-        const child = draft.data.menu?.items[0]?.items[0];
-        assert.ok(child !== undefined);
-        child.items.push({
-          id: "gid://shopify/MenuItem/deeper",
-          title: "Too deep",
-          url: "/collections/outerwear",
-          items: [],
-        });
-      }),
-    ];
-    for (const response of cases) {
-      assert.throws(() => mapped(response), ShopifyCatalogError);
-    }
+  it("reads only the two levels the query asks for", () => {
+    const response = navigationResponseWith((draft) => {
+      const child = draft.data.menu?.items[0]?.items[0];
+      assert.ok(child !== undefined);
+      child.items.push({
+        id: "gid://shopify/MenuItem/deeper",
+        title: "Too deep",
+        url: "/collections/outerwear",
+        items: [],
+      });
+    });
+    assert.deepEqual(mapped(response).primary, expectedPrimary);
   });
 
-  it("rejects missing, paginated, or contaminated canonical collections", () => {
+  it("rejects a paginated or malformed collections page", () => {
+    /* Membership is the merchant's, so it is never rejected. A truncated or
+     * shapeless page still is: it would silently hide collections. */
     const cases = [
-      navigationResponseWith((draft) => {
-        draft.data.collections.nodes.pop();
-      }),
       navigationResponseWith((draft) => {
         draft.data.collections.pageInfo.hasNextPage = true;
       }),
@@ -504,9 +386,9 @@ describe("Shopify navigation mapping", () => {
           undefined as unknown as boolean;
       }),
       navigationResponseWith((draft) => {
-        const outerwear = draft.data.collections.nodes[1];
-        assert.ok(outerwear !== undefined);
-        outerwear.products.nodes = [{ handle: "talus-trail-shoe" }];
+        const first = draft.data.collections.nodes[0];
+        assert.ok(first !== undefined);
+        first.handle = undefined as unknown as string;
       }),
     ];
     for (const response of cases) {
@@ -514,7 +396,9 @@ describe("Shopify navigation mapping", () => {
     }
   });
 
-  it("ignores unrelated published collections without exposing them", () => {
+  it("exposes every collection the store publishes, in its order", () => {
+    /* A theme that only surfaced four approved handles could not run on
+     * another store. Whatever the merchant published is what ships. */
     const response = navigationResponseWith((draft) => {
       const first = draft.data.collections.nodes[0];
       assert.ok(first !== undefined);
@@ -524,10 +408,22 @@ describe("Shopify navigation mapping", () => {
         title: "Home page",
       });
     });
-    assert.deepEqual(
-      mapped(response).collections.map((collection) => collection.handle),
-      ["forward", "outerwear", "packs", "footwear"],
+    assert.deepEqual(mapped(response).collections[0]?.handle, "frontpage");
+    assert.equal(
+      mapped(response).collections.length,
+      response.data.collections.nodes.length,
     );
+  });
+
+  it("drops a collection's membership only when the store did", () => {
+    const response = navigationResponseWith((draft) => {
+      const outerwear = draft.data.collections.nodes[1];
+      assert.ok(outerwear !== undefined);
+      outerwear.products.nodes = [{ handle: "talus-trail-shoe" }];
+    });
+    assert.deepEqual(mapped(response).collections[1]?.productHandles, [
+      "talus-trail-shoe",
+    ]);
   });
 });
 
@@ -540,12 +436,6 @@ describe("Shopify navigation data source", () => {
       utility: base.utility,
       footerColumns: expectedFooterColumns,
     });
-    const navigation = await source.getNavigation();
-    assert.equal(navigation.footerColumns.length, 3);
-    assert.deepEqual(
-      navigation.footerColumns[0]?.links.slice(1),
-      navigation.primary[0]?.children?.slice(1),
-    );
     assert.deepEqual(
       (await source.listCollections()).map((collection) => collection.handle),
       ["forward", "outerwear", "packs", "footwear"],
@@ -559,24 +449,15 @@ describe("Shopify navigation data source", () => {
     );
   });
 
-  it("does not require theme-owned Footer navigation when the live footer menu is valid", async () => {
-    const source = new ShopifyCatalogDataSource({
-      base: new StaticWithoutFooterNavigation(),
-      execute: async () => catalogResponse(),
-      executeNavigation: async () => navigationResponse(),
-      storeDomain: SYNTHETIC_STORE_DOMAIN,
-      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
-    });
-
+  it("does not require theme-owned Footer navigation", async () => {
+    const source = shopifySource(
+      async () => navigationResponse(),
+      new StaticWithoutFooterNavigation(),
+    );
     assert.deepEqual(
       (await source.getNavigation()).footerColumns,
       expectedFooterColumns,
     );
-  });
-
-  it("keeps the static Company fixture aligned with the accepted four-link contract", async () => {
-    const navigation = await new StaticStorefrontDataSource().getNavigation();
-    assert.deepEqual(navigation.footerColumns, expectedFooterColumns);
   });
 
   it("keeps every Company destination available in deterministic static mode", async () => {
@@ -585,9 +466,9 @@ describe("Shopify navigation data source", () => {
     const company = navigation.footerColumns.find(
       (column) => column.heading === "Company",
     );
-    assert.ok(company !== undefined);
+    assert.deepEqual(company?.links, expectedCompanyLinks);
 
-    for (const link of company.links) {
+    for (const link of company?.links ?? []) {
       const handle = link.href.match(/^\/pages\/(.+)$/)?.[1];
       assert.ok(
         handle !== undefined,
@@ -600,315 +481,61 @@ describe("Shopify navigation data source", () => {
     }
   });
 
-  it("falls back only the malformed footer while main navigation and collections stay live", async () => {
-    const malformed = navigationResponseWith((draft) => {
-      draft.data.footerMenu?.items.pop();
-    });
-    const footerObserved: ShopifyCatalogError[] = [];
-    const navigationObserved: ShopifyCatalogError[] = [];
-    const collectionObserved: ShopifyCatalogError[] = [];
-    const source = new ShopifyCatalogDataSource({
-      base: new StaticStorefrontDataSource(),
-      execute: async () => catalogResponse(),
-      executeNavigation: async () => malformed,
-      storeDomain: SYNTHETIC_STORE_DOMAIN,
-      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
-      onFooterFallback: (error) => footerObserved.push(error),
-      onNavigationFallback: (error) => navigationObserved.push(error),
-      onCollectionFallback: (error) => collectionObserved.push(error),
-    });
-
-    assert.deepEqual(
-      (await source.getNavigation()).primary.slice(0, 3),
-      expectedPrimary,
-    );
-    assert.deepEqual(
-      (await source.getNavigation()).footerColumns,
-      expectedFooterColumns,
-    );
-    assert.deepEqual(
-      (await source.listCollections()).map((collection) => collection.handle),
-      ["forward", "outerwear", "packs", "footwear"],
-    );
-    assert.equal(footerObserved.length, 1);
-    assert.equal(navigationObserved.length, 0);
-    assert.equal(collectionObserved.length, 0);
-  });
-
-  it("keeps a separately valid live footer when main navigation falls back", async () => {
-    const malformedMain = navigationResponseWith((draft) => {
-      draft.data.menu = null;
-    });
-    const footerObserved: ShopifyCatalogError[] = [];
-    const navigationObserved: ShopifyCatalogError[] = [];
-    const source = new ShopifyCatalogDataSource({
-      base: new StaticStorefrontDataSource(),
-      execute: async () => catalogResponse(),
-      executeNavigation: async () => malformedMain,
-      storeDomain: SYNTHETIC_STORE_DOMAIN,
-      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
-      onFooterFallback: (error) => footerObserved.push(error),
-      onNavigationFallback: (error) => navigationObserved.push(error),
-    });
-
-    assert.deepEqual(
-      (await source.getNavigation()).footerColumns,
-      expectedFooterColumns,
-    );
-    assert.equal(navigationObserved.length, 1);
-    assert.equal(footerObserved.length, 0);
-  });
-
-  it("does not let footer fallback turn product failures into fixture success", async () => {
-    const malformed = navigationResponseWith((draft) => {
-      draft.data.footerMenu = null;
-    });
-    const source = new ShopifyCatalogDataSource({
-      base: new StaticStorefrontDataSource(),
-      execute: async () => {
-        throw new ShopifyCatalogError("Synthetic product failure.");
-      },
-      executeNavigation: async () => malformed,
-      storeDomain: SYNTHETIC_STORE_DOMAIN,
-      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
-      onFooterFallback: () => undefined,
-    });
-
-    assert.deepEqual(
-      (await source.getNavigation()).footerColumns,
-      expectedFooterColumns,
-    );
-    await assert.rejects(() => source.listProducts(), ShopifyCatalogError);
-  });
-
-  it("falls back to the canonical static menu when live data is missing or flat", async () => {
-    const cases = [
+  it("renders a store with no main menu as Search alone", async () => {
+    const source = shopifySource(async () =>
       navigationResponseWith((draft) => {
         draft.data.menu = null;
       }),
-      navigationResponseWith((draft) => {
-        const shop = draft.data.menu?.items[0];
-        assert.ok(shop !== undefined);
-        draft.data.menu?.items.splice(1, 0, ...shop.items);
-        shop.items = [];
-      }),
-    ];
-    const base = await new StaticStorefrontDataSource().getNavigation();
-
-    for (const response of cases) {
-      const observed: ShopifyCatalogError[] = [];
-      const source = new ShopifyCatalogDataSource({
-        base: new StaticStorefrontDataSource(),
-        execute: async () => catalogResponse(),
-        executeNavigation: async () => response,
-        storeDomain: SYNTHETIC_STORE_DOMAIN,
-        mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
-        onNavigationFallback: (error) => observed.push(error),
-      });
-      assert.deepEqual(await source.getNavigation(), base);
-      assert.deepEqual(await source.getNavigation(), base);
-      assert.equal(observed.length, 1);
-      assert.deepEqual(
-        (await source.listCollections()).map((collection) => collection.handle),
-        ["forward", "outerwear", "packs", "footwear"],
-      );
-    }
+    );
+    const navigation = await source.getNavigation();
+    assert.deepEqual(navigation.primary, [
+      { href: "/search", label: "Search" },
+    ]);
+    assert.deepEqual(navigation.footerColumns, expectedFooterColumns);
   });
 
-  it("falls back to canonical collection structure without hiding the live menu", async () => {
-    const response = navigationResponseWith((draft) => {
-      draft.data.collections.nodes.pop();
+  it("fails closed when the navigation read fails, never serving fixtures", async () => {
+    const source = shopifySource(async () => {
+      throw new ShopifyCatalogError("Synthetic navigation failure.");
     });
-    const collectionObserved: ShopifyCatalogError[] = [];
-    const navigationObserved: ShopifyCatalogError[] = [];
-    const source = new ShopifyCatalogDataSource({
-      base: new StaticStorefrontDataSource(),
-      execute: async () => catalogResponse(),
-      executeNavigation: async () => response,
-      storeDomain: SYNTHETIC_STORE_DOMAIN,
-      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
-      onCollectionFallback: (error) => collectionObserved.push(error),
-      onNavigationFallback: (error) => navigationObserved.push(error),
-    });
-    const base = new StaticStorefrontDataSource();
-
-    assert.deepEqual(
-      await source.listCollections(),
-      await base.listCollections(),
-    );
-    assert.deepEqual(
-      await source.listCollections(),
-      await base.listCollections(),
-    );
-    assert.equal(collectionObserved.length, 1);
-    assert.equal(navigationObserved.length, 0);
-    assert.deepEqual(
-      (await source.getNavigation()).primary.slice(0, 3),
-      expectedPrimary,
-    );
+    await assert.rejects(() => source.getNavigation(), ShopifyCatalogError);
+    await assert.rejects(() => source.listCollections(), ShopifyCatalogError);
   });
 
-  it("reports a collection fallback that begins after an initial live read", async () => {
-    const malformed = navigationResponseWith((draft) => {
-      draft.data.collections.nodes.pop();
-    });
-    const observed: ShopifyCatalogError[] = [];
-    let reads = 0;
-    const source = new ShopifyCatalogDataSource({
-      base: new StaticStorefrontDataSource(),
-      execute: async () => catalogResponse(),
-      executeNavigation: async () => {
-        reads += 1;
-        return reads === 1 ? navigationResponse() : malformed;
-      },
-      onCollectionFallback: (error) => observed.push(error),
-      storeDomain: SYNTHETIC_STORE_DOMAIN,
-      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
-    });
-
-    assert.deepEqual(
-      (await source.listCollections()).map((collection) => collection.handle),
-      ["forward", "outerwear", "packs", "footwear"],
+  it("fails only the structure a scoped GraphQL error touches", async () => {
+    const footerFailure = shopifySource(async () => withErrors("footerMenu"));
+    await assert.rejects(
+      () => footerFailure.getNavigation(),
+      ShopifyCatalogError,
     );
-    assert.equal(observed.length, 0);
-    assert.deepEqual(
-      (await source.getCollectionProducts("outerwear"))?.map(
-        (product) => product.handle,
-      ),
-      ["weatherline-shell", "traverse-grid-fleece", "drift-insulated-vest"],
+    assert.equal(
+      (await footerFailure.getCollection("outerwear"))?.handle,
+      "outerwear",
     );
-    assert.equal(observed.length, 1);
-  });
 
-  it("contains structure transport failures while product data stays fail-closed", async () => {
-    const collectionObserved: ShopifyCatalogError[] = [];
-    const footerObserved: ShopifyCatalogError[] = [];
-    const navigationObserved: ShopifyCatalogError[] = [];
-    const source = new ShopifyCatalogDataSource({
-      base: new StaticStorefrontDataSource(),
-      execute: async () => catalogResponse(),
-      executeNavigation: async () => {
-        throw new ShopifyCatalogError("Synthetic navigation failure.");
-      },
-      onCollectionFallback: (error) => collectionObserved.push(error),
-      onFooterFallback: (error) => footerObserved.push(error),
-      onNavigationFallback: (error) => navigationObserved.push(error),
-      storeDomain: SYNTHETIC_STORE_DOMAIN,
-      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
-    });
-    const base = await new StaticStorefrontDataSource().getNavigation();
-    assert.deepEqual(await source.getNavigation(), base);
-    assert.deepEqual(
-      await source.listCollections(),
-      await new StaticStorefrontDataSource().listCollections(),
+    const collectionFailure = shopifySource(async () =>
+      withErrors("collections"),
     );
-    assert.equal(navigationObserved.length, 1);
-    assert.equal(footerObserved.length, 1);
-    assert.equal(collectionObserved.length, 1);
-  });
-
-  it("scopes partial GraphQL field errors to only the affected structure", async () => {
-    const staticNavigation =
-      await new StaticStorefrontDataSource().getNavigation();
-    for (const [rootField, expected] of [
-      ["footerMenu", { main: 0, footer: 1, collections: 0 }],
-      ["menu", { main: 1, footer: 0, collections: 0 }],
-      ["collections", { main: 0, footer: 0, collections: 1 }],
-    ] as const) {
-      const response = navigationResponse() as ReturnType<
-        typeof navigationResponse
-      > & {
-        errors: Array<{ message: string; path: string[] }>;
-      };
-      response.errors = [
-        { message: "synthetic scoped failure", path: [rootField] },
-      ];
-      const observed = { main: 0, footer: 0, collections: 0 };
-      const source = new ShopifyCatalogDataSource({
-        base: new StaticStorefrontDataSource(),
-        execute: async () => catalogResponse(),
-        executeNavigation: async () => response,
-        storeDomain: SYNTHETIC_STORE_DOMAIN,
-        mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
-        onNavigationFallback: () => {
-          observed.main += 1;
-        },
-        onFooterFallback: () => {
-          observed.footer += 1;
-        },
-        onCollectionFallback: () => {
-          observed.collections += 1;
-        },
-      });
-
-      const navigation = await source.getNavigation();
-      const collection = await source.getCollection("outerwear");
-      assert.deepEqual(
-        navigation.primary.slice(0, 3),
-        expected.main === 1
-          ? staticNavigation.primary.slice(0, 3)
-          : expectedPrimary,
-      );
-      assert.deepEqual(
-        navigation.footerColumns,
-        expected.footer === 1
-          ? staticNavigation.footerColumns
-          : expectedFooterColumns,
-      );
-      assert.equal(collection?.handle, "outerwear");
-      assert.deepEqual(observed, expected, rootField);
-    }
+    assert.deepEqual(
+      (await collectionFailure.getNavigation()).footerColumns,
+      expectedFooterColumns,
+    );
+    await assert.rejects(
+      () => collectionFailure.listCollections(),
+      ShopifyCatalogError,
+    );
   });
 
   it("treats an unscoped GraphQL error as affecting every structure", async () => {
-    const response = navigationResponse() as ReturnType<
-      typeof navigationResponse
-    > & {
-      errors: Array<{ message: string }>;
-    };
-    response.errors = [{ message: "synthetic unscoped failure" }];
-    const observed = { main: 0, footer: 0, collections: 0 };
-    const source = new ShopifyCatalogDataSource({
-      base: new StaticStorefrontDataSource(),
-      execute: async () => catalogResponse(),
-      executeNavigation: async () => response,
-      storeDomain: SYNTHETIC_STORE_DOMAIN,
-      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
-      onNavigationFallback: () => {
-        observed.main += 1;
-      },
-      onFooterFallback: () => {
-        observed.footer += 1;
-      },
-      onCollectionFallback: () => {
-        observed.collections += 1;
-      },
-    });
-
-    await source.getNavigation();
-    await source.getCollection("outerwear");
-    assert.deepEqual(observed, { main: 1, footer: 1, collections: 1 });
+    const source = shopifySource(async () => withErrors());
+    await assert.rejects(() => source.getNavigation(), ShopifyCatalogError);
+    await assert.rejects(() => source.listCollections(), ShopifyCatalogError);
   });
 });
 
 describe("live Shopify verifier", () => {
-  it("checks collection fallback only after the final collection read", async () => {
+  it("fails live verification on footer link drift", async () => {
     const source = await readFile("scripts/verify-shopify.mts", "utf8");
-    const finalCollectionRead = source.indexOf(
-      'getCollectionProducts("frontpage")',
-    );
-    const fallbackCheck = source.indexOf(
-      '"canonical collection reads stayed live and in contract order"',
-    );
-    assert.ok(finalCollectionRead >= 0);
-    assert.ok(fallbackCheck > finalCollectionRead);
-    assert.equal(source.indexOf("getCollectionProducts(", fallbackCheck), -1);
-  });
-
-  it("fails live verification on footer fallback or link drift", async () => {
-    const source = await readFile("scripts/verify-shopify.mts", "utf8");
-    assert.match(source, /onFooterFallback/);
-    assert.match(source, /footerFallbackUsed/);
     assert.match(source, /live footer has the canonical three-column tree/);
     for (const column of expectedFooterColumns) {
       assert.ok(source.includes(column.heading));
@@ -945,70 +572,91 @@ describe("Footer navigation query/cache contract", () => {
 });
 
 describe("Field Index presentation", () => {
-  const expectedCards = [
-    { id: "forward", index: "00", label: "Shop all", href: "/shop" },
-    {
-      id: "outerwear",
-      index: "01",
-      label: "Outerwear",
-      href: "/shop/outerwear",
-    },
-    { id: "packs", index: "02", label: "Packs", href: "/shop/packs" },
-    {
-      id: "footwear",
-      index: "03",
-      label: "Footwear",
-      href: "/shop/footwear",
-    },
-  ] as const;
-
-  it("maps the ordered Shopify Shop children into four presentation cards", () => {
-    for (const response of [navigationResponse(), targetShopMenuResponse()]) {
-      const shop = mapped(response).primary[0];
-      assert.ok(shop !== undefined);
-      assert.deepEqual(
-        createFieldIndexCollections(shop).map(({ id, index, label, href }) => ({
-          id,
-          index,
-          label,
-          href,
-        })),
-        expectedCards,
-      );
-    }
-    assert.equal(FIELD_INDEX_PRESENTATION.length, 4);
-  });
-
-  it("uses the canonical forward collection image for the Shop all card", () => {
+  it("dresses each Shop link with its collection, in the merchant's order", async () => {
     const shop = mapped().primary[0];
-    assert.ok(shop !== undefined);
-    const shopAll = createFieldIndexCollections(shop)[0];
+    const collections =
+      await new StaticStorefrontDataSource().listCollections();
+    const cards = fieldIndexCollections(shop, collections);
     assert.deepEqual(
-      shopAll?.image,
-      COLLECTION_PRESENTATION_PROFILES.find(
-        (profile) => profile.handle === "forward",
-      )?.heroImage,
+      cards?.map(({ index, label, href, fieldCode }) => ({
+        index,
+        label,
+        href,
+        fieldCode,
+      })),
+      [
+        {
+          index: "00",
+          label: "Shop all",
+          href: "/shop/forward",
+          fieldCode: "FW-00",
+        },
+        {
+          index: "01",
+          label: "Outerwear",
+          href: "/shop/outerwear",
+          fieldCode: "OW-01",
+        },
+        {
+          index: "02",
+          label: "Packs",
+          href: "/shop/packs",
+          fieldCode: "PK-02",
+        },
+        {
+          index: "03",
+          label: "Footwear",
+          href: "/shop/footwear",
+          fieldCode: "FT-03",
+        },
+      ],
+    );
+    assert.deepEqual(
+      cards?.[1]?.image,
+      collections.find((collection) => collection.handle === "outerwear")
+        ?.heroImage,
     );
   });
 
-  it("rejects a Shop item without the exact four canonical children", () => {
-    assert.throws(
-      () => createFieldIndexCollections({ href: "/shop", label: "Shop" }),
-      /exactly four children/i,
+  it("keeps the label of a link to an unpublished collection and nothing else", () => {
+    const cards = fieldIndexCollections(
+      {
+        href: "/shop",
+        label: "Shop",
+        children: [
+          { href: "/shop", label: "Everything" },
+          { href: "/shop/archive", label: "Archive" },
+        ],
+      },
+      [],
     );
-    assert.throws(
-      () =>
-        createFieldIndexCollections({
-          href: "/shop",
-          label: "Shop",
-          children: [
-            { href: "/shop/outerwear", label: "Outerwear" },
-            { href: "/shop", label: "Shop all" },
-            { href: "/shop/packs", label: "Packs" },
-            { href: "/shop/footwear", label: "Footwear" },
-          ],
-        }),
-      /must target \/shop/i,
+    assert.deepEqual(cards, [
+      {
+        id: "/shop",
+        index: "00",
+        label: "Everything",
+        href: "/shop",
+        fieldCode: "",
+        description: "",
+        image: null,
+      },
+      {
+        id: "/shop/archive",
+        index: "01",
+        label: "Archive",
+        href: "/shop/archive",
+        fieldCode: "",
+        description: "",
+        image: null,
+      },
+    ]);
+  });
+
+  it("has no panel without Shop links", () => {
+    assert.equal(fieldIndexCollections(undefined, []), null);
+    assert.equal(
+      fieldIndexCollections({ href: "/shop", label: "Shop" }, []),
+      null,
     );
   });
 });

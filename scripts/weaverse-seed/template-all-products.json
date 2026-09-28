@@ -1,0 +1,10 @@
+{
+  "pageType": "ALL_PRODUCTS",
+  "handle": "",
+  "description": "All products template.",
+  "sections": [
+    {
+      "type": "all-products"
+    }
+  ]
+}

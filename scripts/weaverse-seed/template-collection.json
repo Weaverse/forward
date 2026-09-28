@@ -3,7 +3,9 @@
   "handle": "",
   "description": "Collection template.",
   "sections": [
-    { "type": "collection-hero" },
+    {
+      "type": "collection-hero"
+    },
     {
       "type": "system-manifest",
       "data": {
@@ -15,7 +17,11 @@
         }
       }
     },
-    { "type": "collection-grid" },
-    { "type": "field-practice" }
+    {
+      "type": "main-collection"
+    },
+    {
+      "type": "field-practice"
+    }
   ]
 }

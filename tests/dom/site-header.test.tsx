@@ -14,7 +14,8 @@ import userEvent from "@testing-library/user-event";
 
 import { ICON_PATHS } from "@/components/icon";
 import { FieldIndexHeader } from "@/components/site-header/field-index-header";
-import { createFieldIndexCollections } from "@/components/site-header/header-navigation";
+import { fieldIndexCollections } from "@/components/site-header/header-navigation";
+import { COLLECTION_FIXTURES } from "@/lib/storefront/fixtures/collections";
 import { THEME_CONTENT_FIXTURE } from "@/lib/storefront/fixtures/navigation";
 import type { NavItem } from "@/lib/storefront/types";
 import {
@@ -70,6 +71,7 @@ function mountHeader({
   return render(
     <FieldIndexHeader
       announcement={THEME_CONTENT_FIXTURE.announcement}
+      collections={COLLECTION_FIXTURES}
       primary={primary}
       queryString={queryString}
       utility={withAccount ? UTILITY_NAV_WITH_ACCOUNT : UTILITY_NAV_NO_ACCOUNT}
@@ -197,48 +199,46 @@ describe("header enhancement fallbacks", () => {
     assert.equal(link.getAttribute("aria-controls"), null);
   });
 
-  for (const [name, children] of [
-    ["unexpected child count", SHOP_CHILDREN.slice(0, -1)],
-    [
-      "unexpected child order",
-      [SHOP_CHILDREN[1], SHOP_CHILDREN[0], ...SHOP_CHILDREN.slice(2)],
-    ],
-    [
-      "unmapped presentation handle",
-      SHOP_CHILDREN.map((child, index) =>
-        index === 2 ? { ...child, href: "/shop/daypacks" } : child,
+  it("opens the panel for whatever Shop tree the merchant arranged", async () => {
+    const user = userEvent.setup();
+    const children = [
+      SHOP_CHILDREN[2],
+      SHOP_CHILDREN[0],
+      { label: "Archive", href: "/shop/archive" },
+    ];
+    mountHeader({
+      primary: PRIMARY_NAV.map((item) =>
+        item.href === "/shop" ? { ...item, children } : item,
       ),
-    ],
-  ] as const) {
-    it(`renders Shop as a query-preserving plain link for ${name}`, () => {
-      mountHeader({
-        primary: PRIMARY_NAV.map((item) =>
-          item.href === "/shop" ? { ...item, children } : item,
-        ),
-        queryString: "sort=name&colorway=claystone",
-      });
-
-      assert.equal(screen.queryByRole("button", { name: /Shop/ }), null);
-      const link = screen.getByRole("link", { name: /Shop$/ });
-      assert.equal(link.getAttribute("href"), "/shop?sort=name");
-      assert.equal(link.getAttribute("aria-controls"), null);
-      assert.equal(
-        screen.queryByRole("region", { name: "Shop field index" }),
-        null,
-      );
     });
-  }
 
-  it("keeps malformed Shop links in the accessible mobile dialog", async () => {
+    await user.click(screen.getByRole("button", { name: /Shop/ }));
+    const links = within(
+      screen.getByRole("navigation", { name: "Shop collections" }),
+    ).getAllByRole("link");
+    assert.deepEqual(
+      hrefs(links),
+      children.map((child) => child.href),
+    );
+  });
+
+  it("renders Shop as a query-preserving plain link when it has no children", async () => {
     const user = userEvent.setup();
     mountHeader({
       primary: PRIMARY_NAV.map((item) =>
-        item.href === "/shop"
-          ? { ...item, children: SHOP_CHILDREN.slice(0, -1) }
-          : item,
+        item.href === "/shop" ? { href: item.href, label: item.label } : item,
       ),
-      queryString: "sort=name",
+      queryString: "sort=name&colorway=claystone",
     });
+
+    assert.equal(screen.queryByRole("button", { name: /Shop/ }), null);
+    const link = screen.getByRole("link", { name: /Shop$/ });
+    assert.equal(link.getAttribute("href"), "/shop?sort=name");
+    assert.equal(link.getAttribute("aria-controls"), null);
+    assert.equal(
+      screen.queryByRole("region", { name: "Shop field index" }),
+      null,
+    );
 
     await user.click(screen.getByRole("button", { name: /^Menu$/ }));
     const dialog = screen.getByRole("dialog", { name: "Site menu" });
@@ -252,13 +252,6 @@ describe("header enhancement fallbacks", () => {
       within(dialog).getByRole("link", { name: /Shop$/ }).getAttribute("href"),
       "/shop?sort=name",
     );
-    for (const child of SHOP_CHILDREN.slice(0, -1)) {
-      assert.ok(
-        within(dialog).getByRole("link", {
-          name: new RegExp(`${child.label}$`),
-        }),
-      );
-    }
   });
 });
 
@@ -291,10 +284,10 @@ describe("header query ownership", () => {
       screen.getByRole("navigation", { name: "Shop collections" }),
     ).getAllByRole("link");
     assert.deepEqual(hrefs(shopLinks), [
-      "/shop?sort=name&category=packs",
-      "/shop/outerwear?sort=name&category=packs",
-      "/shop/packs?sort=name&category=packs",
-      "/shop/footwear?sort=name&category=packs",
+      "/shop?sort=name",
+      "/shop/outerwear?sort=name",
+      "/shop/packs?sort=name",
+      "/shop/footwear?sort=name",
     ]);
   });
 
@@ -386,18 +379,19 @@ describe("desktop Shop field index", () => {
 
     const shopItem = PRIMARY_NAV.find((item) => item.href === "/shop");
     assert.ok(shopItem !== undefined);
-    const [forward, , packsCollection] = createFieldIndexCollections(shopItem);
-    assert.ok(forward !== undefined && packsCollection !== undefined);
+    const [, , packsCollection] =
+      fieldIndexCollections(shopItem, COLLECTION_FIXTURES) ?? [];
+    assert.ok(packsCollection?.image);
 
-    const before = panel.querySelector("img");
-    assert.equal(before?.getAttribute("src"), forward.image.src);
+    /* `Shop all` is the whole catalog, not a collection: no image to show. */
+    assert.equal(panel.querySelector("img"), null);
 
     await user.hover(packs);
     const image = panel.querySelector("img");
     assert.ok(image !== null);
     assert.equal(image.getAttribute("src"), packsCollection.image.src);
     assert.equal(image.getAttribute("alt"), packsCollection.image.alt);
-    assert.match(visibleText(panel), new RegExp(packsCollection.fieldNote));
+    assert.match(visibleText(panel), new RegExp(packsCollection.fieldCode));
     /* Previewing a system must never navigate away from the current route. */
     assert.equal(currentRoute().pushed.length, 0);
   });

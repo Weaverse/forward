@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Fragment } from "react";
 
 import { eyebrow, textLink } from "@/lib/presentation/variants";
 import { formatDate } from "@/lib/storefront/format";
@@ -114,11 +115,18 @@ function ArticleAside({
       <aside className="border-border-subtle border-b pb-5 text-caption text-text-muted md:border-b-0 md:pb-0">
         <p className={eyebrow()}>Route notes</p>
         <p>
-          {article.location}
-          <br />
-          {article.coordinates}
-          <br />
-          {article.readingMinutes} minute read
+          {[
+            article.location,
+            article.coordinates,
+            `${article.readingMinutes} minute read`,
+          ]
+            .filter((line) => line !== "")
+            .map((line, lineIndex) => (
+              <Fragment key={line}>
+                {lineIndex === 0 ? null : <br />}
+                {line}
+              </Fragment>
+            ))}
         </p>
       </aside>
     );

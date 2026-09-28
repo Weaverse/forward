@@ -1,18 +1,17 @@
-import {
-  type CanonicalCollectionHandle,
-  COLLECTION_PRESENTATION_PROFILES,
-} from "@/lib/storefront/collection-presentation";
-import type { NavItem, StorefrontImage } from "@/lib/storefront/types";
+import type {
+  Collection,
+  NavItem,
+  StorefrontImage,
+} from "@/lib/storefront/types";
 
 export interface FieldIndexCollection {
-  id: CanonicalCollectionHandle;
-  index: "00" | "01" | "02" | "03";
+  id: string;
+  index: string;
   label: string;
   href: string;
-  coordinate: string;
+  fieldCode: string;
   description: string;
-  fieldNote: string;
-  image: StorefrontImage;
+  image: StorefrontImage | null;
 }
 
 /**
@@ -27,7 +26,9 @@ const DESTINATION_OWNED_PARAMS: readonly {
   params: readonly string[];
 }[] = [
   { prefix: "/search", params: ["q"] },
-  { prefix: "/shop", params: ["category", "activity", "sort"] },
+  /* Order carries across collections; facets do not — each collection offers
+   * its own, so a facet value from one names nothing in the next. */
+  { prefix: "/shop", params: ["sort"] },
 ];
 
 function ownedParams(path: string): readonly string[] {
@@ -62,98 +63,6 @@ export function createHeaderNavigationHref(
   }
   const query = params.toString();
   return `${path}${query === "" ? "" : `?${query}`}${hash}`;
-}
-
-interface FieldIndexPresentation {
-  id: FieldIndexCollection["id"];
-  index: FieldIndexCollection["index"];
-  href: string;
-  coordinate: string;
-  description: string;
-  fieldNote: string;
-  image: StorefrontImage;
-}
-
-function collectionImage(handle: FieldIndexCollection["id"]): StorefrontImage {
-  const profile = COLLECTION_PRESENTATION_PROFILES.find(
-    (entry) => entry.handle === handle,
-  );
-  if (profile === undefined) {
-    throw new Error(`Missing collection presentation for ${handle}.`);
-  }
-  return profile.heroImage;
-}
-
-/** Static visual metadata; Shopify owns labels, order, hierarchy, and URLs. */
-export const FIELD_INDEX_PRESENTATION = [
-  {
-    id: "forward",
-    index: "00",
-    href: "/shop",
-    coordinate: "54.4609° N / 03.0886° W",
-    description:
-      "The complete Forward catalog, ordered as one continuous field index.",
-    fieldNote: "Every system in one list, from shell layers to trail footwear.",
-    image: collectionImage("forward"),
-  },
-  {
-    id: "outerwear",
-    index: "01",
-    href: "/shop/outerwear",
-    coordinate: "54.4609° N",
-    description:
-      "Weatherproof layers built for exposed ground and changing forecasts.",
-    fieldNote: "Protection designed for movement, repair, and repeat use.",
-    image: collectionImage("outerwear"),
-  },
-  {
-    id: "packs",
-    index: "02",
-    href: "/shop/packs",
-    coordinate: "03.0886° W",
-    description:
-      "Low-bulk carry systems composed for long miles above the tree line.",
-    fieldNote: "Stable load transfer for distance, exposure, and movement.",
-    image: collectionImage("packs"),
-  },
-  {
-    id: "footwear",
-    index: "03",
-    href: "/shop/footwear",
-    coordinate: "ALT. 978 M",
-    description:
-      "Dependable trail footwear tuned for grip, feedback, and long days out.",
-    fieldNote: "Ground contact selected for utility, not excess.",
-    image: collectionImage("footwear"),
-  },
-] as const satisfies readonly FieldIndexPresentation[];
-
-/** Maps the exact Shopify `Shop` children into Header 01 presentation cards. */
-export function createFieldIndexCollections(
-  shopItem: NavItem,
-): readonly FieldIndexCollection[] {
-  const children = shopItem.children ?? [];
-  if (children.length !== FIELD_INDEX_PRESENTATION.length) {
-    throw new Error("Header 01 requires Shop to have exactly four children.");
-  }
-  return FIELD_INDEX_PRESENTATION.map((presentation, index) => {
-    const item = children[index];
-    if (item === undefined || item.href !== presentation.href) {
-      throw new Error(
-        `Header 01 Shop child ${index + 1} must target ${presentation.href}.`,
-      );
-    }
-    if (item.children !== undefined && item.children.length > 0) {
-      throw new Error(
-        "Header 01 collection links cannot contain grandchildren.",
-      );
-    }
-    return {
-      ...presentation,
-      label: item.label,
-      href: item.href,
-    };
-  });
 }
 
 /** True when `href` names the current page or one of its nested routes. */
@@ -198,21 +107,44 @@ export function activeCollectionIndex(
   return Math.max(currentCollectionIndex(pathname, collections), 0);
 }
 
+/** True for the catalog and any collection route. */
+function isCatalogHref(href: string): boolean {
+  return href === "/shop" || href.startsWith("/shop/");
+}
+
+/** The top-level menu entry that opens the Shop panel: the catalog branch. */
+export function findShopItem(primary: readonly NavItem[]): NavItem | undefined {
+  return primary.find((item) => isCatalogHref(item.href));
+}
+
 /**
- * The Shop mega panel is an enhancement on merchant-owned navigation: drifted
- * or missing data yields no panel instead of a failed render.
+ * The Shop panel's rows: the merchant's Shop links, in the merchant's order,
+ * each dressed with its collection's own description, image and field code.
+ * A link to a collection the store does not publish keeps its label and loses
+ * the rest. No Shop links means no panel.
  */
 export function fieldIndexCollections(
   shopItem: NavItem | undefined,
+  collections: readonly Collection[],
 ): readonly FieldIndexCollection[] | null {
-  if (shopItem === undefined) {
+  const children = shopItem?.children ?? [];
+  if (children.length === 0) {
     return null;
   }
-  try {
-    return createFieldIndexCollections(shopItem);
-  } catch {
-    return null;
-  }
+  return children.map((item, index) => {
+    const collection = collections.find(
+      (entry) => item.href === `/shop/${entry.handle}`,
+    );
+    return {
+      id: item.href,
+      index: String(index).padStart(2, "0"),
+      label: item.label,
+      href: item.href,
+      fieldCode: collection?.fieldCode ?? "",
+      description: collection?.description ?? "",
+      image: collection?.heroImage ?? null,
+    };
+  });
 }
 
 /** Account entry reports session state; every other destination keeps its label. */

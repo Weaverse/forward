@@ -2,7 +2,7 @@
 
 import { cva } from "class-variance-authority";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Children, type ReactNode, Suspense, useEffect } from "react";
+import { type ReactNode, Suspense, useEffect } from "react";
 
 import {
   COLORWAY_PARAM,
@@ -17,17 +17,7 @@ import {
   elementAttributes,
   type WeaverseElementProps,
 } from "../weaverse-element";
-import ProductBreadcrumb from "./breadcrumb";
-import ProductBuyButtons from "./buy-buttons";
-import ProductCollapsibleDetails from "./collapsible-details";
 import { type GalleryPosition, MainProductContext } from "./context";
-import ProductInfo from "./info";
-import ProductMedia from "./media";
-import ProductMeta from "./meta";
-import ProductPrices from "./prices";
-import ProductSummary from "./summary";
-import ProductTitle from "./title";
-import ProductVariantSelector from "./variant-selector";
 
 type PanelWidth = "standard" | "wide";
 
@@ -71,10 +61,6 @@ interface MainProductProps extends WeaverseElementProps {
  * The shell owns what its children share: the `colorway`/option query state,
  * resolved into one selection every child reads through `MainProductContext`,
  * and the two-column grid they sit in. Cart logic stays in `AddToCartForm`.
- *
- * A product URL must never lose its gallery, selection and add to cart, so a
- * section with no children — the route's own fallback, or a template seeded
- * before the block was split — renders the default composition.
  */
 function MainProduct({
   children,
@@ -85,8 +71,6 @@ function MainProduct({
   const { product } = useStorefrontContext();
   if (product === undefined) return null;
   const position = galleryPosition ?? "right";
-  const content =
-    Children.count(children) > 0 ? children : <DefaultComposition />;
 
   return (
     <div
@@ -103,12 +87,12 @@ function MainProduct({
               galleryPosition: position,
             }}
           >
-            {content}
+            {children}
           </MainProductContext>
         }
       >
         <UrlSelection product={product} galleryPosition={position}>
-          {content}
+          {children}
         </UrlSelection>
       </Suspense>
     </div>
@@ -173,25 +157,6 @@ function UrlSelection({
     >
       {children}
     </MainProductContext>
-  );
-}
-
-/** What the section renders when it has no children of its own. */
-function DefaultComposition() {
-  return (
-    <>
-      <ProductMedia />
-      <ProductInfo>
-        <ProductBreadcrumb />
-        <ProductMeta />
-        <ProductTitle />
-        <ProductPrices />
-        <ProductSummary />
-        <ProductVariantSelector />
-        <ProductBuyButtons />
-        <ProductCollapsibleDetails />
-      </ProductInfo>
-    </>
   );
 }
 

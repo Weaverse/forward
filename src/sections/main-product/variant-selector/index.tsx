@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import {
   colorwayIsSoldOut,
+  colorwaySwatchStyle,
   findExactVariant,
   productSelectionHref,
   resolveProductSelection,
@@ -111,7 +112,7 @@ function ProductVariantSelector({
                   <span
                     aria-hidden="true"
                     className="size-3 border border-white/40"
-                    style={{ backgroundColor: entry.swatchColor }}
+                    style={colorwaySwatchStyle(entry)}
                   />
                 )}
                 {entry.name}

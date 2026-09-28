@@ -1,5 +1,5 @@
 /**
- * Normalized catalog query semantics: filtering, sorting, and search.
+ * Normalized catalog query semantics: sorting and search.
  *
  * Both the static fixture data source and the Shopify-backed data source run
  * these exact functions over already-normalized `Product` records, so live mode
@@ -12,7 +12,7 @@
  * - the raw query is never interpolated into Shopify GraphQL search syntax.
  */
 
-import type { Product, ProductListFilter, ProductSort } from "./types";
+import type { Product, ProductSort } from "./types";
 
 export function sortProducts(
   products: readonly Product[],
@@ -36,22 +36,6 @@ export function sortProducts(
   return sorted;
 }
 
-export function matchesFilter(
-  product: Product,
-  filter: ProductListFilter,
-): boolean {
-  if (filter.category !== undefined && product.category !== filter.category) {
-    return false;
-  }
-  if (
-    filter.activity !== undefined &&
-    !product.activities.includes(filter.activity)
-  ) {
-    return false;
-  }
-  return true;
-}
-
 function searchableText(product: Product): string {
   return [
     product.title,
@@ -63,18 +47,6 @@ function searchableText(product: Product): string {
   ]
     .join(" ")
     .toLowerCase();
-}
-
-/** Applies the normalized filter then the normalized sort, in that order. */
-export function filterAndSortProducts(
-  products: readonly Product[],
-  filter: ProductListFilter,
-  sort: ProductSort,
-): readonly Product[] {
-  return sortProducts(
-    products.filter((product) => matchesFilter(product, filter)),
-    sort,
-  );
 }
 
 /** Deterministic local product search over normalized records. */

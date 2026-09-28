@@ -7,11 +7,9 @@
  * only here. A section receives both as ordinary props, so neither seam can
  * reach into the other.
  *
- * Every read fails soft. Weaverse is a composition layer over a storefront
- * that already renders without it, so an unconfigured project, a network
- * failure, or a missing page yields `null` and the route keeps its existing
- * theme-owned rendering. Composition never turns a working page into an error
- * page.
+ * Every read fails soft: an unconfigured project, a network failure, or a
+ * missing page yields `null`, and the route answers 404. A page that exists
+ * renders exactly as authored — an empty template renders empty.
  */
 
 import "server-only";
@@ -28,7 +26,6 @@ import { createWeaverseNextServerClient } from "@weaverse/next/server";
 import { headers } from "next/headers";
 import { cache } from "react";
 import { readWeaverseConfig } from "./env";
-import { hasAuthoredSections } from "./page-payload";
 import {
   buildRequestContext,
   type SearchParams,
@@ -53,11 +50,6 @@ export interface LoadWeaversePageOptions {
    */
   pathname: string;
   searchParams?: SearchParams;
-}
-
-/** Whether this request is Studio composing the page rather than a visitor. */
-function isDesignMode(searchParams: SearchParams | undefined): boolean {
-  return String(searchParams?.isDesignMode) === "true";
 }
 
 /**
@@ -100,8 +92,8 @@ async function createServerClient(
  * Loads one Weaverse page, or `null` when composition is unavailable.
  *
  * `null` is an ordinary outcome, not an error: the project may be
- * unconfigured, the Builder may hold no page for this route yet, or the fetch
- * may have failed. Routes fall back to their theme-owned rendering.
+ * unconfigured, the Builder may hold no page for this route, or the fetch may
+ * have failed. Routes answer it with `notFound()`.
  */
 export async function loadWeaversePage({
   handle,
@@ -129,13 +121,6 @@ export async function loadWeaversePage({
     ) {
       return null;
     }
-    /* An empty payload is the project's shared default template, or a page a
-     * merchant emptied. Rendering it composes a blank route, so the route
-     * falls back to its own sections instead — except in Studio, where that
-     * empty page is exactly what the merchant is about to compose. */
-    if (!isDesignMode(searchParams) && !hasAuthoredSections(page)) {
-      return null;
-    }
     return page;
   } catch {
     return null;
@@ -143,27 +128,12 @@ export async function loadWeaversePage({
 }
 
 /**
- * Loads published-mode theme settings once per request.
- *
- * Memoized with React `cache()` so the root layout and any metadata function
- * share a single fetch per request. This adds no cross-request caching, so
- * design-mode reads — which the SDK forces to `no-store` — stay fresh.
- */
-/**
- * Builds a client for the Studio revalidation handler.
- *
- * When the handler supplies a validated request context, the loader re-runs
- * with the live page's exact route identity. Without one — an older Studio
- * bridge — fall back to a bare client so the edit still resolves rather than
- * failing outright.
+ * Builds a client for the Studio revalidation handler, re-running the loader
+ * with the live page's exact route identity.
  */
 export async function revalidateServerClient(
-  requestContext?: WeaverseNextRequestContext,
+  requestContext: WeaverseNextRequestContext,
 ): Promise<WeaverseNextServerClient | null> {
-  if (requestContext === undefined) {
-    return await createServerClient("/", undefined);
-  }
-
   const config = readWeaverseConfig(process.env);
   if (config === null) {
     return null;
@@ -185,6 +155,13 @@ export function weaverseProjectId(): string | null {
   return readWeaverseConfig(process.env)?.projectId ?? null;
 }
 
+/**
+ * Loads published-mode theme settings once per request.
+ *
+ * Memoized with React `cache()` so the root layout and any metadata function
+ * share a single fetch per request. This adds no cross-request caching, so
+ * design-mode reads — which the SDK forces to `no-store` — stay fresh.
+ */
 export const loadWeaverseThemeSettings = cache(
   async (): Promise<WeaverseNextThemeSettingsResponse | null> => {
     try {

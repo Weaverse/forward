@@ -1,9 +1,5 @@
 /** Static deterministic catalog used only when Shopify is not configured. */
 
-import {
-  CATALOG_PRESENTATION_PROFILES,
-  type CatalogPresentationProfile,
-} from "../catalog-presentation";
 import type {
   Money,
   Product,
@@ -28,14 +24,14 @@ function productImage(file: string, alt: string): StorefrontImage {
 function fixtureColorway(
   id: string,
   name: string,
-  swatchColor: string,
   filePrefix: string,
   title: string,
 ): ProductColorway {
   return {
     id,
     name,
-    swatchColor,
+    /* The store sets no native swatches, so selectors use the image. */
+    swatchColor: null,
     images: {
       primary: productImage(
         `${filePrefix}-primary.webp`,
@@ -84,6 +80,14 @@ function productVariants(
 }
 
 interface StaticProductDefinition {
+  /** Shopify `productType`, which is what `Product.category` carries. */
+  productType: string;
+  /** Shopify tags minus the ownership marker, as `Product.activities`. */
+  tags: readonly string[];
+  /** Shopify Color option values, verbatim. */
+  colors: readonly string[];
+  /** Shopify Size option values, or `null` when the product has no Size. */
+  sizes: readonly string[] | null;
   title: string;
   price: number;
   description: string;
@@ -95,6 +99,21 @@ interface StaticProductDefinition {
 
 const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
   "weatherline-shell": {
+    productType: "Outerwear",
+    tags: [
+      "alpine",
+      "breathable",
+      "field-system",
+      "hiking",
+      "layering",
+      "outerwear",
+      "shell-jacket",
+      "technical-outdoor",
+      "waterproof",
+      "windproof",
+    ],
+    colors: ["Charcoal / Moss", "Claystone / Charcoal"],
+    sizes: ["XS", "S", "M", "L", "XL"],
     title: "Weatherline Shell",
     price: 248,
     description:
@@ -113,6 +132,21 @@ const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
     imagePrefixes: ["weatherline-charcoal", "weatherline-claystone"],
   },
   "traverse-grid-fleece": {
+    productType: "Outerwear",
+    tags: [
+      "breathable",
+      "cool-weather",
+      "field-system",
+      "fleece",
+      "hiking",
+      "layering",
+      "midlayer",
+      "moisture-management",
+      "outerwear",
+      "technical-outdoor",
+    ],
+    colors: ["Moss / Charcoal", "Claystone / Bone"],
+    sizes: ["XS", "S", "M", "L", "XL"],
     title: "Traverse Grid Fleece",
     price: 148,
     description:
@@ -131,6 +165,21 @@ const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
     imagePrefixes: ["weatherline-charcoal", "weatherline-claystone"],
   },
   "drift-insulated-vest": {
+    productType: "Outerwear",
+    tags: [
+      "cold-weather",
+      "field-system",
+      "hiking",
+      "insulated-vest",
+      "layering",
+      "outerwear",
+      "packable",
+      "synthetic-insulation",
+      "technical-outdoor",
+      "wind-resistant",
+    ],
+    colors: ["Charcoal / Signal", "Dune / Moss"],
+    sizes: ["XS", "S", "M", "L", "XL"],
     title: "Drift Insulated Vest",
     price: 188,
     description:
@@ -149,6 +198,20 @@ const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
     imagePrefixes: ["weatherline-charcoal", "weatherline-claystone"],
   },
   "ridge-30-field-pack": {
+    productType: "Packs",
+    tags: [
+      "30l",
+      "backpack",
+      "day-hike",
+      "field-system",
+      "hiking",
+      "load-carry",
+      "packs",
+      "technical-outdoor",
+      "trail",
+    ],
+    colors: ["Charcoal / Moss / Tan", "Dune / Charcoal"],
+    sizes: null,
     title: "Ridge 30 Field Pack",
     price: 198,
     description:
@@ -167,6 +230,20 @@ const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
     imagePrefixes: ["ridge-charcoal", "ridge-dune"],
   },
   "approach-18-day-pack": {
+    productType: "Packs",
+    tags: [
+      "18l",
+      "backpack",
+      "daypack",
+      "field-system",
+      "hiking",
+      "lightweight",
+      "packs",
+      "scrambling",
+      "technical-outdoor",
+    ],
+    colors: ["Moss / Charcoal", "Claystone / Dune"],
+    sizes: null,
     title: "Approach 18 Day Pack",
     price: 148,
     description:
@@ -182,6 +259,20 @@ const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
     imagePrefixes: ["ridge-charcoal", "ridge-dune"],
   },
   "waypoint-sling-6": {
+    productType: "Packs",
+    tags: [
+      "6l",
+      "everyday-carry",
+      "field-system",
+      "lightweight",
+      "organization",
+      "packs",
+      "sling",
+      "technical-outdoor",
+      "travel",
+    ],
+    colors: ["Charcoal / Signal", "Dune / Moss"],
+    sizes: null,
     title: "Waypoint Sling 6",
     price: 98,
     description:
@@ -197,6 +288,20 @@ const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
     imagePrefixes: ["ridge-charcoal", "ridge-dune"],
   },
   "talus-trail-shoe": {
+    productType: "Footwear",
+    tags: [
+      "all-terrain",
+      "cushioned",
+      "field-system",
+      "footwear",
+      "grip",
+      "hiking",
+      "technical-outdoor",
+      "trail",
+      "trail-shoe",
+    ],
+    colors: ["Charcoal / Moss / Gum", "Limestone / Clay / Moss"],
+    sizes: ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12", "US 13"],
     title: "Talus Trail Shoe",
     price: 168,
     description:
@@ -215,6 +320,20 @@ const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
     imagePrefixes: ["talus-charcoal", "talus-limestone"],
   },
   "scree-approach-shoe": {
+    productType: "Footwear",
+    tags: [
+      "approach-shoe",
+      "field-system",
+      "footwear",
+      "grip",
+      "hiking",
+      "rubber-rand",
+      "scrambling",
+      "technical-outdoor",
+      "technical-terrain",
+    ],
+    colors: ["Charcoal / Gum", "Limestone / Moss"],
+    sizes: ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12", "US 13"],
     title: "Scree Approach Shoe",
     price: 158,
     description:
@@ -233,6 +352,20 @@ const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
     imagePrefixes: ["talus-charcoal", "talus-limestone"],
   },
   "camp-recovery-clog": {
+    productType: "Footwear",
+    tags: [
+      "camp",
+      "comfort",
+      "cushioned",
+      "field-system",
+      "footwear",
+      "recovery",
+      "slip-on",
+      "technical-outdoor",
+      "weather-tolerant",
+    ],
+    colors: ["Charcoal / Moss", "Dune / Claystone"],
+    sizes: ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12", "US 13"],
     title: "Camp Recovery Clog",
     price: 118,
     description:
@@ -249,56 +382,76 @@ const DEFINITIONS: Readonly<Record<string, StaticProductDefinition>> = {
   },
 };
 
-function buildProduct(profile: CatalogPresentationProfile): Product {
-  const definition = DEFINITIONS[profile.handle];
-  if (definition === undefined) {
-    throw new Error(`Missing static product definition for ${profile.handle}.`);
+/** The same derivation the Shopify mapper runs, over the same shapes. */
+function colorwayId(label: string): string {
+  const slug = label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug.length > 0 ? slug : "default";
+}
+
+function buildProduct(
+  handle: string,
+  definition: StaticProductDefinition,
+): Product {
+  if (definition.colors.length !== definition.imagePrefixes.length) {
+    throw new Error(`Static colorway images do not match ${handle}.`);
   }
-  const colorEntries = Object.entries(profile.colorways);
-  if (colorEntries.length !== definition.imagePrefixes.length) {
-    throw new Error(`Static colorway images do not match ${profile.handle}.`);
-  }
-  const colorways = colorEntries.map(([name, presentation], index) => {
-    const prefix = definition.imagePrefixes[index];
-    if (prefix === undefined) {
-      throw new Error(`Missing static image prefix for ${profile.handle}.`);
-    }
-    return fixtureColorway(
-      presentation.id,
+  const colorways = definition.colors.map((name, index) =>
+    fixtureColorway(
+      colorwayId(name),
       name,
-      presentation.swatchColor,
-      prefix,
+      definition.imagePrefixes[index] as string,
       definition.title,
-    );
-  });
+    ),
+  );
   const options: readonly ProductOption[] =
-    profile.optionValues === undefined
+    definition.sizes === null
       ? []
-      : [{ name: "Size", values: profile.optionValues }];
+      : [{ name: "Size", values: definition.sizes }];
   const price: Money = { amount: definition.price, currencyCode: "USD" };
   return {
-    handle: profile.handle,
+    handle,
     title: definition.title,
-    subtitle: profile.subtitle,
-    category: profile.category,
-    activities: profile.activities,
+    /* The live mapper uses the store's first `forward.highlights` line; the
+     * deterministic catalog has no metafields, so it uses the first sentence
+     * of the same description the store publishes. */
+    subtitle: definition.description.split(/(?<=\.)\s/)[0] ?? "",
+    category: definition.productType,
+    activities: definition.tags,
     price,
     description: definition.description,
     detailParagraphs: [definition.description, definition.materials],
     specs: definition.specs,
     care: definition.care,
-    repair: profile.repair,
+    repair: "",
     colorways,
     options,
     variants: productVariants(
-      profile.handle,
+      handle,
       colorways.map((entry) => entry.id),
       options,
       price,
     ),
-    relatedHandles: profile.relatedHandles,
+    relatedHandles: [],
   };
 }
 
-export const PRODUCT_FIXTURES: readonly Product[] =
-  CATALOG_PRESENTATION_PROFILES.map(buildProduct);
+const BUILT: readonly Product[] = Object.entries(DEFINITIONS).map(
+  ([handle, definition]) => buildProduct(handle, definition),
+);
+
+/**
+ * Related products are the other items sharing a product type — the same rule
+ * the Shopify mapper applies, so static and live modes cannot diverge.
+ */
+export const PRODUCT_FIXTURES: readonly Product[] = BUILT.map((product) => ({
+  ...product,
+  relatedHandles: BUILT.filter(
+    (entry) =>
+      entry.handle !== product.handle && entry.category === product.category,
+  )
+    .map((entry) => entry.handle)
+    .slice(0, 4),
+}));

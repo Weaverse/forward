@@ -55,6 +55,16 @@ export const NAVIGATION_QUERY = gql(`
       nodes {
         handle
         title
+        description
+        image {
+          url
+          width
+          height
+          altText
+        }
+        fieldCode: metafield(namespace: "forward", key: "field_code") {
+          value
+        }
         products(first: $collectionProductFirst) {
           pageInfo {
             hasNextPage

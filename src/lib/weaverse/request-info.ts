@@ -7,6 +7,7 @@ export type WeaversePageType =
   | "INDEX"
   | "PRODUCT"
   | "COLLECTION"
+  | "ALL_PRODUCTS"
   | "ARTICLE"
   | "PAGE"
   | "CUSTOM";

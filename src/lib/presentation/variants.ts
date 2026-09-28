@@ -148,3 +148,11 @@ export const blockSpacing = cva("", {
     },
   },
 });
+
+/** The bottom rhythm of a catalog browse block (`main-collection`, `all-products`). */
+export const browseShell = cva("w-full", {
+  variants: {
+    spacing: { compact: "pb-14", standard: "pb-25", roomy: "pb-37.5" },
+  },
+  defaultVariants: { spacing: "standard" },
+});

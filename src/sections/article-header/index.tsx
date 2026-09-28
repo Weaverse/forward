@@ -36,15 +36,17 @@ function ArticleHeader({
       className="mx-3 mt-5.5 grid min-h-0 grid-cols-1 items-stretch bg-ink text-text-inverse md:mx-7 md:min-h-article-min md:grid-cols-page-header"
     >
       <div className="relative min-h-route-media-min min-w-0 overflow-hidden md:min-h-auto">
-        <Image
-          className="absolute inset-0 h-full object-cover object-center saturate-76"
-          src={article.heroImage.src}
-          alt={article.heroImage.alt}
-          width={article.heroImage.width}
-          height={article.heroImage.height}
-          sizes="(min-width: 820px) 66vw, 100vw"
-          priority
-        />
+        {article.heroImage === null ? null : (
+          <Image
+            className="absolute inset-0 h-full object-cover object-center saturate-76"
+            src={article.heroImage.src}
+            alt={article.heroImage.alt}
+            width={article.heroImage.width}
+            height={article.heroImage.height}
+            sizes="(min-width: 820px) 66vw, 100vw"
+            priority
+          />
+        )}
       </div>
       <div className="relative z-2 flex flex-col justify-center bg-ink px-page-gutter pt-12 pb-14.5 md:p-panel">
         <p className={eyebrow({ tone: "warm" })}>
@@ -56,7 +58,7 @@ function ArticleHeader({
         </h1>
         <div className="mt-7 flex flex-wrap gap-6 text-ui font-bold tracking-button uppercase">
           <span>{formatDate(article.publishedAt)}</span>
-          <span>{article.location}</span>
+          {article.location === "" ? null : <span>{article.location}</span>}
           <span>{article.readingMinutes} minute read</span>
         </div>
       </div>

@@ -13,6 +13,7 @@ import {
   createHeaderNavigationHref,
   currentCollectionIndex,
   type FieldIndexCollection,
+  findShopItem,
   isActive,
 } from "./header-navigation";
 import { HEADER_CONTROL_CLASS } from "./header-styles";
@@ -98,7 +99,7 @@ export function MobileMenu({
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const links = [
     ...primary
-      .filter((item) => item.href !== "/shop" || collections === null)
+      .filter((item) => collections === null || item !== findShopItem(primary))
       .flatMap((item) => [
         { item, child: false },
         ...(item.children ?? []).map((child) => ({ item: child, child: true })),

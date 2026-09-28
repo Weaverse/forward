@@ -61,7 +61,7 @@ describe("route-aware header query ownership", () => {
         "/shop",
         "category=outerwear&activity=alpine&sort=name",
       ),
-      "/shop?category=outerwear&activity=alpine&sort=name",
+      "/shop?sort=name",
     );
     assert.equal(
       createHeaderNavigationHref(

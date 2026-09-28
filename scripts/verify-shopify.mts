@@ -20,17 +20,8 @@ import {
   createShopifyRequestContext,
   createStorefrontClient,
 } from "@shopify/hydrogen";
-import {
-  CANONICAL_PRODUCT_HANDLES,
-  getCatalogPresentationProfile,
-} from "../src/lib/storefront/catalog-presentation.ts";
 import { createStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
 import { isShopifyProductImageUrl } from "../src/lib/storefront/image-source.ts";
-import {
-  CONTENT_ARTICLE_HANDLES,
-  CONTENT_PAGE_HANDLES,
-  CONTENT_POLICY_HANDLES,
-} from "../src/lib/storefront/shopify/content-query.ts";
 import { readShopifyCatalogConfig } from "../src/lib/storefront/shopify/env.ts";
 import { safeErrorLabel } from "../src/lib/storefront/shopify/errors.ts";
 import { SHOP_IDENTITY_QUERY } from "../src/lib/storefront/shopify/queries.ts";
@@ -50,7 +41,7 @@ const CANONICAL_COLLECTION_HANDLES = [
 const CANONICAL_VARIANT_COUNT = 78;
 
 const CANONICAL_SHOP_LINKS = [
-  "/shop",
+  "/shop/forward",
   "/shop/outerwear",
   "/shop/packs",
   "/shop/footwear",
@@ -69,7 +60,7 @@ const CANONICAL_FOOTER_COLUMNS = [
   {
     heading: "Shop",
     links: [
-      { href: "/shop", label: "All products" },
+      { href: "/shop/forward", label: "All products" },
       { href: "/shop/outerwear", label: "Outerwear" },
       { href: "/shop/packs", label: "Packs" },
       { href: "/shop/footwear", label: "Footwear" },
@@ -94,6 +85,33 @@ const CANONICAL_FOOTER_COLUMNS = [
       { href: "/policies/terms-of-service", label: "Terms" },
     ],
   },
+] as const;
+
+/** The Forward demo store's published content; the theme reads any store's. */
+const CANONICAL_PAGE_HANDLES = [
+  "about-forward",
+  "field-repair",
+  "shipping-returns",
+  "contact",
+  "materials-and-care",
+  "fit-and-sizing",
+  "field-testing",
+] as const;
+
+const CANONICAL_ARTICLE_HANDLES = [
+  "layering-for-moving-weather",
+  "packing-thirty-liters-for-a-long-day",
+  "reading-the-trail-underfoot",
+  "how-we-test-a-shell-before-calling-it-weatherproof",
+  "a-two-day-kit-built-around-nine-kilograms",
+  "repair-notes-what-five-years-of-use-should-look-like",
+] as const;
+
+const CANONICAL_POLICY_HANDLES = [
+  "privacy-policy",
+  "refund-policy",
+  "shipping-policy",
+  "terms-of-service",
 ] as const;
 
 const MEDIA_ROLES = ["primary", "alternate", "detail", "context"] as const;
@@ -201,47 +219,31 @@ await probeShopIdentity(
 try {
   // This CLI runs outside the Next runtime. Exercise the exact Hydrogen
   // transport/mapping seam while leaving the production default Data Cache on.
-  let collectionFallbackUsed = false;
-  let footerFallbackUsed = false;
-  let navigationFallbackUsed = false;
   const config = readShopifyCatalogConfig(process.env);
   if (config === null) {
     throw new Error("Shopify catalog mode is not configured.");
   }
   const storefront = createStorefrontDataSource(process.env, {
     useNextCache: false,
-    onCollectionFallback: () => {
-      collectionFallbackUsed = true;
-    },
-    onFooterFallback: () => {
-      footerFallbackUsed = true;
-    },
-    onNavigationFallback: () => {
-      navigationFallbackUsed = true;
-    },
   });
   const navigation = await storefront.getNavigation();
-  const shop = navigation.primary.find((item) => item.href === "/shop");
+  const shop = navigation.primary.find((item) => item.href === "/shop/forward");
   const about = navigation.primary.find(
     (item) => item.href === "/pages/about-forward",
   );
   check(
     "live main-menu has the canonical two-level tree",
-    !navigationFallbackUsed &&
-      navigation.primary.map((item) => item.href).join(",") ===
-        "/shop,/journal,/pages/about-forward,/search" &&
+    navigation.primary.map((item) => item.href).join(",") ===
+      "/shop/forward,/journal,/pages/about-forward,/search" &&
       shop?.children?.map((item) => item.href).join(",") ===
         CANONICAL_SHOP_LINKS.join(",") &&
       about?.children?.map((item) => item.href).join(",") ===
         CANONICAL_ABOUT_LINKS.join(","),
-    navigationFallbackUsed
-      ? "static safeguard active"
-      : `${shop?.children?.length ?? 0} Shop children, ${about?.children?.length ?? 0} About children`,
+    `${shop?.children?.length ?? 0} Shop children, ${about?.children?.length ?? 0} About children`,
   );
   check(
     "live footer has the canonical three-column tree",
-    !footerFallbackUsed &&
-      navigation.footerColumns.length === CANONICAL_FOOTER_COLUMNS.length &&
+    navigation.footerColumns.length === CANONICAL_FOOTER_COLUMNS.length &&
       navigation.footerColumns.every(
         (column, columnIndex) =>
           column.heading === CANONICAL_FOOTER_COLUMNS[columnIndex]?.heading &&
@@ -255,56 +257,20 @@ try {
                 CANONICAL_FOOTER_COLUMNS[columnIndex]?.links[linkIndex]?.label,
           ),
       ),
-    footerFallbackUsed
-      ? "static safeguard active"
-      : `${navigation.footerColumns.length} live Footer columns`,
+    `${navigation.footerColumns.length} live Footer columns`,
   );
 
   const products = await storefront.listProducts();
 
   check(
-    "adapter returns the canonical catalog in order",
-    products.length === CANONICAL_PRODUCT_HANDLES.length &&
-      products.every(
-        (product, index) => product.handle === CANONICAL_PRODUCT_HANDLES[index],
-      ),
+    "adapter returns a non-empty catalog with unique handles",
+    products.length > 0 &&
+      new Set(products.map((product) => product.handle)).size ===
+        products.length,
     products.map((product) => product.handle).join(", "),
   );
 
   for (const product of products) {
-    const profile = getCatalogPresentationProfile(product.handle);
-    const expectedOptionValues = profile?.optionValues;
-    const optionsMatch =
-      expectedOptionValues === undefined
-        ? product.options.length === 0
-        : product.options.length === 1 &&
-          product.options[0]?.name === "Size" &&
-          JSON.stringify(product.options[0].values) ===
-            JSON.stringify(expectedOptionValues);
-    const optionSelections =
-      expectedOptionValues === undefined
-        ? [[]]
-        : expectedOptionValues.map((value) => [{ name: "Size", value }]);
-    const expectedVariants =
-      profile === null
-        ? []
-        : Object.values(profile.colorways).flatMap((colorway) =>
-            optionSelections.map((selectedOptions) => ({
-              colorwayId: colorway.id,
-              selectedOptions,
-            })),
-          );
-    const variantsMatchOrder =
-      product.variants.length === expectedVariants.length &&
-      product.variants.every((variant, index) => {
-        const expected = expectedVariants[index];
-        return (
-          expected !== undefined &&
-          variant.colorwayId === expected.colorwayId &&
-          JSON.stringify(variant.selectedOptions) ===
-            JSON.stringify(expected.selectedOptions)
-        );
-      });
     check(
       `${product.handle} money`,
       product.price.currencyCode === "USD" &&
@@ -314,26 +280,35 @@ try {
     );
 
     check(
-      `${product.handle} options`,
-      profile !== null && optionsMatch,
+      `${product.handle} presentation from the store`,
+      product.category.length > 0 && product.activities.length > 0,
+      `type "${product.category}", ${product.activities.length} tags`,
+    );
+
+    /* Every published Color value must resolve to exactly one colorway, and
+     * every variant must point at one of them. */
+    const colorwayIds = new Set(product.colorways.map((entry) => entry.id));
+    check(
+      `${product.handle} colorways`,
+      colorwayIds.size === product.colorways.length &&
+        product.variants.every((variant) =>
+          colorwayIds.has(variant.colorwayId),
+        ),
+      product.colorways.map((entry) => entry.name).join(", "),
+    );
+
+    const optionValueCount = product.options.reduce(
+      (total, option) => total * option.values.length,
+      1,
+    );
+    check(
+      `${product.handle} variant matrix`,
+      product.variants.length === product.colorways.length * optionValueCount,
       product.options.length === 0
         ? "no non-Color options"
         : product.options
             .map((option) => `${option.name} x${option.values.length}`)
             .join(", "),
-    );
-    check(
-      `${product.handle} variant order`,
-      profile !== null && variantsMatchOrder,
-      `${product.variants.length} canonical combinations in order`,
-    );
-
-    const colorwayIds = product.colorways.map((colorway) => colorway.id);
-    check(
-      `${product.handle} colorways`,
-      new Set(colorwayIds).size === colorwayIds.length &&
-        colorwayIds.length > 0,
-      colorwayIds.join(", "),
     );
 
     const mediaOk = product.colorways.every((colorway) =>
@@ -375,12 +350,9 @@ try {
   );
 
   const collections = await storefront.listCollections();
-  const canonicalCollectionsInOrder =
-    collections.length === CANONICAL_COLLECTION_HANDLES.length &&
-    collections.every(
-      (collection, index) =>
-        collection.handle === CANONICAL_COLLECTION_HANDLES[index],
-    );
+  const publishedHandles = new Set(
+    collections.map((collection) => collection.handle),
+  );
 
   for (const handle of CANONICAL_COLLECTION_HANDLES) {
     const collectionProducts = await storefront.getCollectionProducts(handle);
@@ -394,16 +366,16 @@ try {
   check(
     "unknown handles resolve to null",
     (await storefront.getProduct("__forward-missing__")) === null &&
-      (await storefront.getCollectionProducts("frontpage")) === null,
+      (await storefront.getCollectionProducts("__forward-missing__")) === null,
     "no invented catalog records",
   );
 
   check(
-    "canonical collection reads stayed live and in contract order",
-    !collectionFallbackUsed && canonicalCollectionsInOrder,
-    collectionFallbackUsed
-      ? "static safeguard active"
-      : collections.map((collection) => collection.handle).join(", "),
+    "every canonical collection is published",
+    CANONICAL_COLLECTION_HANDLES.every((handle) =>
+      publishedHandles.has(handle),
+    ),
+    collections.map((collection) => collection.handle).join(", "),
   );
 
   const emptySearch = await storefront.searchProducts("   ");
@@ -417,18 +389,16 @@ try {
   const pages = await storefront.listPages();
   const articles = await storefront.listArticles();
 
+  const pageHandles = new Set(pages.map((page) => page.handle));
+  const articleHandles = new Set(articles.map((article) => article.handle));
   check(
-    "approved live page handles",
-    pages.length === CONTENT_PAGE_HANDLES.length &&
-      pages.every((page, index) => page.handle === CONTENT_PAGE_HANDLES[index]),
+    "every canonical page is published",
+    CANONICAL_PAGE_HANDLES.every((handle) => pageHandles.has(handle)),
     pages.map((page) => `${page.handle}:${page.title}`).join(", "),
   );
   check(
-    "approved live article handles",
-    articles.length === CONTENT_ARTICLE_HANDLES.length &&
-      articles.every(
-        (article, index) => article.handle === CONTENT_ARTICLE_HANDLES[index],
-      ),
+    "every canonical article is published",
+    CANONICAL_ARTICLE_HANDLES.every((handle) => articleHandles.has(handle)),
     articles.map((article) => `${article.handle}:${article.title}`).join(", "),
   );
   check(
@@ -439,11 +409,10 @@ try {
 
   const policies = await storefront.listPolicies();
   check(
-    "approved live policy handles",
-    policies.length === CONTENT_POLICY_HANDLES.length &&
-      policies.every(
-        (policy, index) => policy.handle === CONTENT_POLICY_HANDLES[index],
-      ),
+    "every canonical policy is published",
+    CANONICAL_POLICY_HANDLES.every((handle) =>
+      policies.some((policy) => policy.handle === handle),
+    ),
     policies.map((policy) => `${policy.handle}:${policy.title}`).join(", "),
   );
   check(

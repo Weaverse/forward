@@ -15,16 +15,30 @@ import {
   createShopifyRequestContext,
   createStorefrontClient,
 } from "@shopify/hydrogen";
+import type {
+  ProductCollectionSortKeys,
+  ProductFilter,
+  ProductSortKeys,
+} from "@shopify/hydrogen/storefront-api-types";
 import { unstable_cache } from "next/cache";
-
 import {
+  ALL_PRODUCTS_CACHE_KEY,
   CATALOG_CACHE_KEY,
   CATALOG_REVALIDATE_SECONDS,
+  COLLECTION_CACHE_KEY,
   NAVIGATION_CACHE_KEY,
 } from "./cache-policy";
+import {
+  ALL_PRODUCTS_QUERY,
+  COLLECTION_PRODUCTS_QUERY,
+} from "./collection-query";
 import type { ShopifyCatalogConfig } from "./env";
 import { ShopifyCatalogError, safeErrorLabel } from "./errors";
-import { mapCatalogResult } from "./mapper";
+import {
+  mapAllProductsResult,
+  mapCatalogResult,
+  mapCollectionProductsResult,
+} from "./mapper";
 import {
   FOOTER_MENU_HANDLE,
   NAVIGATION_COLLECTION_LIMIT,
@@ -49,6 +63,32 @@ export interface CatalogQueryResult {
 }
 
 export type CatalogQueryExecutor = () => Promise<CatalogQueryResult>;
+
+/** What a route asked Shopify for: facets, order, and a cursor. */
+export interface CollectionQueryVariables {
+  handle: string;
+  /** Shopify's own `ProductFilter` objects, round-tripped through the URL. */
+  filters: readonly unknown[];
+  sortKey: ProductCollectionSortKeys;
+  reverse: boolean;
+  first?: number;
+  last?: number;
+  startCursor?: string;
+  endCursor?: string;
+}
+
+export type CollectionQueryExecutor = (
+  variables: CollectionQueryVariables,
+) => Promise<CatalogQueryResult>;
+
+export type AllProductsQueryExecutor = (
+  variables: Omit<
+    CollectionQueryVariables,
+    "handle" | "sortKey" | "filters"
+  > & {
+    sortKey: ProductSortKeys;
+  },
+) => Promise<CatalogQueryResult>;
 
 export interface NavigationQueryResult {
   data?: unknown;
@@ -249,4 +289,132 @@ export function createNavigationQueryExecutor(
     { revalidate: CATALOG_REVALIDATE_SECONDS },
   );
   return () => recoverPartialNavigationResult(cachedExecute);
+}
+
+type StorefrontReadClient = ReturnType<typeof createStorefrontReadClient>;
+
+/** The paging variables every paged read passes through unchanged. */
+function pagingVariables(variables: {
+  first?: number;
+  last?: number;
+  startCursor?: string;
+  endCursor?: string;
+}) {
+  return {
+    first: variables.first ?? null,
+    last: variables.last ?? null,
+    startCursor: variables.startCursor ?? null,
+    endCursor: variables.endCursor ?? null,
+    variantFirst: CATALOG_VARIANT_LIMIT,
+    mediaFirst: CATALOG_MEDIA_LIMIT,
+  };
+}
+
+/**
+ * A read that pages through products on the shopper's own state.
+ *
+ * Unlike the catalog read, the response depends on that state, so the cache
+ * key carries the variables; a page is still shared by every visitor who asked
+ * for that exact page. As with the catalog read, the response is validated
+ * before it can resolve into a persistent cache entry.
+ */
+function createPagedExecutor<Variables>(
+  config: ShopifyCatalogConfig,
+  options: CatalogQueryExecutorOptions,
+  label: string,
+  cacheKey: string,
+  read: (
+    client: StorefrontReadClient,
+    variables: Variables,
+  ) => Promise<{ data?: unknown; errors?: unknown }>,
+  validate: (result: CatalogQueryResult) => unknown,
+): (variables: Variables) => Promise<CatalogQueryResult> {
+  const client = createStorefrontReadClient(config);
+
+  async function execute(variables: Variables): Promise<CatalogQueryResult> {
+    try {
+      const { data, errors } = await read(client, variables);
+      const graphQLErrors = readGraphQLErrors(errors, "catalog");
+      if (graphQLErrors.length > 0) {
+        throw new ShopifyCatalogError(
+          `Storefront API ${label} response contained ${graphQLErrors.length} error(s).`,
+        );
+      }
+      if (data == null) {
+        throw new ShopifyCatalogError(
+          `Storefront API ${label} response did not contain data.`,
+        );
+      }
+      const result = { data };
+      validate(result);
+      return result;
+    } catch (error) {
+      if (error instanceof ShopifyCatalogError) {
+        throw error;
+      }
+      throw new ShopifyCatalogError(
+        `Storefront API ${label} request failed (${safeErrorLabel(error)}).`,
+      );
+    }
+  }
+
+  if (options.useNextCache === false) {
+    return execute;
+  }
+  return (variables) =>
+    unstable_cache(
+      () => execute(variables),
+      [cacheKey, config.storeDomain, JSON.stringify(variables)],
+      { revalidate: CATALOG_REVALIDATE_SECONDS },
+    )();
+}
+
+/** Builds the per-collection page executor: facets, order and a cursor. */
+export function createCollectionQueryExecutor(
+  config: ShopifyCatalogConfig,
+  options: CatalogQueryExecutorOptions = {},
+): CollectionQueryExecutor {
+  return createPagedExecutor(
+    config,
+    options,
+    "collection",
+    COLLECTION_CACHE_KEY,
+    (client, variables: CollectionQueryVariables) =>
+      client.graphql(COLLECTION_PRODUCTS_QUERY, {
+        variables: {
+          handle: variables.handle,
+          /* Opaque by design: these came from Shopify's own `input` and go
+           * back unchanged, so the theme never has to know a filter's
+           * shape to support it. */
+          filters: [...variables.filters] as ProductFilter[],
+          sortKey: variables.sortKey,
+          reverse: variables.reverse,
+          ...pagingVariables(variables),
+        },
+      }),
+    mapCollectionProductsResult,
+  );
+}
+
+/** Builds the all-products page executor; the catalog read, but paged. */
+export function createAllProductsQueryExecutor(
+  config: ShopifyCatalogConfig,
+  options: CatalogQueryExecutorOptions = {},
+): AllProductsQueryExecutor {
+  return createPagedExecutor(
+    config,
+    options,
+    "products",
+    ALL_PRODUCTS_CACHE_KEY,
+    (client, variables: Parameters<AllProductsQueryExecutor>[0]) =>
+      client.graphql(ALL_PRODUCTS_QUERY, {
+        variables: {
+          query: CATALOG_PRODUCT_FILTER,
+          sortKey: variables.sortKey,
+          reverse: variables.reverse,
+          ...pagingVariables(variables),
+        },
+      }),
+    mapAllProductsResult,
+  );
 }

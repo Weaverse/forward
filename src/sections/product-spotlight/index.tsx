@@ -18,6 +18,7 @@ import {
 import { formatMoney } from "@/lib/storefront/format";
 import {
   colorwayIsSoldOut,
+  colorwaySwatchStyle,
   findExactVariant,
   galleryImages,
   productSelectionHref,
@@ -234,7 +235,7 @@ function SpotlightProduct({
                   <span
                     aria-hidden="true"
                     className="size-3 border border-black/25"
-                    style={{ backgroundColor: entry.swatchColor }}
+                    style={colorwaySwatchStyle(entry)}
                   />
                   {entry.name}
                 </button>

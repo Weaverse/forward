@@ -25,7 +25,10 @@ export async function generateMetadata({
   if (policy === null) {
     return { title: "Policy not found" };
   }
-  return { title: policy.title, description: policy.summary };
+  return {
+    title: policy.title,
+    ...(policy.summary === "" ? {} : { description: policy.summary }),
+  };
 }
 
 export default async function PolicyPage({ params }: PolicyPageProps) {

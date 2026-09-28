@@ -71,7 +71,8 @@ test.describe("premium presentation behavior", () => {
     const plpCards = page
       .getByRole("region", { name: "Products" })
       .getByRole("article");
-    expect(await plpCards.count()).toBe(9);
+    /* One page, not the whole catalog: paging is the store's cursor. */
+    expect(await plpCards.count()).toBeGreaterThan(2);
     const firstPlp = await boxOf(plpCards.nth(0));
     const secondPlp = await boxOf(plpCards.nth(1));
     expect(Math.abs(firstPlp.width - secondPlp.width)).toBeLessThan(2);
@@ -131,16 +132,13 @@ test.describe("premium presentation behavior", () => {
     }
 
     await gotoReady(page, "/shop");
-    const pageHero = page
-      .getByRole("heading", { name: "Field goods for moving outside." })
-      .locator("../..");
-    const lead = await boxOf(pageHero.locator(":scope > div"));
-    const lede = await boxOf(pageHero.locator(":scope > p"));
-    if ((viewport?.width ?? 0) > 820) {
-      expect(lead.x).toBeLessThan(lede.x);
-    } else {
-      expect(lead.y).toBeLessThan(lede.y);
-    }
+    const shopHeading = await boxOf(
+      page.getByRole("heading", { level: 1, name: "All products" }),
+    );
+    const shopGrid = await boxOf(
+      page.getByRole("region", { name: "Products" }),
+    );
+    expect(shopHeading.y).toBeLessThan(shopGrid.y);
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBeLessThanOrEqual(viewport?.width ?? Number.POSITIVE_INFINITY);
@@ -153,9 +151,10 @@ test.describe("premium presentation behavior", () => {
     await expect(page.getByRole("heading", { name: "Products" })).toHaveCount(
       1,
     );
+    /* Cursor paging means the toolbar counts this page, not the catalog. */
     await expect(
       page.locator('main [aria-live="polite"]').first(),
-    ).toContainText("9 products");
+    ).toContainText(/\d+ products/);
     await expect(
       page.getByText(/No matching plates|full catalog is three/i),
     ).toHaveCount(0);
@@ -174,37 +173,33 @@ test.describe("premium presentation behavior", () => {
   test("preserves catalog query state and responsive filter ownership", async ({
     page,
   }) => {
-    await gotoReady(
-      page,
-      "/shop?category=packs&activity=trail&sort=price-desc",
-    );
+    /* Facets are the store's, so the assertions are about the contract — a
+     * facet param round-trips, an applied value is marked, and the order
+     * control carries everything it does not own — never about a particular
+     * facet the theme decided to have. */
+    await gotoReady(page, "/shop/outerwear?sort=price-desc");
 
-    const sortForm = page.locator('form[action="/shop"]');
+    const sortForm = page.locator('form[action="/shop/outerwear"]').first();
     await expect(sortForm).toHaveAttribute("method", "get");
-    await expect(sortForm.locator('input[name="category"]')).toHaveValue(
-      "packs",
-    );
-    await expect(sortForm.locator('input[name="activity"]')).toHaveValue(
-      "trail",
-    );
     await expect(page.getByLabel("Sort")).toHaveValue("price-desc");
 
-    for (const name of [/^packs$/i, /^trail$/i]) {
-      const selected = page.locator("main a").filter({ hasText: name });
-      await expect(selected).toHaveCount(2);
-      for (let index = 0; index < 2; index += 1) {
-        await expect(selected.nth(index)).toHaveAttribute(
-          "aria-current",
-          "page",
-        );
-      }
-    }
+    const facetLinks = page.locator('main a[href*="filter."]');
+    const facetCount = await facetLinks.count();
+    expect(facetCount).toBeGreaterThan(0);
+
+    const href = await facetLinks.first().getAttribute("href");
+    expect(href).toContain("sort=price-desc");
+    await facetLinks.first().click();
+    await expect(page).toHaveURL(/filter\./);
+    await expect(page).toHaveURL(/sort=price-desc/);
     await expect(
-      page
-        .locator("main a")
-        .filter({ hasText: /^All categories$/ })
-        .first(),
-    ).not.toHaveAttribute("aria-current", "page");
+      page.locator('main a[aria-current="true"]').first(),
+    ).toBeVisible();
+
+    /* Clearing is reachable once something is applied. */
+    await expect(
+      page.getByRole("link", { name: "Clear filters" }).first(),
+    ).toBeVisible();
 
     const tools = sortForm.locator("..");
     expect(
@@ -213,9 +208,7 @@ test.describe("premium presentation behavior", () => {
 
     if ((page.viewportSize()?.width ?? 0) <= 820) {
       await page.getByText("Filters", { exact: true }).click();
-      await expect(
-        page.getByRole("link", { name: /^packs$/i }).last(),
-      ).toBeVisible();
+      await expect(facetLinks.last()).toBeVisible();
     }
 
     expect(

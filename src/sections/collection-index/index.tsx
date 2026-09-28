@@ -38,14 +38,16 @@ function CollectionIndex({
             href={`/shop/${collection.handle}`}
             key={collection.handle}
           >
-            <Image
-              className="h-full object-cover saturate-72 transition-transform duration-500 ease-standard group-hover:scale-102.5"
-              src={collection.heroImage.src}
-              alt={collection.heroImage.alt}
-              width={collection.heroImage.width}
-              height={collection.heroImage.height}
-              sizes="(min-width: 820px) 34vw, 100vw"
-            />
+            {collection.heroImage === null ? null : (
+              <Image
+                className="h-full object-cover saturate-72 transition-transform duration-500 ease-standard group-hover:scale-102.5"
+                src={collection.heroImage.src}
+                alt={collection.heroImage.alt}
+                width={collection.heroImage.width}
+                height={collection.heroImage.height}
+                sizes="(min-width: 820px) 34vw, 100vw"
+              />
+            )}
             <div className="absolute right-0 bottom-0 left-0 z-1 p-8.5">
               <span className={eyebrow({ tone: "warm" })}>
                 {collection.fieldCode}

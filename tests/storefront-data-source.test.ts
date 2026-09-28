@@ -1,12 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-
-import { CANONICAL_PRODUCT_HANDLES } from "../src/lib/storefront/catalog-presentation.ts";
 import { StaticStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
-import {
-  CONTENT_ARTICLE_HANDLES,
-  CONTENT_PAGE_HANDLES,
-} from "../src/lib/storefront/shopify/content-query.ts";
+import { PRODUCT_FIXTURES } from "../src/lib/storefront/fixtures/products.ts";
 
 const storefront = new StaticStorefrontDataSource();
 
@@ -36,7 +31,7 @@ describe("StaticStorefrontDataSource known handles", () => {
     const products = await storefront.listProducts();
     assert.deepEqual(
       products.map((product) => product.handle),
-      [...CANONICAL_PRODUCT_HANDLES],
+      PRODUCT_FIXTURES.map((product) => product.handle),
     );
     for (const product of products) {
       const found = await storefront.getProduct(product.handle);
@@ -62,11 +57,26 @@ describe("StaticStorefrontDataSource known handles", () => {
     ]);
     assert.deepEqual(
       (await storefront.listPages()).map((page) => page.handle),
-      [...CONTENT_PAGE_HANDLES],
+      [
+        "about-forward",
+        "field-repair",
+        "shipping-returns",
+        "contact",
+        "materials-and-care",
+        "fit-and-sizing",
+        "field-testing",
+      ],
     );
     assert.deepEqual(
       (await storefront.listArticles()).map((article) => article.handle),
-      [...CONTENT_ARTICLE_HANDLES],
+      [
+        "layering-for-moving-weather",
+        "packing-thirty-liters-for-a-long-day",
+        "reading-the-trail-underfoot",
+        "how-we-test-a-shell-before-calling-it-weatherproof",
+        "a-two-day-kit-built-around-nine-kilograms",
+        "repair-notes-what-five-years-of-use-should-look-like",
+      ],
     );
   });
 

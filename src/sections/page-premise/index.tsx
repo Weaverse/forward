@@ -28,9 +28,9 @@ function PagePremise({ eyebrowLabel, ...rest }: PagePremiseProps) {
       <div className="grid grid-cols-1 items-start gap-page-gap md:grid-cols-split-85">
         <div>
           <p className={eyebrow()}>{eyebrowLabel}</p>
-          {premise !== undefined ? (
+          {premise === undefined || premise.heading === "" ? null : (
             <h2 className={sectionHeading()}>{premise.heading}</h2>
-          ) : null}
+          )}
         </div>
         <div>
           <p className="max-w-lede text-lede leading-lede text-text-muted">

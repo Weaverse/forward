@@ -10,19 +10,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import {
-  CANONICAL_PRODUCT_HANDLES,
-  CATALOG_PRESENTATION_PROFILES,
-} from "../src/lib/storefront/catalog-presentation.ts";
+import { PRODUCT_FIXTURES } from "../src/lib/storefront/fixtures/products.ts";
 
 describe("concise Home merchandising copy", () => {
-  it("keys one short sentence to every canonical product handle", () => {
-    const handles = CATALOG_PRESENTATION_PROFILES.map(
-      (profile) => profile.handle,
-    );
-
-    assert.deepEqual(handles, [...CANONICAL_PRODUCT_HANDLES]);
-    for (const profile of CATALOG_PRESENTATION_PROFILES) {
+  it("keys one short sentence to every product the store returns", () => {
+    assert.ok(PRODUCT_FIXTURES.length > 0);
+    for (const profile of PRODUCT_FIXTURES) {
       const { subtitle } = profile;
       assert.ok(
         subtitle.length > 0 && subtitle.length <= 90,
