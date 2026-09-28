@@ -181,15 +181,6 @@ export interface SiteNavigation {
   footerColumns: readonly FooterColumn[];
 }
 
-export interface ThemeContent {
-  announcement: string;
-  footerTagline: string;
-  demoNotice: string;
-  footerStatus: string;
-  homeHeroImage: StorefrontImage;
-  standardBandImage: StorefrontImage;
-}
-
 /** Seed line for the client-side demo cart (no persistence, no network). */
 export interface DemoCartSeedLine {
   productHandle: string;

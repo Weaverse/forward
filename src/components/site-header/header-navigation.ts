@@ -4,6 +4,10 @@ import type {
   StorefrontImage,
 } from "@/lib/storefront/types";
 
+/** Theme routes the header always offers; they are the theme's, not a menu's. */
+export const SEARCH_LINK: NavItem = { href: "/search", label: "Search" };
+export const ACCOUNT_LINK: NavItem = { href: "/account", label: "Account" };
+
 export interface FieldIndexCollection {
   id: string;
   index: string;

@@ -3,8 +3,7 @@
  * may import this file.
  */
 
-import type { SiteNavigation, ThemeContent } from "../types";
-import { EDITORIAL_IMAGES } from "./editorial-images";
+import type { SiteNavigation } from "../types";
 
 export const NAVIGATION_FIXTURE: SiteNavigation = {
   primary: [
@@ -67,15 +66,4 @@ export const NAVIGATION_FIXTURE: SiteNavigation = {
       ],
     },
   ],
-} as const;
-
-export const THEME_CONTENT_FIXTURE: ThemeContent = {
-  announcement: "Free shipping over $150 · Repairs for life",
-  footerTagline:
-    "Gear for moving through weather, not around it. A short catalog, built slowly and repaired indefinitely.",
-  demoNotice:
-    "Forward is running as a static demonstration storefront. Catalog and cart data are local fixtures, customer accounts are unavailable, and nothing you do here is sent anywhere.",
-  footerStatus: "Static demonstration storefront · Not a live store",
-  homeHeroImage: EDITORIAL_IMAGES.heroOpenSky,
-  standardBandImage: EDITORIAL_IMAGES.mountainRidges,
 } as const;

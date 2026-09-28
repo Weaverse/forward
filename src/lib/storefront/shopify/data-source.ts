@@ -23,7 +23,6 @@ import type {
   Product,
   SiteNavigation,
   StorePage,
-  ThemeContent,
 } from "../types";
 import { CATALOG_REVALIDATE_SECONDS } from "./cache-policy";
 import type {
@@ -311,17 +310,6 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   async getPolicy(handle: string): Promise<Policy | null> {
     const { policies } = await this.#loadContent();
     return policies.find((policy) => policy.handle === handle) ?? null;
-  }
-
-  async getThemeContent(): Promise<ThemeContent> {
-    return {
-      ...(await this.#base.getThemeContent()),
-      demoNotice:
-        "Forward uses a live Shopify catalog, navigation, content, and a secure Shopify cart. Checkout is handed off to Shopify.",
-      /* Live mode has no shopper-facing status to report; the empty string
-       * removes the build-state placeholder from the footer rail entirely. */
-      footerStatus: "",
-    };
   }
 
   async getDemoCartSeed(): Promise<readonly DemoCartSeedLine[]> {

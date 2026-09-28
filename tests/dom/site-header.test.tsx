@@ -16,7 +16,6 @@ import { ICON_PATHS } from "@/components/icon";
 import { FieldIndexHeader } from "@/components/site-header/field-index-header";
 import { fieldIndexCollections } from "@/components/site-header/header-navigation";
 import { COLLECTION_FIXTURES } from "@/lib/storefront/fixtures/collections";
-import { THEME_CONTENT_FIXTURE } from "@/lib/storefront/fixtures/navigation";
 import type { NavItem } from "@/lib/storefront/types";
 import {
   type AccountStatusStub,
@@ -70,7 +69,7 @@ function mountHeader({
   account = stubAccountStatus(signedIn);
   return render(
     <FieldIndexHeader
-      announcement={THEME_CONTENT_FIXTURE.announcement}
+      announcement="Free shipping over $150 · Repairs for life"
       collections={COLLECTION_FIXTURES}
       primary={primary}
       queryString={queryString}

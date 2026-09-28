@@ -20,6 +20,7 @@ import {
   findShopItem,
   isActive,
   isBranchActive,
+  SEARCH_LINK,
 } from "./header-navigation";
 import {
   HEADER_CONTROL_CLASS,
@@ -83,7 +84,7 @@ export function FieldIndexHeader({
   const aboutPanelId = useId();
   const mobilePanelId = useId();
 
-  const searchItem = primary.find((item) => item.href === "/search");
+  const searchItem = SEARCH_LINK;
   const primaryLinks = primary.filter(
     (item) => item !== shopItem && item.href !== "/search",
   );
@@ -232,7 +233,7 @@ export function FieldIndexHeader({
         <span className="hidden md:inline">
           Shopify · Hydrogen · Next.js · Weaverse
         </span>
-        <span>{announcement}</span>
+        {announcement === "" ? null : <span>{announcement}</span>}
         <CountryControl />
       </aside>
       <header

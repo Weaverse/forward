@@ -7,12 +7,8 @@ import { SiteHeader } from "@/components/site-header/site-header";
 import { ShopifyCartRuntime } from "@/lib/cart/shopify-cart-react";
 import { cn } from "@/lib/cn";
 import { storefrontRuntimeMode } from "@/lib/storefront/data-source";
-import {
-  loadWeaverseThemeSettings,
-  weaverseProjectId,
-} from "@/lib/weaverse/server";
+import { readThemeSettings, weaverseProjectId } from "@/lib/weaverse/server";
 import { StudioConnect } from "@/lib/weaverse/studio-connect";
-import type { ThemeSettings } from "@/lib/weaverse/theme-schema";
 
 import "./globals.css";
 
@@ -60,12 +56,7 @@ export const viewport: Viewport = {
  * token every section already resolves through.
  */
 async function pageWidthStyle(): Promise<string | null> {
-  const theme = await loadWeaverseThemeSettings();
-  /* Read through the type derived from the schema groups, so renaming the
-   * input or changing its type breaks here rather than silently ignoring the
-   * merchant's setting. */
-  const settings = theme?.themeSettings as Partial<ThemeSettings> | undefined;
-  const pageWidth = settings?.pageWidth;
+  const { pageWidth } = await readThemeSettings();
   if (typeof pageWidth !== "number" || pageWidth <= 0) {
     return null;
   }

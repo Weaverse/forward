@@ -6,7 +6,6 @@ import { describe, it } from "node:test";
 import {
   createStorefrontDataSource,
   StaticStorefrontDataSource,
-  type StorefrontDataSource,
 } from "../src/lib/storefront/data-source.ts";
 import { isAllowedProductImageSrc } from "../src/lib/storefront/image-source.ts";
 import {
@@ -1231,32 +1230,8 @@ describe("ShopifyCatalogDataSource", () => {
     }
   });
 
-  it("keeps theme presentation static and reads content only from the store", async () => {
+  it("reads content only from the store", async () => {
     const source = shopifySource();
-    const base: StorefrontDataSource = new StaticStorefrontDataSource();
-
-    const liveTheme = await source.getThemeContent();
-    const staticTheme = await base.getThemeContent();
-    assert.deepEqual(
-      {
-        announcement: liveTheme.announcement,
-        footerTagline: liveTheme.footerTagline,
-        homeHeroImage: liveTheme.homeHeroImage,
-        standardBandImage: liveTheme.standardBandImage,
-      },
-      {
-        announcement: staticTheme.announcement,
-        footerTagline: staticTheme.footerTagline,
-        homeHeroImage: staticTheme.homeHeroImage,
-        standardBandImage: staticTheme.standardBandImage,
-      },
-    );
-    assert.match(
-      liveTheme.demoNotice,
-      /live Shopify catalog, navigation, content, and a secure Shopify cart/i,
-    );
-    assert.equal(liveTheme.footerStatus, "");
-    assert.match(staticTheme.footerStatus, /Not a live store/i);
     /* Content is always a live read: nothing falls back to fixtures. */
     await assert.rejects(() => source.listArticles());
     await assert.rejects(() => source.listPages());

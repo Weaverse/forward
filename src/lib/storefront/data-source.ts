@@ -23,10 +23,7 @@ import { searchNormalizedProducts, sortProducts } from "./catalog-query";
 import { DEMO_CART_SEED } from "./fixtures/account";
 import { COLLECTION_FIXTURES } from "./fixtures/collections";
 import { JOURNAL_FIXTURES } from "./fixtures/journal";
-import {
-  NAVIGATION_FIXTURE,
-  THEME_CONTENT_FIXTURE,
-} from "./fixtures/navigation";
+import { NAVIGATION_FIXTURE } from "./fixtures/navigation";
 import { PAGE_FIXTURES } from "./fixtures/pages";
 import { POLICY_FIXTURES } from "./fixtures/policies";
 import { PRODUCT_FIXTURES } from "./fixtures/products";
@@ -55,7 +52,6 @@ import type {
   Product,
   SiteNavigation,
   StorePage,
-  ThemeContent,
 } from "./types";
 
 export interface StorefrontDataSource {
@@ -92,7 +88,6 @@ export interface StorefrontDataSource {
   listPolicies(): Promise<readonly Policy[]>;
   getPolicy(handle: string): Promise<Policy | null>;
   getNavigation(): Promise<SiteNavigation>;
-  getThemeContent(): Promise<ThemeContent>;
   getDemoCartSeed(): Promise<readonly DemoCartSeedLine[]>;
 }
 
@@ -243,10 +238,6 @@ export class StaticStorefrontDataSource implements StorefrontDataSource {
 
   async getNavigation(): Promise<SiteNavigation> {
     return NAVIGATION_FIXTURE;
-  }
-
-  async getThemeContent(): Promise<ThemeContent> {
-    return THEME_CONTENT_FIXTURE;
   }
 
   async getDemoCartSeed(): Promise<readonly DemoCartSeedLine[]> {
