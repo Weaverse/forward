@@ -246,11 +246,6 @@ export interface CollectionProductsQuery {
   pageBy?: number;
 }
 
-export interface ProductListFilter {
-  category?: ProductCategory;
-  activity?: string;
-}
-
 /**
  * Sort options, each one a Shopify sort key rather than a theme invention.
  * `featured` is the merchant's own collection order.

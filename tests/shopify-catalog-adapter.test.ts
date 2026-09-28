@@ -1213,62 +1213,6 @@ describe("ShopifyCatalogDataSource", () => {
     );
   });
 
-  it("preserves normalized filter and sort semantics over live products", async () => {
-    const source = shopifySource();
-    assert.deepEqual(
-      (await source.listProducts({ category: "Packs" })).map(
-        (product) => product.handle,
-      ),
-      ["ridge-30-field-pack", "approach-18-day-pack", "waypoint-sling-6"],
-    );
-    assert.deepEqual(
-      (await source.listProducts({ activity: "hiking" })).map(
-        (product) => product.handle,
-      ),
-      [
-        "weatherline-shell",
-        "traverse-grid-fleece",
-        "drift-insulated-vest",
-        "ridge-30-field-pack",
-        "approach-18-day-pack",
-        "talus-trail-shoe",
-        "scree-approach-shoe",
-      ],
-    );
-    assert.deepEqual(
-      (await source.listProducts({}, "price-asc")).map(
-        (product) => product.price.amount,
-      ),
-      [98, 118, 148, 148, 158, 168, 188, 198, 248],
-    );
-    assert.deepEqual(
-      (await source.listProducts({}, "price-desc")).map(
-        (product) => product.price.amount,
-      ),
-      [248, 198, 188, 168, 158, 148, 148, 118, 98],
-    );
-    assert.deepEqual(
-      (await source.listProducts({}, "name")).map((product) => product.title),
-      [
-        "Approach 18 Day Pack",
-        "Camp Recovery Clog",
-        "Drift Insulated Vest",
-        "Ridge 30 Field Pack",
-        "Scree Approach Shoe",
-        "Talus Trail Shoe",
-        "Traverse Grid Fleece",
-        "Waypoint Sling 6",
-        "Weatherline Shell",
-      ],
-    );
-    assert.deepEqual(
-      (await source.listProducts()).map((product) => product.handle).sort(),
-      (await new StaticStorefrontDataSource().listProducts())
-        .map((product) => product.handle)
-        .sort(),
-    );
-  });
-
   it("keeps deferred demo cart and account references resolvable", async () => {
     const source = shopifySource();
     for (const line of await source.getDemoCartSeed()) {

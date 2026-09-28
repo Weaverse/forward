@@ -19,10 +19,7 @@
  * rather than inventing content.
  */
 
-import {
-  filterAndSortProducts,
-  searchNormalizedProducts,
-} from "./catalog-query";
+import { searchNormalizedProducts, sortProducts } from "./catalog-query";
 import { DEMO_CART_SEED } from "./fixtures/account";
 import { COLLECTION_FIXTURES } from "./fixtures/collections";
 import { JOURNAL_FIXTURES } from "./fixtures/journal";
@@ -44,10 +41,10 @@ import {
   createCollectionQueryExecutor,
   createNavigationQueryExecutor,
 } from "./shopify/client";
+import { COLLECTION_PAGE_SIZE } from "./shopify/collection-query";
 import { createContentQueryExecutor } from "./shopify/content-client";
 import { ShopifyCatalogDataSource } from "./shopify/data-source";
 import { type EnvSource, readShopifyCatalogConfig } from "./shopify/env";
-import { sortProductsLocally } from "./sort-local";
 import type {
   Collection,
   CollectionProductsPage,
@@ -56,26 +53,17 @@ import type {
   JournalArticle,
   Policy,
   Product,
-  ProductListFilter,
-  ProductSort,
   SiteNavigation,
   StorePage,
   ThemeContent,
 } from "./types";
 
 export interface StorefrontDataSource {
-  listProducts(
-    filter?: ProductListFilter,
-    sort?: ProductSort,
-  ): Promise<readonly Product[]>;
+  listProducts(): Promise<readonly Product[]>;
   getProduct(handle: string): Promise<Product | null>;
   listCollections(): Promise<readonly Collection[]>;
   getCollection(handle: string): Promise<Collection | null>;
-  getCollectionProducts(
-    handle: string,
-    filter?: ProductListFilter,
-    sort?: ProductSort,
-  ): Promise<readonly Product[] | null>;
+  getCollectionProducts(handle: string): Promise<readonly Product[] | null>;
   /**
    * One page of a collection, with the facets the store offers for it.
    *
@@ -110,8 +98,6 @@ export interface StorefrontDataSource {
 
 export type StorefrontDataSourceOptions = CatalogQueryExecutorOptions;
 
-const DEFAULT_PAGE_BY = 12;
-
 function decodeCursor(cursor: string | undefined): number | null {
   if (cursor === undefined) {
     return null;
@@ -123,19 +109,18 @@ function decodeCursor(cursor: string | undefined): number | null {
 /**
  * One page of an already-resolved product list, shaped like a live response.
  *
- * Shared by the static data source and by any collection the Shopify adapter
- * could not read live, so both answer a route identically.
+ * The static data source answers a route exactly as a live read would.
  */
 export function localCollectionPage(
   all: readonly Product[],
   query: CollectionProductsQuery,
 ): CollectionProductsPage {
   const filters = synthesizeProductFilters(all);
-  const narrowed = sortProductsLocally(
+  const narrowed = sortProducts(
     applyProductFilters(all, query.filters ?? []),
     query.sort ?? "featured",
   );
-  const pageBy = query.pageBy ?? DEFAULT_PAGE_BY;
+  const pageBy = query.pageBy ?? COLLECTION_PAGE_SIZE;
   const after = decodeCursor(query.after);
   const before = decodeCursor(query.before);
   const start =
@@ -161,11 +146,8 @@ export function localCollectionPage(
 
 /** Fixture-backed implementation; the no-credential default. */
 export class StaticStorefrontDataSource implements StorefrontDataSource {
-  async listProducts(
-    filter: ProductListFilter = {},
-    sort: ProductSort = "featured",
-  ): Promise<readonly Product[]> {
-    return filterAndSortProducts(PRODUCT_FIXTURES, filter, sort);
+  async listProducts(): Promise<readonly Product[]> {
+    return PRODUCT_FIXTURES;
   }
 
   async getProduct(handle: string): Promise<Product | null> {
@@ -187,8 +169,6 @@ export class StaticStorefrontDataSource implements StorefrontDataSource {
 
   async getCollectionProducts(
     handle: string,
-    filter: ProductListFilter = {},
-    sort: ProductSort = "featured",
   ): Promise<readonly Product[] | null> {
     const collection = await this.getCollection(handle);
     if (collection === null) {
@@ -199,11 +179,7 @@ export class StaticStorefrontDataSource implements StorefrontDataSource {
         this.getProduct(productHandle),
       ),
     );
-    return filterAndSortProducts(
-      products.filter((product): product is Product => product !== null),
-      filter,
-      sort,
-    );
+    return products.filter((product): product is Product => product !== null);
   }
 
   /**
