@@ -11,8 +11,6 @@
 
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-
-import { PRODUCT_FIXTURES } from "../src/lib/storefront/fixtures/products.ts";
 import {
   resolveProductSelection,
   saleCompareAtPrice,
@@ -24,6 +22,7 @@ import {
   catalogResponse,
   catalogResponseWith,
 } from "./fixtures/shopify-catalog-response.ts";
+import { PRODUCT_FIXTURES } from "./fixtures/storefront/products.ts";
 
 const USD = (amount: number): Money => ({ amount, currencyCode: "USD" });
 

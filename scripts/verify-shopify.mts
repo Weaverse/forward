@@ -219,10 +219,7 @@ await probeShopIdentity(
 try {
   // This CLI runs outside the Next runtime. Exercise the exact Hydrogen
   // transport/mapping seam while leaving the production default Data Cache on.
-  const config = readShopifyCatalogConfig(process.env);
-  if (config === null) {
-    throw new Error("Shopify catalog mode is not configured.");
-  }
+  readShopifyCatalogConfig(process.env);
   const storefront = createStorefrontDataSource(process.env, {
     useNextCache: false,
   });

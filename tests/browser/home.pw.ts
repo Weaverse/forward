@@ -7,7 +7,7 @@
  * alignment, and reduced motion.
  */
 
-import { PRODUCT_FIXTURES } from "../../src/lib/storefront/fixtures/products.ts";
+import { PRODUCT_FIXTURES } from "../fixtures/storefront/products.ts";
 import { boxOf, expect, gotoReady, SHOPIFY_MODE, test } from "./fixtures.ts";
 
 /** Headings the theme owns, at their exact position in the page outline. */

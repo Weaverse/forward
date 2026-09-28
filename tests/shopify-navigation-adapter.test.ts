@@ -3,7 +3,6 @@ import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
 import { fieldIndexCollections } from "../src/components/site-header/header-navigation.ts";
-import { StaticStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
 import { createNavigationQueryExecutor } from "../src/lib/storefront/shopify/client.ts";
 import { ShopifyCatalogDataSource } from "../src/lib/storefront/shopify/data-source.ts";
 import { DEFAULT_MAIN_MENU_HANDLE } from "../src/lib/storefront/shopify/env.ts";
@@ -21,6 +20,7 @@ import {
   navigationResponse,
   navigationResponseWith,
 } from "./fixtures/shopify-navigation-response.ts";
+import { COLLECTION_FIXTURES } from "./fixtures/storefront/collections.ts";
 
 const SYNTHETIC_STORE_DOMAIN = "forward-test-shop.myshopify.com";
 const SYNTHETIC_STORE_ORIGIN = `https://${SYNTHETIC_STORE_DOMAIN}`;
@@ -96,23 +96,14 @@ function shopifySource(
   executeNavigation: () => Promise<
     ReturnType<typeof navigationResponse>
   > = async () => navigationResponse(),
-  base = new StaticStorefrontDataSource(),
 ) {
   return new ShopifyCatalogDataSource({
     ...UNREAD_EXECUTORS,
-    base,
     execute: async () => catalogResponse(),
     executeNavigation,
     storeDomain: SYNTHETIC_STORE_DOMAIN,
     mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
   });
-}
-
-class StaticWithoutFooterNavigation extends StaticStorefrontDataSource {
-  override async getNavigation() {
-    const navigation = await super.getNavigation();
-    return { ...navigation, footerColumns: [] };
-  }
 }
 
 /** A response whose GraphQL errors are scoped to one root field, or none. */
@@ -428,12 +419,10 @@ describe("Shopify navigation mapping", () => {
 });
 
 describe("Shopify navigation data source", () => {
-  it("maps live primary and every Footer column while theme owns only utility/search", async () => {
+  it("maps the live primary menu and every Footer column", async () => {
     const source = shopifySource();
-    const base = await new StaticStorefrontDataSource().getNavigation();
     assert.deepEqual(await source.getNavigation(), {
-      primary: [...expectedPrimary, { href: "/search", label: "Search" }],
-      utility: base.utility,
+      primary: expectedPrimary,
       footerColumns: expectedFooterColumns,
     });
     assert.deepEqual(
@@ -449,48 +438,14 @@ describe("Shopify navigation data source", () => {
     );
   });
 
-  it("does not require theme-owned Footer navigation", async () => {
-    const source = shopifySource(
-      async () => navigationResponse(),
-      new StaticWithoutFooterNavigation(),
-    );
-    assert.deepEqual(
-      (await source.getNavigation()).footerColumns,
-      expectedFooterColumns,
-    );
-  });
-
-  it("keeps every Company destination available in deterministic static mode", async () => {
-    const source = new StaticStorefrontDataSource();
-    const navigation = await source.getNavigation();
-    const company = navigation.footerColumns.find(
-      (column) => column.heading === "Company",
-    );
-    assert.deepEqual(company?.links, expectedCompanyLinks);
-
-    for (const link of company?.links ?? []) {
-      const handle = link.href.match(/^\/pages\/(.+)$/)?.[1];
-      assert.ok(
-        handle !== undefined,
-        `${link.href} must be an internal page route.`,
-      );
-      assert.ok(
-        (await source.getPage(handle)) !== null,
-        `${link.href} must resolve through the static data source.`,
-      );
-    }
-  });
-
-  it("renders a store with no main menu as Search alone", async () => {
+  it("renders a store with no main menu as no primary links", async () => {
     const source = shopifySource(async () =>
       navigationResponseWith((draft) => {
         draft.data.menu = null;
       }),
     );
     const navigation = await source.getNavigation();
-    assert.deepEqual(navigation.primary, [
-      { href: "/search", label: "Search" },
-    ]);
+    assert.deepEqual(navigation.primary, []);
     assert.deepEqual(navigation.footerColumns, expectedFooterColumns);
   });
 
@@ -574,8 +529,7 @@ describe("Footer navigation query/cache contract", () => {
 describe("Field Index presentation", () => {
   it("dresses each Shop link with its collection, in the merchant's order", async () => {
     const shop = mapped().primary[0];
-    const collections =
-      await new StaticStorefrontDataSource().listCollections();
+    const collections = COLLECTION_FIXTURES;
     const cards = fieldIndexCollections(shop, collections);
     assert.deepEqual(
       cards?.map(({ index, label, href, fieldCode }) => ({

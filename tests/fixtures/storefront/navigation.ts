@@ -1,9 +1,9 @@
 /**
- * Static navigation and theme-content fixture records. Only the data source
- * may import this file.
+ * Static navigation and theme-content fixture records. Test data only; runtime
+ * code never imports it.
  */
 
-import type { SiteNavigation } from "../types";
+import type { SiteNavigation } from "@/lib/storefront/types";
 
 export const NAVIGATION_FIXTURE: SiteNavigation = {
   primary: [
@@ -30,11 +30,6 @@ export const NAVIGATION_FIXTURE: SiteNavigation = {
         { href: "/pages/contact", label: "Contact" },
       ],
     },
-    { href: "/search", label: "Search" },
-  ],
-  utility: [
-    { href: "/account", label: "Account" },
-    { href: "/cart", label: "Cart" },
   ],
   footerColumns: [
     {

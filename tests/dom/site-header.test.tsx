@@ -15,8 +15,8 @@ import userEvent from "@testing-library/user-event";
 import { ICON_PATHS } from "@/components/icon";
 import { FieldIndexHeader } from "@/components/site-header/field-index-header";
 import { fieldIndexCollections } from "@/components/site-header/header-navigation";
-import { COLLECTION_FIXTURES } from "@/lib/storefront/fixtures/collections";
 import type { NavItem } from "@/lib/storefront/types";
+import { COLLECTION_FIXTURES } from "../fixtures/storefront/collections";
 import {
   type AccountStatusStub,
   PRIMARY_NAV,

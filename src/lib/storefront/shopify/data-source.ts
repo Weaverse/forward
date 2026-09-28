@@ -17,7 +17,6 @@ import type {
   Collection,
   CollectionProductsPage,
   CollectionProductsQuery,
-  DemoCartSeedLine,
   JournalArticle,
   Policy,
   Product,
@@ -51,8 +50,6 @@ export { CATALOG_REVALIDATE_SECONDS } from "./cache-policy";
 const MILLISECONDS_PER_SECOND = 1000;
 
 export interface ShopifyCatalogDataSourceOptions {
-  /** Static implementation backing every not-yet-live domain. */
-  base: StorefrontDataSource;
   execute: CatalogQueryExecutor;
   executeCollection: CollectionQueryExecutor;
   executeAllProducts: AllProductsQueryExecutor;
@@ -84,7 +81,6 @@ interface ContentCacheEntry {
 }
 
 export class ShopifyCatalogDataSource implements StorefrontDataSource {
-  readonly #base: StorefrontDataSource;
   readonly #execute: CatalogQueryExecutor;
   readonly #executeCollection: CollectionQueryExecutor;
   readonly #executeAllProducts: AllProductsQueryExecutor;
@@ -102,7 +98,6 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   #contentInFlight: Promise<MappedContentResult> | null = null;
 
   constructor(options: ShopifyCatalogDataSourceOptions) {
-    this.#base = options.base;
     this.#execute = options.execute;
     this.#executeCollection = options.executeCollection;
     this.#executeAllProducts = options.executeAllProducts;
@@ -264,21 +259,15 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     );
   }
 
-  /**
-   * The store's own menus. Search and the utility links are the theme's own
-   * destinations rather than menu entries, so they come from the theme.
-   */
+  /** The store's own menus: the primary menu and the footer columns. */
   async getNavigation(): Promise<SiteNavigation> {
-    const [theme, result] = await Promise.all([
-      this.#base.getNavigation(),
-      this.#executeNavigation(),
-    ]);
+    const result = await this.#executeNavigation();
     return {
-      primary: [
-        ...mapMainMenuResult(result, this.#storeDomain, this.#mainMenuHandle),
-        ...theme.primary.filter((item) => item.href === "/search"),
-      ],
-      utility: theme.utility,
+      primary: mapMainMenuResult(
+        result,
+        this.#storeDomain,
+        this.#mainMenuHandle,
+      ),
       footerColumns: mapFooterMenuResult(result, this.#storeDomain),
     };
   }
@@ -310,9 +299,5 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   async getPolicy(handle: string): Promise<Policy | null> {
     const { policies } = await this.#loadContent();
     return policies.find((policy) => policy.handle === handle) ?? null;
-  }
-
-  async getDemoCartSeed(): Promise<readonly DemoCartSeedLine[]> {
-    return this.#base.getDemoCartSeed();
   }
 }

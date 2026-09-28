@@ -1,10 +1,5 @@
 import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
-import { COLLECTION_FIXTURES } from "@/lib/storefront/fixtures/collections";
-import { JOURNAL_FIXTURES } from "@/lib/storefront/fixtures/journal";
-import { PAGE_FIXTURES } from "@/lib/storefront/fixtures/pages";
-import { PRODUCT_FIXTURES } from "@/lib/storefront/fixtures/products";
-import { synthesizeProductFilters } from "@/lib/storefront/product-filters";
 import { resolveProductSelection } from "@/lib/storefront/product-state";
 import type { Product } from "@/lib/storefront/types";
 import { WEAVERSE_COMPONENTS } from "@/lib/weaverse/components";
@@ -18,6 +13,11 @@ import {
   type MainProductState,
 } from "@/sections/main-product/context";
 import { elementAttributes } from "@/sections/weaverse-element";
+import { COLLECTION_FIXTURES } from "../fixtures/storefront/collections";
+import { FILTER_FIXTURES } from "../fixtures/storefront/filters";
+import { JOURNAL_FIXTURES } from "../fixtures/storefront/journal";
+import { PAGE_FIXTURES } from "../fixtures/storefront/pages";
+import { PRODUCT_FIXTURES } from "../fixtures/storefront/products";
 import { renderWithCart } from "./harness";
 
 /**
@@ -48,7 +48,7 @@ const ROUTE_CONTEXT: StorefrontDataContext = {
   /* The route resolves filters, order and paging before any section renders,
    * so the `mc--*` and `ap--*` elements only ever see a result. */
   browse: {
-    filters: synthesizeProductFilters(PRODUCT_FIXTURES),
+    filters: FILTER_FIXTURES,
     sort: "featured",
     pageInfo: {
       hasNextPage: false,

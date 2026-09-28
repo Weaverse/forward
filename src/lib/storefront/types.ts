@@ -1,11 +1,8 @@
 /**
  * Normalized storefront view models.
  *
- * These are the only shapes routes and visual components may consume. Raw
- * static fixture records live in `src/lib/storefront/fixtures/` and are read
- * exclusively through the data source in `src/lib/storefront/data-source.ts`,
- * so a later Shopify adapter can replace one domain at a time without
- * rewriting page composition.
+ * These are the only shapes routes and visual components may consume; the
+ * Shopify adapter behind `src/lib/storefront/data-source.ts` produces them.
  */
 
 export interface Money {
@@ -177,16 +174,7 @@ export interface FooterColumn {
 
 export interface SiteNavigation {
   primary: readonly NavItem[];
-  utility: readonly NavItem[];
   footerColumns: readonly FooterColumn[];
-}
-
-/** Seed line for the client-side demo cart (no persistence, no network). */
-export interface DemoCartSeedLine {
-  productHandle: string;
-  colorwayId: string;
-  size?: string;
-  quantity: number;
 }
 
 /**

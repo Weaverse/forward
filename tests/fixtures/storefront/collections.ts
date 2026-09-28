@@ -1,9 +1,9 @@
 /**
  * Deterministic collection records mirroring the live Shopify collection
- * contract. Only the static data source may import this file.
+ * contract. Test data only; runtime code never imports it.
  */
 
-import type { Collection } from "../types";
+import type { Collection } from "@/lib/storefront/types";
 import { PRODUCT_FIXTURES } from "./products";
 
 export const COLLECTION_FIXTURES: readonly Collection[] = [

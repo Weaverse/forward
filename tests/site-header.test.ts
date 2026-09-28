@@ -16,8 +16,8 @@ import {
   currentCollectionIndex,
   fieldIndexCollections,
 } from "../src/components/site-header/header-navigation.ts";
-import { COLLECTION_FIXTURES } from "../src/lib/storefront/fixtures/collections.ts";
-import { NAVIGATION_FIXTURE } from "../src/lib/storefront/fixtures/navigation.ts";
+import { COLLECTION_FIXTURES } from "./fixtures/storefront/collections.ts";
+import { NAVIGATION_FIXTURE } from "./fixtures/storefront/navigation.ts";
 
 describe("canonical header presentation", () => {
   it("preserves only destination-owned query state across header navigation", () => {

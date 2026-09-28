@@ -1,10 +1,9 @@
 /**
  * Localized editorial imagery (see `docs/editorial-image-sources.md` for
- * Unsplash photo IDs, source URLs, and license notes). Only fixture modules
- * may import this file.
+ * Unsplash photo IDs, source URLs, and license notes). Test data only.
  */
 
-import type { StorefrontImage } from "../types";
+import type { StorefrontImage } from "@/lib/storefront/types";
 
 export const EDITORIAL_IMAGES = {
   heroOpenSky: {

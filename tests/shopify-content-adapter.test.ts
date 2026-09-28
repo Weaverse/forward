@@ -3,10 +3,6 @@ import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
 import {
-  createStorefrontDataSource,
-  StaticStorefrontDataSource,
-} from "../src/lib/storefront/data-source.ts";
-import {
   parseArticleHtml,
   parsePageHtml,
   parsePolicyHtml,
@@ -34,7 +30,6 @@ const SYNTHETIC_STORE_DOMAIN = "forward-test-shop.myshopify.com";
 function shopifySource(response = contentResponse()): ShopifyCatalogDataSource {
   return new ShopifyCatalogDataSource({
     ...UNREAD_EXECUTORS,
-    base: new StaticStorefrontDataSource(),
     execute: async () => catalogResponse(),
     executeContent: async () => mapContentResult(response),
     executeNavigation: async () => navigationResponse(),
@@ -591,21 +586,6 @@ describe("Shopify content data source", () => {
     assert.equal(
       (await source.getPolicy("shipping-policy"))?.title,
       "Shipping Policy",
-    );
-  });
-
-  it("leaves static mode unaffected", async () => {
-    const source = createStorefrontDataSource({});
-
-    assert.ok(source instanceof StaticStorefrontDataSource);
-    assert.equal(
-      (await source.getArticle("layering-for-moving-weather"))?.title,
-      "Layering for Moving Weather",
-    );
-    assert.equal((await source.getPage("field-repair"))?.title, "Field Repair");
-    assert.equal(
-      (await source.getPolicy("shipping-policy"))?.updatedAt,
-      "2026-07-01",
     );
   });
 });

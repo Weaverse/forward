@@ -3,7 +3,7 @@
  * `shipping-policy` is the approved route-smoke policy handle.
  */
 
-import type { Policy } from "../types";
+import type { Policy } from "@/lib/storefront/types";
 
 const POLICY_FIXTURE_COPY = [
   {

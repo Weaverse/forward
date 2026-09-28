@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { PRODUCT_FIXTURES } from "../src/lib/storefront/fixtures/products.ts";
 import {
   COLORWAY_PARAM,
   galleryImages,
@@ -12,6 +11,7 @@ import {
   resolveProductSelection,
 } from "../src/lib/storefront/product-state.ts";
 import type { Product } from "../src/lib/storefront/types.ts";
+import { PRODUCT_FIXTURES } from "./fixtures/storefront/products.ts";
 
 function firstProduct(): Product {
   const product = PRODUCT_FIXTURES[0];

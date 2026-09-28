@@ -3,10 +3,6 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, it } from "node:test";
 
-import {
-  createStorefrontDataSource,
-  StaticStorefrontDataSource,
-} from "../src/lib/storefront/data-source.ts";
 import { isAllowedProductImageSrc } from "../src/lib/storefront/image-source.ts";
 import {
   type CatalogQueryResult,
@@ -52,7 +48,6 @@ function shopifySource(
 ): ShopifyCatalogDataSource {
   return new ShopifyCatalogDataSource({
     ...UNREAD_EXECUTORS,
-    base: new StaticStorefrontDataSource(),
     execute: async () => response,
     executeNavigation: async () => navigationResponse(),
     storeDomain: SYNTHETIC_STORE_DOMAIN,
@@ -91,34 +86,23 @@ async function assertRejectsCatalog(
 /* -------------------------------------------------------------------------- */
 
 describe("catalog mode selection", () => {
-  it("defaults to the static adapter with no Shopify configuration", () => {
-    assert.equal(readShopifyCatalogConfig({}), null);
-    assert.equal(
-      readShopifyCatalogConfig({
-        [MAIN_MENU_HANDLE_ENV_KEY]: "forward-main-menu",
-      }),
-      null,
-    );
-    assert.ok(
-      createStorefrontDataSource({}) instanceof StaticStorefrontDataSource,
-    );
-  });
-
-  it("ignores unrelated environment keys", () => {
-    assert.equal(
-      readShopifyCatalogConfig({ NODE_ENV: "test", PUBLIC_STOREFRONT_ID: "0" }),
-      null,
-    );
+  it("refuses to run without a Shopify configuration", () => {
+    for (const env of [
+      {},
+      { [MAIN_MENU_HANDLE_ENV_KEY]: "forward-main-menu" },
+      { NODE_ENV: "test", PUBLIC_STOREFRONT_ID: "0" },
+    ]) {
+      assert.throws(
+        () => readShopifyCatalogConfig(env),
+        ShopifyConfigurationError,
+      );
+    }
   });
 
   it("selects Shopify mode for a complete configuration", () => {
     const config = readShopifyCatalogConfig(COMPLETE_ENV);
     assert.equal(config?.storeDomain, SYNTHETIC_STORE_DOMAIN);
     assert.equal(config?.mainMenuHandle, DEFAULT_MAIN_MENU_HANDLE);
-    assert.ok(
-      createStorefrontDataSource(COMPLETE_ENV) instanceof
-        ShopifyCatalogDataSource,
-    );
   });
 
   it("accepts an explicit Shopify primary-menu handle override", () => {
@@ -1030,18 +1014,6 @@ describe("catalog mapping failures", () => {
     );
   });
 
-  it("keeps deterministic non-Shopify variants in the static source", async () => {
-    const weatherline = await new StaticStorefrontDataSource().getProduct(
-      "weatherline-shell",
-    );
-    assert.equal(weatherline?.variants.length, 10);
-    assert.equal(
-      weatherline?.variants[0]?.id,
-      "demo:weatherline-shell:charcoal-moss:XS",
-    );
-    assert.equal(weatherline?.variants[0]?.availableForSale, true);
-  });
-
   it("rejects duplicate merchandise IDs", async () => {
     await assertRejectsCatalog(
       catalogResponseWith("weatherline-shell", (product) => {
@@ -1212,24 +1184,6 @@ describe("ShopifyCatalogDataSource", () => {
     );
   });
 
-  it("keeps deferred demo cart and account references resolvable", async () => {
-    const source = shopifySource();
-    for (const line of await source.getDemoCartSeed()) {
-      const product = await source.getProduct(line.productHandle);
-      assert.ok(product !== null, `missing ${line.productHandle}`);
-      assert.ok(
-        product.colorways.some((colorway) => colorway.id === line.colorwayId),
-        `missing ${line.productHandle} colorway ${line.colorwayId}`,
-      );
-      if (line.size !== undefined) {
-        assert.ok(
-          product.options[0]?.values.includes(line.size),
-          `missing ${line.productHandle} size ${line.size}`,
-        );
-      }
-    }
-  });
-
   it("reads content only from the store", async () => {
     const source = shopifySource();
     /* Content is always a live read: nothing falls back to fixtures. */
@@ -1241,7 +1195,6 @@ describe("ShopifyCatalogDataSource", () => {
   it("fails closed instead of falling back to fixtures", async () => {
     const failing = new ShopifyCatalogDataSource({
       ...UNREAD_EXECUTORS,
-      base: new StaticStorefrontDataSource(),
       execute: async () => {
         throw new ShopifyCatalogError("Storefront API catalog request failed.");
       },
@@ -1275,7 +1228,6 @@ describe("catalog revalidation window", () => {
     let clock = 0;
     const source = new ShopifyCatalogDataSource({
       ...UNREAD_EXECUTORS,
-      base: new StaticStorefrontDataSource(),
       execute: async () => {
         calls += 1;
         return catalogResponse();
@@ -1305,7 +1257,6 @@ describe("catalog revalidation window", () => {
     let calls = 0;
     const source = new ShopifyCatalogDataSource({
       ...UNREAD_EXECUTORS,
-      base: new StaticStorefrontDataSource(),
       execute: async () => {
         calls += 1;
         return catalogResponse();
@@ -1326,7 +1277,6 @@ describe("catalog revalidation window", () => {
     let calls = 0;
     const source = new ShopifyCatalogDataSource({
       ...UNREAD_EXECUTORS,
-      base: new StaticStorefrontDataSource(),
       execute: async () => {
         calls += 1;
         return catalogResponse();
@@ -1383,7 +1333,7 @@ describe("store-driven presentation", () => {
    * nothing here may depend on a theme-side list of approved products. */
 
   it("derives a unique, slug-shaped colorway id per Color value", async () => {
-    for (const product of await new StaticStorefrontDataSource().listProducts()) {
+    for (const product of await shopifySource().listProducts()) {
       const ids = product.colorways.map((colorway) => colorway.id);
       assert.ok(ids.length > 0, `${product.handle} has no colorway`);
       assert.equal(
@@ -1398,7 +1348,7 @@ describe("store-driven presentation", () => {
   });
 
   it("carries the store's product type and tags verbatim", async () => {
-    for (const product of await new StaticStorefrontDataSource().listProducts()) {
+    for (const product of await shopifySource().listProducts()) {
       assert.ok(product.category.length > 0, `${product.handle} has no type`);
       assert.ok(product.activities.length > 0, `${product.handle} has no tags`);
       /* Infrastructure tags are the store's bookkeeping, never shopper copy. */
@@ -1409,7 +1359,7 @@ describe("store-driven presentation", () => {
   });
 
   it("takes a swatch only when the store published one", async () => {
-    for (const product of await new StaticStorefrontDataSource().listProducts()) {
+    for (const product of await shopifySource().listProducts()) {
       for (const colorway of product.colorways) {
         if (colorway.swatchColor !== null) {
           assert.match(colorway.swatchColor, /^#[0-9a-f]{6}$/i);
@@ -1419,7 +1369,7 @@ describe("store-driven presentation", () => {
   });
 
   it("relates a product only to same-type products, never itself", async () => {
-    const products = await new StaticStorefrontDataSource().listProducts();
+    const products = await shopifySource().listProducts();
     const byHandle = new Map(products.map((entry) => [entry.handle, entry]));
     for (const product of products) {
       for (const handle of product.relatedHandles) {
@@ -1449,7 +1399,22 @@ describe("data boundary", () => {
 
   const IMPORT_SPECIFIER_PATTERN = /(?:from|import)\s*\(?\s*["']([^"']+)["']/g;
 
-  it("keeps fixtures and Shopify internals out of pages and components", async () => {
+  it("keeps test fixtures out of every runtime module", async () => {
+    const files = await collectSourceFiles("src");
+    assert.ok(files.length > 0);
+    for (const file of files) {
+      const source = await readFile(path.join(process.cwd(), file), "utf8");
+      for (const match of source.matchAll(IMPORT_SPECIFIER_PATTERN)) {
+        const specifier = match[1] ?? "";
+        assert.ok(
+          !specifier.includes("fixtures") && !specifier.includes("tests/"),
+          `${file} imports test fixtures`,
+        );
+      }
+    }
+  });
+
+  it("keeps Shopify internals out of pages and components", async () => {
     const files = [
       ...(await collectSourceFiles("src/app")),
       ...(await collectSourceFiles("src/components")),
@@ -1459,10 +1424,6 @@ describe("data boundary", () => {
       const source = await readFile(path.join(process.cwd(), file), "utf8");
       for (const match of source.matchAll(IMPORT_SPECIFIER_PATTERN)) {
         const specifier = match[1] ?? "";
-        assert.ok(
-          !specifier.includes("storefront/fixtures"),
-          `${file} imports fixture records directly`,
-        );
         assert.ok(
           !specifier.includes("storefront/shopify"),
           `${file} imports Shopify adapter internals`,

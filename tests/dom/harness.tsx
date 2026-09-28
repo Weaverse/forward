@@ -11,21 +11,20 @@
 import { render } from "@testing-library/react";
 import type { ReactNode } from "react";
 
+import { ACCOUNT_LINK } from "@/components/site-header/header-navigation";
 import type { ShopifyCartData } from "@/lib/cart/shopify-cart";
 import { ShopifyCartProvider } from "@/lib/cart/shopify-cart-react";
-import { NAVIGATION_FIXTURE } from "@/lib/storefront/fixtures/navigation";
-import { PRODUCT_FIXTURES } from "@/lib/storefront/fixtures/products";
 import type { NavItem, Product } from "@/lib/storefront/types";
+import { NAVIGATION_FIXTURE } from "../fixtures/storefront/navigation";
+import { PRODUCT_FIXTURES } from "../fixtures/storefront/products";
 
 export const PRIMARY_NAV: readonly NavItem[] = NAVIGATION_FIXTURE.primary;
 
 /** Utility navigation as the shell renders it when accounts are enabled. */
-export const UTILITY_NAV_WITH_ACCOUNT: readonly NavItem[] =
-  NAVIGATION_FIXTURE.utility;
+export const UTILITY_NAV_WITH_ACCOUNT: readonly NavItem[] = [ACCOUNT_LINK];
 
 /** Utility navigation as the shell renders it when accounts are disabled. */
-export const UTILITY_NAV_NO_ACCOUNT: readonly NavItem[] =
-  NAVIGATION_FIXTURE.utility.filter((item) => item.href !== "/account");
+export const UTILITY_NAV_NO_ACCOUNT: readonly NavItem[] = [];
 
 interface CartLineStub {
   id: string;
