@@ -1,25 +1,18 @@
 "use client";
 
-import { cva } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
 import type { ReactNode } from "react";
+
+import { browseShell } from "@/lib/presentation/variants";
 
 import {
   elementAttributes,
   type WeaverseElementProps,
 } from "../weaverse-element";
 
-type Spacing = "compact" | "standard" | "roomy";
-
-const shell = cva("w-full", {
-  variants: {
-    spacing: { compact: "pb-14", standard: "pb-25", roomy: "pb-37.5" },
-  },
-  defaultVariants: { spacing: "standard" },
-});
-
 interface AllProductsProps extends WeaverseElementProps {
   children?: ReactNode;
-  spacing?: Spacing;
+  spacing?: VariantProps<typeof browseShell>["spacing"];
 }
 
 /**
@@ -31,7 +24,7 @@ interface AllProductsProps extends WeaverseElementProps {
  */
 function AllProducts({ children, spacing, ...rest }: AllProductsProps) {
   return (
-    <div {...elementAttributes(rest)} className={shell({ spacing })}>
+    <div {...elementAttributes(rest)} className={browseShell({ spacing })}>
       {children}
     </div>
   );

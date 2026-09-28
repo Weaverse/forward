@@ -1,11 +1,9 @@
 "use client";
 
-import { cva } from "class-variance-authority";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
-import { CursorPagination } from "@/components/cursor-pagination";
-import { ProductCard } from "@/components/product-card";
+import { type CatalogColumns, CatalogGrid } from "@/components/catalog-grid";
 import { cta, emptyState, eyebrow } from "@/lib/presentation/variants";
 import {
   clearFiltersHref,
@@ -13,31 +11,15 @@ import {
 } from "@/lib/storefront/filter-params";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
 
-import {
-  elementAttributes,
-  type WeaverseElementProps,
-} from "../../weaverse-element";
-
-const grid = cva(
-  "grid grid-cols-2 gap-x-2.5 gap-y-8.75 sm:gap-x-4.5 sm:gap-y-14",
-  {
-    variants: {
-      columns: { "2": "", "3": "lg:grid-cols-3", "4": "lg:grid-cols-4" },
-    },
-    defaultVariants: { columns: "3" },
-  },
-);
-
-type Columns = "2" | "3" | "4";
+import type { WeaverseElementProps } from "../../weaverse-element";
 
 interface CollectionProductGridProps extends WeaverseElementProps {
-  columns?: Columns;
+  columns?: CatalogColumns;
   emptyBody?: string;
 }
 
 /** The page of results the store returned, or an honest empty state. */
 function CollectionProductGrid({
-  columns,
   emptyBody,
   ...rest
 }: CollectionProductGridProps) {
@@ -47,13 +29,12 @@ function CollectionProductGrid({
   if (collectionProducts === undefined) return null;
 
   return (
-    <section
-      {...elementAttributes(rest)}
+    <CatalogGrid
+      {...rest}
       className="w-full min-w-0 flex-1"
-      aria-label="Products"
-    >
-      <h2 className="sr-only">Products</h2>
-      {collectionProducts.length === 0 ? (
+      products={collectionProducts}
+      pageInfo={browse?.pageInfo}
+      empty={
         <div className={emptyState()}>
           <div className="max-w-form">
             <p className={eyebrow()}>No matching products</p>
@@ -69,27 +50,8 @@ function CollectionProductGrid({
             ) : null}
           </div>
         </div>
-      ) : (
-        <>
-          <div className={grid({ columns })}>
-            {collectionProducts.map((product, index) => (
-              <ProductCard
-                key={product.handle}
-                product={product}
-                priority={index < 2}
-              />
-            ))}
-          </div>
-          {browse === undefined ? null : (
-            <CursorPagination
-              pageInfo={browse.pageInfo}
-              pathname={pathname}
-              params={params}
-            />
-          )}
-        </>
-      )}
-    </section>
+      }
+    />
   );
 }
 

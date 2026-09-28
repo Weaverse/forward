@@ -1,7 +1,9 @@
 "use client";
 
-import { cva } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
 import type { ReactNode } from "react";
+
+import { browseShell } from "@/lib/presentation/variants";
 
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
 
@@ -10,22 +12,9 @@ import {
   type WeaverseElementProps,
 } from "../weaverse-element";
 
-type Spacing = "compact" | "standard" | "roomy";
-
-const shell = cva("w-full", {
-  variants: {
-    spacing: {
-      compact: "pb-14",
-      standard: "pb-25",
-      roomy: "pb-37.5",
-    },
-  },
-  defaultVariants: { spacing: "standard" },
-});
-
 interface MainCollectionProps extends WeaverseElementProps {
   children?: ReactNode;
-  spacing?: Spacing;
+  spacing?: VariantProps<typeof browseShell>["spacing"];
 }
 
 /**
@@ -41,7 +30,7 @@ function MainCollection({ children, spacing, ...rest }: MainCollectionProps) {
   if (collection === undefined) return null;
 
   return (
-    <div {...elementAttributes(rest)} className={shell({ spacing })}>
+    <div {...elementAttributes(rest)} className={browseShell({ spacing })}>
       {children}
     </div>
   );
