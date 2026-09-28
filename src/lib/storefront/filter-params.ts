@@ -158,32 +158,31 @@ export function toggleValueHref(
   });
 }
 
-/** Drops every facet param, keeping sort and anything unrelated. */
+function isFilterParam(key: string): boolean {
+  return (
+    key.startsWith(FILTER_PARAM_PREFIX) ||
+    key === PRICE_MIN_PARAM ||
+    key === PRICE_MAX_PARAM
+  );
+}
+
+/** Drops every facet param and the cursor, keeping sort and anything unrelated. */
 export function clearFiltersHref(
   pathname: string,
   params: URLSearchParams,
 ): string {
-  const next = new URLSearchParams(params);
-  for (const key of [...next.keys()]) {
-    if (key.startsWith(FILTER_PARAM_PREFIX)) {
-      next.delete(key);
-    }
-  }
-  next.delete(PRICE_MIN_PARAM);
-  next.delete(PRICE_MAX_PARAM);
-  next.delete(AFTER_PARAM);
-  next.delete(BEFORE_PARAM);
-  const query = next.toString();
-  return query.length > 0 ? `${pathname}?${query}` : pathname;
+  const dropped = [...params.keys()].filter(isFilterParam);
+  return browseHref(
+    pathname,
+    params,
+    Object.fromEntries(
+      [...dropped, AFTER_PARAM, BEFORE_PARAM].map((key) => [key, undefined]),
+    ),
+  );
 }
 
 export function hasAppliedFilters(params: URLSearchParams): boolean {
-  return [...params.keys()].some(
-    (key) =>
-      key.startsWith(FILTER_PARAM_PREFIX) ||
-      key === PRICE_MIN_PARAM ||
-      key === PRICE_MAX_PARAM,
-  );
+  return [...params.keys()].some(isFilterParam);
 }
 
 export function pageHref(
