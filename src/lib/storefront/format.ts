@@ -18,7 +18,7 @@ const DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
   timeZone: "UTC",
 });
 
-/** Formats an ISO `YYYY-MM-DD` fixture date for display. */
+/** Formats an ISO `YYYY-MM-DD` date for display. */
 export function formatDate(isoDate: string): string {
   return DATE_FORMATTER.format(new Date(`${isoDate}T00:00:00Z`));
 }

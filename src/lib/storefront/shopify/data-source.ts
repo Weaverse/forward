@@ -1,13 +1,8 @@
 /**
- * Shopify-backed catalog and navigation data source.
+ * The Shopify-backed storefront data source.
  *
- * Products plus canonical collections and main/Footer navigation are live.
- * Content, theme text, utility presentation, cart, and account records remain
- * delegated to the injected static base until their own bounded slices.
- *
- * Product failures remain fail-closed. Main navigation, the whole Footer tree,
- * and canonical collection structure use independently scoped exact static
- * contracts when malformed remote data would otherwise take down routes.
+ * Products, collections, menus, pages, articles and policies are all read
+ * from the store. Every read fails closed: nothing falls back to fixtures.
  */
 
 import { searchNormalizedProducts } from "../catalog-query";

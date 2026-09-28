@@ -1,13 +1,9 @@
 /**
  * Server-only environment boundary for the Shopify catalog adapter.
  *
- * Selection is explicit and fails closed:
- *
- * - no Shopify environment at all -> static catalog (the deterministic default
- *   used by tests and by this worktree);
- * - both required keys present -> Shopify catalog mode;
- * - a partial configuration -> `ShopifyConfigurationError` naming only the
- *   missing keys.
+ * Forward always runs against a real store, so this fails closed: both required
+ * keys configure the Shopify catalog, and anything less throws a
+ * `ShopifyConfigurationError` naming only the missing keys.
  *
  * `PUBLIC_STOREFRONT_API_TOKEN` and `PUBLIC_STOREFRONT_ID` are intentionally
  * not read here. Catalog reads are server-owned and use the private token with

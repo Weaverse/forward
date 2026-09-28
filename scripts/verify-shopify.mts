@@ -231,7 +231,7 @@ try {
   check(
     "live main-menu has the canonical two-level tree",
     navigation.primary.map((item) => item.href).join(",") ===
-      "/shop/forward,/journal,/pages/about-forward,/search" &&
+      "/shop/forward,/journal,/pages/about-forward" &&
       shop?.children?.map((item) => item.href).join(",") ===
         CANONICAL_SHOP_LINKS.join(",") &&
       about?.children?.map((item) => item.href).join(",") ===
