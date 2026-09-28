@@ -5,7 +5,7 @@
 
 import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
-import { act, render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { ICON_PATHS, Icon } from "@/components/icon";
@@ -13,14 +13,19 @@ import { PaymentMarks } from "@/components/payment-marks";
 import { CartCount } from "@/components/site-header/cart-count";
 import { CountryControl } from "@/components/site-header/country-control";
 import { Wordmark } from "@/components/wordmark";
-import { addCartLine } from "@/lib/demo-cart/store";
 import { CHECKOUT_PAYMENT_MARKS } from "@/lib/storefront/integrations";
 import {
   ACTIVE_STOREFRONT_COUNTRY,
   AVAILABLE_STOREFRONT_COUNTRIES,
   countryControlLabel,
 } from "@/lib/storefront/localization";
-import { productByHandle, visibleText } from "./harness";
+import {
+  cartData,
+  cartLine,
+  productByHandle,
+  renderWithCart,
+  visibleText,
+} from "./harness";
 
 /** Every glyph the shell is allowed to render. */
 const SHELL_ICONS = [
@@ -38,7 +43,7 @@ const SHELL_ICONS = [
 
 describe("icon semantics", () => {
   it("hides a decorative icon from assistive tech", () => {
-    const { container } = render(<Icon name="shopping-bag" />);
+    const { container } = renderWithCart(<Icon name="shopping-bag" />);
     const svg = container.querySelector("svg");
 
     assert.ok(svg !== null);
@@ -49,7 +54,7 @@ describe("icon semantics", () => {
   });
 
   it("promotes a titled icon to an image carrying that accessible name", () => {
-    render(<Icon name="x" title="Close menu" />);
+    renderWithCart(<Icon name="x" title="Close menu" />);
     const image = screen.getByRole("img", { name: "Close menu" });
 
     assert.equal(image.getAttribute("aria-hidden"), null);
@@ -58,7 +63,9 @@ describe("icon semantics", () => {
 
   it("renders every shell glyph from one local path family", () => {
     for (const name of SHELL_ICONS) {
-      const { container, unmount } = render(<Icon name={name} size={20} />);
+      const { container, unmount } = renderWithCart(
+        <Icon name={name} size={20} />,
+      );
       const path = container.querySelector("svg > path");
 
       assert.ok(path !== null, `missing icon: ${name}`);
@@ -73,7 +80,7 @@ describe("icon semantics", () => {
 describe("market selector", () => {
   it("opens on the active market and lists every published market", async () => {
     const user = userEvent.setup();
-    render(<CountryControl />);
+    renderWithCart(<CountryControl />);
 
     const trigger = screen.getByRole("button", {
       name: new RegExp(countryControlLabel(ACTIVE_STOREFRONT_COUNTRY)),
@@ -101,7 +108,7 @@ describe("market selector", () => {
   });
 
   it("flags every market and keeps the flags out of the accessible name", () => {
-    const { container } = render(<CountryControl />);
+    const { container } = renderWithCart(<CountryControl />);
 
     const flag = container.querySelector("img");
     assert.ok(flag !== null);
@@ -123,7 +130,7 @@ describe("market selector", () => {
     const user = userEvent.setup();
     const other = AVAILABLE_STOREFRONT_COUNTRIES[1];
     assert.ok(other !== undefined);
-    render(<CountryControl />);
+    renderWithCart(<CountryControl />);
 
     await user.click(
       screen.getByRole("button", {
@@ -144,7 +151,7 @@ describe("market selector", () => {
 
   it("closes on Escape without changing the market", async () => {
     const user = userEvent.setup();
-    render(<CountryControl />);
+    renderWithCart(<CountryControl />);
 
     const trigger = screen.getByRole("button");
     await user.click(trigger);
@@ -160,9 +167,9 @@ describe("market selector", () => {
 
 describe("approved wordmarks", () => {
   it("uses the moss lockup for light surfaces and the reversed lockup for dark", () => {
-    const header = render(<Wordmark href="/?utm=x" />).container.querySelector(
-      "a",
-    );
+    const header = renderWithCart(
+      <Wordmark href="/?utm=x" />,
+    ).container.querySelector("a");
     assert.ok(header !== null);
     assert.equal(header.getAttribute("aria-label"), "Forward — home");
     assert.equal(header.getAttribute("href"), "/?utm=x");
@@ -179,7 +186,9 @@ describe("approved wordmarks", () => {
     assert.equal(header.querySelector("img")?.getAttribute("alt"), "");
 
     for (const variant of ["footer", "mobile"] as const) {
-      const { container, unmount } = render(<Wordmark variant={variant} />);
+      const { container, unmount } = renderWithCart(
+        <Wordmark variant={variant} />,
+      );
       assert.equal(
         container.querySelector("img")?.getAttribute("src"),
         "/images/brand/forward-wordmark-horizontal-reversed.svg",
@@ -190,42 +199,29 @@ describe("approved wordmarks", () => {
 });
 
 describe("cart count", () => {
-  it("announces the live item count politely", async () => {
+  it("announces the live item count politely", () => {
     const product = productByHandle("weatherline-shell");
     const variant = product.variants[0];
-    const colorway = product.colorways[0];
-    assert.ok(variant !== undefined && colorway !== undefined);
+    assert.ok(variant !== undefined);
 
-    const { container } = render(<CartCount />);
-    assert.equal(visibleText(container), ", 0 items in cart0");
-
-    const live = container.querySelector("[aria-live='polite']");
+    const empty = renderWithCart(<CartCount />);
+    assert.equal(visibleText(empty.container), ", 0 items in cart0");
+    const live = empty.container.querySelector("[aria-live='polite']");
     assert.ok(live !== null);
     assert.equal(live.getAttribute("aria-atomic"), "true");
+    empty.unmount();
 
-    act(() => {
-      addCartLine({
-        key: "weatherline-shell::gid://shopify/ProductVariant/1001",
-        variantId: "gid://shopify/ProductVariant/1001",
-        productHandle: product.handle,
-        title: product.title,
-        colorwayId: colorway.id,
-        colorwayName: colorway.name,
-        selectedOptions: { Size: "S" },
-        quantity: 1,
-        unitPrice: variant.price,
-        image: colorway.images.primary,
-        href: `/products/${product.handle}`,
-      });
-    });
-
+    const { container } = renderWithCart(
+      <CartCount />,
+      cartData([cartLine(product, variant)]),
+    );
     assert.equal(visibleText(container), ", 1 item in cart1");
   });
 });
 
 describe("footer payment marks", () => {
   it("draws every mark with its brand name available to assistive tech", () => {
-    render(<PaymentMarks />);
+    renderWithCart(<PaymentMarks />);
 
     const row = screen.getByRole("list", { name: "Accepted payment methods" });
     assert.deepEqual(

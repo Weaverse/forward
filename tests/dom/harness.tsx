@@ -8,6 +8,11 @@
  * environment boundary, which refuses to run once `document` exists.
  */
 
+import { render } from "@testing-library/react";
+import type { ReactNode } from "react";
+
+import type { ShopifyCartData } from "@/lib/cart/shopify-cart";
+import { ShopifyCartProvider } from "@/lib/cart/shopify-cart-react";
 import { NAVIGATION_FIXTURE } from "@/lib/storefront/fixtures/navigation";
 import { PRODUCT_FIXTURES } from "@/lib/storefront/fixtures/products";
 import type { NavItem, Product } from "@/lib/storefront/types";
@@ -21,6 +26,55 @@ export const UTILITY_NAV_WITH_ACCOUNT: readonly NavItem[] =
 /** Utility navigation as the shell renders it when accounts are disabled. */
 export const UTILITY_NAV_NO_ACCOUNT: readonly NavItem[] =
   NAVIGATION_FIXTURE.utility.filter((item) => item.href !== "/account");
+
+interface CartLineStub {
+  id: string;
+  quantity: number;
+  merchandise: {
+    id: string;
+    selectedOptions: { name: string; value: string }[];
+    product: { handle: string; title: string };
+    image: null;
+  };
+}
+
+/** A server-owned cart as the Shopify cart provider would hold it. */
+export function cartData(lines: readonly CartLineStub[] = []): ShopifyCartData {
+  return {
+    cart: {
+      id: "gid://shopify/Cart/test",
+      checkoutUrl: null,
+      totalQuantity: lines.reduce((sum, line) => sum + line.quantity, 0),
+      lines: { nodes: lines },
+      cost: { subtotalAmount: { amount: "0.0", currencyCode: "USD" } },
+    },
+  } as unknown as ShopifyCartData;
+}
+
+/** One cart line for `variant` of `product`. */
+export function cartLine(
+  product: Product,
+  variant: Product["variants"][number],
+  quantity = 1,
+): CartLineStub {
+  return {
+    id: `gid://shopify/CartLine/${variant.id}`,
+    quantity,
+    merchandise: {
+      id: variant.id,
+      selectedOptions: [...variant.selectedOptions],
+      product: { handle: product.handle, title: product.title },
+      image: null,
+    },
+  };
+}
+
+/** Renders inside the Shopify cart provider every storefront page mounts. */
+export function renderWithCart(ui: ReactNode, data = cartData()) {
+  return render(
+    <ShopifyCartProvider initialData={data}>{ui}</ShopifyCartProvider>,
+  );
+}
 
 export function productByHandle(handle: string): Product {
   const product = PRODUCT_FIXTURES.find((entry) => entry.handle === handle);

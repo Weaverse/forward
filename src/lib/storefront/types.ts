@@ -45,7 +45,7 @@ export interface ProductOption {
 }
 
 export interface ProductVariant {
-  /** Exact Shopify merchandise GID in live mode; deterministic demo id in static mode. */
+  /** Exact Shopify merchandise GID. */
   id: string;
   colorwayId: string;
   /** Every selected option except Color, in Shopify option order. */

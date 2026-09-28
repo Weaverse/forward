@@ -1,7 +1,5 @@
 import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
-import { render } from "@testing-library/react";
-
 import { COLLECTION_FIXTURES } from "@/lib/storefront/fixtures/collections";
 import { JOURNAL_FIXTURES } from "@/lib/storefront/fixtures/journal";
 import { PAGE_FIXTURES } from "@/lib/storefront/fixtures/pages";
@@ -20,6 +18,7 @@ import {
   type MainProductState,
 } from "@/sections/main-product/context";
 import { elementAttributes } from "@/sections/weaverse-element";
+import { renderWithCart } from "./harness";
 
 /**
  * Every component a merchant can place in Studio, taken from the registry
@@ -76,7 +75,7 @@ describe("composed sections tolerate merchant-cleared settings", () => {
     it(`renders ${type} with no settings and no route data`, () => {
       /* Both halves are ordinary states: a merchant can clear any field, and
        * can drop a product section onto a page that has no product. */
-      assert.doesNotThrow(() => render(<Component />));
+      assert.doesNotThrow(() => renderWithCart(<Component />));
     });
   }
 });
@@ -93,7 +92,7 @@ describe("image inputs survive Builder's own shape", () => {
   };
 
   it("renders a Builder image in the editorial hero", () => {
-    const { container } = render(
+    const { container } = renderWithCart(
       <EditorialHero image={BUILDER_IMAGE}>
         <p>Copy</p>
       </EditorialHero>,
@@ -107,7 +106,7 @@ describe("image inputs survive Builder's own shape", () => {
   it("drops the image rather than crashing when it has no dimensions", () => {
     /* The copy is children now, so the section keeps carrying it when the
      * image is unusable rather than taking the route down with it. */
-    const { container } = render(
+    const { container } = renderWithCart(
       <EditorialHero image={{ url: "https://cdn.example/hero.jpg" }}>
         <p>Copy</p>
       </EditorialHero>,
@@ -147,7 +146,7 @@ describe("composed components are addressable by Studio", () => {
   for (const [type, Component] of COMPOSED) {
     it(`forwards the runtime identity attributes on ${type}`, () => {
       const element = <Component data-wv-id="item-1" data-wv-type={type} />;
-      const { container } = render(
+      const { container } = renderWithCart(
         <StorefrontDataProvider value={ROUTE_CONTEXT}>
           {/* An `mp--*` child only renders inside its `main-product` shell,
            * which provides the resolved selection. */}
