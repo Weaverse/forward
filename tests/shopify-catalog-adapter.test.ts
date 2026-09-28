@@ -3,7 +3,7 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, it } from "node:test";
 
-import { isAllowedProductImageSrc } from "../src/lib/storefront/image-source.ts";
+import { isShopifyProductImageUrl } from "../src/lib/storefront/image-source.ts";
 import {
   type CatalogQueryResult,
   createCatalogQueryExecutor,
@@ -569,7 +569,7 @@ describe("catalog mapping", () => {
     assert.equal(ids.length, 4);
 
     for (const image of Object.values(images)) {
-      assert.ok(isAllowedProductImageSrc(image.src));
+      assert.ok(isShopifyProductImageUrl(image.src));
       assert.ok(image.alt.trim().length > 0);
       assert.ok(Number.isInteger(image.width) && image.width > 0);
       assert.ok(Number.isInteger(image.height) && image.height > 0);
@@ -916,12 +916,12 @@ describe("catalog mapping failures", () => {
 
   it("allows collection images from the owned CDN tenant", () => {
     assert.ok(
-      isAllowedProductImageSrc(
+      isShopifyProductImageUrl(
         "https://cdn.shopify.com/s/files/1/0978/4757/4828/collections/hero.webp?v=1",
       ),
     );
     assert.ok(
-      !isAllowedProductImageSrc(
+      !isShopifyProductImageUrl(
         "https://cdn.shopify.com/s/files/9/9999/9999/9999/collections/hero.webp",
       ),
     );

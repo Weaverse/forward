@@ -15,9 +15,8 @@ const nextConfig: NextConfig = {
   distDir: process.env.FORWARD_DIST_DIR ?? ".next",
   images: {
     /*
-     * Only the exact owned Shopify CDN media path is allowed. Static mode keeps
-     * serving the approved local catalog from `public/images/products/`, and no
-     * remote editorial hotlinks are introduced by this slice.
+     * Only the exact owned Shopify CDN media path is allowed; no remote
+     * editorial hotlinks are introduced.
      */
     remotePatterns: [
       {
