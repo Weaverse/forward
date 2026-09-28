@@ -8,91 +8,80 @@
  * relevance across the whole catalog, which is what Shopify defines it as.
  */
 
+import type {
+  ProductCollectionSortKeys,
+  ProductSortKeys,
+} from "@shopify/hydrogen/storefront-api-types";
+
 import type { ProductSort } from "./types";
 
-export const SORT_OPTIONS: ReadonlyArray<{
-  value: ProductSort;
-  label: string;
-}> = [
-  { value: "featured", label: "Featured" },
-  { value: "best-selling", label: "Best selling" },
-  { value: "newest", label: "Newest" },
-  { value: "price-asc", label: "Price low–high" },
-  { value: "price-desc", label: "Price high–low" },
-  { value: "name", label: "Name A–Z" },
-];
+/** Each option's label and the key a collection and the whole catalog take. */
+const SORTS: Record<
+  ProductSort,
+  {
+    label: string;
+    collection: ProductCollectionSortKeys;
+    catalog: ProductSortKeys;
+    reverse: boolean;
+  }
+> = {
+  featured: {
+    label: "Featured",
+    collection: "COLLECTION_DEFAULT",
+    catalog: "RELEVANCE",
+    reverse: false,
+  },
+  "best-selling": {
+    label: "Best selling",
+    collection: "BEST_SELLING",
+    catalog: "BEST_SELLING",
+    reverse: false,
+  },
+  newest: {
+    label: "Newest",
+    collection: "CREATED",
+    catalog: "CREATED_AT",
+    reverse: true,
+  },
+  "price-asc": {
+    label: "Price low–high",
+    collection: "PRICE",
+    catalog: "PRICE",
+    reverse: false,
+  },
+  "price-desc": {
+    label: "Price high–low",
+    collection: "PRICE",
+    catalog: "PRICE",
+    reverse: true,
+  },
+  name: {
+    label: "Name A–Z",
+    collection: "TITLE",
+    catalog: "TITLE",
+    reverse: false,
+  },
+};
 
-const SORT_VALUES = new Set(SORT_OPTIONS.map((option) => option.value));
+export const SORT_OPTIONS = Object.entries(SORTS).map(([value, { label }]) => ({
+  value: value as ProductSort,
+  label,
+}));
 
 export function parseProductSort(
   value: string | null | undefined,
 ): ProductSort {
-  return typeof value === "string" && SORT_VALUES.has(value as ProductSort)
+  return typeof value === "string" && Object.hasOwn(SORTS, value)
     ? (value as ProductSort)
     : "featured";
 }
 
-/** `ProductCollectionSortKeys`, as the Storefront schema defines them. */
-export type CollectionSortKey =
-  | "TITLE"
-  | "PRICE"
-  | "BEST_SELLING"
-  | "CREATED"
-  | "ID"
-  | "MANUAL"
-  | "COLLECTION_DEFAULT"
-  | "RELEVANCE";
-
-/** `ProductSortKeys`, as the Storefront schema defines them. */
-export type CatalogSortKey =
-  | "TITLE"
-  | "PRODUCT_TYPE"
-  | "VENDOR"
-  | "UPDATED_AT"
-  | "CREATED_AT"
-  | "BEST_SELLING"
-  | "PRICE"
-  | "ID"
-  | "RELEVANCE";
-
-/** `ProductCollectionSortKeys` — the keys a collection accepts. */
-export function collectionSortArguments(sort: ProductSort): {
-  sortKey: CollectionSortKey;
-  reverse: boolean;
-} {
-  switch (sort) {
-    case "price-asc":
-      return { sortKey: "PRICE", reverse: false };
-    case "price-desc":
-      return { sortKey: "PRICE", reverse: true };
-    case "name":
-      return { sortKey: "TITLE", reverse: false };
-    case "best-selling":
-      return { sortKey: "BEST_SELLING", reverse: false };
-    case "newest":
-      return { sortKey: "CREATED", reverse: true };
-    default:
-      return { sortKey: "COLLECTION_DEFAULT", reverse: false };
-  }
+/** The `ProductCollectionSortKeys` a collection read takes. */
+export function collectionSortArguments(sort: ProductSort) {
+  return { sortKey: SORTS[sort].collection, reverse: SORTS[sort].reverse };
 }
 
-/** `ProductSortKeys` — the keys the whole-catalog read accepts. */
-export function catalogSortArguments(sort: ProductSort): {
-  sortKey: CatalogSortKey;
-  reverse: boolean;
-} {
-  switch (sort) {
-    case "price-asc":
-      return { sortKey: "PRICE", reverse: false };
-    case "price-desc":
-      return { sortKey: "PRICE", reverse: true };
-    case "name":
-      return { sortKey: "TITLE", reverse: false };
-    case "best-selling":
-      return { sortKey: "BEST_SELLING", reverse: false };
-    case "newest":
-      return { sortKey: "CREATED_AT", reverse: true };
-    default:
-      return { sortKey: "RELEVANCE", reverse: false };
-  }
+/** The `ProductSortKeys` the whole-catalog read takes. */
+export function catalogSortArguments(sort: ProductSort) {
+  return { sortKey: SORTS[sort].catalog, reverse: SORTS[sort].reverse };
 }
