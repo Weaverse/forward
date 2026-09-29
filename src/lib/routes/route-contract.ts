@@ -295,6 +295,38 @@ export const ROUTE_CONTRACT: readonly RouteContractEntry[] = [
 ] as const;
 
 /** A path that must exercise the root `not-found.tsx`, never a dynamic route. */
+/**
+ * The proxy's market routing, exercised over HTTP: a non-default locale is
+ * served under its prefix, an unknown prefix is an ordinary missing page, and
+ * naming the default locale redirects to the unprefixed URL.
+ */
+export const LOCALE_SMOKES: {
+  pages: readonly RouteSmoke[];
+  redirects: readonly { path: string; expectedLocation: string }[];
+} = {
+  pages: [
+    { path: "/de-de/shop", expectedStatus: 200, composed: true },
+    {
+      path: `/ja-jp/products/${PRIMARY_PRODUCT_FIXTURE}`,
+      expectedStatus: 200,
+      composed: true,
+    },
+    { path: "/fr-fr/cart", expectedStatus: 200 },
+    {
+      path: "/xx-yy/shop",
+      expectedStatus: 404,
+      expectedContentType: "text/html",
+    },
+  ],
+  redirects: [
+    { path: "/en-us", expectedLocation: "/" },
+    {
+      path: "/en-us/shop?utm_source=route-smoke",
+      expectedLocation: "/shop?utm_source=route-smoke",
+    },
+  ],
+};
+
 export const NOT_FOUND_SMOKE: RouteSmoke = {
   path: "/__forward-route-smoke-missing__",
   expectedStatus: 404,
@@ -376,6 +408,11 @@ export function normalizeAppRoutePattern(manifestKey: string): string | null {
     .filter((segment) => !segment.startsWith("@"));
   if (pathSegments.some((segment) => segment === "_not-found")) {
     return null;
+  }
+  /* Rendered routes live under `app/[locale]/`; the proxy serves them at the
+   * locale-free path the contract names, so the segment is not part of it. */
+  if (pathSegments[0] === "[locale]") {
+    pathSegments.shift();
   }
   return `/${pathSegments.join("/")}`;
 }

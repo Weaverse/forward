@@ -31,6 +31,18 @@ describe("normalizeAppRoutePattern", () => {
     );
   });
 
+  it("drops the locale segment the proxy serves routes under", () => {
+    assert.equal(normalizeAppRoutePattern("/[locale]/page"), "/");
+    assert.equal(
+      normalizeAppRoutePattern("/[locale]/shop/[collectionHandle]/page"),
+      "/shop/[collectionHandle]",
+    );
+    assert.equal(
+      normalizeAppRoutePattern("/account/status/route"),
+      "/account/status",
+    );
+  });
+
   it("normalizes route-handler and metadata manifest keys", () => {
     assert.equal(
       normalizeAppRoutePattern("/account/logout/route"),

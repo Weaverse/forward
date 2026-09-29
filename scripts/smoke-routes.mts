@@ -18,6 +18,7 @@ import nextEnv from "@next/env";
 import {
   ACCOUNT_PROTOCOL_SMOKES,
   DYNAMIC_NOT_FOUND_SMOKES,
+  LOCALE_SMOKES,
   NOT_FOUND_SMOKE,
   PERMANENT_REDIRECT_STATUS,
   REDIRECT_CONTRACT,
@@ -401,6 +402,12 @@ try {
   }
   for (const redirect of REDIRECT_CONTRACT) {
     await checkRedirect(redirect.smoke.path, redirect.smoke.expectedLocation);
+  }
+  for (const smoke of LOCALE_SMOKES.pages) {
+    await checkStatus(smoke);
+  }
+  for (const redirect of LOCALE_SMOKES.redirects) {
+    await checkRedirect(redirect.path, redirect.expectedLocation);
   }
 } catch (error) {
   console.error(`smoke:routes: ${String(error)}`);
