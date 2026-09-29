@@ -17,7 +17,7 @@ import {
 import { readThemeSettings, weaverseProjectId } from "@/lib/weaverse/server";
 import { StudioConnect } from "@/lib/weaverse/studio-connect";
 
-import "./globals.css";
+import "../globals.css";
 
 /* Premium type contract: Archivo for display, Manrope for body/UI, and
  * IBM Plex Mono only for compact field metadata. Next serves all three. */

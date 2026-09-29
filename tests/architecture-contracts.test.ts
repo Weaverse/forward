@@ -117,14 +117,14 @@ describe("Tailwind presentation ownership", () => {
   it("loads only the Tailwind global stylesheet from the root layout", async () => {
     const layout = await read("src/app/[locale]/layout.tsx");
     const stylesheets = [
-      ...layout.matchAll(/import\s+["'](\.\/[^"']+\.css)["']/g),
+      ...layout.matchAll(/import\s+["'](\.\.?\/[^"']+\.css)["']/g),
     ].map(([, stylesheet]) => stylesheet);
 
-    assert.deepEqual(stylesheets, ["./globals.css"]);
+    assert.deepEqual(stylesheets, ["../globals.css"]);
   });
 
   it("keeps globals.css limited to the semantic theme and document policy", async () => {
-    const globals = await read("src/app/[locale]/globals.css");
+    const globals = await read("src/app/globals.css");
 
     assert.equal(globals.match(/@import\s+["']tailwindcss["']/g)?.length, 1);
     assert.equal(globals.match(/@theme\b/g)?.length, 1);
