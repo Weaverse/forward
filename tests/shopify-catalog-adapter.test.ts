@@ -1300,9 +1300,9 @@ describe("catalog revalidation window", () => {
 
   it("keeps shared route revalidation and personalized cart boundaries explicit", async () => {
     const routes = [
-      "src/app/page.tsx",
-      "src/app/shop/[collectionHandle]/page.tsx",
-      "src/app/products/[productHandle]/page.tsx",
+      "src/app/[locale]/page.tsx",
+      "src/app/[locale]/shop/[collectionHandle]/page.tsx",
+      "src/app/[locale]/products/[productHandle]/page.tsx",
     ];
     for (const route of routes) {
       const source = await readFile(path.join(process.cwd(), route), "utf8");
@@ -1317,8 +1317,8 @@ describe("catalog revalidation window", () => {
 
     // Personalized routes never share the catalog window.
     for (const route of [
-      "src/app/cart/page.tsx",
-      "src/app/account/orders/[orderId]/page.tsx",
+      "src/app/[locale]/cart/page.tsx",
+      "src/app/[locale]/account/orders/[orderId]/page.tsx",
     ]) {
       const personalized = await readFile(
         path.join(process.cwd(), route),

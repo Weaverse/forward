@@ -165,7 +165,7 @@ describe("Studio integration surface", () => {
   });
 
   it("mounts the Studio bridge script in the document body", async () => {
-    const layout = await read("src/app/layout.tsx");
+    const layout = await read("src/app/[locale]/layout.tsx");
 
     assert.match(layout, /<StudioConnect \/>/);
     const bodyIndex = layout.indexOf("<body");
@@ -179,7 +179,7 @@ describe("Studio integration surface", () => {
   it("forwards searchParams and pathname from the custom-page route", async () => {
     /* Design mode is detected from the query Studio puts on the iframe URL,
      * and CUSTOM pages resolve by path, so both are load-bearing. */
-    const source = await read("src/app/[...slug]/page.tsx");
+    const source = await read("src/app/[locale]/[...slug]/page.tsx");
 
     assert.match(
       source,

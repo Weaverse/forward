@@ -1,7 +1,7 @@
 import type { WeaverseNextComponent } from "@weaverse/next";
 
 import type { Product } from "@/lib/storefront/types";
-import { resolveProduct } from "@/lib/weaverse/resource";
+import { loaderLocale, resolveProduct } from "@/lib/weaverse/resource";
 
 type LoaderArgs = Parameters<NonNullable<WeaverseNextComponent["loader"]>>[0];
 
@@ -12,8 +12,10 @@ export interface HomeHeroLoaderData {
 /** Resolves the optional product badge shown over the hero image. */
 export async function loader({
   data,
+  context,
 }: LoaderArgs): Promise<HomeHeroLoaderData> {
+  const locale = loaderLocale(context);
   const selection = (data as { featuredProduct?: unknown } | undefined)
     ?.featuredProduct;
-  return { featuredProduct: await resolveProduct(selection) };
+  return { featuredProduct: await resolveProduct(selection, locale) };
 }

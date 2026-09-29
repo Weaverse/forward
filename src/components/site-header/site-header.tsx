@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
+import type { LocaleId } from "@/lib/i18n/locales";
 import { getStorefront } from "@/lib/storefront/data-source";
 import { readThemeSettings } from "@/lib/weaverse/server";
 import { FieldIndexHeader } from "./field-index-header";
@@ -11,11 +12,11 @@ import { QueryPreservingFieldIndexHeader } from "./query-preserving-field-index-
  * storefront boundary; the full server-rendered header is also the query
  * reader's Suspense fallback so static pages never bail out to client rendering.
  */
-export async function SiteHeader() {
+export async function SiteHeader({ locale }: { locale: LocaleId }) {
   const [navigation, settings, collections] = await Promise.all([
-    getStorefront().getNavigation(),
-    readThemeSettings(),
-    getStorefront().listCollections(),
+    getStorefront(locale).getNavigation(),
+    readThemeSettings(locale),
+    getStorefront(locale).listCollections(),
   ]);
 
   const utility = getCustomerAccountRuntime() === null ? [] : [ACCOUNT_LINK];

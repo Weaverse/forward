@@ -660,7 +660,7 @@ describe("readAccountAddresses", () => {
 describe("address action boundary", () => {
   it("explains the optional zone-code contract in the form", async () => {
     const source = await readFile(
-      path.join(process.cwd(), "src/app/account/addresses/page.tsx"),
+      path.join(process.cwd(), "src/app/[locale]/account/addresses/page.tsx"),
       "utf8",
     );
     assert.match(source, /Leave blank[\s\S]*Vietnam/);

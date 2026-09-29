@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import ErrorPage from "@/app/error";
+import ErrorPage from "@/app/[locale]/error";
 
 describe("system states", () => {
   it("announces an error and retries through the supplied boundary reset", async () => {

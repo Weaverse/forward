@@ -319,10 +319,10 @@ describe("disabled account configuration", () => {
 describe("account route segment configuration", () => {
   it("keeps every account page dynamic, no-store, and never statically enumerated", async () => {
     for (const route of [
-      "src/app/account/page.tsx",
-      "src/app/account/orders/page.tsx",
-      "src/app/account/orders/[orderId]/page.tsx",
-      "src/app/account/addresses/page.tsx",
+      "src/app/[locale]/account/page.tsx",
+      "src/app/[locale]/account/orders/page.tsx",
+      "src/app/[locale]/account/orders/[orderId]/page.tsx",
+      "src/app/[locale]/account/addresses/page.tsx",
       "src/app/account/status/route.ts",
     ]) {
       const source = await readFile(path.join(process.cwd(), route), "utf8");
