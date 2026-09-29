@@ -27,7 +27,8 @@ test.describe("shell structure", () => {
   });
 
   test("loads the approved wordmark artwork", async ({ page }) => {
-    await gotoReady(page, "/");
+    /* Home floats the header over its hero with the reversed lockup. */
+    await gotoReady(page, "/search");
     const mark = page
       .getByRole("banner")
       .getByRole("link", { name: "Forward — home" })
