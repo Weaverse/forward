@@ -1,8 +1,9 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { type ReactNode, Suspense, useEffect } from "react";
+import { usePathname } from "@/lib/i18n/locale-context";
 
 import {
   COLORWAY_PARAM,

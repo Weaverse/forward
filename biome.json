@@ -43,7 +43,11 @@
           "level": "error",
           "options": {
             "paths": {
-              "next/link": "Use the locale-aware `Link` from `@/components/link`."
+              "next/link": "Use the locale-aware `Link` from `@/components/link`.",
+              "next/navigation": {
+                "importNames": ["usePathname"],
+                "message": "Use `usePathname` from `@/lib/i18n/locale-context`: Next reports the internal `/en-us` rewrite while rendering on the server."
+              }
             }
           }
         }
@@ -63,7 +67,10 @@
   },
   "overrides": [
     {
-      "includes": ["src/components/link.tsx"],
+      "includes": [
+        "src/components/link.tsx",
+        "src/lib/i18n/locale-context.tsx"
+      ],
       "linter": {
         "rules": {
           "style": {

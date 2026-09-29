@@ -1,10 +1,10 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Link } from "@/components/link";
-
 import { SortForm } from "@/components/sort-form";
 import { cn } from "@/lib/cn";
+import { usePathname } from "@/lib/i18n/locale-context";
 import {
   clearFiltersHref,
   hasAppliedFilters,

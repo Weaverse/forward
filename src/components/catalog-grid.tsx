@@ -1,12 +1,12 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
-
 import { CursorPagination } from "@/components/cursor-pagination";
 import { ProductCard } from "@/components/product-card";
 import { cn } from "@/lib/cn";
+import { usePathname } from "@/lib/i18n/locale-context";
 import type { CollectionProductsPage, Product } from "@/lib/storefront/types";
 import {
   elementAttributes,

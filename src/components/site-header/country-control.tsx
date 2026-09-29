@@ -1,13 +1,11 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import ReactCountryFlag from "react-country-flag";
-
 import { Icon } from "@/components/icon";
 import { Link } from "@/components/link";
 import { cn } from "@/lib/cn";
-import { useLocale } from "@/lib/i18n/locale-context";
+import { useLocale, usePathname } from "@/lib/i18n/locale-context";
 import {
   LOCALE_IDS,
   LOCALES,

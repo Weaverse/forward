@@ -1,11 +1,11 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { Icon, type IconName } from "@/components/icon";
 import { Link } from "@/components/link";
 import { Wordmark } from "@/components/wordmark";
 import { cn } from "@/lib/cn";
+import { usePathname } from "@/lib/i18n/locale-context";
 import type { Collection, NavItem } from "@/lib/storefront/types";
 import { AboutIndexPanel } from "./about-index-panel";
 import { CartCount } from "./cart-count";
