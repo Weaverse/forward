@@ -2,12 +2,12 @@
 
 | Field            | Value                                                  |
 | ---------------- | ------------------------------------------------------ |
-| **Status**       | in-progress                                            |
+| **Status**       | completed                                              |
 | **Owner**        | @hta218                                                |
 | **Issue**        | [#81](https://github.com/Weaverse/forward/issues/81)   |
 | **Branch**       | `feat/remove-static-mode`                              |
 | **Created**      | 2026-09-28                                             |
-| **Last Updated** | 2026-09-28                                             |
+| **Last Updated** | 2026-09-29                                             |
 
 ## Original Prompt
 
