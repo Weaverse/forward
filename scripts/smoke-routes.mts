@@ -314,13 +314,19 @@ async function checkStatus(smoke: RouteSmoke): Promise<void> {
     }
   }
 
-  /* A page that answers 200 with no top-level heading is blank, which is how
-   * an empty Weaverse payload composed itself over every theme-owned route
-   * while still passing every status check here. */
+  /* A theme-rendered page that answers 200 with no top-level heading is blank,
+   * which is how a broken render could still pass every status check here.
+   * A Weaverse-composed page renders what the merchant authored, so it is held
+   * only to its status and content type. */
   const rendersHtml = (response.headers.get("content-type") ?? "")
     .toLowerCase()
     .startsWith("text/html");
-  if (smoke.expectedStatus === 200 && rendersHtml && !body.includes("<h1")) {
+  if (
+    smoke.expectedStatus === 200 &&
+    smoke.composed !== true &&
+    rendersHtml &&
+    !body.includes("<h1")
+  ) {
     failures.push({
       path: smoke.path,
       expected: "a rendered <h1>",
