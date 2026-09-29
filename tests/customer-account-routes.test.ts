@@ -120,8 +120,11 @@ describe("customer account route ownership", () => {
       "utf8",
     );
     assert.equal(source.match(/handleShopifyRoutes\(/g)?.length, 1);
+    /* The matcher covers every page path, so the account boundary is always
+     * reached; the proxy branches on the locale-free account path. */
     const matcher = source.slice(source.indexOf("matcher: ["));
-    assert.ok(matcher.includes('"/account/:path*"'));
+    assert.ok(matcher.includes('"/((?!_next/|api/|.*\\\\.[^/]+$).*)"'));
+    assert.ok(source.includes("isAccountPath(route.path)"));
     assert.ok(source.includes("CUSTOMER_ACCOUNT_PROTOCOL_METHODS.get"));
   });
 });

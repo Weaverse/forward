@@ -26,6 +26,15 @@ describe("locales", () => {
     assert.equal(localizePath("/", "ja-jp"), "/ja-jp");
   });
 
+  it("never prefixes a path that already names a locale", () => {
+    assert.equal(
+      localizePath("/de-de/shop?sort=name", "de-de"),
+      "/de-de/shop?sort=name",
+    );
+    assert.equal(localizePath("/de-de", "de-de"), "/de-de");
+    assert.equal(localizePath("/de-defaults", "de-de"), "/de-de/de-defaults");
+  });
+
   it("leaves external and non-path hrefs alone", () => {
     for (const href of [
       "https://example.com/x",

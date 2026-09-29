@@ -100,7 +100,10 @@ export function localizePath(path: string, locale: LocaleId): string {
   if (
     locale === DEFAULT_LOCALE ||
     !path.startsWith("/") ||
-    path.startsWith("//")
+    path.startsWith("//") ||
+    /* Already localized: a pathname read back from the URL carries its own
+     * prefix, and prefixing it again would name a page that does not exist. */
+    parseLocale(path.split(/[/?#]/)[1]) !== null
   ) {
     return path;
   }
