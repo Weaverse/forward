@@ -20,6 +20,7 @@ import {
   findShopItem,
   isActive,
   isBranchActive,
+  isShopActive,
   SEARCH_LINK,
 } from "./header-navigation";
 import {
@@ -258,9 +259,7 @@ export function FieldIndexHeader({
             <Link
               href={createHeaderNavigationHref(shopItem.href, queryString)}
               className={PRIMARY_NAV_ITEM_CLASS}
-              aria-current={
-                isActive(pathname, shopItem.href) ? "page" : undefined
-              }
+              aria-current={isShopActive(pathname) ? "page" : undefined}
             >
               <i className={NAV_ITEM_INDEX_CLASS}>01</i>
               {shopItem.label}
@@ -270,9 +269,7 @@ export function FieldIndexHeader({
               ref={desktopTriggerRef}
               type="button"
               className={PRIMARY_NAV_ITEM_CLASS}
-              aria-current={
-                isActive(pathname, shopItem.href) ? "page" : undefined
-              }
+              aria-current={isShopActive(pathname) ? "page" : undefined}
               aria-expanded={desktopOpen}
               aria-controls={desktopOpen ? desktopPanelId : undefined}
               onClick={toggleDesktop}

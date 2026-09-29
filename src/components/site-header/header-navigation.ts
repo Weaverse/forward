@@ -116,6 +116,14 @@ function isCatalogHref(href: string): boolean {
   return href === "/shop" || href.startsWith("/shop/");
 }
 
+/**
+ * The Shop entry is current anywhere in the catalog: on any collection and on
+ * a product, whichever collection the merchant pointed Shop itself at.
+ */
+export function isShopActive(pathname: string): boolean {
+  return isCatalogHref(pathname) || pathname.startsWith("/products/");
+}
+
 /** The top-level menu entry that opens the Shop panel: the catalog branch. */
 export function findShopItem(primary: readonly NavItem[]): NavItem | undefined {
   return primary.find((item) => isCatalogHref(item.href));
