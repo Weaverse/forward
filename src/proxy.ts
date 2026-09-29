@@ -36,6 +36,7 @@ import {
   type LocaleId,
   localeFromCookieHeader,
   localeI18n,
+  splitLocale,
 } from "@/lib/i18n/locales";
 
 const CUSTOMER_ACCOUNT_PROTOCOL_METHODS = new Map<string, string>([
@@ -45,6 +46,7 @@ const CUSTOMER_ACCOUNT_PROTOCOL_METHODS = new Map<string, string>([
   [CUSTOMER_ACCOUNT_LOGOUT_PATH, "POST"],
 ]);
 const ACCOUNT_STATUS_PATH = "/account/status";
+const LOCALE_REWRITE_HEADER = "x-forward-locale-rewrite";
 const ACCOUNT_PRIVATE_NO_STORE =
   "private, no-store, max-age=0, must-revalidate";
 
@@ -135,7 +137,11 @@ function routeResponse(
   }
   const url = request.nextUrl.clone();
   url.pathname = route.target;
-  return NextResponse.rewrite(url);
+  /* Next can hand the rewritten request back through the proxy. The marker
+   * tells that pass the `/en-us` prefix is ours, not the shopper's. */
+  const headers = new Headers(request.headers);
+  headers.set(LOCALE_REWRITE_HEADER, route.locale);
+  return NextResponse.rewrite(url, { request: { headers } });
 }
 
 /** Records the page's market for handlers that serve no page of their own. */
@@ -177,8 +183,20 @@ function isAccountPath(path: string): boolean {
   return path === "/account" || path.startsWith("/account/");
 }
 
+/** The route for this request; a request this proxy rewrote is served as is. */
+function requestRoute(request: NextRequest): LocaleRoute {
+  const { pathname } = request.nextUrl;
+  if (request.headers.has(LOCALE_REWRITE_HEADER)) {
+    const { locale, path } = splitLocale(pathname);
+    if (locale !== null) {
+      return { kind: "serve", locale, path };
+    }
+  }
+  return resolveLocaleRoute(pathname);
+}
+
 export async function proxy(request: NextRequest): Promise<Response> {
-  const route = resolveLocaleRoute(request.nextUrl.pathname);
+  const route = requestRoute(request);
   if (route.kind === "redirect") {
     const url = request.nextUrl.clone();
     url.pathname = route.path;
