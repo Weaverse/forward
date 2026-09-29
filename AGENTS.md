@@ -85,10 +85,28 @@ Forward is a fresh Next.js App Router storefront theme using
 - `canonical-source.css`, `site-header.css`, and `production-polish.css` are
   retired. Do not restore legacy selectors or compatibility imports.
 
+## Markets
+
+- The locale list is the `LOCALES` const in `src/lib/i18n/locales.ts`; a
+  market is added there and nowhere else.
+- Rendered routes live under `src/app/[locale]/`. The default locale never
+  appears in a URL: `src/proxy.ts` 308-redirects `/en-us/*` to the unprefixed
+  path and rewrites unprefixed paths to `/en-us/*`. Route handlers, `robots`
+  and `sitemap` stay outside the segment.
+- Every read is scoped to the request's market through
+  `getStorefront(locale)`; Weaverse loaders read it with `loaderLocale`.
+  Prices carry their own currency and are never derived from the locale.
+- `next/link` is imported only by `src/components/link.tsx`; everything else
+  uses that `Link`, which prefixes the current market (Biome enforces this).
+- Client code reads the path through `usePathname` from
+  `src/lib/i18n/locale-context.tsx`, never `next/navigation`'s: during server
+  rendering Next reports the proxy's `/en-us/*` rewrite target (Biome enforces
+  this too).
+
 ## Storefront data boundary
 
-- Routes and visual components consume storefront data only through the
-  `storefront` instance exported from `src/lib/storefront/data-source.ts`.
+- Routes and visual components consume storefront data only through
+  `getStorefront(locale)` exported from `src/lib/storefront/data-source.ts`.
   Never import Shopify queries or raw Shopify shapes directly in pages or
   components.
 - Forward always runs against a real Shopify store. There is no static mode:
