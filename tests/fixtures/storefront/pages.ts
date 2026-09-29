@@ -1,6 +1,6 @@
 /** Representative static pages for credential-free development. Shopify owns live copy. */
 
-import type { StorePage } from "../types";
+import type { StorePage } from "@/lib/storefront/types";
 import { EDITORIAL_IMAGES } from "./editorial-images";
 
 type StaticStorePage = Omit<StorePage, "sections"> & {

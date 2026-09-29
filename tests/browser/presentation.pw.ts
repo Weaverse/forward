@@ -37,36 +37,10 @@ test.describe("premium presentation behavior", () => {
     expect(normalizedFamily(families.meta)).toContain("ibm plex mono");
   });
 
-  test("renders ordinal-free 4:5 product cards on uniform responsive grids", async ({
+  test("renders product cards on a uniform responsive grid", async ({
     page,
   }) => {
-    await gotoReady(page, "/");
-    const homeCards = page
-      .getByRole("region", { name: "Start with the core four." })
-      .getByRole("article");
-    expect(await homeCards.count()).toBe(4);
-    expect((await homeCards.allTextContents()).join(" ")).not.toMatch(
-      /plate\s+\d+/i,
-    );
-
-    const firstHomeImage = await boxOf(homeCards.first().locator("img"));
-    expect(
-      Math.abs(firstHomeImage.width / firstHomeImage.height - 0.8),
-    ).toBeLessThan(0.02);
-
-    const firstHome = await boxOf(homeCards.nth(0));
-    const secondHome = await boxOf(homeCards.nth(1));
-    expect(Math.abs(firstHome.width - secondHome.width)).toBeLessThan(2);
-
     const viewport = page.viewportSize();
-    if ((viewport?.width ?? 0) > 820) {
-      expect(Math.abs(firstHome.y - secondHome.y)).toBeLessThan(2);
-    } else {
-      const thirdHome = await boxOf(homeCards.nth(2));
-      expect(Math.abs(firstHome.y - secondHome.y)).toBeLessThan(2);
-      expect(thirdHome.y).toBeGreaterThan(firstHome.y);
-    }
-
     await gotoReady(page, "/shop");
     const plpCards = page
       .getByRole("region", { name: "Products" })
@@ -102,55 +76,24 @@ test.describe("premium presentation behavior", () => {
     } else {
       expect(gallery.y).toBeLessThan(panel.y);
     }
-
-    await page.getByText("Repair", { exact: true }).click();
-    const repairLink = page.getByRole("link", {
-      name: "The repairs programme",
-    });
-    await expect(repairLink).toBeVisible();
-    await expect(repairLink).toHaveAttribute("href", "/pages/field-repair");
   });
 
-  test("stacks the Home and page heroes without horizontal overflow", async ({
-    page,
-  }) => {
-    await gotoReady(page, "/");
-    const hero = page.getByRole("region", {
-      name: "Equipment for weather that changes the plan.",
-    });
-    const heroCopy = await boxOf(
-      hero.getByRole("heading", { level: 1 }).locator(".."),
-    );
-    const heroMedia = await boxOf(hero.locator("img").first().locator(".."));
-    const viewport = page.viewportSize();
-
-    if ((viewport?.width ?? 0) > 820) {
-      expect(heroCopy.x).toBeLessThan(heroMedia.x);
-    } else {
-      expect(heroCopy.y).toBeLessThan(heroMedia.y);
-      expect(heroMedia.height).toBeGreaterThan((viewport?.height ?? 1) * 0.6);
-    }
-
+  test("keeps the catalog free of horizontal overflow", async ({ page }) => {
     await gotoReady(page, "/shop");
-    const shopHeading = await boxOf(
-      page.getByRole("heading", { level: 1, name: "All products" }),
-    );
-    const shopGrid = await boxOf(
-      page.getByRole("region", { name: "Products" }),
-    );
-    expect(shopHeading.y).toBeLessThan(shopGrid.y);
+    await expect(page.getByRole("region", { name: "Products" })).toBeVisible();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
-    ).toBeLessThanOrEqual(viewport?.width ?? Number.POSITIVE_INFINITY);
+    ).toBeLessThanOrEqual(
+      page.viewportSize()?.width ?? Number.POSITIVE_INFINITY,
+    );
   });
 
   test("keeps PLP and custom-page content owned by their routes", async ({
     page,
   }) => {
     await gotoReady(page, "/shop");
-    await expect(page.getByRole("heading", { name: "Products" })).toHaveCount(
-      1,
-    );
+    /* One results region, whatever else the merchant composed around it. */
+    await expect(page.getByRole("region", { name: "Products" })).toHaveCount(1);
     /* Cursor paging means the toolbar counts this page, not the catalog. */
     await expect(
       page.locator('main [aria-live="polite"]').first(),
@@ -183,9 +126,12 @@ test.describe("premium presentation behavior", () => {
     await expect(sortForm).toHaveAttribute("method", "get");
     await expect(page.getByLabel("Sort")).toHaveValue("price-desc");
 
-    const facetLinks = page.locator('main a[href*="filter."]');
-    const facetCount = await facetLinks.count();
-    expect(facetCount).toBeGreaterThan(0);
+    /* Below the desktop breakpoint the facets sit in a disclosure. */
+    const facetLinks = page.locator('main a[href*="filter."]:visible');
+    if ((await facetLinks.count()) === 0) {
+      await page.getByText("Filters", { exact: true }).first().click();
+    }
+    expect(await facetLinks.count()).toBeGreaterThan(0);
 
     const href = await facetLinks.first().getAttribute("href");
     expect(href).toContain("sort=price-desc");
@@ -193,7 +139,7 @@ test.describe("premium presentation behavior", () => {
     await expect(page).toHaveURL(/filter\./);
     await expect(page).toHaveURL(/sort=price-desc/);
     await expect(
-      page.locator('main a[aria-current="true"]').first(),
+      page.locator('main a[aria-current="true"]:visible').first(),
     ).toBeVisible();
 
     /* Clearing is reachable once something is applied. */
@@ -205,11 +151,6 @@ test.describe("premium presentation behavior", () => {
     expect(
       await tools.evaluate((node) => getComputedStyle(node).position),
     ).toBe("sticky");
-
-    if ((page.viewportSize()?.width ?? 0) <= 820) {
-      await page.getByText("Filters", { exact: true }).click();
-      await expect(facetLinks.last()).toBeVisible();
-    }
 
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
@@ -223,12 +164,6 @@ test.describe("premium presentation behavior", () => {
   }) => {
     await gotoReady(page, "/shop/outerwear");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(page.getByText("The system", { exact: true })).toBeVisible();
-    await expect(
-      page.getByRole("heading", {
-        name: "A focused kit for a full day out.",
-      }),
-    ).toBeVisible();
     await expect(page.locator("main img").first()).toHaveAttribute(
       "sizes",
       "(min-width: 820px) 65vw, 100vw",

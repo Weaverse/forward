@@ -15,10 +15,5 @@ export const editorialImagerySettings = {
       name: "homeHeroImage",
       label: "Home hero image",
     },
-    {
-      type: "image",
-      name: "standardBandImage",
-      label: "Material standard image",
-    },
   ],
 } as const satisfies WeaverseNextThemeSchemaGroup;

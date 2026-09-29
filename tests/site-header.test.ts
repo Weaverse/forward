@@ -15,9 +15,10 @@ import {
   createHeaderNavigationHref,
   currentCollectionIndex,
   fieldIndexCollections,
+  isShopActive,
 } from "../src/components/site-header/header-navigation.ts";
-import { COLLECTION_FIXTURES } from "../src/lib/storefront/fixtures/collections.ts";
-import { NAVIGATION_FIXTURE } from "../src/lib/storefront/fixtures/navigation.ts";
+import { COLLECTION_FIXTURES } from "./fixtures/storefront/collections.ts";
+import { NAVIGATION_FIXTURE } from "./fixtures/storefront/navigation.ts";
 
 describe("canonical header presentation", () => {
   it("preserves only destination-owned query state across header navigation", () => {
@@ -69,6 +70,20 @@ describe("canonical header presentation", () => {
       );
       assert.ok(collection.description.length >= 30);
       assert.ok(collection.fieldCode.length > 0);
+    }
+  });
+
+  it("marks Shop current anywhere in the catalog", () => {
+    for (const path of [
+      "/shop",
+      "/shop/packs",
+      "/shop/forward",
+      "/products/talus-trail-shoe",
+    ]) {
+      assert.equal(isShopActive(path), true, path);
+    }
+    for (const path of ["/", "/journal", "/pages/about-forward", "/shopping"]) {
+      assert.equal(isShopActive(path), false, path);
     }
   });
 

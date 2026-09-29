@@ -14,14 +14,11 @@ import {
   type Response as PlaywrightResponse,
 } from "@playwright/test";
 
-export type MatrixId =
-  | "static"
-  | "live-account-disabled"
-  | "live-account-enabled";
+export type MatrixId = "live-account-disabled" | "live-account-enabled";
 
-export const MATRIX = (process.env.FORWARD_MATRIX ?? "static") as MatrixId;
+export const MATRIX = (process.env.FORWARD_MATRIX ??
+  "live-account-disabled") as MatrixId;
 export const ACCOUNT_ENABLED = MATRIX === "live-account-enabled";
-export const SHOPIFY_MODE = MATRIX !== "static";
 
 interface Options {
   expectedProblem: RegExp;

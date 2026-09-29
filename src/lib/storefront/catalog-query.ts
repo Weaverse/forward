@@ -1,9 +1,7 @@
 /**
- * Normalized catalog query semantics: sorting and search.
+ * Normalized catalog search.
  *
- * Both the static fixture data source and the Shopify-backed data source run
- * these exact functions over already-normalized `Product` records, so live mode
- * cannot drift from the approved deterministic behavior:
+ * Search runs over already-normalized `Product` records:
  *
  * - empty/whitespace queries return no results;
  * - search is case-insensitive and every term must match;
@@ -12,29 +10,7 @@
  * - the raw query is never interpolated into Shopify GraphQL search syntax.
  */
 
-import type { Product, ProductSort } from "./types";
-
-export function sortProducts(
-  products: readonly Product[],
-  sort: ProductSort,
-): readonly Product[] {
-  if (sort === "featured") {
-    return products;
-  }
-  const sorted = [...products];
-  switch (sort) {
-    case "price-asc":
-      sorted.sort((a, b) => a.price.amount - b.price.amount);
-      break;
-    case "price-desc":
-      sorted.sort((a, b) => b.price.amount - a.price.amount);
-      break;
-    case "name":
-      sorted.sort((a, b) => a.title.localeCompare(b.title));
-      break;
-  }
-  return sorted;
-}
+import type { Product } from "./types";
 
 function searchableText(product: Product): string {
   return [

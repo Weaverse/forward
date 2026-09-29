@@ -1,13 +1,6 @@
 /** Cart and account contracts that require a real responsive browser. */
 
-import {
-  ACCOUNT_ENABLED,
-  boxOf,
-  expect,
-  gotoReady,
-  SHOPIFY_MODE,
-  test,
-} from "./fixtures.ts";
+import { ACCOUNT_ENABLED, boxOf, expect, gotoReady, test } from "./fixtures.ts";
 
 test.describe("Cart presentation", () => {
   test("keeps its truthful mode, controls, responsive grid, and viewport bounds", async ({
@@ -17,12 +10,7 @@ test.describe("Cart presentation", () => {
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { name: /^Cart/ })).toBeVisible();
     await expect(
-      page.getByText(
-        SHOPIFY_MODE
-          ? "Your field bag · live Shopify cart"
-          : "Your field bag · demo only",
-        { exact: true },
-      ),
+      page.getByText("Your field bag · live Shopify cart", { exact: true }),
     ).toBeVisible();
 
     const overflow = await page.evaluate(
@@ -30,67 +18,15 @@ test.describe("Cart presentation", () => {
     );
     expect(overflow).toBeLessThanOrEqual(1);
 
-    if (SHOPIFY_MODE) {
-      await expect(
-        page.getByRole("heading", { name: "Nothing packed yet." }),
-      ).toBeVisible();
-      await expect(
-        page.getByRole("region", { name: "Cart items" }),
-      ).toHaveCount(0);
-      return;
-    }
-
-    const items = page.getByRole("region", { name: "Cart items" });
-    const summary = page.getByRole("complementary", {
-      name: "Order summary",
-    });
-    await expect(items).toBeVisible();
-    await expect(summary).toBeVisible();
-    await expect(summary).toContainText("Checkout — not connected");
-    await expect(summary.getByText("Checkout — not connected")).toHaveAttribute(
-      "aria-disabled",
-      "true",
+    await expect(
+      page.getByRole("heading", { name: "Nothing packed yet." }),
+    ).toBeVisible();
+    await expect(page.getByRole("region", { name: "Cart items" })).toHaveCount(
+      0,
     );
 
-    const firstLine = items.getByRole("article").first();
-    const image = await boxOf(firstLine.getByRole("img"));
-    const decrease = await boxOf(
-      firstLine.getByRole("button", { name: /^Decrease quantity/ }),
-    );
-    const quantityFrame = await boxOf(
-      firstLine
-        .getByRole("button", { name: /^Decrease quantity/ })
-        .locator(".."),
-    );
-    const remove = await boxOf(
-      firstLine.getByRole("button", { name: /^Remove/ }),
-    );
-    /* The accepted 44px bordered quantity frame leaves a 42px inner button. */
-    expect(decrease.height).toBeGreaterThanOrEqual(42);
-    expect(decrease.width).toBeGreaterThanOrEqual(36);
-    expect(remove.height).toBeGreaterThanOrEqual(44);
-
-    const itemBox = await boxOf(items);
-    const summaryBox = await boxOf(summary);
-    const viewport = page.viewportSize();
-    expect(quantityFrame.height).toBe((viewport?.width ?? 0) <= 560 ? 48 : 44);
-    if ((viewport?.width ?? 0) > 820) {
-      expect(itemBox.x).toBeLessThan(summaryBox.x);
-      expect(Math.abs(image.width - 190)).toBeLessThanOrEqual(1);
-    } else {
-      expect(itemBox.y).toBeLessThan(summaryBox.y);
-      expect(Math.abs(image.width - 92)).toBeLessThanOrEqual(1);
-    }
-
-    // Empty the demo cart so the primary CTA's actual Tailwind cascade is
-    // exercised. Class-order assertions cannot prove which box shadow wins.
-    while ((await items.getByRole("article").count()) > 0) {
-      await items
-        .getByRole("article")
-        .first()
-        .getByRole("button", { name: /^Remove/ })
-        .click();
-    }
+    /* The empty cart's primary CTA exercises the real Tailwind cascade.
+     * Class-order assertions cannot prove which box shadow wins. */
     const emptyCartCta = page.getByRole("link", {
       name: "Explore all gear",
     });

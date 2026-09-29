@@ -10,11 +10,7 @@ import { subscribeToCartAdd } from "@/lib/cart/mini-cart-signal";
 import {
   formatShopifyMoney,
   useShopifyCart,
-  useShopifyCartMode,
 } from "@/lib/cart/shopify-cart-react";
-import { subtotal } from "@/lib/demo-cart/cart-logic";
-import { useDemoCartLines } from "@/lib/demo-cart/use-demo-cart";
-import { formatMoney } from "@/lib/storefront/format";
 
 /** Long enough to read, short enough not to sit over the page. */
 const AUTO_DISMISS_MS = 8000;
@@ -113,34 +109,7 @@ function MiniCartBody({ checkoutUrl, line, subtotalLabel }: MiniCartBodyProps) {
   );
 }
 
-/** Static mode: the browser-local demo cart, read only. */
-function DemoMiniCartBody({ variantId }: { variantId: string }) {
-  const lines = useDemoCartLines();
-  const line = lines.find((entry) => entry.variantId === variantId) ?? null;
-
-  return (
-    <MiniCartBody
-      checkoutUrl={null}
-      line={
-        line === null
-          ? null
-          : {
-              title: line.title,
-              href: line.href,
-              image: line.image,
-              options: [
-                line.colorwayName,
-                ...Object.values(line.selectedOptions),
-              ].join(" · "),
-              quantity: line.quantity,
-            }
-      }
-      subtotalLabel={formatMoney(subtotal(lines))}
-    />
-  );
-}
-
-/** Shopify mode: the server-owned cart, read only — never a second cart. */
+/** The server-owned cart, read only — never a second cart. */
 function ShopifyMiniCartBody({ variantId }: { variantId: string }) {
   const cart = useShopifyCart((state) => state.data);
   const node =
@@ -191,7 +160,6 @@ function ShopifyMiniCartBody({ variantId }: { variantId: string }) {
  * unless the visitor's focus is already inside it.
  */
 export function MiniCart() {
-  const shopifyMode = useShopifyCartMode();
   const [presentation, setPresentation] = useState<MiniCartPresentation | null>(
     null,
   );
@@ -303,11 +271,7 @@ export function MiniCart() {
           >
             <Icon name="x" size={16} />
           </button>
-          {shopifyMode ? (
-            <ShopifyMiniCartBody variantId={presentation.variantId} />
-          ) : (
-            <DemoMiniCartBody variantId={presentation.variantId} />
-          )}
+          <ShopifyMiniCartBody variantId={presentation.variantId} />
         </div>
       )}
       <p aria-live="polite" className="sr-only" role="status">

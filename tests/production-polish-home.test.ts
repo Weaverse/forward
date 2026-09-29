@@ -10,7 +10,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { PRODUCT_FIXTURES } from "../src/lib/storefront/fixtures/products.ts";
+import { PRODUCT_FIXTURES } from "./fixtures/storefront/products.ts";
 
 describe("concise Home merchandising copy", () => {
   it("keys one short sentence to every product the store returns", () => {

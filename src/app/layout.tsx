@@ -6,13 +6,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header/site-header";
 import { ShopifyCartRuntime } from "@/lib/cart/shopify-cart-react";
 import { cn } from "@/lib/cn";
-import { storefrontRuntimeMode } from "@/lib/storefront/data-source";
-import {
-  loadWeaverseThemeSettings,
-  weaverseProjectId,
-} from "@/lib/weaverse/server";
+import { readThemeSettings, weaverseProjectId } from "@/lib/weaverse/server";
 import { StudioConnect } from "@/lib/weaverse/studio-connect";
-import type { ThemeSettings } from "@/lib/weaverse/theme-schema";
 
 import "./globals.css";
 
@@ -60,12 +55,7 @@ export const viewport: Viewport = {
  * token every section already resolves through.
  */
 async function pageWidthStyle(): Promise<string | null> {
-  const theme = await loadWeaverseThemeSettings();
-  /* Read through the type derived from the schema groups, so renaming the
-   * input or changing its type breaks here rather than silently ignoring the
-   * merchant's setting. */
-  const settings = theme?.themeSettings as Partial<ThemeSettings> | undefined;
-  const pageWidth = settings?.pageWidth;
+  const { pageWidth } = await readThemeSettings();
   if (typeof pageWidth !== "number" || pageWidth <= 0) {
     return null;
   }
@@ -77,7 +67,6 @@ export default async function RootLayout({
 }: {
   children: ReactNode;
 }) {
-  const shopifyCartEnabled = storefrontRuntimeMode === "shopify";
   const weaverseEnabled = weaverseProjectId() !== null;
   const pageWidth = await pageWidthStyle();
   return (
@@ -98,18 +87,16 @@ export default async function RootLayout({
             dangerouslySetInnerHTML={{ __html: pageWidth }}
           />
         )}
-        {shopifyCartEnabled ? (
-          <script
-            crossOrigin="anonymous"
-            id="shopify-standard-actions"
-            src="https://cdn.shopify.com/storefront/standard-actions.js"
-            type="module"
-          />
-        ) : null}
+        <script
+          crossOrigin="anonymous"
+          id="shopify-standard-actions"
+          src="https://cdn.shopify.com/storefront/standard-actions.js"
+          type="module"
+        />
       </head>
       <body className="m-0 max-w-full overflow-x-clip bg-canvas font-body text-copy-sm leading-body text-ink antialiased">
         {weaverseEnabled ? <StudioConnect /> : null}
-        <ShopifyCartRuntime enabled={shopifyCartEnabled}>
+        <ShopifyCartRuntime>
           <a
             className="fixed top-2.5 left-2.5 z-1000 -translate-y-3/2 bg-ink px-4 py-2.75 text-text-inverse focus:translate-y-0"
             data-shell-background

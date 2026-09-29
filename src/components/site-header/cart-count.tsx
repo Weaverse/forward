@@ -1,14 +1,10 @@
 "use client";
 
-import {
-  useShopifyCart,
-  useShopifyCartMode,
-} from "@/lib/cart/shopify-cart-react";
-import { totalQuantity } from "@/lib/demo-cart/cart-logic";
-import { useDemoCartLines } from "@/lib/demo-cart/use-demo-cart";
+import { useShopifyCart } from "@/lib/cart/shopify-cart-react";
 
 /** Live cart badge announced politely to assistive technology. */
-function Count({ count }: { count: number }) {
+export function CartCount() {
+  const count = useShopifyCart((state) => state.data.totalQuantity);
   return (
     <span aria-live="polite" aria-atomic="true">
       <span className="sr-only">
@@ -22,18 +18,4 @@ function Count({ count }: { count: number }) {
       </span>
     </span>
   );
-}
-
-function DemoCartCount() {
-  const lines = useDemoCartLines();
-  return <Count count={totalQuantity(lines)} />;
-}
-
-function LiveCartCount() {
-  const count = useShopifyCart((state) => state.data.totalQuantity);
-  return <Count count={count} />;
-}
-
-export function CartCount() {
-  return useShopifyCartMode() ? <LiveCartCount /> : <DemoCartCount />;
 }

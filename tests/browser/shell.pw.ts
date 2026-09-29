@@ -5,14 +5,7 @@
  * mini-cart lifecycle against the cart the deployment actually owns.
  */
 
-import {
-  ACCOUNT_ENABLED,
-  boxOf,
-  expect,
-  gotoReady,
-  SHOPIFY_MODE,
-  test,
-} from "./fixtures.ts";
+import { ACCOUNT_ENABLED, boxOf, expect, gotoReady, test } from "./fixtures.ts";
 
 const DESKTOP_NAV_MIN_WIDTH = 1101;
 
@@ -34,7 +27,8 @@ test.describe("shell structure", () => {
   });
 
   test("loads the approved wordmark artwork", async ({ page }) => {
-    await gotoReady(page, "/");
+    /* Home floats the header over its hero with the reversed lockup. */
+    await gotoReady(page, "/search");
     const mark = page
       .getByRole("banner")
       .getByRole("link", { name: "Forward — home" })
@@ -297,22 +291,6 @@ test.describe("interactive affordances", () => {
 });
 
 test.describe("footer integration truth", () => {
-  test("renders only the deployment mode's truthful status", async ({
-    page,
-  }) => {
-    await gotoReady(page, "/");
-    const footer = page.getByRole("contentinfo");
-    const staticStatus = footer.getByText(
-      "Static demonstration storefront · Not a live store",
-    );
-
-    if (SHOPIFY_MODE) {
-      await expect(staticStatus).toHaveCount(0);
-    } else {
-      await expect(staticStatus).toBeVisible();
-    }
-  });
-
   test("keeps the Footer grid at five or one column at project widths", async ({
     page,
   }, testInfo) => {

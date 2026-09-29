@@ -7,7 +7,7 @@ import type {
   ProductOption,
   ProductVariant,
   StorefrontImage,
-} from "../types";
+} from "@/lib/storefront/types";
 
 const PRODUCT_IMAGE_WIDTH = 1600;
 const PRODUCT_IMAGE_HEIGHT = 2000;

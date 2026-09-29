@@ -1,7 +1,9 @@
 import { Suspense } from "react";
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
 import { storefront } from "@/lib/storefront/data-source";
+import { readThemeSettings } from "@/lib/weaverse/server";
 import { FieldIndexHeader } from "./field-index-header";
+import { ACCOUNT_LINK } from "./header-navigation";
 import { QueryPreservingFieldIndexHeader } from "./query-preserving-field-index-header";
 
 /**
@@ -10,22 +12,20 @@ import { QueryPreservingFieldIndexHeader } from "./query-preserving-field-index-
  * reader's Suspense fallback so static pages never bail out to client rendering.
  */
 export async function SiteHeader() {
-  const [navigation, themeContent, collections] = await Promise.all([
+  const [navigation, settings, collections] = await Promise.all([
     storefront.getNavigation(),
-    storefront.getThemeContent(),
+    readThemeSettings(),
     storefront.listCollections(),
   ]);
 
-  const accountEnabled = getCustomerAccountRuntime() !== null;
-  const utility = accountEnabled
-    ? navigation.utility
-    : navigation.utility.filter((item) => item.href !== "/account");
+  const utility = getCustomerAccountRuntime() === null ? [] : [ACCOUNT_LINK];
+  const announcement = settings.announcement ?? "";
 
   return (
     <Suspense
       fallback={
         <FieldIndexHeader
-          announcement={themeContent.announcement}
+          announcement={announcement}
           collections={collections}
           primary={navigation.primary}
           utility={utility}
@@ -33,7 +33,7 @@ export async function SiteHeader() {
       }
     >
       <QueryPreservingFieldIndexHeader
-        announcement={themeContent.announcement}
+        announcement={announcement}
         collections={collections}
         primary={navigation.primary}
         utility={utility}

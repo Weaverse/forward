@@ -4,6 +4,10 @@ import type {
   StorefrontImage,
 } from "@/lib/storefront/types";
 
+/** Theme routes the header always offers; they are the theme's, not a menu's. */
+export const SEARCH_LINK: NavItem = { href: "/search", label: "Search" };
+export const ACCOUNT_LINK: NavItem = { href: "/account", label: "Account" };
+
 export interface FieldIndexCollection {
   id: string;
   index: string;
@@ -110,6 +114,14 @@ export function activeCollectionIndex(
 /** True for the catalog and any collection route. */
 function isCatalogHref(href: string): boolean {
   return href === "/shop" || href.startsWith("/shop/");
+}
+
+/**
+ * The Shop entry is current anywhere in the catalog: on any collection and on
+ * a product, whichever collection the merchant pointed Shop itself at.
+ */
+export function isShopActive(pathname: string): boolean {
+  return isCatalogHref(pathname) || pathname.startsWith("/products/");
 }
 
 /** The top-level menu entry that opens the Shop panel: the catalog branch. */

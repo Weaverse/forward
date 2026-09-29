@@ -15,6 +15,7 @@ import {
   type FieldIndexCollection,
   findShopItem,
   isActive,
+  SEARCH_LINK,
 } from "./header-navigation";
 import { HEADER_CONTROL_CLASS } from "./header-styles";
 
@@ -104,6 +105,7 @@ export function MobileMenu({
         { item, child: false },
         ...(item.children ?? []).map((child) => ({ item: child, child: true })),
       ]),
+    { item: SEARCH_LINK, child: false },
     ...utilityLinks.map((item) => ({ item, child: false })),
   ];
 

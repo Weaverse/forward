@@ -9,18 +9,18 @@
 
 import { afterEach, describe, it } from "bun:test";
 import assert from "node:assert/strict";
-import { act, render, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { ICON_PATHS } from "@/components/icon";
 import { FieldIndexHeader } from "@/components/site-header/field-index-header";
 import { fieldIndexCollections } from "@/components/site-header/header-navigation";
-import { COLLECTION_FIXTURES } from "@/lib/storefront/fixtures/collections";
-import { THEME_CONTENT_FIXTURE } from "@/lib/storefront/fixtures/navigation";
 import type { NavItem } from "@/lib/storefront/types";
+import { COLLECTION_FIXTURES } from "../fixtures/storefront/collections";
 import {
   type AccountStatusStub,
   PRIMARY_NAV,
+  renderWithCart,
   stubAccountStatus,
   UTILITY_NAV_NO_ACCOUNT,
   UTILITY_NAV_WITH_ACCOUNT,
@@ -68,9 +68,9 @@ function mountHeader({
 }: MountOptions = {}) {
   setRoute(pathname, queryString);
   account = stubAccountStatus(signedIn);
-  return render(
+  return renderWithCart(
     <FieldIndexHeader
-      announcement={THEME_CONTENT_FIXTURE.announcement}
+      announcement="Free shipping over $150 · Repairs for life"
       collections={COLLECTION_FIXTURES}
       primary={primary}
       queryString={queryString}

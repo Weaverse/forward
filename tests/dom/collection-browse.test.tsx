@@ -1,10 +1,6 @@
 import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { render } from "@testing-library/react";
-
-import { COLLECTION_FIXTURES } from "@/lib/storefront/fixtures/collections";
-import { PRODUCT_FIXTURES } from "@/lib/storefront/fixtures/products";
-import { synthesizeProductFilters } from "@/lib/storefront/product-filters";
 import type { CollectionProductsPage } from "@/lib/storefront/types";
 import {
   type StorefrontDataContext,
@@ -14,6 +10,9 @@ import CollectionContent from "@/sections/main-collection/content";
 import CollectionFilters from "@/sections/main-collection/filters";
 import CollectionProductGrid from "@/sections/main-collection/product-grid";
 import CollectionToolbar from "@/sections/main-collection/toolbar";
+import { COLLECTION_FIXTURES } from "../fixtures/storefront/collections";
+import { FILTER_FIXTURES } from "../fixtures/storefront/filters";
+import { PRODUCT_FIXTURES } from "../fixtures/storefront/products";
 
 import { setRoute } from "./preload";
 
@@ -38,7 +37,7 @@ function routeContext(
     collection: COLLECTION,
     collectionProducts: products,
     browse: {
-      filters: synthesizeProductFilters(PRODUCT_FIXTURES),
+      filters: FILTER_FIXTURES,
       sort: "featured",
       pageInfo,
     },

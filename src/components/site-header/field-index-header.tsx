@@ -20,6 +20,8 @@ import {
   findShopItem,
   isActive,
   isBranchActive,
+  isShopActive,
+  SEARCH_LINK,
 } from "./header-navigation";
 import {
   HEADER_CONTROL_CLASS,
@@ -83,7 +85,7 @@ export function FieldIndexHeader({
   const aboutPanelId = useId();
   const mobilePanelId = useId();
 
-  const searchItem = primary.find((item) => item.href === "/search");
+  const searchItem = SEARCH_LINK;
   const primaryLinks = primary.filter(
     (item) => item !== shopItem && item.href !== "/search",
   );
@@ -232,7 +234,7 @@ export function FieldIndexHeader({
         <span className="hidden md:inline">
           Shopify · Hydrogen · Next.js · Weaverse
         </span>
-        <span>{announcement}</span>
+        {announcement === "" ? null : <span>{announcement}</span>}
         <CountryControl />
       </aside>
       <header
@@ -257,9 +259,7 @@ export function FieldIndexHeader({
             <Link
               href={createHeaderNavigationHref(shopItem.href, queryString)}
               className={PRIMARY_NAV_ITEM_CLASS}
-              aria-current={
-                isActive(pathname, shopItem.href) ? "page" : undefined
-              }
+              aria-current={isShopActive(pathname) ? "page" : undefined}
             >
               <i className={NAV_ITEM_INDEX_CLASS}>01</i>
               {shopItem.label}
@@ -269,9 +269,7 @@ export function FieldIndexHeader({
               ref={desktopTriggerRef}
               type="button"
               className={PRIMARY_NAV_ITEM_CLASS}
-              aria-current={
-                isActive(pathname, shopItem.href) ? "page" : undefined
-              }
+              aria-current={isShopActive(pathname) ? "page" : undefined}
               aria-expanded={desktopOpen}
               aria-controls={desktopOpen ? desktopPanelId : undefined}
               onClick={toggleDesktop}

@@ -1,6 +1,6 @@
 /**
  * One permanent browser verification matrix
- * (`bun run test:browser:{static,live-account-disabled,live-account-enabled}`).
+ * (`bun run test:browser:{live-account-disabled,live-account-enabled}`).
  *
  * Each matrix builds its own fresh production bundle into an isolated build
  * directory, starts its own `next start` on its own port through Playwright's
@@ -23,14 +23,13 @@ import {
 } from "./env-matrix.mts";
 
 const MATRIX_PORTS: Readonly<Record<string, string>> = {
-  static: "4991",
   "live-account-disabled": "4992",
   "live-account-enabled": "4993",
 };
 
 const matrix = parseMatrixArgument(process.argv[2]);
 const distDir = `.forward-browser/${matrix}/next`;
-const port = MATRIX_PORTS[matrix] ?? "4991";
+const port = MATRIX_PORTS[matrix] ?? "4992";
 
 const child = buildChildEnvironment(matrix, {
   FORWARD_MATRIX: matrix,

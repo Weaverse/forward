@@ -9,10 +9,9 @@
 
 import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
-import { render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { getCartSnapshot } from "@/lib/demo-cart/store";
 import { formatMoney } from "@/lib/storefront/format";
 import type { Money, Product } from "@/lib/storefront/types";
 import { StorefrontDataProvider } from "@/lib/weaverse/data-context";
@@ -27,7 +26,7 @@ import ProductPrices from "@/sections/main-product/prices";
 import ProductSummary from "@/sections/main-product/summary";
 import ProductTitle from "@/sections/main-product/title";
 import ProductVariantSelector from "@/sections/main-product/variant-selector";
-import { productByHandle, visibleText } from "./harness";
+import { productByHandle, renderWithCart, visibleText } from "./harness";
 import { currentRoute, setRoute } from "./preload";
 
 const SHELL = productByHandle("weatherline-shell");
@@ -51,7 +50,7 @@ function withVariants(
 function mountPdp(product: Product, query: string) {
   setRoute(`/products/${product.handle}`, query);
   /* The tree the section's preset seeds into a template. */
-  return render(
+  return renderWithCart(
     <StorefrontDataProvider value={{ product }}>
       <MainProduct>
         <ProductMedia />
@@ -305,33 +304,24 @@ describe("gallery", () => {
 });
 
 describe("add to cart identity", () => {
-  it("adds the exact selected variant with its colorway, size, and deep link", async () => {
+  it("submits the exact selected variant and quantity to the Shopify cart", async () => {
     const user = userEvent.setup();
-    mountPdp(SHELL, "colorway=claystone-charcoal&size=L");
+    const { container } = mountPdp(SHELL, "colorway=claystone-charcoal&size=L");
 
     await user.click(screen.getByRole("button", { name: "Increase quantity" }));
-    await user.click(screen.getByRole("button", { name: /^Add to cart/ }));
 
-    assert.deepEqual(
-      getCartSnapshot().map((line) => ({
-        variantId: line.variantId,
-        productHandle: line.productHandle,
-        colorwayId: line.colorwayId,
-        selectedOptions: line.selectedOptions,
-        quantity: line.quantity,
-        href: line.href,
-      })),
-      [
-        {
-          variantId: "demo:weatherline-shell:claystone-charcoal:L",
-          productHandle: "weatherline-shell",
-          colorwayId: "claystone-charcoal",
-          selectedOptions: { Size: "L" },
-          quantity: 2,
-          href: "/products/weatherline-shell?colorway=claystone-charcoal&size=L",
-        },
-      ],
+    const selected = SHELL.variants.find(
+      (variant) =>
+        variant.colorwayId === "claystone-charcoal" &&
+        variant.selectedOptions.some(
+          (option) => option.name === "Size" && option.value === "L",
+        ),
     );
+    assert.ok(selected);
+    const field = (name: string) =>
+      container.querySelector<HTMLInputElement>(`input[name="${name}"]`)?.value;
+    assert.equal(field("merchandiseId"), selected.id);
+    assert.equal(field("quantity"), "2");
     assert.match(
       visibleText(screen.getByRole("button", { name: /^Add to cart/ })),
       new RegExp(`Add to cart · ${money(496)}`),
@@ -348,6 +338,5 @@ describe("add to cart identity", () => {
     const atc = screen.getByRole("button", { name: /^Sold out/ });
     assert.equal(atc.hasAttribute("disabled"), true);
     assert.match(visibleText(atc), new RegExp(`Sold out · ${money(248)}`));
-    assert.equal(getCartSnapshot().length, 0);
   });
 });

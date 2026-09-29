@@ -4,21 +4,16 @@ import { cva } from "class-variance-authority";
 import { useEffect, useRef, useState } from "react";
 import { announceCartAdd } from "@/lib/cart/mini-cart-signal";
 import {
+  MAX_LINE_QUANTITY,
   ShopifyProductProvider,
   toHydrogenProductInput,
   useShopifyCart,
-  useShopifyCartMode,
   useShopifyProductForm,
 } from "@/lib/cart/shopify-cart-react";
 import { cn } from "@/lib/cn";
-import { lineKey, MAX_LINE_QUANTITY } from "@/lib/demo-cart/cart-logic";
-import { addCartLine } from "@/lib/demo-cart/store";
 import { cta } from "@/lib/presentation/variants";
 import { formatMoney } from "@/lib/storefront/format";
-import {
-  type ProductSelection,
-  productSelectionHref,
-} from "@/lib/storefront/product-state";
+import type { ProductSelection } from "@/lib/storefront/product-state";
 import type { Product } from "@/lib/storefront/types";
 
 type Surface = "dark" | "light";
@@ -67,103 +62,6 @@ const note = cva(
     },
   },
 );
-
-function DemoAddToCartForm({
-  product,
-  selection,
-  tone = "dark",
-  addToCartText = "Add to cart",
-  soldOutText = "Sold out",
-  showCartNote = true,
-}: AddToCartFormProps) {
-  const [quantity, setQuantity] = useState(1);
-  const [status, setStatus] = useState("");
-  const size = selection.selectedOptions.Size;
-
-  function handleAdd() {
-    if (!selection.variant.availableForSale) return;
-    addCartLine({
-      key: lineKey(product.handle, selection.variant.id),
-      variantId: selection.variant.id,
-      productHandle: product.handle,
-      title: product.title,
-      colorwayId: selection.colorway.id,
-      colorwayName: selection.colorway.name,
-      selectedOptions: selection.selectedOptions,
-      quantity,
-      unitPrice: selection.variant.price,
-      image: selection.colorway.images.primary,
-      href: productSelectionHref(
-        product,
-        selection.colorway.id,
-        selection.selectedOptions,
-      ),
-    });
-    setStatus(
-      `Added ${quantity} × ${product.title} (${selection.colorway.name}${
-        size !== undefined ? `, ${size}` : ""
-      }) to the demo cart.`,
-    );
-    announceCartAdd(selection.variant.id);
-  }
-
-  return (
-    <>
-      <div className={ACTIONS_CLASS}>
-        <div className={quantityBox({ tone })}>
-          <button
-            className={QUANTITY_BUTTON_CLASS}
-            type="button"
-            aria-label="Decrease quantity"
-            disabled={quantity <= 1}
-            onClick={() => setQuantity((current) => Math.max(1, current - 1))}
-          >
-            −
-          </button>
-          <output
-            className={QUANTITY_OUTPUT_CLASS}
-            aria-live="polite"
-            aria-label="Quantity"
-          >
-            {quantity}
-          </output>
-          <button
-            className={QUANTITY_BUTTON_CLASS}
-            type="button"
-            aria-label="Increase quantity"
-            disabled={quantity >= MAX_LINE_QUANTITY}
-            onClick={() =>
-              setQuantity((current) => Math.min(MAX_LINE_QUANTITY, current + 1))
-            }
-          >
-            +
-          </button>
-        </div>
-        <button
-          className={addToCartClass(tone)}
-          type="button"
-          disabled={!selection.variant.availableForSale}
-          onClick={handleAdd}
-        >
-          {selection.variant.availableForSale ? addToCartText : soldOutText} ·{" "}
-          {formatMoney({
-            amount: selection.variant.price.amount * quantity,
-            currencyCode: "USD",
-          })}
-        </button>
-      </div>
-      <p className={feedback({ tone })} role="status">
-        {status}
-      </p>
-      {showCartNote ? (
-        <p className={note({ tone })}>
-          Demo cart only — items stay in this browser and no checkout is
-          connected.
-        </p>
-      ) : null}
-    </>
-  );
-}
 
 function ShopifyAddToCartForm({
   selection,
@@ -288,7 +186,7 @@ function ShopifyAddToCartForm({
 }
 
 export function AddToCartForm(props: AddToCartFormProps) {
-  return useShopifyCartMode() ? (
+  return (
     <ShopifyProductProvider
       product={toHydrogenProductInput(
         props.product,
@@ -298,7 +196,5 @@ export function AddToCartForm(props: AddToCartFormProps) {
     >
       <ShopifyAddToCartForm {...props} />
     </ShopifyProductProvider>
-  ) : (
-    <DemoAddToCartForm {...props} />
   );
 }

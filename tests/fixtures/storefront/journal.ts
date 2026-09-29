@@ -1,6 +1,6 @@
 /** Representative static Field Notes. Shopify owns the published long-form copy. */
 
-import type { ArticleBlock, JournalArticle } from "../types";
+import type { ArticleBlock, JournalArticle } from "@/lib/storefront/types";
 import { EDITORIAL_IMAGES } from "./editorial-images";
 
 type StaticArticleBlock =

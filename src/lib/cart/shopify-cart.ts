@@ -32,9 +32,6 @@ export function runtimeEnvironment(
 
 function createCartRequestContext(request: Request, source: EnvSource) {
   const config = readShopifyCatalogConfig(source);
-  if (config === null) {
-    throw new Error("Shopify cart is unavailable in static storefront mode.");
-  }
   const environment = runtimeEnvironment(source.NODE_ENV);
   const buyerIp = readTrustedBuyerIp(request.headers, environment);
   const requestContext = createShopifyRequestContext({

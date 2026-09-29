@@ -89,12 +89,13 @@ Forward is a fresh Next.js App Router storefront theme using
 
 - Routes and visual components consume storefront data only through the
   `storefront` instance exported from `src/lib/storefront/data-source.ts`.
-  Never import fixture objects from `src/lib/storefront/fixtures/`, Shopify
-  queries, or raw Shopify shapes directly in pages or components.
-- Mode selection is explicit and fails closed: no Shopify environment selects
-  the static adapter, a complete environment selects the Shopify adapter, and
-  a partial environment throws a sanitized configuration error. Nothing falls
-  back to fixtures in Shopify mode — products, collections and menus alike.
+  Never import Shopify queries or raw Shopify shapes directly in pages or
+  components.
+- Forward always runs against a real Shopify store. There is no static mode:
+  an absent, partial or malformed Shopify environment throws a sanitized
+  configuration error, so a build or route without credentials fails closed.
+  Nothing falls back to fixtures — products, collections, content and menus
+  alike.
   Menus are the merchant's as arranged: a menu the store has not set up is
   empty, and a link to another origin or to a route the theme lacks is left
   out. Failing closed is
@@ -108,9 +109,12 @@ Forward is a fresh Next.js App Router storefront theme using
   in `src/lib/storefront/shopify/env.ts`.
 - Unknown dynamic handles resolve to `null` from the data source and routes
   must translate that into `notFound()` — never invent content.
-- The demo cart (`src/lib/demo-cart/`) remains browser-local prototype state in
-  static mode only. Shopify mode must replace it with the server-owned Cart API
-  integration and an honestly validated checkout handoff.
+- Fixtures live in `tests/fixtures/storefront/` and are test data only; no
+  runtime module under `src/` imports them (a test enforces it).
+- The cart is the server-owned Shopify Cart API with a validated checkout
+  handoff. There is no browser-local cart.
+- Theme-owned copy (announcement, footer tagline, fallback imagery) comes from
+  Weaverse theme settings; an unset setting renders nothing.
 - The Shopify adapter continues to replace the data source one domain at a
   time without rewriting page composition.
 - Run `bun run check:graphql` (`hydrogen gql check`) after adding or changing
@@ -163,20 +167,18 @@ bun run check
 
 (`bun run check` composes typecheck → lint → format:check → test →
 check:graphql → build → check:theme → check:routes; `smoke:routes` needs the
-production build and is run separately.)
+production build and is run separately.) `build`, and therefore `check`,
+requires the Shopify environment.
 
-Credential-dependent gates are never part of `check`:
+Further credential-dependent gates:
 
-- `bun run verify:static` builds and runs the route/smoke contract with every
-  Shopify credential removed in a script-owned child environment.
 - `bun run verify:live` requires the complete live Shopify configuration and
   runs the live build/route/read-only gates for both account-disabled and
   account-enabled states.
 - `bun run verify:shopify` is the opt-in live read-only catalog verification.
   It asserts rules that hold for any store, never a fixed catalog.
-- `bun run test:browser` aggregates `test:browser:static`,
-  `test:browser:live-account-disabled`, and `test:browser:live-account-enabled`
-  against fresh production builds. It fails when a required credential matrix
+- `bun run test:browser` aggregates `test:browser:live-account-disabled` and
+  `test:browser:live-account-enabled` against fresh production builds. It fails when a required credential matrix
   cannot be established rather than skipping it.
 
 Inspect the final git diff and keep generated/build output untracked.

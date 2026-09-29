@@ -28,4 +28,4 @@ used to replicate Unsplash.
 The `Downloaded as` query string records the exact Unsplash CDN render used to
 produce the local optimized WebP (single fetch at implementation time,
 2026-08-05). Product imagery never uses stock photography — products use only
-the approved branded catalog in `public/images/products/`.
+their own media from the Shopify store.

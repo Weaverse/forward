@@ -149,15 +149,9 @@ mock.module("next/font/google", () => ({
 /* --------------------------------------------------------------- cleanup */
 
 const { cleanup } = await import("@testing-library/react");
-const { getCartSnapshot, removeCartLine } = await import(
-  "@/lib/demo-cart/store"
-);
 
 afterEach(() => {
   cleanup();
-  for (const line of [...getCartSnapshot()]) {
-    removeCartLine(line.key);
-  }
   document.body.className = "";
   document.body.innerHTML = "";
   window.localStorage.clear();

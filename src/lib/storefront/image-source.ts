@@ -1,14 +1,10 @@
 /**
- * Allowed sources for normalized product imagery.
+ * Allowed sources for normalized storefront imagery: the store's own Shopify
+ * CDN media. The same allowlist backs the Next Image remote pattern in
+ * `next.config.ts`.
  *
- * Static mode serves the approved branded catalog from `public/images/products/`.
- * Shopify mode serves owned product media from the store's Shopify CDN. These
- * are the only two shapes any normalized `StorefrontImage.src` may take, and
- * the same allowlist backs the Next Image remote pattern in `next.config.ts`
- * and the demo-cart storage validator.
- *
- * This module has no dependencies on purpose: it is imported by the Next config,
- * by server-only Shopify mapping code, and by browser demo-cart code.
+ * This module has no dependencies on purpose: it is imported by the Next config
+ * as well as by server-only Shopify mapping code.
  */
 
 /** The exact Shopify CDN hostname that serves this store's owned media. */
@@ -20,8 +16,6 @@ export const SHOPIFY_IMAGE_HOSTNAME = "cdn.shopify.com";
  * from the sibling `collections/` folder.
  */
 export const SHOPIFY_IMAGE_PATH_PREFIX = "/s/files/1/0978/4757/4828/";
-
-const LOCAL_PRODUCT_IMAGE_PATTERN = /^\/images\/products\/[a-z0-9-]+\.webp$/;
 
 /** True for an owned Shopify CDN media URL (https, exact host, files path). */
 export function isShopifyProductImageUrl(src: string): boolean {
@@ -55,14 +49,4 @@ export function isShopifyProductImageUrl(src: string): boolean {
     !decodedSegments.includes("..") &&
     !decodedSegments.includes(".")
   );
-}
-
-/** True for an approved static catalog image path. */
-export function isLocalProductImagePath(src: string): boolean {
-  return LOCAL_PRODUCT_IMAGE_PATTERN.test(src);
-}
-
-/** True when `src` is an approved product image source in either mode. */
-export function isAllowedProductImageSrc(src: string): boolean {
-  return isLocalProductImagePath(src) || isShopifyProductImageUrl(src);
 }

@@ -1,10 +1,9 @@
 /**
- * Static navigation and theme-content fixture records. Only the data source
- * may import this file.
+ * Static navigation and theme-content fixture records. Test data only; runtime
+ * code never imports it.
  */
 
-import type { SiteNavigation, ThemeContent } from "../types";
-import { EDITORIAL_IMAGES } from "./editorial-images";
+import type { SiteNavigation } from "@/lib/storefront/types";
 
 export const NAVIGATION_FIXTURE: SiteNavigation = {
   primary: [
@@ -31,11 +30,6 @@ export const NAVIGATION_FIXTURE: SiteNavigation = {
         { href: "/pages/contact", label: "Contact" },
       ],
     },
-    { href: "/search", label: "Search" },
-  ],
-  utility: [
-    { href: "/account", label: "Account" },
-    { href: "/cart", label: "Cart" },
   ],
   footerColumns: [
     {
@@ -67,15 +61,4 @@ export const NAVIGATION_FIXTURE: SiteNavigation = {
       ],
     },
   ],
-} as const;
-
-export const THEME_CONTENT_FIXTURE: ThemeContent = {
-  announcement: "Free shipping over $150 · Repairs for life",
-  footerTagline:
-    "Gear for moving through weather, not around it. A short catalog, built slowly and repaired indefinitely.",
-  demoNotice:
-    "Forward is running as a static demonstration storefront. Catalog and cart data are local fixtures, customer accounts are unavailable, and nothing you do here is sent anywhere.",
-  footerStatus: "Static demonstration storefront · Not a live store",
-  homeHeroImage: EDITORIAL_IMAGES.heroOpenSky,
-  standardBandImage: EDITORIAL_IMAGES.mountainRidges,
 } as const;

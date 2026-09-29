@@ -6,9 +6,7 @@
  * and leaves the storefront as the single owner of product data.
  *
  * Resolution therefore goes through the `storefront` data source, exactly like
- * every other read in this theme. A loader never queries Shopify directly: in
- * static mode the same handle resolves against fixtures, so a composed section
- * renders without credentials.
+ * every other read in this theme. A loader never queries Shopify directly.
  */
 
 import "server-only";

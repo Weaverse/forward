@@ -15,7 +15,7 @@ import {
   formatRouteSegment,
   safeDecodeRouteSegment,
 } from "../src/lib/routes/segments.ts";
-import { JOURNAL_FIXTURES } from "../src/lib/storefront/fixtures/journal.ts";
+import { JOURNAL_FIXTURES } from "./fixtures/storefront/journal.ts";
 
 describe("normalizeAppRoutePattern", () => {
   it("normalizes page manifest keys to route patterns", () => {

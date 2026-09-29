@@ -10,7 +10,7 @@ import {
   createCartComponents,
   createProductComponents,
 } from "@shopify/hydrogen/react";
-import { createContext, type ReactNode, useContext } from "react";
+import type { ReactNode } from "react";
 
 import { formatMoney } from "@/lib/storefront/format";
 import type { Product } from "@/lib/storefront/types";
@@ -31,25 +31,11 @@ export const {
   useProductForm: useShopifyProductForm,
 } = createProductComponents<ProductInput>();
 
-const ShopifyCartModeContext = createContext(false);
+/** The most of one variant a single add or line may hold. */
+export const MAX_LINE_QUANTITY = 9;
 
-export function ShopifyCartRuntime({
-  enabled,
-  children,
-}: {
-  enabled: boolean;
-  children: ReactNode;
-}) {
-  if (!enabled) return children;
-  return (
-    <ShopifyCartModeContext.Provider value>
-      <ShopifyCartProvider>{children}</ShopifyCartProvider>
-    </ShopifyCartModeContext.Provider>
-  );
-}
-
-export function useShopifyCartMode(): boolean {
-  return useContext(ShopifyCartModeContext);
+export function ShopifyCartRuntime({ children }: { children: ReactNode }) {
+  return <ShopifyCartProvider>{children}</ShopifyCartProvider>;
 }
 
 /** Renders Shopify cart money, or an em dash when it is absent or off-currency. */

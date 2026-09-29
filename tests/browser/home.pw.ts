@@ -1,137 +1,36 @@
 /**
- * Home — rendered composition and the layout contracts only a browser proves.
+ * Home — the layout contracts only a browser proves.
  *
- * Section order, links, media hints, and copy are read from the real page.
- * Everything else here is geometry: the one-viewport desktop bound, the short
- * desktop bound, natural mobile stacking, no horizontal overflow, Journal card
- * alignment, and reduced motion.
+ * Home is composed in Weaverse, so its sections, copy and links are whatever
+ * the merchant authored and are not asserted here. What the theme owns is:
+ * every image carries an alternative attribute and a responsive size hint, the
+ * page never scrolls horizontally, Journal cards share a baseline, and reduced
+ * motion removes transition time.
  */
 
-import { PRODUCT_FIXTURES } from "../../src/lib/storefront/fixtures/products.ts";
-import { boxOf, expect, gotoReady, SHOPIFY_MODE, test } from "./fixtures.ts";
+import { boxOf, expect, gotoReady, test } from "./fixtures.ts";
 
-/** Headings the theme owns, at their exact position in the page outline. */
-const FIXED_HEADINGS: Readonly<Record<number, string>> = {
-  0: "Equipment for weather that changes the plan.",
-  1: "Start with the core four.",
-  2: "Built separately. Better together.",
-  4: "Fewer materials. Better understood.",
-  5: "Carry the day, not the doubt.",
-  6: "Keep equipment in motion.",
-};
-
-function subtitleFor(handle: string): string {
-  const product = PRODUCT_FIXTURES.find((entry) => entry.handle === handle);
-  if (product === undefined) throw new Error(`no product for ${handle}`);
-  return product.subtitle;
-}
-
-test.describe("Home composition", () => {
-  test("keeps the exact accepted section and heading order", async ({
-    page,
-  }) => {
-    await gotoReady(page, "/");
-
-    const headings = await page.locator("main h1, main h2").allTextContents();
-    expect(headings).toHaveLength(8);
-    for (const [index, text] of Object.entries(FIXED_HEADINGS)) {
-      expect(headings[Number(index)]?.trim()).toBe(text);
-    }
-    /* Slots 3 and 7 are the live spotlight product and latest dispatch. */
-    expect(headings[3]?.trim().length).toBeGreaterThan(0);
-    expect(headings[7]?.trim().length).toBeGreaterThan(0);
-  });
-
-  test("merchandises with the theme's concise summaries, never the full description", async ({
-    page,
-  }) => {
-    await gotoReady(page, "/");
-    const body = (await page.locator("main").innerText()).replace(/\s+/g, " ");
-
-    expect(body).toContain(subtitleFor("drift-insulated-vest"));
-    expect(body).toContain(subtitleFor("approach-18-day-pack"));
-    /* Authored short, never clipped from arbitrary copy at runtime. */
-    expect(body).not.toMatch(/…|\.\.\./);
-  });
-
-  test("links the spotlight and kit to their exact products", async ({
-    page,
-  }) => {
-    await gotoReady(page, "/");
-
-    await expect(
-      page.locator('main a[href="/products/drift-insulated-vest"]'),
-    ).toHaveCount(1);
-    await expect(
-      page.locator('main a[href^="/products/approach-18-day-pack"]'),
-    ).toHaveCount(1);
-    await expect(
-      page.getByRole("link", { name: "Shop all equipment" }),
-    ).toHaveAttribute("href", "/shop");
-  });
-
-  test("gives every Home image an alternative and a responsive size hint", async ({
+test.describe("Home images", () => {
+  test("gives every image an alternative attribute and a responsive size hint", async ({
     page,
   }) => {
     await gotoReady(page, "/");
     const images = page.locator("main img");
     const count = await images.count();
-    expect(count).toBeGreaterThan(5);
 
     for (let index = 0; index < count; index += 1) {
       const image = images.nth(index);
-      const alt = await image.getAttribute("alt");
-      const sizes = await image.getAttribute("sizes");
-      expect(alt, `image ${index} has no alternative`).toBeTruthy();
-      expect(sizes, `image ${index} has no sizes hint`).toBeTruthy();
-      if (!SHOPIFY_MODE) {
-        await image.scrollIntoViewIfNeeded();
-        await expect(image).toHaveJSProperty("complete", true);
-        expect(
-          await image.evaluate((node: HTMLImageElement) => node.naturalWidth),
-          `image ${index} did not load`,
-        ).toBeGreaterThan(0);
-      }
+      /* An empty alternative marks a decorative image, which is the author's
+       * call; a missing attribute never is. */
+      expect(
+        await image.getAttribute("alt"),
+        `image ${index} has no alt attribute`,
+      ).not.toBeNull();
+      expect(
+        await image.getAttribute("sizes"),
+        `image ${index} has no sizes hint`,
+      ).toBeTruthy();
     }
-  });
-
-  test("advertises the accepted spotlight and kit image widths", async ({
-    page,
-  }) => {
-    await gotoReady(page, "/");
-
-    const spotlight = page
-      .locator("main section")
-      .filter({ hasText: subtitleFor("drift-insulated-vest") })
-      .locator("img")
-      .first();
-    await expect(spotlight).toHaveAttribute(
-      "sizes",
-      "(min-width: 820px) 60vw, 100vw",
-    );
-
-    const kit = page
-      .locator("main section")
-      .filter({ hasText: "Carry the day, not the doubt." })
-      .locator("img")
-      .first();
-    await expect(kit).toHaveAttribute("sizes", "(min-width: 820px) 20vw, 45vw");
-  });
-
-  test("stacks the Shop by system label above its heading", async ({
-    page,
-  }) => {
-    await gotoReady(page, "/");
-
-    const label = page.getByText("Shop by system", { exact: true });
-    const heading = page.getByRole("heading", {
-      name: "Built separately. Better together.",
-    });
-    const labelBox = await boxOf(label);
-    const headingBox = await boxOf(heading);
-
-    expect(labelBox.y + labelBox.height).toBeLessThanOrEqual(headingBox.y + 1);
-    expect(Math.abs(labelBox.x - headingBox.x)).toBeLessThan(2);
   });
 });
 
@@ -145,40 +44,6 @@ test.describe("Home geometry", () => {
         document.documentElement.clientWidth,
     );
     expect(overflow).toBeLessThanOrEqual(1);
-  });
-
-  test("bounds Spotlight and Kit to one viewport on desktop and lets mobile grow", async ({
-    page,
-  }, testInfo) => {
-    await gotoReady(page, "/");
-    const viewport = page.viewportSize();
-    expect(viewport).not.toBeNull();
-    if (viewport === null) return;
-
-    const sections = [
-      page
-        .locator("main section")
-        .filter({ hasText: subtitleFor("drift-insulated-vest") })
-        .first(),
-      page
-        .locator("main section")
-        .filter({ hasText: "Carry the day, not the doubt." })
-        .first(),
-    ];
-
-    for (const section of sections) {
-      const box = await boxOf(section);
-      if (testInfo.project.name === "mobile") {
-        /* Mobile stacks at natural content height rather than being clipped. */
-        expect(box.height).toBeGreaterThan(0);
-        expect(box.width).toBeLessThanOrEqual(viewport.width + 1);
-      } else {
-        expect(
-          box.height,
-          `${testInfo.project.name} must keep the section within one viewport`,
-        ).toBeLessThanOrEqual(viewport.height + 1);
-      }
-    }
   });
 
   test("keeps every Journal card on one baseline", async ({

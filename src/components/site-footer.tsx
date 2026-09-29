@@ -11,6 +11,7 @@ import {
   SOCIAL_SECTION_HEADING,
   VERIFIED_SOCIAL_LINKS,
 } from "@/lib/storefront/integrations";
+import { readThemeSettings } from "@/lib/weaverse/server";
 
 const FOOTER_COLUMN_CLASS =
   "[&>a]:flex [&>a]:min-h-9 [&>a]:items-center [&>a]:text-caption [&>a:hover]:text-signal [&>h2]:mt-0 [&>h2]:mb-3.75 [&>h2]:font-body [&>h2]:text-field-meta [&>h2]:text-text-dark-muted [&>h2]:tracking-field-meta [&>h2]:uppercase";
@@ -24,9 +25,9 @@ const FOOTER_COLUMN_CLASS =
  * at all rather than a decorative claim the shopper cannot check.
  */
 export async function SiteFooter() {
-  const [navigation, themeContent] = await Promise.all([
+  const [navigation, settings] = await Promise.all([
     storefront.getNavigation(),
-    storefront.getThemeContent(),
+    readThemeSettings(),
   ]);
 
   const accountEnabled = getCustomerAccountRuntime() !== null;
@@ -48,9 +49,11 @@ export async function SiteFooter() {
       >
         <div className="col-auto sm:col-span-full md:col-auto">
           <Wordmark variant="footer" />
-          <p className="mt-7.5 mb-prose-paragraph max-w-95 text-text-dark-muted">
-            {themeContent.footerTagline}
-          </p>
+          {settings.footerTagline ? (
+            <p className="mt-7.5 mb-prose-paragraph max-w-95 text-text-dark-muted">
+              {settings.footerTagline}
+            </p>
+          ) : null}
         </div>
         {footerColumns.map((column) => (
           <nav
@@ -104,9 +107,6 @@ export async function SiteFooter() {
           VERIFIED_SOCIAL_LINKS.length > 0 ? "mt-6" : "mt-15",
         )}
       >
-        {themeContent.footerStatus.length > 0 ? (
-          <span>{themeContent.footerStatus}</span>
-        ) : null}
         <span>FORWARD · Field office 54.4609° N / 3.0886° W</span>
         <PaymentMarks />
       </div>

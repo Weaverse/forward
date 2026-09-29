@@ -1,13 +1,8 @@
 /**
- * Shopify-backed catalog and navigation data source.
+ * The Shopify-backed storefront data source.
  *
- * Products plus canonical collections and main/Footer navigation are live.
- * Content, theme text, utility presentation, cart, and account records remain
- * delegated to the injected static base until their own bounded slices.
- *
- * Product failures remain fail-closed. Main navigation, the whole Footer tree,
- * and canonical collection structure use independently scoped exact static
- * contracts when malformed remote data would otherwise take down routes.
+ * Products, collections, menus, pages, articles and policies are all read
+ * from the store. Every read fails closed: nothing falls back to fixtures.
  */
 
 import { searchNormalizedProducts } from "../catalog-query";
@@ -17,13 +12,11 @@ import type {
   Collection,
   CollectionProductsPage,
   CollectionProductsQuery,
-  DemoCartSeedLine,
   JournalArticle,
   Policy,
   Product,
   SiteNavigation,
   StorePage,
-  ThemeContent,
 } from "../types";
 import { CATALOG_REVALIDATE_SECONDS } from "./cache-policy";
 import type {
@@ -52,8 +45,6 @@ export { CATALOG_REVALIDATE_SECONDS } from "./cache-policy";
 const MILLISECONDS_PER_SECOND = 1000;
 
 export interface ShopifyCatalogDataSourceOptions {
-  /** Static implementation backing every not-yet-live domain. */
-  base: StorefrontDataSource;
   execute: CatalogQueryExecutor;
   executeCollection: CollectionQueryExecutor;
   executeAllProducts: AllProductsQueryExecutor;
@@ -85,7 +76,6 @@ interface ContentCacheEntry {
 }
 
 export class ShopifyCatalogDataSource implements StorefrontDataSource {
-  readonly #base: StorefrontDataSource;
   readonly #execute: CatalogQueryExecutor;
   readonly #executeCollection: CollectionQueryExecutor;
   readonly #executeAllProducts: AllProductsQueryExecutor;
@@ -103,7 +93,6 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   #contentInFlight: Promise<MappedContentResult> | null = null;
 
   constructor(options: ShopifyCatalogDataSourceOptions) {
-    this.#base = options.base;
     this.#execute = options.execute;
     this.#executeCollection = options.executeCollection;
     this.#executeAllProducts = options.executeAllProducts;
@@ -265,21 +254,15 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     );
   }
 
-  /**
-   * The store's own menus. Search and the utility links are the theme's own
-   * destinations rather than menu entries, so they come from the theme.
-   */
+  /** The store's own menus: the primary menu and the footer columns. */
   async getNavigation(): Promise<SiteNavigation> {
-    const [theme, result] = await Promise.all([
-      this.#base.getNavigation(),
-      this.#executeNavigation(),
-    ]);
+    const result = await this.#executeNavigation();
     return {
-      primary: [
-        ...mapMainMenuResult(result, this.#storeDomain, this.#mainMenuHandle),
-        ...theme.primary.filter((item) => item.href === "/search"),
-      ],
-      utility: theme.utility,
+      primary: mapMainMenuResult(
+        result,
+        this.#storeDomain,
+        this.#mainMenuHandle,
+      ),
       footerColumns: mapFooterMenuResult(result, this.#storeDomain),
     };
   }
@@ -311,20 +294,5 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   async getPolicy(handle: string): Promise<Policy | null> {
     const { policies } = await this.#loadContent();
     return policies.find((policy) => policy.handle === handle) ?? null;
-  }
-
-  async getThemeContent(): Promise<ThemeContent> {
-    return {
-      ...(await this.#base.getThemeContent()),
-      demoNotice:
-        "Forward uses a live Shopify catalog, navigation, content, and a secure Shopify cart. Checkout is handed off to Shopify.",
-      /* Live mode has no shopper-facing status to report; the empty string
-       * removes the build-state placeholder from the footer rail entirely. */
-      footerStatus: "",
-    };
-  }
-
-  async getDemoCartSeed(): Promise<readonly DemoCartSeedLine[]> {
-    return this.#base.getDemoCartSeed();
   }
 }

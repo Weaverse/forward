@@ -4,16 +4,12 @@ Forward is a fresh Next.js App Router storefront theme for Shopify, powered by W
 
 ## Status
 
-The storefront now has a hybrid production data source. With the approved
-server-only Shopify environment, products, canonical collection structure,
-Header `main-menu`, and the complete three-column `footer` navigation tree are
-read from the Storefront API. Footer navigation has one Store-owned source: it
-is not derived from `main-menu`, `forward-footer`, or theme-owned Support links.
-Without that environment it remains a deterministic, network-independent
-static storefront. Journal/page/policy bodies, theme copy, the browser-local
-demo cart, and prototype account surfaces still use fixtures; checkout,
-Customer Account OAuth, Weaverse Studio composition, and locale/market routing
-remain deferred.
+Forward always runs against a real Shopify store. Products, collections,
+pages, articles, policies and the `main-menu` / `footer` menus are read from
+the Storefront API with the server-only credentials; the cart is the Shopify
+Cart API. Without a complete Shopify environment the app refuses to start.
+Theme copy comes from Weaverse theme settings. Locale/market routing remains
+deferred.
 
 ## Setup
 
@@ -52,32 +48,30 @@ context, checkout, and Customer Account remain explicit future work.
 | `bun run lint` | Biome lint (`biome lint .`). |
 | `bun run format` | Format the repository and sort imports with Biome (writes). |
 | `bun run format:check` | Verify formatting and import order without writing. |
-| `bun test` | Unit tests (route contract, static data source, colorway/gallery helpers, demo-cart logic) via Bun's test runner. |
+| `bun run test` | Unit and DOM tests via Bun's test runner; they use the test fixtures in `tests/fixtures/`, never a network. |
 | `bun run check:routes` | Verify the route contract against actual build output (`.next` manifests). Requires a prior `bun run build`. |
 | `bun run smoke:routes` | Start the production server, verify every contract path and redirect over HTTP, then stop the server. Requires a prior `bun run build`. |
-| `bun run check` | Composed static gates: typecheck → lint → format:check → test → check:graphql → build → check:theme → check:routes. Leaves no server running. |
+| `bun run check` | Composed gates: typecheck → lint → format:check → test → check:graphql → build → check:theme → check:routes. The build needs the Shopify environment. Leaves no server running. |
 
 ## Storefront data architecture
 
 Storefront data flows through a single replaceable seam:
 
 ```text
-static fixtures or server-only Shopify Storefront API reads
-  -> StaticStorefrontDataSource or ShopifyCatalogDataSource
+server-only Shopify Storefront API reads
+  -> ShopifyCatalogDataSource
   -> normalized storefront view models (src/lib/storefront/types.ts)
   -> route loaders / page composition (src/app/**)
   -> visual components (src/components/**)
 ```
 
-Pages and components never import fixture objects directly — everything goes
-through the exported `storefront` instance. Unknown dynamic handles resolve to
-`null` and routes answer with real `notFound()` 404s. The Shopify adapter
-implements the same `StorefrontDataSource` interface one domain at a time
-without touching page composition.
+Pages and components never read Shopify directly — everything goes through
+the exported `storefront` instance. Unknown dynamic handles resolve to `null`
+and routes answer with real `notFound()` 404s. Fixtures under
+`tests/fixtures/storefront/` are test data only.
 
-The cart is an honest browser-local demo (`src/lib/demo-cart/`): quantities,
-removal, and totals work, state persists in the browser, and the UI labels it
-as a demo with no real checkout.
+The cart is the server-owned Shopify Cart API; checkout is handed off to
+Shopify.
 
 ## Route contract
 
@@ -105,7 +99,7 @@ The single source of truth is [`src/lib/routes/route-contract.ts`](src/lib/route
 
 ### Account protocol surfaces
 
-`/account/authorize` and `/account/logout` are explicit placeholders that answer `501 Not Implemented`. No authentication or credential handling exists in the static demo, and these handlers do not pretend otherwise. Account pages are polished prototype states rendered from demo fixtures and are labeled as not live.
+`/account/authorize` and `/account/logout` are explicit placeholders that answer `501 Not Implemented`. These handlers do not pretend otherwise. Account records come only from the Customer Account API; a deployment without account configuration renders no account data.
 
 ### Metadata/resource routes
 
@@ -120,31 +114,20 @@ The single source of truth is [`src/lib/routes/route-contract.ts`](src/lib/route
 | `/blogs/journal` | `/journal` |
 | `/blogs/journal/[articleHandle]` | `/journal/[articleHandle]` |
 
-### Fixtures
+### Smoke handles
 
-Dynamic routes are smoke-tested with approved fixture handles only
-(`weatherline-shell`, `ridge-30-field-pack`, `talus-trail-shoe` for products;
-`field-gear`, `walking-the-long-light`, `about-forward`, and
-`shipping-policy` for the other resource classes). The smoke handles live in
-`src/lib/routes/route-contract.ts` and resolve against the storefront
-fixtures in `src/lib/storefront/fixtures/`; unknown handles return real 404s.
+Dynamic routes are smoke-tested with approved handles only
+(`weatherline-shell`, `ridge-30-field-pack`, `talus-trail-shoe` for products,
+plus one handle per other resource class). They live in
+`src/lib/routes/route-contract.ts` and resolve against the live store;
+unknown handles return real 404s.
 
 ## Route checking vs. `shopify hydrogen check routes`
 
 Shopify's `shopify hydrogen check routes` inspects the file-based routes of Shopify's React Router Hydrogen skeleton. Forward uses the Hydrogen preview package inside Next.js App Router, so that framework-specific route checker is not authoritative here. The equivalent is `bun run check:routes`, which validates generated App Router manifests in `.next/` (not source filenames) against this repo's own route contract, plus `bun run smoke:routes`, which verifies live HTTP behavior — including permanent redirects — against a production server.
 
-## Static vs. live boundaries (deferred by design)
+## Deferred by design
 
-- Products, canonical collection structure, Header `main-menu`, and Footer
-  `footer` navigation are live in Shopify mode. Without the complete approved
-  server-only environment, the same normalized seam selects deterministic
-  static fixtures without network access.
-- Shopify-mode product reads fail closed. Header, Footer, and collection
-  structure have separate deterministic safeguards; one structure failure does
-  not change the others or turn a live product failure into fixture success.
-- No real cart mutations or checkout — the cart is browser-local demo state with an explicitly disabled checkout.
-- No Customer Account OAuth — account surfaces are labeled prototype states.
-- No Weaverse Studio bridge.
 - No locale/market routing (markets are TBD in the shared contract).
 - Vercel Production deployment is configured separately from repository data
   adapters; credentials remain outside Git and browser bundles.

@@ -3,14 +3,17 @@ import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { cta, sectionHeading } from "@/lib/presentation/variants";
 import { storefront } from "@/lib/storefront/data-source";
+import { weaverseImage } from "@/lib/weaverse/image";
+import { readThemeSettings } from "@/lib/weaverse/server";
 
 /** Shared accessible 404 for the root and every unknown dynamic handle. */
 export default async function NotFound() {
-  const [collections, themeContent] = await Promise.all([
+  const [collections, settings] = await Promise.all([
     storefront.listCollections(),
-    storefront.getThemeContent(),
+    readThemeSettings(),
   ]);
-  const panelImage = collections[0]?.heroImage ?? themeContent.homeHeroImage;
+  const panelImage =
+    collections[0]?.heroImage ?? weaverseImage(settings.homeHeroImage);
 
   return (
     <div className="m-3 grid min-h-[72svh] grid-cols-1 border border-ink md:m-6 md:grid-cols-split-65">
@@ -35,14 +38,16 @@ export default async function NotFound() {
         </div>
       </section>
       <div className="min-h-[50svh] md:min-h-auto">
-        <Image
-          className="h-full object-cover"
-          src={panelImage.src}
-          alt={panelImage.alt}
-          width={panelImage.width}
-          height={panelImage.height}
-          sizes="(min-width: 820px) 68vw, 100vw"
-        />
+        {panelImage === null ? null : (
+          <Image
+            className="h-full object-cover"
+            src={panelImage.src}
+            alt={panelImage.alt}
+            width={panelImage.width}
+            height={panelImage.height}
+            sizes="(min-width: 820px) 68vw, 100vw"
+          />
+        )}
       </div>
     </div>
   );

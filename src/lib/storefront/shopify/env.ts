@@ -1,13 +1,9 @@
 /**
  * Server-only environment boundary for the Shopify catalog adapter.
  *
- * Selection is explicit and fails closed:
- *
- * - no Shopify environment at all -> static catalog (the deterministic default
- *   used by tests and by this worktree);
- * - both required keys present -> Shopify catalog mode;
- * - a partial configuration -> `ShopifyConfigurationError` naming only the
- *   missing keys.
+ * Forward always runs against a real store, so this fails closed: both required
+ * keys configure the Shopify catalog, and anything less throws a
+ * `ShopifyConfigurationError` naming only the missing keys.
  *
  * `PUBLIC_STOREFRONT_API_TOKEN` and `PUBLIC_STOREFRONT_ID` are intentionally
  * not read here. Catalog reads are server-owned and use the private token with
@@ -59,14 +55,14 @@ function assertServerOnly(): void {
 /**
  * Resolves the catalog configuration from an environment source.
  *
- * Returns `null` when no Shopify environment is present (static mode). Throws a
- * sanitized `ShopifyConfigurationError` for partial or malformed configuration.
+ * Forward always runs against a real store, so an absent, partial or malformed
+ * configuration throws a sanitized `ShopifyConfigurationError`.
  * The source is a parameter so selection stays injectable and tests never have
  * to mutate `process.env`.
  */
 export function readShopifyCatalogConfig(
   source: EnvSource,
-): ShopifyCatalogConfig | null {
+): ShopifyCatalogConfig {
   assertServerOnly();
 
   const storeDomain = readKey(source, STORE_DOMAIN_ENV_KEY);
@@ -75,26 +71,20 @@ export function readShopifyCatalogConfig(
     PRIVATE_STOREFRONT_TOKEN_ENV_KEY,
   );
 
-  if (storeDomain === undefined && privateStorefrontToken === undefined) {
-    return null;
-  }
-
   const missing = SHOPIFY_CATALOG_ENV_KEYS.filter(
     (key) => readKey(source, key) === undefined,
   );
   if (missing.length > 0) {
     throw new ShopifyConfigurationError(
-      `Shopify catalog mode is partially configured. Missing required environment ${
+      `Shopify is not fully configured. Missing required environment ${
         missing.length === 1 ? "key" : "keys"
-      }: ${missing.join(", ")}. Set every key, or unset all of them to use the static catalog.`,
+      }: ${missing.join(", ")}.`,
     );
   }
 
   if (storeDomain === undefined || privateStorefrontToken === undefined) {
     // Unreachable: `missing` above already covers both keys.
-    throw new ShopifyConfigurationError(
-      "Shopify catalog mode is partially configured.",
-    );
+    throw new ShopifyConfigurationError("Shopify is not fully configured.");
   }
 
   if (!STORE_DOMAIN_PATTERN.test(storeDomain)) {

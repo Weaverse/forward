@@ -23,6 +23,12 @@ export interface RouteSmoke {
   expectedStatus: number;
   /** Optional media type prefix expected from the response. */
   expectedContentType?: string;
+  /**
+   * The page is composed in Weaverse, so what it renders is whatever the
+   * merchant authored; an empty template renders empty. Only theme-rendered
+   * routes are held to a fixed page shape.
+   */
+  composed?: true;
 }
 
 export interface RouteContractEntry {
@@ -69,13 +75,13 @@ export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [
     pattern: "/",
     label: "Home",
     category: "storefront",
-    smoke: { path: "/", expectedStatus: 200 },
+    smoke: { path: "/", expectedStatus: 200, composed: true },
   },
   {
     pattern: "/shop",
     label: "Shop",
     category: "commerce",
-    smoke: { path: "/shop", expectedStatus: 200 },
+    smoke: { path: "/shop", expectedStatus: 200, composed: true },
   },
   {
     pattern: "/shop/[collectionHandle]",
@@ -84,6 +90,7 @@ export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [
     smoke: {
       path: `/shop/${SMOKE_FIXTURES.collectionHandle}`,
       expectedStatus: 200,
+      composed: true,
     },
   },
   {
@@ -93,6 +100,7 @@ export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [
     smoke: {
       path: `/products/${PRIMARY_PRODUCT_FIXTURE}`,
       expectedStatus: 200,
+      composed: true,
     },
   },
   {
@@ -123,19 +131,19 @@ export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [
     pattern: "/[...slug]",
     label: "About Forward custom page",
     category: "content",
-    smoke: { path: "/about", expectedStatus: 200 },
+    smoke: { path: "/about", expectedStatus: 200, composed: true },
   },
   {
     pattern: "/[...slug]",
     label: "Materials custom page",
     category: "content",
-    smoke: { path: "/materials", expectedStatus: 200 },
+    smoke: { path: "/materials", expectedStatus: 200, composed: true },
   },
   {
     pattern: "/[...slug]",
     label: "Field testing custom page",
     category: "content",
-    smoke: { path: "/field-testing", expectedStatus: 200 },
+    smoke: { path: "/field-testing", expectedStatus: 200, composed: true },
   },
   {
     pattern: "/journal/[articleHandle]",
@@ -144,6 +152,7 @@ export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [
     smoke: {
       path: `/journal/${SMOKE_FIXTURES.articleHandle}`,
       expectedStatus: 200,
+      composed: true,
     },
   },
   {
@@ -153,6 +162,7 @@ export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [
     smoke: {
       path: `/pages/${SMOKE_FIXTURES.pageHandle}`,
       expectedStatus: 200,
+      composed: true,
     },
   },
   {

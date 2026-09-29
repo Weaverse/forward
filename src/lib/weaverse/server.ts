@@ -35,7 +35,7 @@ import { WEAVERSE_SERVER_COMPONENTS } from "./server-components";
 
 export type { SearchParams, WeaversePageType } from "./request-info";
 
-import { themeSchema } from "./theme-schema";
+import { type ThemeSettings, themeSchema } from "./theme-schema";
 
 export interface LoadWeaversePageOptions {
   type: WeaversePageType;
@@ -148,6 +148,16 @@ export async function revalidateServerClient(
       : { weaverseHost: config.weaverseHost }),
     requestContext,
   });
+}
+
+/**
+ * The merchant's theme settings, read through the type derived from their
+ * schema, so a renamed input breaks its consumers at compile time. A setting
+ * the merchant left unset is simply absent.
+ */
+export async function readThemeSettings(): Promise<Partial<ThemeSettings>> {
+  const theme = await loadWeaverseThemeSettings();
+  return (theme?.themeSettings ?? {}) as Partial<ThemeSettings>;
 }
 
 /** The configured project id, or `null` when Weaverse is not configured. */

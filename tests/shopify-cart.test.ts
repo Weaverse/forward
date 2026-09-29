@@ -16,11 +16,11 @@ import {
   sanitizeCartHandlerResult,
   validateCheckoutUrl,
 } from "../src/lib/cart/shopify-cart-server.ts";
-import { PRODUCT_FIXTURES } from "../src/lib/storefront/fixtures/products.ts";
 import {
   PRIVATE_STOREFRONT_TOKEN_ENV_KEY,
   STORE_DOMAIN_ENV_KEY,
 } from "../src/lib/storefront/shopify/env.ts";
+import { PRODUCT_FIXTURES } from "./fixtures/storefront/products.ts";
 
 const STORE_DOMAIN = "forward-test-shop.myshopify.com";
 
