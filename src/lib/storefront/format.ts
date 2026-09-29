@@ -1,14 +1,24 @@
 import type { Money } from "./types";
 
-const USD_FORMATTER = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 2,
-});
+const MONEY_FORMATTERS = new Map<string, Intl.NumberFormat>();
 
-export function formatMoney(money: Money): string {
-  return USD_FORMATTER.format(money.amount);
+/**
+ * Money in its own currency, in the shopper's locale. The currency always comes
+ * from the money itself — the market the store priced it in — never from the
+ * locale.
+ */
+export function formatMoney(money: Money, localeTag = "en-US"): string {
+  const key = `${localeTag}|${money.currencyCode}`;
+  let formatter = MONEY_FORMATTERS.get(key);
+  if (formatter === undefined) {
+    formatter = new Intl.NumberFormat(localeTag, {
+      style: "currency",
+      currency: money.currencyCode,
+      minimumFractionDigits: 0,
+    });
+    MONEY_FORMATTERS.set(key, formatter);
+  }
+  return formatter.format(money.amount);
 }
 
 const DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {

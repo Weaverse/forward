@@ -59,7 +59,7 @@ function colorwayId(label: string): string {
 }
 
 /** The normalized model is USD-only. */
-const REQUIRED_CURRENCY_CODE = "USD";
+const CURRENCY_CODE_PATTERN = /^[A-Z]{3}$/;
 
 /**
  * Colorway media roles, in the exact order the metafield lists media IDs.
@@ -157,8 +157,12 @@ function readMetafieldValue(
 
 function mapMoney(value: unknown, context: string): Money {
   const record = asRecord(value, context);
-  if (record.currencyCode !== REQUIRED_CURRENCY_CODE) {
-    fail(`${context} must be ${REQUIRED_CURRENCY_CODE}.`);
+  const currencyCode = record.currencyCode;
+  if (
+    typeof currencyCode !== "string" ||
+    !CURRENCY_CODE_PATTERN.test(currencyCode)
+  ) {
+    fail(`${context} currency is not an ISO 4217 code.`);
   }
   const raw = record.amount;
   if (typeof raw !== "string" && typeof raw !== "number") {
@@ -171,7 +175,7 @@ function mapMoney(value: unknown, context: string): Money {
   if (!Number.isFinite(amount) || amount < 0) {
     fail(`${context} amount is not a finite non-negative number.`);
   }
-  return { amount, currencyCode: REQUIRED_CURRENCY_CODE };
+  return { amount, currencyCode };
 }
 
 /**
@@ -774,18 +778,29 @@ function mapVariants(
     selections.add(selectionKey);
 
     const price = mapMoney(record.price, `${context} price`);
+    /* A market prices a product in one currency; a mix is a broken response. */
+    if (minimum !== undefined && price.currencyCode !== minimum.currencyCode) {
+      fail(`${handle} prices its variants in more than one currency.`);
+    }
     if (minimum === undefined || price.amount < minimum.amount) {
       minimum = price;
+    }
+    const compareAtPrice = mapNullableMoney(
+      record.compareAtPrice,
+      `${context} compareAtPrice`,
+    );
+    if (
+      compareAtPrice !== null &&
+      compareAtPrice.currencyCode !== price.currencyCode
+    ) {
+      fail(`${context} compareAtPrice is in a different currency.`);
     }
     variants.push({
       id,
       colorwayId: colorwayId(color.value),
       selectedOptions,
       price,
-      compareAtPrice: mapNullableMoney(
-        record.compareAtPrice,
-        `${context} compareAtPrice`,
-      ),
+      compareAtPrice,
       availableForSale: record.availableForSale,
     });
   }

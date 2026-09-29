@@ -40,8 +40,11 @@ export function ShopifyCartRuntime({ children }: { children: ReactNode }) {
 
 /** Renders Shopify cart money, or an em dash when it is absent or off-currency. */
 export function formatShopifyMoney(value: ShopifyMoney | undefined): string {
-  if (value === undefined || value.currencyCode !== "USD") return "—";
-  return formatMoney({ amount: Number(value.amount), currencyCode: "USD" });
+  if (value === undefined) return "—";
+  return formatMoney({
+    amount: Number(value.amount),
+    currencyCode: value.currencyCode,
+  });
 }
 
 export function toHydrogenProductInput(

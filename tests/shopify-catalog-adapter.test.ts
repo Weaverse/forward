@@ -927,12 +927,19 @@ describe("catalog mapping failures", () => {
     );
   });
 
-  it("rejects invalid and non-USD money", async () => {
+  it("rejects invalid money and a product priced in mixed currencies", async () => {
     await assertRejectsCatalog(
       catalogResponseWith("weatherline-shell", (product) => {
-        product.variants.nodes[0].price.currencyCode = "EUR";
+        product.variants.nodes[1].price.currencyCode = "EUR";
+        product.variants.nodes[1].compareAtPrice = null;
       }),
-      "must be USD",
+      "more than one currency",
+    );
+    await assertRejectsCatalog(
+      catalogResponseWith("weatherline-shell", (product) => {
+        product.variants.nodes[0].price.currencyCode = "euro";
+      }),
+      "ISO 4217",
     );
 
     for (const amount of ["", "not-a-number", "-12.00", null]) {
