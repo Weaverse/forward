@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { Fragment } from "react";
+import { Link } from "@/components/link";
 
 import { eyebrow, textLink } from "@/lib/presentation/variants";
 import { formatDate } from "@/lib/storefront/format";

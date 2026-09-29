@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { AccountAccessPanel } from "@/components/account-access";
 import { AccountShell } from "@/components/account-shell";
+import { Link } from "@/components/link";
 import {
   hasRefreshMarker,
   readAccountProfile,

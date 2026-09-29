@@ -3,10 +3,9 @@
 import { IMAGES_PLACEHOLDERS } from "@weaverse/schema";
 import { cva } from "class-variance-authority";
 import Image from "next/image";
-import Link from "next/link";
 import { useId, useState } from "react";
-
 import { AddToCartForm } from "@/components/add-to-cart-form";
+import { Link } from "@/components/link";
 import { Section } from "@/components/section";
 import { cn } from "@/lib/cn";
 import {

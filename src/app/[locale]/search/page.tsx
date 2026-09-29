@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { localizePath } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
 import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { getStorefront } from "@/lib/storefront/data-source";
@@ -38,7 +39,7 @@ export default async function SearchPage({
       <form
         className="mt-17.5 mb-15 grid grid-cols-1 border-ink border-b-3 sm:grid-cols-lead-trailing"
         method="get"
-        action="/search"
+        action={localizePath("/search", locale)}
       >
         <label className="sr-only" htmlFor="search-input">
           Search products

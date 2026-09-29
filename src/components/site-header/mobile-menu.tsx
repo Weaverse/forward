@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef } from "react";
-
 import { Icon } from "@/components/icon";
+import { Link } from "@/components/link";
 import { Wordmark } from "@/components/wordmark";
 import { cn } from "@/lib/cn";
 import type { NavItem } from "@/lib/storefront/types";

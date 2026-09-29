@@ -58,7 +58,7 @@ test.describe("shell structure", () => {
     page,
   }) => {
     await gotoReady(page, "/");
-    const market = page.getByText("United States · USD");
+    const market = page.getByText("United States (USD $)");
 
     await expect(market).toBeVisible();
   });

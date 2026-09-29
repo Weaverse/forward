@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useId, useState } from "react";
+import { Link } from "@/components/link";
 
 import { formatMoney } from "@/lib/storefront/format";
 import {

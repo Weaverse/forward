@@ -14,6 +14,8 @@ import type { ReactNode } from "react";
 import { ACCOUNT_LINK } from "@/components/site-header/header-navigation";
 import type { ShopifyCartData } from "@/lib/cart/shopify-cart";
 import { ShopifyCartProvider } from "@/lib/cart/shopify-cart-react";
+import { LocaleProvider } from "@/lib/i18n/locale-context";
+import { DEFAULT_LOCALE, type LocaleId } from "@/lib/i18n/locales";
 import type { NavItem, Product } from "@/lib/storefront/types";
 import { NAVIGATION_FIXTURE } from "../fixtures/storefront/navigation";
 import { PRODUCT_FIXTURES } from "../fixtures/storefront/products";
@@ -68,10 +70,16 @@ export function cartLine(
   };
 }
 
-/** Renders inside the Shopify cart provider every storefront page mounts. */
-export function renderWithCart(ui: ReactNode, data = cartData()) {
+/** Renders inside the locale and Shopify cart providers every page mounts. */
+export function renderWithCart(
+  ui: ReactNode,
+  data = cartData(),
+  locale: LocaleId = DEFAULT_LOCALE,
+) {
   return render(
-    <ShopifyCartProvider initialData={data}>{ui}</ShopifyCartProvider>,
+    <LocaleProvider locale={locale}>
+      <ShopifyCartProvider initialData={data}>{ui}</ShopifyCartProvider>
+    </LocaleProvider>,
   );
 }
 

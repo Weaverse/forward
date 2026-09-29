@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/link";
 
 import { pageHref } from "@/lib/storefront/filter-params";
 import type { CollectionProductsPage } from "@/lib/storefront/types";

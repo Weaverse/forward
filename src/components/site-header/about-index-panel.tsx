@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-
 import { Icon } from "@/components/icon";
+import { Link } from "@/components/link";
 import { cn } from "@/lib/cn";
 import type { NavItem } from "@/lib/storefront/types";
 import { createHeaderNavigationHref, isActive } from "./header-navigation";

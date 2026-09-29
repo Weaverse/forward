@@ -1,16 +1,19 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import ReactCountryFlag from "react-country-flag";
 
 import { Icon } from "@/components/icon";
+import { Link } from "@/components/link";
 import { cn } from "@/lib/cn";
+import { useLocale } from "@/lib/i18n/locale-context";
 import {
-  ACTIVE_STOREFRONT_COUNTRY,
-  AVAILABLE_STOREFRONT_COUNTRIES,
-  countryControlLabel,
-  type StorefrontCountry,
-} from "@/lib/storefront/localization";
+  LOCALE_IDS,
+  LOCALES,
+  type LocaleId,
+  splitLocale,
+} from "@/lib/i18n/locales";
 
 const CONTROL_CLASS =
   "inline-flex items-center gap-1.5 font-body text-ui font-ui tracking-control uppercase";
@@ -19,11 +22,11 @@ const CONTROL_CLASS =
 const FLAG_DIMENSIONS = { width: "18px", height: "12px" } as const;
 
 /** Decorative: the label beside every flag already names the market. */
-function CountryFlag({ country }: { country: StorefrontCountry }) {
+function LocaleFlag({ locale }: { locale: LocaleId }) {
   return (
     <ReactCountryFlag
       svg
-      countryCode={country.isoCode}
+      countryCode={LOCALES[locale].country}
       className="shrink-0 rounded-xs object-cover"
       style={FLAG_DIMENSIONS}
       alt=""
@@ -32,15 +35,12 @@ function CountryFlag({ country }: { country: StorefrontCountry }) {
   );
 }
 
-/**
- * Topbar market indicator for a store with a single published market. It
- * states that market truthfully instead of dressing one option as a choice.
- */
-function MarketStatement() {
+/** Topbar market indicator when the theme serves a single locale. */
+function MarketStatement({ locale }: { locale: LocaleId }) {
   return (
     <span className={CONTROL_CLASS}>
       <Icon name="globe-hemisphere-west" size={14} />
-      {countryControlLabel(ACTIVE_STOREFRONT_COUNTRY)}
+      {LOCALES[locale].label}
       <span className="sr-only">
         . Forward currently ships to this market only.
       </span>
@@ -51,17 +51,16 @@ function MarketStatement() {
 /**
  * Topbar market selector.
  *
- * Selection is presentational: it moves the marker, and nothing else. The
- * shopper is still priced and checked out against
- * `ACTIVE_STOREFRONT_COUNTRY` until a Storefront `@inContext` localization
- * read replaces the preview market list.
+ * Each market is a link to the page the shopper is on, in that market: the
+ * locale lives in the URL, so choosing one is navigation, and the prices on the
+ * next page are the ones the store quotes that market.
  */
-function CountrySelector() {
+function MarketSelector({ locale }: { locale: LocaleId }) {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(ACTIVE_STOREFRONT_COUNTRY);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
+  const path = splitLocale(usePathname()).path;
 
   useEffect(() => {
     if (!open) {
@@ -92,12 +91,6 @@ function CountrySelector() {
     };
   }, [open]);
 
-  function choose(country: StorefrontCountry) {
-    setSelected(country);
-    setOpen(false);
-    triggerRef.current?.focus();
-  }
-
   return (
     <div ref={rootRef} className="relative">
       <button
@@ -113,8 +106,8 @@ function CountrySelector() {
         aria-controls={open ? panelId : undefined}
         onClick={() => setOpen((current) => !current)}
       >
-        <CountryFlag country={selected} />
-        {countryControlLabel(selected)}
+        <LocaleFlag locale={locale} />
+        {LOCALES[locale].label}
         <span className="sr-only">. Change shipping market</span>
         <Icon name={open ? "caret-up" : "caret-down"} size={12} />
       </button>
@@ -127,24 +120,23 @@ function CountrySelector() {
             Shipping market
           </p>
           <ul className="m-0 list-none p-0">
-            {AVAILABLE_STOREFRONT_COUNTRIES.map((country) => (
-              <li key={country.isoCode}>
-                <button
-                  type="button"
+            {LOCALE_IDS.map((option) => (
+              <li key={option}>
+                <Link
                   className="flex min-h-touch w-full items-center justify-between gap-4 border-border-subtle border-b bg-transparent px-4 py-2.5 text-start font-body text-ui font-ui tracking-control uppercase last:border-b-0 hover:bg-ink hover:text-text-inverse focus-visible:bg-ink focus-visible:text-text-inverse aria-[current=true]:font-ui-strong"
-                  aria-current={
-                    country.isoCode === selected.isoCode ? "true" : undefined
-                  }
-                  onClick={() => choose(country)}
+                  href={path}
+                  locale={option}
+                  aria-current={option === locale ? "true" : undefined}
+                  onClick={() => setOpen(false)}
                 >
                   <span className="inline-flex items-center gap-2">
-                    <CountryFlag country={country} />
-                    {countryControlLabel(country)}
+                    <LocaleFlag locale={option} />
+                    {LOCALES[option].label}
                   </span>
-                  {country.isoCode === selected.isoCode ? (
+                  {option === locale ? (
                     <Icon name="check-circle" size={14} />
                   ) : null}
-                </button>
+                </Link>
               </li>
             ))}
           </ul>
@@ -155,9 +147,10 @@ function CountrySelector() {
 }
 
 export function CountryControl() {
-  return AVAILABLE_STOREFRONT_COUNTRIES.length > 1 ? (
-    <CountrySelector />
+  const locale = useLocale();
+  return LOCALE_IDS.length > 1 ? (
+    <MarketSelector locale={locale} />
   ) : (
-    <MarketStatement />
+    <MarketStatement locale={locale} />
   );
 }

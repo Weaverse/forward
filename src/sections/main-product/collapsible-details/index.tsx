@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { Link } from "@/components/link";
 
 import { textLink } from "@/lib/presentation/variants";
 

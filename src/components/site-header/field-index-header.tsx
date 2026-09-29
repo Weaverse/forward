@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
-
 import { Icon, type IconName } from "@/components/icon";
+import { Link } from "@/components/link";
 import { Wordmark } from "@/components/wordmark";
 import { cn } from "@/lib/cn";
 import type { Collection, NavItem } from "@/lib/storefront/types";

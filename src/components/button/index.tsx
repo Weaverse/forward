@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/link";
 
 import { cn } from "@/lib/cn";
 import { cta, textLink } from "@/lib/presentation/variants";

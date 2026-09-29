@@ -2,7 +2,7 @@
 
 import { IMAGES_PLACEHOLDERS } from "@weaverse/schema";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { cn } from "@/lib/cn";
 import { cta, eyebrow } from "@/lib/presentation/variants";
 import type { Product, StorefrontImage } from "@/lib/storefront/types";

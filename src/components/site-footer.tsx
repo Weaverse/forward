@@ -1,6 +1,5 @@
-import Link from "next/link";
-
 import { Icon } from "@/components/icon";
+import { Link } from "@/components/link";
 import { PaymentMarks } from "@/components/payment-marks";
 import { Wordmark } from "@/components/wordmark";
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";

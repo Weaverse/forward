@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { Link } from "@/components/link";
 
 import { SortForm } from "@/components/sort-form";
 import { cn } from "@/lib/cn";
