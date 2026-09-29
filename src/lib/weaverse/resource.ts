@@ -11,7 +11,7 @@
 
 import "server-only";
 
-import { storefront } from "@/lib/storefront/data-source";
+import { getStorefront } from "@/lib/storefront/data-source";
 import type { Collection, Product } from "@/lib/storefront/types";
 
 /** What a Builder resource picker stores. */
@@ -59,7 +59,7 @@ export function pickerHandles(value: unknown): string[] {
  */
 export async function resolveProduct(value: unknown): Promise<Product | null> {
   const handle = pickerHandle(value);
-  return handle === null ? null : await storefront.getProduct(handle);
+  return handle === null ? null : await getStorefront().getProduct(handle);
 }
 
 /**
@@ -76,7 +76,7 @@ export async function resolveProducts(
     return [];
   }
   const products = await Promise.all(
-    handles.map((handle) => storefront.getProduct(handle)),
+    handles.map((handle) => getStorefront().getProduct(handle)),
   );
   return products.filter((product): product is Product => product !== null);
 }
@@ -86,7 +86,7 @@ export async function resolveCollection(
   value: unknown,
 ): Promise<Collection | null> {
   const handle = pickerHandle(value);
-  return handle === null ? null : await storefront.getCollection(handle);
+  return handle === null ? null : await getStorefront().getCollection(handle);
 }
 
 /** Resolves selected collections in the merchant's chosen order. */
@@ -98,7 +98,7 @@ export async function resolveCollections(
     return [];
   }
   const collections = await Promise.all(
-    handles.map((handle) => storefront.getCollection(handle)),
+    handles.map((handle) => getStorefront().getCollection(handle)),
   );
   return collections.filter(
     (collection): collection is Collection => collection !== null,

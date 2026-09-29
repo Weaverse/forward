@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { storefront } from "@/lib/storefront/data-source";
+import { getStorefront } from "@/lib/storefront/data-source";
 import {
   AFTER_PARAM,
   BEFORE_PARAM,
@@ -27,7 +27,7 @@ export const dynamicParams = false;
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-  const collections = await storefront.listCollections();
+  const collections = await getStorefront().listCollections();
   return collections.map((collection) => ({
     collectionHandle: collection.handle,
   }));
@@ -37,7 +37,7 @@ export async function generateMetadata({
   params,
 }: CollectionPageProps): Promise<Metadata> {
   const { collectionHandle } = await params;
-  const collection = await storefront.getCollection(collectionHandle);
+  const collection = await getStorefront().getCollection(collectionHandle);
   if (collection === null) {
     return { title: "Collection not found" };
   }
@@ -68,11 +68,11 @@ export default async function CollectionPage(props: CollectionPageProps) {
   const sort = parseProductSort(params.get(SORT_PARAM));
 
   const [collection, page, weaversePage, projectId] = await Promise.all([
-    storefront.getCollection(collectionHandle),
+    getStorefront().getCollection(collectionHandle),
     /* The store narrows, orders and pages. Facet shapes travel from the URL
      * into the query untouched, so a filter the merchant enabled after this
      * code shipped still works. */
-    storefront.getCollectionPage(collectionHandle, {
+    getStorefront().getCollectionPage(collectionHandle, {
       filters: parseFilterParams(params),
       sort,
       after: params.get(AFTER_PARAM) ?? undefined,

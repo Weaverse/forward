@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { CANONICAL_ROUTES } from "@/lib/routes/route-contract";
 import { SITE_BASE_URL } from "@/lib/routes/site";
-import { storefront } from "@/lib/storefront/data-source";
+import { getStorefront } from "@/lib/storefront/data-source";
 
 const INDEXABLE_CATEGORIES = new Set([
   "storefront",
@@ -17,11 +17,11 @@ function toUrl(path: string): string {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [products, collections, articles, pages, policies] = await Promise.all([
-    storefront.listProducts(),
-    storefront.listCollections(),
-    storefront.listArticles(),
-    storefront.listPages(),
-    storefront.listPolicies(),
+    getStorefront().listProducts(),
+    getStorefront().listCollections(),
+    getStorefront().listArticles(),
+    getStorefront().listPages(),
+    getStorefront().listPolicies(),
   ]);
 
   const staticEntries = CANONICAL_ROUTES.filter(

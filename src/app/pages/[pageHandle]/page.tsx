@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { storefront } from "@/lib/storefront/data-source";
+import { getStorefront } from "@/lib/storefront/data-source";
 import { WeaversePage } from "@/lib/weaverse/page";
 import {
   loadWeaversePage,
@@ -17,7 +17,7 @@ interface StorePageProps {
 export const dynamicParams = false;
 
 export async function generateStaticParams() {
-  const pages = await storefront.listPages();
+  const pages = await getStorefront().listPages();
   return pages.map((page) => ({ pageHandle: page.handle }));
 }
 
@@ -25,7 +25,7 @@ export async function generateMetadata({
   params,
 }: StorePageProps): Promise<Metadata> {
   const { pageHandle } = await params;
-  const page = await storefront.getPage(pageHandle);
+  const page = await getStorefront().getPage(pageHandle);
   if (page === null) {
     return { title: "Page not found" };
   }
@@ -43,7 +43,7 @@ export async function generateMetadata({
 export default async function StorePageRoute(props: StorePageProps) {
   const { pageHandle } = await props.params;
   const [page, weaversePage, projectId] = await Promise.all([
-    storefront.getPage(pageHandle),
+    getStorefront().getPage(pageHandle),
     loadWeaversePage({
       handle: pageHandle,
       pathname: `/pages/${pageHandle}`,

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { storefront } from "@/lib/storefront/data-source";
+import { getStorefront } from "@/lib/storefront/data-source";
 import { IndexHeader } from "@/sections/index-header";
 import { JournalGrid } from "@/sections/journal-grid";
 import { JournalLead } from "@/sections/journal-lead";
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function JournalPage() {
-  const articles = await storefront.listArticles();
+  const articles = await getStorefront().listArticles();
   const [lead, ...rest] = articles;
 
   return (

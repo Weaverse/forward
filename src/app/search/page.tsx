@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
-import { storefront } from "@/lib/storefront/data-source";
+import { getStorefront } from "@/lib/storefront/data-source";
 import { SearchEmptyState } from "@/sections/search-empty-state";
 import { SearchResults } from "@/sections/search-results";
 
@@ -20,7 +20,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const rawQuery = typeof params.q === "string" ? params.q : "";
   const query = rawQuery.trim();
   const results =
-    query.length > 0 ? await storefront.searchProducts(query) : [];
+    query.length > 0 ? await getStorefront().searchProducts(query) : [];
   const hasQuery = query.length > 0;
 
   return (

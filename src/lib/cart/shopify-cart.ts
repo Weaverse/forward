@@ -3,6 +3,7 @@ import {
   createShopifyRequestContext,
   createStorefrontClient,
 } from "@shopify/hydrogen";
+import { localeFromCookieHeader, localeI18n } from "@/lib/i18n/locales";
 
 import {
   type EnvSource,
@@ -15,8 +16,6 @@ import {
   readTrustedBuyerIp,
   sanitizeCartHandlerResult,
 } from "./shopify-cart-server";
-
-const CART_I18N = { country: "US", language: "EN" } as const;
 
 export const shopifyCartHandlers = createCartServerHandlers();
 export type ShopifyCartData = Awaited<
@@ -36,7 +35,8 @@ function createCartRequestContext(request: Request, source: EnvSource) {
   const buyerIp = readTrustedBuyerIp(request.headers, environment);
   const requestContext = createShopifyRequestContext({
     request,
-    i18n: CART_I18N,
+    /* The market of the page that posted: the proxy records it per request. */
+    i18n: localeI18n(localeFromCookieHeader(request.headers.get("cookie"))),
     buyerIp,
   });
   const storefrontClient = createStorefrontClient({

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { storefront } from "@/lib/storefront/data-source";
+import { getStorefront } from "@/lib/storefront/data-source";
 import {
   AFTER_PARAM,
   BEFORE_PARAM,
@@ -40,7 +40,7 @@ export default async function ShopPage(props: ShopPageProps) {
   const sort = parseProductSort(params.get(SORT_PARAM));
 
   const [page, weaversePage, projectId] = await Promise.all([
-    storefront.getProductsPage({
+    getStorefront().getProductsPage({
       sort,
       after: params.get(AFTER_PARAM) ?? undefined,
       before: params.get(BEFORE_PARAM) ?? undefined,

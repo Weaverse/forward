@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
-import { storefront } from "@/lib/storefront/data-source";
+import { getStorefront } from "@/lib/storefront/data-source";
 import { readThemeSettings } from "@/lib/weaverse/server";
 import { FieldIndexHeader } from "./field-index-header";
 import { ACCOUNT_LINK } from "./header-navigation";
@@ -13,9 +13,9 @@ import { QueryPreservingFieldIndexHeader } from "./query-preserving-field-index-
  */
 export async function SiteHeader() {
   const [navigation, settings, collections] = await Promise.all([
-    storefront.getNavigation(),
+    getStorefront().getNavigation(),
     readThemeSettings(),
-    storefront.listCollections(),
+    getStorefront().listCollections(),
   ]);
 
   const utility = getCustomerAccountRuntime() === null ? [] : [ACCOUNT_LINK];

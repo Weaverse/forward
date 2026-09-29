@@ -1,6 +1,6 @@
 import type { WeaverseNextRequestContext } from "@weaverse/next";
 
-import { CATALOG_I18N } from "@/lib/storefront/shopify/client";
+import { DEFAULT_LOCALE, LOCALES, type LocaleId } from "@/lib/i18n/locales";
 
 /** Weaverse page roles this theme composes. See the contract in the spec. */
 export type WeaversePageType =
@@ -15,18 +15,15 @@ export type WeaversePageType =
 export type SearchParams = Record<string, string | string[] | undefined>;
 
 /**
- * The market identity every Weaverse request carries.
+ * The market identity a Weaverse request carries: the request's own locale.
  *
  * Studio reads `i18n.language` when it binds its runtime; leaving `i18n`
- * undefined crashes the bridge rather than degrading it. Markets are a
- * deferred slice, so this mirrors the one market the catalog client already
- * queries instead of inventing a second source of truth.
+ * undefined crashes the bridge rather than degrading it.
  */
-export const WEAVERSE_I18N = {
-  country: CATALOG_I18N.country,
-  language: CATALOG_I18N.language,
-  locale: `${CATALOG_I18N.language.toLowerCase()}-${CATALOG_I18N.country.toLowerCase()}`,
-} as const;
+export function weaverseI18n(locale: LocaleId) {
+  const { country, language } = LOCALES[locale];
+  return { country, language, locale };
+}
 
 export function toSearchParams(
   input: SearchParams | undefined,
@@ -47,6 +44,8 @@ export interface RequestContextInput {
   pathname: string;
   searchParams?: SearchParams;
   page?: { type: WeaversePageType; handle?: string };
+  /** The request's market; the path stays unprefixed so pages resolve alike. */
+  locale?: LocaleId;
 }
 
 /**
@@ -70,6 +69,7 @@ export function buildRequestContext({
   page,
   pathname,
   searchParams,
+  locale = DEFAULT_LOCALE,
 }: RequestContextInput): WeaverseNextRequestContext {
   const search = toSearchParams(searchParams);
   const host = headers.get("x-forwarded-host") ?? headers.get("host");
@@ -78,7 +78,7 @@ export function buildRequestContext({
 
   return {
     headers,
-    i18n: WEAVERSE_I18N,
+    i18n: weaverseI18n(locale),
     pathname,
     searchParams: search,
     url: `${origin}${pathname}${search.size > 0 ? `?${search}` : ""}`,

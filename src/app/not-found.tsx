@@ -2,14 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { cta, sectionHeading } from "@/lib/presentation/variants";
-import { storefront } from "@/lib/storefront/data-source";
+import { getStorefront } from "@/lib/storefront/data-source";
 import { weaverseImage } from "@/lib/weaverse/image";
 import { readThemeSettings } from "@/lib/weaverse/server";
 
 /** Shared accessible 404 for the root and every unknown dynamic handle. */
 export default async function NotFound() {
   const [collections, settings] = await Promise.all([
-    storefront.listCollections(),
+    getStorefront().listCollections(),
     readThemeSettings(),
   ]);
   const panelImage =

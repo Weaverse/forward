@@ -6,7 +6,7 @@ import { Wordmark } from "@/components/wordmark";
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
 import { cn } from "@/lib/cn";
 import { THEME_CUSTOM_PAGE_LINKS } from "@/lib/routes/route-contract";
-import { storefront } from "@/lib/storefront/data-source";
+import { getStorefront } from "@/lib/storefront/data-source";
 import {
   SOCIAL_SECTION_HEADING,
   VERIFIED_SOCIAL_LINKS,
@@ -26,7 +26,7 @@ const FOOTER_COLUMN_CLASS =
  */
 export async function SiteFooter() {
   const [navigation, settings] = await Promise.all([
-    storefront.getNavigation(),
+    getStorefront().getNavigation(),
     readThemeSettings(),
   ]);
 

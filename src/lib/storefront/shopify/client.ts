@@ -22,6 +22,11 @@ import type {
 } from "@shopify/hydrogen/storefront-api-types";
 import { unstable_cache } from "next/cache";
 import {
+  DEFAULT_LOCALE,
+  type LocaleI18n,
+  localeI18n,
+} from "../../i18n/locales";
+import {
   ALL_PRODUCTS_CACHE_KEY,
   CATALOG_CACHE_KEY,
   CATALOG_REVALIDATE_SECONDS,
@@ -129,14 +134,23 @@ async function recoverPartialNavigationResult(
 export interface CatalogQueryExecutorOptions {
   /** Disable only the Next Data Cache wrapper for isolated transport tests. */
   useNextCache?: boolean;
+  /**
+   * The market every read of this executor runs in. Each market is its own
+   * cache entry, so one locale never serves another's prices or copy.
+   */
+  i18n?: LocaleI18n;
 }
 
-/**
- * The single market this storefront serves. Locale/market routing is a
- * separate deferred slice; until then every surface uses this one, so it is
- * exported rather than redeclared per consumer.
- */
-export const CATALOG_I18N = { country: "US", language: "EN" } as const;
+const DEFAULT_I18N = localeI18n(DEFAULT_LOCALE);
+
+/** The market an executor reads in, and the cache-key part that names it. */
+export function executorMarket(options: CatalogQueryExecutorOptions): {
+  i18n: LocaleI18n;
+  key: string;
+} {
+  const i18n = options.i18n ?? DEFAULT_I18N;
+  return { i18n, key: `${i18n.country}-${i18n.language}` };
+}
 
 function readGraphQLErrors(
   errors: unknown,
@@ -153,10 +167,13 @@ function readGraphQLErrors(
   return errors;
 }
 
-function createStorefrontReadClient(config: ShopifyCatalogConfig) {
+export function createStorefrontReadClient(
+  config: ShopifyCatalogConfig,
+  i18n: LocaleI18n,
+) {
   const requestContext = createShopifyRequestContext({
     request: { headers: new Headers() },
-    i18n: CATALOG_I18N,
+    i18n,
   });
 
   return createStorefrontClient({
@@ -181,7 +198,8 @@ export function createCatalogQueryExecutor(
   config: ShopifyCatalogConfig,
   options: CatalogQueryExecutorOptions = {},
 ): CatalogQueryExecutor {
-  const client = createStorefrontReadClient(config);
+  const market = executorMarket(options);
+  const client = createStorefrontReadClient(config, market.i18n);
 
   const execute = async () => {
     try {
@@ -228,9 +246,13 @@ export function createCatalogQueryExecutor(
     return execute;
   }
 
-  return unstable_cache(execute, [CATALOG_CACHE_KEY, config.storeDomain], {
-    revalidate: CATALOG_REVALIDATE_SECONDS,
-  });
+  return unstable_cache(
+    execute,
+    [CATALOG_CACHE_KEY, config.storeDomain, market.key],
+    {
+      revalidate: CATALOG_REVALIDATE_SECONDS,
+    },
+  );
 }
 
 /** Builds the bounded main-menu and collection query executor. */
@@ -238,7 +260,8 @@ export function createNavigationQueryExecutor(
   config: ShopifyCatalogConfig,
   options: CatalogQueryExecutorOptions = {},
 ): NavigationQueryExecutor {
-  const client = createStorefrontReadClient(config);
+  const market = executorMarket(options);
+  const client = createStorefrontReadClient(config, market.i18n);
 
   const execute = async () => {
     try {
@@ -283,6 +306,7 @@ export function createNavigationQueryExecutor(
     [
       NAVIGATION_CACHE_KEY,
       config.storeDomain,
+      market.key,
       config.mainMenuHandle,
       FOOTER_MENU_HANDLE,
     ],
@@ -329,7 +353,8 @@ function createPagedExecutor<Variables>(
   ) => Promise<{ data?: unknown; errors?: unknown }>,
   validate: (result: CatalogQueryResult) => unknown,
 ): (variables: Variables) => Promise<CatalogQueryResult> {
-  const client = createStorefrontReadClient(config);
+  const market = executorMarket(options);
+  const client = createStorefrontReadClient(config, market.i18n);
 
   async function execute(variables: Variables): Promise<CatalogQueryResult> {
     try {
@@ -364,7 +389,7 @@ function createPagedExecutor<Variables>(
   return (variables) =>
     unstable_cache(
       () => execute(variables),
-      [cacheKey, config.storeDomain, JSON.stringify(variables)],
+      [cacheKey, config.storeDomain, market.key, JSON.stringify(variables)],
       { revalidate: CATALOG_REVALIDATE_SECONDS },
     )();
 }

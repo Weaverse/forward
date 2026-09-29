@@ -1,6 +1,6 @@
 import type { WeaverseNextComponent } from "@weaverse/next";
 
-import { storefront } from "@/lib/storefront/data-source";
+import { getStorefront } from "@/lib/storefront/data-source";
 import type { JournalArticle } from "@/lib/storefront/types";
 
 type LoaderArgs = Parameters<NonNullable<WeaverseNextComponent["loader"]>>[0];
@@ -20,6 +20,6 @@ export interface RepairAndJournalLoaderData {
 export async function loader(
   _args: LoaderArgs,
 ): Promise<RepairAndJournalLoaderData> {
-  const articles = await storefront.listArticles();
+  const articles = await getStorefront().listArticles();
   return { article: articles[0] ?? null };
 }

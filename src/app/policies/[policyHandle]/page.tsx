@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
-import { storefront } from "@/lib/storefront/data-source";
+import { getStorefront } from "@/lib/storefront/data-source";
 import { IndexHeader } from "@/sections/index-header";
 import { PolicyDocument } from "@/sections/policy-document";
 
@@ -13,7 +13,7 @@ interface PolicyPageProps {
 export const dynamicParams = false;
 
 export async function generateStaticParams() {
-  const policies = await storefront.listPolicies();
+  const policies = await getStorefront().listPolicies();
   return policies.map((policy) => ({ policyHandle: policy.handle }));
 }
 
@@ -21,7 +21,7 @@ export async function generateMetadata({
   params,
 }: PolicyPageProps): Promise<Metadata> {
   const { policyHandle } = await params;
-  const policy = await storefront.getPolicy(policyHandle);
+  const policy = await getStorefront().getPolicy(policyHandle);
   if (policy === null) {
     return { title: "Policy not found" };
   }
@@ -34,8 +34,8 @@ export async function generateMetadata({
 export default async function PolicyPage({ params }: PolicyPageProps) {
   const { policyHandle } = await params;
   const [policy, allPolicies] = await Promise.all([
-    storefront.getPolicy(policyHandle),
-    storefront.listPolicies(),
+    getStorefront().getPolicy(policyHandle),
+    getStorefront().listPolicies(),
   ]);
   if (policy === null) {
     notFound();

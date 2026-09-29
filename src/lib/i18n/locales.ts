@@ -82,10 +82,12 @@ export function localeTag(locale: LocaleId): string {
 }
 
 /** The Storefront API `@inContext` pair for a locale. */
-export function localeI18n(locale: LocaleId): {
-  country: string;
-  language: string;
-} {
+export type LocaleI18n = Pick<
+  (typeof LOCALES)[LocaleId],
+  "country" | "language"
+>;
+
+export function localeI18n(locale: LocaleId): LocaleI18n {
   const { country, language } = LOCALES[locale];
   return { country, language };
 }
@@ -117,4 +119,21 @@ export function splitLocale(pathname: string): {
   }
   const rest = pathname.slice(locale.length + 1);
   return { locale, path: rest === "" ? "/" : rest };
+}
+
+/**
+ * The cookie naming the locale of the page the shopper last loaded. The proxy
+ * writes it; request handlers that serve no page of their own, like the cart
+ * endpoint, read it to answer in the same market.
+ */
+export const LOCALE_COOKIE = "forward_locale";
+
+export function localeFromCookieHeader(header: string | null): LocaleId {
+  for (const part of (header ?? "").split(";")) {
+    const [name, value] = part.trim().split("=");
+    if (name === LOCALE_COOKIE) {
+      return parseLocale(value) ?? DEFAULT_LOCALE;
+    }
+  }
+  return DEFAULT_LOCALE;
 }

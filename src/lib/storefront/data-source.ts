@@ -15,6 +15,7 @@
  * rather than inventing content.
  */
 
+import { DEFAULT_LOCALE, type LocaleId, localeI18n } from "../i18n/locales";
 import {
   type CatalogQueryExecutorOptions,
   createAllProductsQueryExecutor,
@@ -98,5 +99,26 @@ export function createStorefrontDataSource(
   });
 }
 
-/** The storefront data source used by all routes. */
-export const storefront: StorefrontDataSource = createStorefrontDataSource();
+const SOURCES = new Map<LocaleId, StorefrontDataSource>();
+
+/**
+ * The data source for one market. Each is built once and reads only in its
+ * own `@inContext`, with its own cache entries, so a locale never sees another
+ * market's prices or copy.
+ */
+export function getStorefront(
+  locale: LocaleId = DEFAULT_LOCALE,
+): StorefrontDataSource {
+  let source = SOURCES.get(locale);
+  if (source === undefined) {
+    source = createStorefrontDataSource(process.env, {
+      i18n: localeI18n(locale),
+    });
+    SOURCES.set(locale, source);
+  }
+  return source;
+}
+
+/* Built as the module loads, so a missing Shopify environment fails the build
+ * and every route at once rather than on the first read. */
+getStorefront(DEFAULT_LOCALE);

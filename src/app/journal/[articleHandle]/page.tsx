@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { storefront } from "@/lib/storefront/data-source";
+import { getStorefront } from "@/lib/storefront/data-source";
 import { WeaversePage } from "@/lib/weaverse/page";
 import {
   loadWeaversePage,
@@ -17,7 +17,7 @@ interface ArticlePageProps {
 export const dynamicParams = false;
 
 export async function generateStaticParams() {
-  const articles = await storefront.listArticles();
+  const articles = await getStorefront().listArticles();
   return articles.map((article) => ({ articleHandle: article.handle }));
 }
 
@@ -25,7 +25,7 @@ export async function generateMetadata({
   params,
 }: ArticlePageProps): Promise<Metadata> {
   const { articleHandle } = await params;
-  const article = await storefront.getArticle(articleHandle);
+  const article = await getStorefront().getArticle(articleHandle);
   if (article === null) {
     return { title: "Article not found" };
   }
@@ -42,7 +42,7 @@ export async function generateMetadata({
 export default async function ArticlePage(props: ArticlePageProps) {
   const { articleHandle } = await props.params;
   const [article, page, projectId] = await Promise.all([
-    storefront.getArticle(articleHandle),
+    getStorefront().getArticle(articleHandle),
     loadWeaversePage({
       handle: articleHandle,
       pathname: `/journal/${articleHandle}`,

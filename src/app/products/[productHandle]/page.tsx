@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { storefront } from "@/lib/storefront/data-source";
+import { getStorefront } from "@/lib/storefront/data-source";
 import type { Product } from "@/lib/storefront/types";
 import { WeaversePage } from "@/lib/weaverse/page";
 import {
@@ -26,7 +26,7 @@ export const dynamicParams = false;
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-  const products = await storefront.listProducts();
+  const products = await getStorefront().listProducts();
   return products.map((product) => ({ productHandle: product.handle }));
 }
 
@@ -34,7 +34,7 @@ export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
   const { productHandle } = await params;
-  const product = await storefront.getProduct(productHandle);
+  const product = await getStorefront().getProduct(productHandle);
   if (product === null) {
     return { title: "Product not found" };
   }
@@ -43,7 +43,7 @@ export async function generateMetadata({
 
 async function relatedProducts(product: Product) {
   const related = await Promise.all(
-    product.relatedHandles.map((handle) => storefront.getProduct(handle)),
+    product.relatedHandles.map((handle) => getStorefront().getProduct(handle)),
   );
   return related.filter((entry): entry is Product => entry !== null);
 }
@@ -51,7 +51,7 @@ async function relatedProducts(product: Product) {
 export default async function ProductPage(props: ProductPageProps) {
   const { productHandle } = await props.params;
   const [product, page, projectId] = await Promise.all([
-    storefront.getProduct(productHandle),
+    getStorefront().getProduct(productHandle),
     loadWeaversePage({
       handle: productHandle,
       pathname: `/products/${productHandle}`,

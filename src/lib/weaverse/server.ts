@@ -25,6 +25,7 @@ import type {
 import { createWeaverseNextServerClient } from "@weaverse/next/server";
 import { headers } from "next/headers";
 import { cache } from "react";
+import { DEFAULT_LOCALE, type LocaleId } from "@/lib/i18n/locales";
 import { readWeaverseConfig } from "./env";
 import {
   buildRequestContext,
@@ -50,6 +51,8 @@ export interface LoadWeaversePageOptions {
    */
   pathname: string;
   searchParams?: SearchParams;
+  /** The request's market. Defaults to the store's default locale. */
+  locale?: LocaleId;
 }
 
 /**
@@ -63,6 +66,7 @@ async function createServerClient(
   pathname: string,
   searchParams: SearchParams | undefined,
   page?: { type: WeaversePageType; handle?: string },
+  locale: LocaleId = DEFAULT_LOCALE,
 ): Promise<WeaverseNextServerClient | null> {
   const config = readWeaverseConfig(process.env);
   if (config === null) {
@@ -84,6 +88,7 @@ async function createServerClient(
       page,
       pathname,
       searchParams,
+      locale,
     }),
   });
 }
@@ -97,15 +102,18 @@ async function createServerClient(
  */
 export async function loadWeaversePage({
   handle,
+  locale,
   pathname,
   searchParams,
   type,
 }: LoadWeaversePageOptions): Promise<WeaverseNextLoaderData | null> {
   try {
-    const client = await createServerClient(pathname, searchParams, {
-      handle,
-      type,
-    });
+    const client = await createServerClient(
+      pathname,
+      searchParams,
+      { handle, type },
+      locale,
+    );
     if (client === null) {
       return null;
     }
@@ -155,8 +163,10 @@ export async function revalidateServerClient(
  * schema, so a renamed input breaks its consumers at compile time. A setting
  * the merchant left unset is simply absent.
  */
-export async function readThemeSettings(): Promise<Partial<ThemeSettings>> {
-  const theme = await loadWeaverseThemeSettings();
+export async function readThemeSettings(
+  locale: LocaleId = DEFAULT_LOCALE,
+): Promise<Partial<ThemeSettings>> {
+  const theme = await loadWeaverseThemeSettings(locale);
   return (theme?.themeSettings ?? {}) as Partial<ThemeSettings>;
 }
 
@@ -173,9 +183,16 @@ export function weaverseProjectId(): string | null {
  * design-mode reads — which the SDK forces to `no-store` — stay fresh.
  */
 export const loadWeaverseThemeSettings = cache(
-  async (): Promise<WeaverseNextThemeSettingsResponse | null> => {
+  async (
+    locale: LocaleId = DEFAULT_LOCALE,
+  ): Promise<WeaverseNextThemeSettingsResponse | null> => {
     try {
-      const client = await createServerClient("/", undefined);
+      const client = await createServerClient(
+        "/",
+        undefined,
+        undefined,
+        locale,
+      );
       if (client === null) {
         return null;
       }
