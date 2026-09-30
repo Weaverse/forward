@@ -26,3 +26,12 @@
 - The browser swatch contract moved from 44px targets to the WCAG 2.2 AA
   target-size minimum (2.5.8: centres 24px apart), matching the looser
   product-card swatch design from `081a84d`. Code unchanged; decided by Leo.
+- Menus were empty on every non-default market: Shopify prefixes menu URLs
+  with the market subfolder. Tracked as #84 and fixed here; see
+  `.weaverse/specs/2026-09-30--market-menus/`.
+- Checked every sitemap route on all five markets: all 200, no `/en-us` or
+  unprefixed internal links. Three more bugs, tracked as #85 and fixed here
+  (cart currency, trailing zero, selector query string); see
+  `.weaverse/specs/2026-09-30--market-cart-and-prices/`.
+- Store finding: every product is sold out outside the US market, so non-US
+  PDPs show "Sold out" and a cart moved there loses its lines.

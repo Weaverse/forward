@@ -14,7 +14,8 @@ export function formatMoney(money: Money, localeTag = "en-US"): string {
     formatter = new Intl.NumberFormat(localeTag, {
       style: "currency",
       currency: money.currencyCode,
-      minimumFractionDigits: 0,
+      /* `$248`, but `£228.20` rather than `£228.2`. */
+      trailingZeroDisplay: "stripIfInteger",
     });
     MONEY_FORMATTERS.set(key, formatter);
   }

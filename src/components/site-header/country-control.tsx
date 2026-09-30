@@ -59,6 +59,9 @@ function MarketSelector({ locale }: { locale: LocaleId }) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
   const path = splitLocale(usePathname()).path;
+  /* Filters, sort and the selected colorway carry into the other market. The
+   * panel only renders after a click, so this never runs on the server. */
+  const search = open ? window.location.search : "";
 
   useEffect(() => {
     if (!open) {
@@ -122,7 +125,7 @@ function MarketSelector({ locale }: { locale: LocaleId }) {
               <li key={option}>
                 <Link
                   className="flex min-h-touch w-full items-center justify-between gap-4 border-border-subtle border-b bg-transparent px-4 py-2.5 text-start font-body text-ui font-ui tracking-control uppercase last:border-b-0 hover:bg-ink hover:text-text-inverse focus-visible:bg-ink focus-visible:text-text-inverse aria-[current=true]:font-ui-strong"
-                  href={path}
+                  href={`${path}${search}`}
                   locale={option}
                   aria-current={option === locale ? "true" : undefined}
                   onClick={() => setOpen(false)}

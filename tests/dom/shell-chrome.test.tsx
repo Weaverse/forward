@@ -126,6 +126,25 @@ describe("market selector", () => {
     );
   });
 
+  it("carries the page's filters, sort and colorway into every market", async () => {
+    const user = userEvent.setup();
+    const query = "?sort=name&colorway=moss";
+    setRoute("/shop/packs", query);
+    window.history.replaceState(null, "", `/shop/packs${query}`);
+    try {
+      renderWithCart(<CountryControl />);
+
+      await user.click(screen.getByRole("button"));
+      const options = within(screen.getByRole("list")).getAllByRole("link");
+      assert.deepEqual(
+        options.map((option) => option.getAttribute("href")),
+        LOCALE_IDS.map((locale) => localizePath(`/shop/packs${query}`, locale)),
+      );
+    } finally {
+      window.history.replaceState(null, "", "/");
+    }
+  });
+
   it("flags every market and keeps the flags out of the accessible name", () => {
     const { container } = renderWithCart(<CountryControl />);
 
