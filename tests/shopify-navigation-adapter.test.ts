@@ -308,6 +308,11 @@ describe("Shopify navigation mapping", () => {
       ["/pages/contact#form", "/pages/contact"],
       ["/pages/contact?from=footer", "/pages/contact"],
       [`${SYNTHETIC_STORE_ORIGIN}/pages/contact/`, "/pages/contact"],
+      ["/en-gb/collections/packs", "/shop/packs"],
+      [`${SYNTHETIC_STORE_ORIGIN}/de-de/pages/contact`, "/pages/contact"],
+      ["/ja-jp/blogs/field-notes/layering", "/journal/layering"],
+      ["/de/collections/all", "/shop"],
+      ["/fr-fr", "/"],
     ] as const;
     for (const [url, href] of cases) {
       const response = navigationResponseWith((draft) => {

@@ -321,4 +321,69 @@ describe("pinned Hydrogen cart handler integration", () => {
       globalThis.fetch = originalFetch;
     }
   });
+
+  it("moves an existing cart into the shopper's current market", async () => {
+    const originalFetch = globalThis.fetch;
+    const sent: string[] = [];
+    let cartCountry = "US";
+    globalThis.fetch = async (_input, init) => {
+      const request = JSON.parse(String(init?.body)) as {
+        query?: string;
+        variables?: { countryCode?: string };
+      };
+      const query = request.query ?? "";
+      sent.push(query);
+      if (query.includes("ForwardCartCountryUpdate")) {
+        cartCountry = request.variables?.countryCode ?? cartCountry;
+        return Response.json({
+          data: { cartBuyerIdentityUpdate: { userErrors: [] } },
+        });
+      }
+      return Response.json({
+        data: {
+          cart: {
+            id: "gid://shopify/Cart/synthetic?key=secret",
+            checkoutUrl: `https://${STORE_DOMAIN}/cart/c/synthetic`,
+            totalQuantity: 0,
+            note: null,
+            buyerIdentity: { countryCode: cartCountry },
+            lines: { nodes: [] },
+            discountCodes: [],
+          },
+        },
+      });
+    };
+    const env = {
+      NODE_ENV: "production",
+      [STORE_DOMAIN_ENV_KEY]: STORE_DOMAIN,
+      [PRIVATE_STOREFRONT_TOKEN_ENV_KEY]: "synthetic-private-token",
+    };
+    function get(locale: string) {
+      return handleShopifyCartRequest(
+        new Request("https://forward.example/api/cart", {
+          headers: {
+            "x-forwarded-for": "203.0.113.9",
+            cookie: `cart=synthetic%3Fkey%3Dsecret; forward_locale=${locale}`,
+          },
+        }),
+        env,
+      );
+    }
+    const updates = () =>
+      sent.filter((query) => query.includes("ForwardCartCountryUpdate")).length;
+
+    try {
+      assert.equal((await get("en-us")).status, 200);
+      assert.equal(updates(), 0);
+
+      assert.equal((await get("de-de")).status, 200);
+      assert.equal(updates(), 1);
+      assert.equal(cartCountry, "DE");
+
+      assert.equal((await get("de-de")).status, 200);
+      assert.equal(updates(), 1);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { ProductCard } from "@/components/product-card";
 import { Section } from "@/components/section";
 import { sectionHeading, textLink } from "@/lib/presentation/variants";

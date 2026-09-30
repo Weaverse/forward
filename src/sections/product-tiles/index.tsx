@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/components/link";
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
 import {
   elementAttributes,

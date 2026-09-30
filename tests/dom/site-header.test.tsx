@@ -94,7 +94,7 @@ describe("header shell", () => {
       visibleText(announcement),
       /Shopify · Hydrogen · Next\.js · WeaverseFree shipping over \$150 · Repairs for life/,
     );
-    assert.match(visibleText(announcement), /United States · USD/);
+    assert.match(visibleText(announcement), /United States \(USD \$\)/);
 
     assert.ok(screen.getByRole("banner"));
     assert.equal(

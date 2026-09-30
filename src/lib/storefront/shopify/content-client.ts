@@ -1,11 +1,11 @@
-import {
-  createShopifyRequestContext,
-  createStorefrontClient,
-} from "@shopify/hydrogen";
 import { unstable_cache } from "next/cache";
 
 import { CATALOG_REVALIDATE_SECONDS, CONTENT_CACHE_KEY } from "./cache-policy";
-import type { CatalogQueryExecutorOptions } from "./client";
+import {
+  type CatalogQueryExecutorOptions,
+  createStorefrontReadClient,
+  executorMarket,
+} from "./client";
 import { type MappedContentResult, mapContentResult } from "./content-mapper";
 import {
   CONTENT_ARTICLE_LIMIT,
@@ -22,8 +22,6 @@ export interface ContentQueryResult {
 
 export type ContentQueryExecutor = () => Promise<MappedContentResult>;
 
-const CONTENT_I18N = { country: "US", language: "EN" } as const;
-
 function readGraphQLErrors(errors: unknown): readonly unknown[] {
   if (errors === undefined) {
     return [];
@@ -36,27 +34,12 @@ function readGraphQLErrors(errors: unknown): readonly unknown[] {
   return errors;
 }
 
-function createStorefrontReadClient(config: ShopifyCatalogConfig) {
-  const requestContext = createShopifyRequestContext({
-    request: { headers: new Headers() },
-    i18n: CONTENT_I18N,
-  });
-
-  return createStorefrontClient({
-    type: "private_no_buyer_context",
-    requestContext,
-    config: {
-      storeDomain: config.storeDomain,
-      privateStorefrontToken: config.privateStorefrontToken,
-    },
-  });
-}
-
 export function createContentQueryExecutor(
   config: ShopifyCatalogConfig,
   options: CatalogQueryExecutorOptions = {},
 ): ContentQueryExecutor {
-  const client = createStorefrontReadClient(config);
+  const market = executorMarket(options);
+  const client = createStorefrontReadClient(config, market.i18n);
 
   const execute = async () => {
     try {
@@ -93,7 +76,9 @@ export function createContentQueryExecutor(
     return execute;
   }
 
-  return unstable_cache(execute, [CONTENT_CACHE_KEY, config.storeDomain], {
-    revalidate: CATALOG_REVALIDATE_SECONDS,
-  });
+  return unstable_cache(
+    execute,
+    [CONTENT_CACHE_KEY, config.storeDomain, market.key],
+    { revalidate: CATALOG_REVALIDATE_SECONDS },
+  );
 }

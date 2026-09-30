@@ -1,8 +1,10 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { type ReactNode, Suspense, useEffect } from "react";
+import { useLocale, usePathname } from "@/lib/i18n/locale-context";
+import { localizePath } from "@/lib/i18n/locales";
 
 import {
   COLORWAY_PARAM,
@@ -125,6 +127,7 @@ function UrlSelection({
   children: ReactNode;
 }) {
   const router = useRouter();
+  const locale = useLocale();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const selection = resolveProductSelection(
@@ -132,11 +135,15 @@ function UrlSelection({
     searchParams.get(COLORWAY_PARAM) ?? undefined,
     requestedOptions(product, searchParams),
   );
-  const canonicalHref = productSelectionHref(
-    product,
-    selection.colorway.id,
-    selection.selectedOptions,
-    searchParams,
+  /* `router.replace` bypasses the theme `Link`, so the market goes on here. */
+  const canonicalHref = localizePath(
+    productSelectionHref(
+      product,
+      selection.colorway.id,
+      selection.selectedOptions,
+      searchParams,
+    ),
+    locale,
   );
 
   useEffect(() => {

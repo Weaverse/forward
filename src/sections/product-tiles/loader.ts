@@ -1,7 +1,7 @@
 import type { WeaverseNextComponent } from "@weaverse/next";
 
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
-import { resolveProducts } from "@/lib/weaverse/resource";
+import { loaderLocale, resolveProducts } from "@/lib/weaverse/resource";
 
 type LoaderArgs = Parameters<NonNullable<WeaverseNextComponent["loader"]>>[0];
 
@@ -18,9 +18,11 @@ export interface ProductTilesLoaderData {
  */
 export async function loader({
   data,
+  context,
 }: LoaderArgs): Promise<ProductTilesLoaderData> {
+  const locale = loaderLocale(context);
   const selection = (data as { products?: unknown } | undefined)?.products;
-  const products = await resolveProducts(selection);
+  const products = await resolveProducts(selection, locale);
 
   return {
     tiles: products.flatMap((product) => {

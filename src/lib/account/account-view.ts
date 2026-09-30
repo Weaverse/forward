@@ -15,6 +15,7 @@ import {
 } from "@shopify/hydrogen/customer-account";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import { DEFAULT_LOCALE, type LocaleId, localeI18n } from "@/lib/i18n/locales";
 
 import {
   getCustomerAccountRuntime,
@@ -31,7 +32,6 @@ import {
 } from "./queries";
 import { createCustomerAccountSessionManager } from "./session-manager";
 
-const ACCOUNT_I18N = { country: "US", language: "EN" } as const;
 const ORDER_NUMBER_PATTERN = /^\d+$/;
 
 /** Generic account failure. Carries no provider, GraphQL, or session detail. */
@@ -148,6 +148,8 @@ export async function readAccountSession(options: {
   path: string;
   /** True when this render already came back from `/account/refresh`. */
   refreshed: boolean;
+  /** The page's market; the default locale when omitted. */
+  locale?: LocaleId;
 }): Promise<AccountSession> {
   const runtime = getCustomerAccountRuntime();
   if (runtime === null) {
@@ -161,7 +163,7 @@ export async function readAccountSession(options: {
       // The configured origin, never a Host/Forwarded header.
       url: `${runtime.config.storefrontOrigin}${options.path}`,
     },
-    i18n: ACCOUNT_I18N,
+    i18n: localeI18n(options.locale ?? DEFAULT_LOCALE),
   });
   const sessionManager = await createCustomerAccountSessionManager({
     config: runtime.config,

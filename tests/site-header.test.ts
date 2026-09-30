@@ -15,6 +15,7 @@ import {
   createHeaderNavigationHref,
   currentCollectionIndex,
   fieldIndexCollections,
+  isActive,
   isShopActive,
 } from "../src/components/site-header/header-navigation.ts";
 import { COLLECTION_FIXTURES } from "./fixtures/storefront/collections.ts";
@@ -71,6 +72,12 @@ describe("canonical header presentation", () => {
       assert.ok(collection.description.length >= 30);
       assert.ok(collection.fieldCode.length > 0);
     }
+  });
+
+  it("compares the current page without its market prefix", () => {
+    assert.equal(isShopActive("/de-de/shop/packs"), true);
+    assert.equal(isActive("/de-de/journal/field-notes", "/journal"), true);
+    assert.equal(isActive("/de-de", "/journal"), false);
   });
 
   it("marks Shop current anywhere in the catalog", () => {

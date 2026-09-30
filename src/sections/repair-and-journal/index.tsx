@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/components/link";
 import { Section } from "@/components/section";
 import { cn } from "@/lib/cn";
 import { eyebrow, sectionHeading, textLink } from "@/lib/presentation/variants";

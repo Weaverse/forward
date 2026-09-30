@@ -7,7 +7,8 @@
 
 export interface Money {
   amount: number;
-  currencyCode: "USD";
+  /** ISO 4217 code of the market the store priced this in. */
+  currencyCode: string;
 }
 
 export interface StorefrontImage {

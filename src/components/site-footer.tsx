@@ -1,12 +1,12 @@
-import Link from "next/link";
-
 import { Icon } from "@/components/icon";
+import { Link } from "@/components/link";
 import { PaymentMarks } from "@/components/payment-marks";
 import { Wordmark } from "@/components/wordmark";
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
 import { cn } from "@/lib/cn";
+import type { LocaleId } from "@/lib/i18n/locales";
 import { THEME_CUSTOM_PAGE_LINKS } from "@/lib/routes/route-contract";
-import { storefront } from "@/lib/storefront/data-source";
+import { getStorefront } from "@/lib/storefront/data-source";
 import {
   SOCIAL_SECTION_HEADING,
   VERIFIED_SOCIAL_LINKS,
@@ -24,10 +24,10 @@ const FOOTER_COLUMN_CLASS =
  * marks, and the (currently unconfigured) newsletter provider render nothing
  * at all rather than a decorative claim the shopper cannot check.
  */
-export async function SiteFooter() {
+export async function SiteFooter({ locale }: { locale: LocaleId }) {
   const [navigation, settings] = await Promise.all([
-    storefront.getNavigation(),
-    readThemeSettings(),
+    getStorefront(locale).getNavigation(),
+    readThemeSettings(locale),
   ]);
 
   const accountEnabled = getCustomerAccountRuntime() !== null;

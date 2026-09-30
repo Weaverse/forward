@@ -927,12 +927,19 @@ describe("catalog mapping failures", () => {
     );
   });
 
-  it("rejects invalid and non-USD money", async () => {
+  it("rejects invalid money and a product priced in mixed currencies", async () => {
     await assertRejectsCatalog(
       catalogResponseWith("weatherline-shell", (product) => {
-        product.variants.nodes[0].price.currencyCode = "EUR";
+        product.variants.nodes[1].price.currencyCode = "EUR";
+        product.variants.nodes[1].compareAtPrice = null;
       }),
-      "must be USD",
+      "more than one currency",
+    );
+    await assertRejectsCatalog(
+      catalogResponseWith("weatherline-shell", (product) => {
+        product.variants.nodes[0].price.currencyCode = "euro";
+      }),
+      "ISO 4217",
     );
 
     for (const amount of ["", "not-a-number", "-12.00", null]) {
@@ -1293,9 +1300,9 @@ describe("catalog revalidation window", () => {
 
   it("keeps shared route revalidation and personalized cart boundaries explicit", async () => {
     const routes = [
-      "src/app/page.tsx",
-      "src/app/shop/[collectionHandle]/page.tsx",
-      "src/app/products/[productHandle]/page.tsx",
+      "src/app/[locale]/page.tsx",
+      "src/app/[locale]/shop/[collectionHandle]/page.tsx",
+      "src/app/[locale]/products/[productHandle]/page.tsx",
     ];
     for (const route of routes) {
       const source = await readFile(path.join(process.cwd(), route), "utf8");
@@ -1310,8 +1317,8 @@ describe("catalog revalidation window", () => {
 
     // Personalized routes never share the catalog window.
     for (const route of [
-      "src/app/cart/page.tsx",
-      "src/app/account/orders/[orderId]/page.tsx",
+      "src/app/[locale]/cart/page.tsx",
+      "src/app/[locale]/account/orders/[orderId]/page.tsx",
     ]) {
       const personalized = await readFile(
         path.join(process.cwd(), route),

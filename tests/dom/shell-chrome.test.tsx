@@ -13,12 +13,13 @@ import { PaymentMarks } from "@/components/payment-marks";
 import { CartCount } from "@/components/site-header/cart-count";
 import { CountryControl } from "@/components/site-header/country-control";
 import { Wordmark } from "@/components/wordmark";
-import { CHECKOUT_PAYMENT_MARKS } from "@/lib/storefront/integrations";
 import {
-  ACTIVE_STOREFRONT_COUNTRY,
-  AVAILABLE_STOREFRONT_COUNTRIES,
-  countryControlLabel,
-} from "@/lib/storefront/localization";
+  DEFAULT_LOCALE,
+  LOCALE_IDS,
+  LOCALES,
+  localizePath,
+} from "@/lib/i18n/locales";
+import { CHECKOUT_PAYMENT_MARKS } from "@/lib/storefront/integrations";
 import {
   cartData,
   cartLine,
@@ -26,6 +27,7 @@ import {
   renderWithCart,
   visibleText,
 } from "./harness";
+import { setRoute } from "./preload";
 
 /** Every glyph the shell is allowed to render. */
 const SHELL_ICONS = [
@@ -78,33 +80,69 @@ describe("icon semantics", () => {
 });
 
 describe("market selector", () => {
-  it("opens on the active market and lists every published market", async () => {
+  it("opens on the current market and links every market to this page", async () => {
     const user = userEvent.setup();
+    setRoute("/shop/packs");
     renderWithCart(<CountryControl />);
 
     const trigger = screen.getByRole("button", {
-      name: new RegExp(countryControlLabel(ACTIVE_STOREFRONT_COUNTRY)),
+      name: new RegExp(LOCALES[DEFAULT_LOCALE].label.replace(/[()$]/g, "\\$&")),
     });
     assert.equal(trigger.getAttribute("aria-expanded"), "false");
     assert.equal(screen.queryByRole("list"), null);
 
     await user.click(trigger);
     assert.equal(trigger.getAttribute("aria-expanded"), "true");
+    const options = within(screen.getByRole("list")).getAllByRole("link");
     assert.deepEqual(
-      within(screen.getByRole("list"))
-        .getAllByRole("button")
-        .map((option) => visibleText(option)),
-      AVAILABLE_STOREFRONT_COUNTRIES.map((country) =>
-        countryControlLabel(country),
-      ),
+      options.map((option) => visibleText(option)),
+      LOCALE_IDS.map((locale) => LOCALES[locale].label),
     );
-    assert.equal(
-      within(screen.getByRole("list"))
-        .getAllByRole("button")
+    assert.deepEqual(
+      options.map((option) => option.getAttribute("href")),
+      LOCALE_IDS.map((locale) => localizePath("/shop/packs", locale)),
+    );
+    assert.deepEqual(
+      options
         .filter((option) => option.getAttribute("aria-current") === "true")
-        .length,
-      1,
+        .map((option) => visibleText(option)),
+      [LOCALES[DEFAULT_LOCALE].label],
     );
+  });
+
+  it("keeps the page's own path when it is already in another market", async () => {
+    const user = userEvent.setup();
+    setRoute("/de-de/cart");
+    renderWithCart(<CountryControl />, undefined, "de-de");
+
+    await user.click(screen.getByRole("button"));
+    const options = within(screen.getByRole("list")).getAllByRole("link");
+    assert.equal(options[0]?.getAttribute("href"), "/cart");
+    assert.deepEqual(
+      options
+        .filter((option) => option.getAttribute("aria-current") === "true")
+        .map((option) => visibleText(option)),
+      [LOCALES["de-de"].label],
+    );
+  });
+
+  it("carries the page's filters, sort and colorway into every market", async () => {
+    const user = userEvent.setup();
+    const query = "?sort=name&colorway=moss";
+    setRoute("/shop/packs", query);
+    window.history.replaceState(null, "", `/shop/packs${query}`);
+    try {
+      renderWithCart(<CountryControl />);
+
+      await user.click(screen.getByRole("button"));
+      const options = within(screen.getByRole("list")).getAllByRole("link");
+      assert.deepEqual(
+        options.map((option) => option.getAttribute("href")),
+        LOCALE_IDS.map((locale) => localizePath(`/shop/packs${query}`, locale)),
+      );
+    } finally {
+      window.history.replaceState(null, "", "/");
+    }
   });
 
   it("flags every market and keeps the flags out of the accessible name", () => {
@@ -114,39 +152,7 @@ describe("market selector", () => {
     assert.ok(flag !== null);
     assert.equal(flag.getAttribute("alt"), "");
     assert.equal(flag.getAttribute("aria-hidden"), "true");
-    assert.match(
-      flag.getAttribute("src") ?? "",
-      new RegExp(`${ACTIVE_STOREFRONT_COUNTRY.isoCode.toLowerCase()}\\.svg$`),
-    );
-    assert.equal(
-      visibleText(screen.getByRole("button")).includes(
-        countryControlLabel(ACTIVE_STOREFRONT_COUNTRY),
-      ),
-      true,
-    );
-  });
-
-  it("moves the marker to the chosen market and closes", async () => {
-    const user = userEvent.setup();
-    const other = AVAILABLE_STOREFRONT_COUNTRIES[1];
-    assert.ok(other !== undefined);
-    renderWithCart(<CountryControl />);
-
-    await user.click(
-      screen.getByRole("button", {
-        name: new RegExp(countryControlLabel(ACTIVE_STOREFRONT_COUNTRY)),
-      }),
-    );
-    await user.click(
-      within(screen.getByRole("list")).getByRole("button", {
-        name: countryControlLabel(other),
-      }),
-    );
-
-    assert.equal(screen.queryByRole("list"), null);
-    const trigger = screen.getByRole("button");
-    assert.match(visibleText(trigger), new RegExp(countryControlLabel(other)));
-    assert.equal(trigger.getAttribute("aria-expanded"), "false");
+    assert.match(flag.getAttribute("src") ?? "", /us\.svg$/);
   });
 
   it("closes on Escape without changing the market", async () => {
@@ -158,10 +164,7 @@ describe("market selector", () => {
     await user.keyboard("{Escape}");
 
     assert.equal(screen.queryByRole("list"), null);
-    assert.match(
-      visibleText(trigger),
-      new RegExp(countryControlLabel(ACTIVE_STOREFRONT_COUNTRY)),
-    );
+    assert.ok(visibleText(trigger).includes(LOCALES[DEFAULT_LOCALE].label));
   });
 });
 

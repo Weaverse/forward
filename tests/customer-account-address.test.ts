@@ -660,7 +660,7 @@ describe("readAccountAddresses", () => {
 describe("address action boundary", () => {
   it("explains the optional zone-code contract in the form", async () => {
     const source = await readFile(
-      path.join(process.cwd(), "src/app/account/addresses/page.tsx"),
+      path.join(process.cwd(), "src/app/[locale]/account/addresses/page.tsx"),
       "utf8",
     );
     assert.match(source, /Leave blank[\s\S]*Vietnam/);
@@ -673,9 +673,10 @@ describe("address action boundary", () => {
     );
     assert.match(source, /^"use server";/);
     // Success is the only thing that revalidates or redirects to the one
-    // fixed path; there is no dynamic redirect target on a failure.
+    // fixed path, in the shopper's market; there is no dynamic redirect
+    // target on a failure.
     assert.match(source, /revalidatePath\(ADDRESSES_PATH\)/);
-    assert.match(source, /redirect\(ADDRESSES_PATH\)/);
+    assert.match(source, /redirect\(\s*localizePath\(\s*ADDRESSES_PATH,/);
     assert.match(source, /session\.commitSession\(\)/);
     assert.ok(
       source.indexOf("session.commitSession()") <

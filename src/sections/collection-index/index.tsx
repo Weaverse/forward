@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { Link } from "@/components/link";
 import { eyebrow } from "@/lib/presentation/variants";
 import type { Collection } from "@/lib/storefront/types";
 import {

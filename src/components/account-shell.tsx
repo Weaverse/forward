@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { Link } from "@/components/link";
 
 import { CUSTOMER_ACCOUNT_LOGOUT_PATH } from "@/lib/account/customer-account";
 import { cn } from "@/lib/cn";

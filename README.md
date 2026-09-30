@@ -77,6 +77,10 @@ Shopify.
 
 The single source of truth is [`src/lib/routes/route-contract.ts`](src/lib/routes/route-contract.ts). Shell UI, `next.config.ts` redirects, the build checker, the HTTP smoke, and the tests all read from it.
 
+### Markets
+
+Every rendered route lives under `src/app/[locale]/`, with markets listed in [`src/lib/i18n/locales.ts`](src/lib/i18n/locales.ts). The default market (`en-us`) is never in the URL: the proxy redirects `/en-us/shop` to `/shop` (308) and rewrites `/shop` to `/en-us/shop` internally. Other markets keep their prefix (`/de-de/shop`); an unknown prefix is a 404. The routes below are the default-market paths.
+
 ### Canonical routes
 
 | Route | Surface |

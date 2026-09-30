@@ -11,7 +11,8 @@
 
 import "server-only";
 
-import { storefront } from "@/lib/storefront/data-source";
+import { DEFAULT_LOCALE, type LocaleId, parseLocale } from "@/lib/i18n/locales";
+import { getStorefront } from "@/lib/storefront/data-source";
 import type { Collection, Product } from "@/lib/storefront/types";
 
 /** What a Builder resource picker stores. */
@@ -57,9 +58,14 @@ export function pickerHandles(value: unknown): string[] {
  * merchant can delete a product in Shopify while a section still points at it,
  * and that must degrade to the section's empty state, not a broken page.
  */
-export async function resolveProduct(value: unknown): Promise<Product | null> {
+export async function resolveProduct(
+  value: unknown,
+  locale: LocaleId,
+): Promise<Product | null> {
   const handle = pickerHandle(value);
-  return handle === null ? null : await storefront.getProduct(handle);
+  return handle === null
+    ? null
+    : await getStorefront(locale).getProduct(handle);
 }
 
 /**
@@ -70,13 +76,14 @@ export async function resolveProduct(value: unknown): Promise<Product | null> {
  */
 export async function resolveProducts(
   value: unknown,
+  locale: LocaleId,
 ): Promise<readonly Product[]> {
   const handles = pickerHandles(value);
   if (handles.length === 0) {
     return [];
   }
   const products = await Promise.all(
-    handles.map((handle) => storefront.getProduct(handle)),
+    handles.map((handle) => getStorefront(locale).getProduct(handle)),
   );
   return products.filter((product): product is Product => product !== null);
 }
@@ -84,23 +91,40 @@ export async function resolveProducts(
 /** Resolves one selected collection, or `null`. */
 export async function resolveCollection(
   value: unknown,
+  locale: LocaleId,
 ): Promise<Collection | null> {
   const handle = pickerHandle(value);
-  return handle === null ? null : await storefront.getCollection(handle);
+  return handle === null
+    ? null
+    : await getStorefront(locale).getCollection(handle);
 }
 
 /** Resolves selected collections in the merchant's chosen order. */
 export async function resolveCollections(
   value: unknown,
+  locale: LocaleId,
 ): Promise<readonly Collection[]> {
   const handles = pickerHandles(value);
   if (handles.length === 0) {
     return [];
   }
   const collections = await Promise.all(
-    handles.map((handle) => storefront.getCollection(handle)),
+    handles.map((handle) => getStorefront(locale).getCollection(handle)),
   );
   return collections.filter(
     (collection): collection is Collection => collection !== null,
+  );
+}
+
+/**
+ * The market a section loader runs in: the locale the page's request context
+ * reports, or the default when a caller (a Studio revalidation without one)
+ * reports none.
+ */
+export function loaderLocale(context: unknown): LocaleId {
+  const locale = (context as { i18n?: { locale?: unknown } } | undefined)?.i18n
+    ?.locale;
+  return (
+    parseLocale(typeof locale === "string" ? locale : null) ?? DEFAULT_LOCALE
   );
 }

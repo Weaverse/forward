@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-
+import { useSearchParams } from "next/navigation";
 import { type CatalogColumns, CatalogGrid } from "@/components/catalog-grid";
+import { Link } from "@/components/link";
+import { usePathname } from "@/lib/i18n/locale-context";
 import { cta, emptyState, eyebrow } from "@/lib/presentation/variants";
 import {
   clearFiltersHref,

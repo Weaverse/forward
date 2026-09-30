@@ -168,7 +168,9 @@ function ShopifyAddToCartForm({
           ·{" "}
           {formatMoney({
             amount: selectedPrice * quantity,
-            currencyCode: "USD",
+            currencyCode:
+              selectedVariant?.price.currencyCode ??
+              selection.variant.price.currencyCode,
           })}
         </button>
       </div>

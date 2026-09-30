@@ -3,8 +3,8 @@
 import { IMAGES_PLACEHOLDERS } from "@weaverse/schema";
 import { cva } from "class-variance-authority";
 import Image from "next/image";
-import Link from "next/link";
 import { type ReactNode, useContext } from "react";
+import { Link } from "@/components/link";
 
 import { cn } from "@/lib/cn";
 import type { Product, StorefrontImage } from "@/lib/storefront/types";

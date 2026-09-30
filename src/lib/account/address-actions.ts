@@ -13,6 +13,7 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import { localeFromCookieHeader, localizePath } from "@/lib/i18n/locales";
 import { readAccountSession } from "./account-view";
 import type { AddressActionState } from "./address-action-state";
 import {
@@ -64,5 +65,10 @@ export async function saveAddress(
     redirect(result.href);
   }
   revalidatePath(ADDRESSES_PATH);
-  redirect(ADDRESSES_PATH);
+  redirect(
+    localizePath(
+      ADDRESSES_PATH,
+      localeFromCookieHeader(requestHeaders.get("cookie")),
+    ),
+  );
 }

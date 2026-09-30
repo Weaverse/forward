@@ -2,10 +2,9 @@
 
 import { cva } from "class-variance-authority";
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-
 import { Icon } from "@/components/icon";
+import { Link } from "@/components/link";
 import { subscribeToCartAdd } from "@/lib/cart/mini-cart-signal";
 import {
   formatShopifyMoney,

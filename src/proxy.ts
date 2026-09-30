@@ -1,20 +1,18 @@
 /**
- * The single Hydrogen route gate for Forward.
+ * The single route gate for Forward: markets first, then the account boundary.
  *
- * Next runs `proxy.ts` before App Router routing, which is the only place the
- * Customer Account protocol paths can be owned without a second OAuth
- * implementation. Exactly one request context, one storefront client, and one
- * writable session manager are created per request, and the pinned handlers
- * commit that session on every successful 303.
+ * Next runs `proxy.ts` before App Router routing. Every rendered route lives in
+ * `app/[locale]/`, and the default locale never appears in a URL:
+ * `/en-us/*` redirects to the unprefixed path, a known non-default prefix is
+ * served as it is, and everything else is rewritten under `/en-us`. The locale
+ * of the page is recorded in a cookie for request handlers that serve no page
+ * of their own, like the cart endpoint.
  *
- * The proxy matches the complete `/account` boundary so disabled deployments
- * fail closed before App Router rendering. When configured, only the four
- * protocol paths enter Hydrogen's handler group; ordinary account pages fall
- * through directly, so unrelated SFAPI/cart/checkout interceptors stay out of
- * scope.
- *
- * When the account tuple is absent every account request receives the same
- * generic no-store 404 and exposes no auth affordance.
+ * The account boundary is unchanged and matches on the locale-free path. When
+ * the account tuple is absent every account request receives the same generic
+ * no-store 404 and exposes no auth affordance. When configured, only the four
+ * unprefixed protocol paths enter Hydrogen's handler group; ordinary account
+ * pages continue to their route with personalized response headers.
  */
 
 import {
@@ -32,14 +30,23 @@ import {
   getCustomerAccountRuntime,
 } from "@/lib/account/customer-account";
 import { createCustomerAccountSessionManager } from "@/lib/account/session-manager";
+import { type LocaleRoute, resolveLocaleRoute } from "@/lib/i18n/locale-route";
+import {
+  LOCALE_COOKIE,
+  type LocaleId,
+  localeFromCookieHeader,
+  localeI18n,
+  splitLocale,
+} from "@/lib/i18n/locales";
 
-const ACCOUNT_I18N = { country: "US", language: "EN" } as const;
 const CUSTOMER_ACCOUNT_PROTOCOL_METHODS = new Map<string, string>([
   [CUSTOMER_ACCOUNT_LOGIN_PATH, "GET"],
   [CUSTOMER_ACCOUNT_AUTHORIZE_PATH, "GET"],
   [CUSTOMER_ACCOUNT_REFRESH_PATH, "GET"],
   [CUSTOMER_ACCOUNT_LOGOUT_PATH, "POST"],
 ]);
+const ACCOUNT_STATUS_PATH = "/account/status";
+const LOCALE_REWRITE_HEADER = "x-forward-locale-rewrite";
 const ACCOUNT_PRIVATE_NO_STORE =
   "private, no-store, max-age=0, must-revalidate";
 
@@ -120,28 +127,98 @@ function createAccountRouteContextClient(
   return Object.freeze({ requestContext }) as unknown as StorefrontClient;
 }
 
-function personalizedAccountPageResponse(request: NextRequest): Response {
+/** The response that sends a page request on to its locale's route. */
+function routeResponse(
+  request: NextRequest,
+  route: Exclude<LocaleRoute, { kind: "redirect" }>,
+): NextResponse {
+  if (route.kind === "serve") {
+    return NextResponse.next();
+  }
+  const url = request.nextUrl.clone();
+  url.pathname = route.target;
+  /* Next can hand the rewritten request back through the proxy. The marker
+   * tells that pass the `/en-us` prefix is ours, not the shopper's. */
+  const headers = new Headers(request.headers);
+  headers.set(LOCALE_REWRITE_HEADER, route.locale);
+  return NextResponse.rewrite(url, { request: { headers } });
+}
+
+/** Records the page's market for handlers that serve no page of their own. */
+function rememberLocale(
+  request: NextRequest,
+  response: NextResponse,
+  locale: LocaleId,
+): NextResponse {
+  if (request.cookies.get(LOCALE_COOKIE)?.value !== locale) {
+    response.cookies.set(LOCALE_COOKIE, locale, {
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
+  }
+  return response;
+}
+
+function personalizedAccountPageResponse(
+  request: NextRequest,
+  route: Exclude<LocaleRoute, { kind: "redirect" }>,
+): Response {
   const requestContext = createShopifyRequestContext({
     request,
-    i18n: ACCOUNT_I18N,
+    i18n: localeI18n(route.locale),
   });
   requestContext.markResponseAsPersonalized("customer-account-page");
-  const response = NextResponse.next();
+  /* `/account/status` is a root route handler, never a localized page. */
+  const response =
+    route.path === ACCOUNT_STATUS_PATH && route.kind === "rewrite"
+      ? NextResponse.next()
+      : rememberLocale(request, routeResponse(request, route), route.locale);
   requestContext.applyResponseHeaders(response.headers);
   return response;
 }
 
+function isAccountPath(path: string): boolean {
+  return path === "/account" || path.startsWith("/account/");
+}
+
+/** The route for this request; a request this proxy rewrote is served as is. */
+function requestRoute(request: NextRequest): LocaleRoute {
+  const { pathname } = request.nextUrl;
+  if (request.headers.has(LOCALE_REWRITE_HEADER)) {
+    const { locale, path } = splitLocale(pathname);
+    if (locale !== null) {
+      return { kind: "serve", locale, path };
+    }
+  }
+  return resolveLocaleRoute(pathname);
+}
+
 export async function proxy(request: NextRequest): Promise<Response> {
+  const route = requestRoute(request);
+  if (route.kind === "redirect") {
+    const url = request.nextUrl.clone();
+    url.pathname = route.path;
+    return NextResponse.redirect(url, 308);
+  }
+  if (!isAccountPath(route.path)) {
+    return rememberLocale(request, routeResponse(request, route), route.locale);
+  }
+
   try {
     const runtime = getCustomerAccountRuntime();
     if (runtime === null) {
       return accountDisabledResponse();
     }
-    const expectedMethod = CUSTOMER_ACCOUNT_PROTOCOL_METHODS.get(
-      request.nextUrl.pathname,
-    );
+    /* Protocol paths are answered only where Shopify redirects to them:
+     * unprefixed. A prefixed copy is an ordinary (missing) account page. */
+    const expectedMethod =
+      route.kind === "rewrite"
+        ? CUSTOMER_ACCOUNT_PROTOCOL_METHODS.get(route.path)
+        : undefined;
     if (expectedMethod === undefined) {
-      return personalizedAccountPageResponse(request);
+      return personalizedAccountPageResponse(request, route);
     }
     if (request.method !== expectedMethod) {
       return accountMethodNotAllowedResponse(expectedMethod);
@@ -153,7 +230,8 @@ export async function proxy(request: NextRequest): Promise<Response> {
     );
     const requestContext = createShopifyRequestContext({
       request: protocolRequest,
-      i18n: ACCOUNT_I18N,
+      /* The market of the page the shopper signed in from. */
+      i18n: localeI18n(localeFromCookieHeader(request.headers.get("cookie"))),
     });
     const storefrontClient = createAccountRouteContextClient(requestContext);
     const sessionManager = await createCustomerAccountSessionManager({
@@ -178,10 +256,10 @@ export async function proxy(request: NextRequest): Promise<Response> {
 }
 
 /**
- * Match the complete account boundary so disabled configuration can fail closed
- * before App Router rendering. Configured non-protocol account pages fall
- * through without invoking Hydrogen's route interceptors.
+ * Every page path. Build assets, route handlers under `/api`, and files with an
+ * extension (`robots.txt`, `sitemap.xml`, `icon.svg`, images) never pass
+ * through; `/account/status` does, so the account boundary still guards it.
  */
 export const config = {
-  matcher: ["/account/:path*"],
+  matcher: ["/((?!_next/|api/|.*\\.[^/]+$).*)"],
 };

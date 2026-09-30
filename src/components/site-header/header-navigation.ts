@@ -1,3 +1,4 @@
+import { splitLocale } from "@/lib/i18n/locales";
 import type {
   Collection,
   NavItem,
@@ -71,10 +72,12 @@ export function createHeaderNavigationHref(
 
 /** True when `href` names the current page or one of its nested routes. */
 export function isActive(pathname: string, href: string): boolean {
-  if (pathname === href || pathname.startsWith(`${href}/`)) {
+  /* Hrefs are locale-free; the visible pathname may carry a market prefix. */
+  const path = splitLocale(pathname).path;
+  if (path === href || path.startsWith(`${href}/`)) {
     return true;
   }
-  return href === "/shop" && pathname.startsWith("/products");
+  return href === "/shop" && path.startsWith("/products");
 }
 
 /**
@@ -121,7 +124,8 @@ function isCatalogHref(href: string): boolean {
  * a product, whichever collection the merchant pointed Shop itself at.
  */
 export function isShopActive(pathname: string): boolean {
-  return isCatalogHref(pathname) || pathname.startsWith("/products/");
+  const path = splitLocale(pathname).path;
+  return isCatalogHref(path) || path.startsWith("/products/");
 }
 
 /** The top-level menu entry that opens the Shop panel: the catalog branch. */

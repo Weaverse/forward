@@ -1,9 +1,9 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
-
+import { useSearchParams } from "next/navigation";
 import { FacetList } from "@/components/facet-list";
 import { cn } from "@/lib/cn";
+import { usePathname } from "@/lib/i18n/locale-context";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
 
 import {

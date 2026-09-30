@@ -1,7 +1,7 @@
 import type { WeaverseNextComponent } from "@weaverse/next";
 
 import type { Collection } from "@/lib/storefront/types";
-import { resolveCollections } from "@/lib/weaverse/resource";
+import { loaderLocale, resolveCollections } from "@/lib/weaverse/resource";
 
 type LoaderArgs = Parameters<NonNullable<WeaverseNextComponent["loader"]>>[0];
 
@@ -11,8 +11,10 @@ export interface CollectionIndexLoaderData {
 
 export async function loader({
   data,
+  context,
 }: LoaderArgs): Promise<CollectionIndexLoaderData> {
+  const locale = loaderLocale(context);
   const selection = (data as { collections?: unknown } | undefined)
     ?.collections;
-  return { collections: await resolveCollections(selection) };
+  return { collections: await resolveCollections(selection, locale) };
 }

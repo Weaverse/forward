@@ -1,7 +1,11 @@
 import type { WeaverseNextComponent } from "@weaverse/next";
 
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
-import { resolveProduct, resolveProducts } from "@/lib/weaverse/resource";
+import {
+  loaderLocale,
+  resolveProduct,
+  resolveProducts,
+} from "@/lib/weaverse/resource";
 
 type LoaderArgs = Parameters<NonNullable<WeaverseNextComponent["loader"]>>[0];
 
@@ -13,13 +17,15 @@ export interface KitCalloutLoaderData {
 /** Resolves the featured kit product and the tile products beside it. */
 export async function loader({
   data,
+  context,
 }: LoaderArgs): Promise<KitCalloutLoaderData> {
+  const locale = loaderLocale(context);
   const settings = data as
     | { product?: unknown; tileProducts?: unknown }
     | undefined;
   const [product, tileProducts] = await Promise.all([
-    resolveProduct(settings?.product),
-    resolveProducts(settings?.tileProducts),
+    resolveProduct(settings?.product, locale),
+    resolveProducts(settings?.tileProducts, locale),
   ]);
 
   return {

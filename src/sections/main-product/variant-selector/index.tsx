@@ -1,7 +1,7 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import Link from "next/link";
+import { Link } from "@/components/link";
 
 import {
   colorwayIsSoldOut,

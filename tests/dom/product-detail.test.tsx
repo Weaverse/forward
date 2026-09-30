@@ -12,6 +12,11 @@ import assert from "node:assert/strict";
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+import {
+  DEFAULT_LOCALE,
+  type LocaleId,
+  localizePath,
+} from "@/lib/i18n/locales";
 import { formatMoney } from "@/lib/storefront/format";
 import type { Money, Product } from "@/lib/storefront/types";
 import { StorefrontDataProvider } from "@/lib/weaverse/data-context";
@@ -47,8 +52,12 @@ function withVariants(
   return { ...product, variants: product.variants.map(update) };
 }
 
-function mountPdp(product: Product, query: string) {
-  setRoute(`/products/${product.handle}`, query);
+function mountPdp(
+  product: Product,
+  query: string,
+  locale: LocaleId = DEFAULT_LOCALE,
+) {
+  setRoute(localizePath(`/products/${product.handle}`, locale), query);
   /* The tree the section's preset seeds into a template. */
   return renderWithCart(
     <StorefrontDataProvider value={{ product }}>
@@ -66,6 +75,8 @@ function mountPdp(product: Product, query: string) {
         </ProductInfo>
       </MainProduct>
     </StorefrontDataProvider>,
+    undefined,
+    locale,
   );
 }
 
@@ -100,6 +111,14 @@ describe("selected variant truth", () => {
 
     assert.deepEqual(currentRoute().replaced, [
       "/products/weatherline-shell?colorway=claystone-charcoal&size=XS",
+    ]);
+  });
+
+  it("keeps the shopper's market when it rewrites the selection", () => {
+    mountPdp(SHELL, "colorway=claystone-charcoal", "de-de");
+
+    assert.deepEqual(currentRoute().replaced, [
+      "/de-de/products/weatherline-shell?colorway=claystone-charcoal&size=XS",
     ]);
   });
 
