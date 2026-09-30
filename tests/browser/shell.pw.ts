@@ -200,7 +200,10 @@ test.describe("header navigation surface", () => {
 });
 
 test.describe("interactive affordances", () => {
-  test("keeps every colorway swatch at a distinct 44px target", async ({
+  /* WCAG 2.2 target size (minimum, 2.5.8): a swatch smaller than 24px passes
+   * when a 24px circle centred on it clears its neighbours' circles, so the
+   * dots may stay small as long as their centres sit 24px apart. */
+  test("spaces every colorway swatch to the 24px target minimum", async ({
     page,
   }) => {
     await gotoReady(page, "/");
@@ -217,25 +220,22 @@ test.describe("interactive affordances", () => {
         .nth(groupIndex)
         .locator("label:has(input[type='radio'])");
       const count = await swatches.count();
-      let previousRight: number | undefined;
+      let previousCenter: number | undefined;
 
       for (let index = 0; index < count; index += 1) {
         const box = await boxOf(swatches.nth(index));
         expect(
-          box.width,
-          `group ${groupIndex} swatch ${index} is too narrow`,
-        ).toBeGreaterThanOrEqual(44);
-        expect(
-          box.height,
-          `group ${groupIndex} swatch ${index} is too short`,
-        ).toBeGreaterThanOrEqual(44);
-        if (previousRight !== undefined) {
+          Math.min(box.width, box.height),
+          `group ${groupIndex} swatch ${index} is not laid out`,
+        ).toBeGreaterThan(0);
+        const center = box.x + box.width / 2;
+        if (previousCenter !== undefined) {
           expect(
-            box.x,
-            `group ${groupIndex} swatch ${index} overlaps its predecessor`,
-          ).toBeGreaterThanOrEqual(previousRight - 0.5);
+            center - previousCenter,
+            `group ${groupIndex} swatch ${index} crowds its predecessor`,
+          ).toBeGreaterThanOrEqual(24);
         }
-        previousRight = box.x + box.width;
+        previousCenter = center;
       }
     }
   });

@@ -23,3 +23,6 @@
     and Biome restricts the Next import.
 - The live store has only a US market, so non-US locales currently receive
   USD prices. Adding markets in Shopify needs no code change.
+- The browser swatch contract moved from 44px targets to the WCAG 2.2 AA
+  target-size minimum (2.5.8: centres 24px apart), matching the looser
+  product-card swatch design from `081a84d`. Code unchanged; decided by Leo.
