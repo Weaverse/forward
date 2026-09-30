@@ -39,3 +39,11 @@
   `router.replace` bypassed the theme `Link`. The address Server Action's
   redirect had the same gap. Tracked as #86 and fixed here; see
   `.weaverse/specs/2026-09-30--market-redirects/`.
+- Store setup completed on the live store: GB/GBP, DE/EUR, FR/EUR and JP/JPY
+  markets, de/fr/ja shop locales, and the stocked location now fulfills every
+  market (63/78 variants available in each, same as US).
+- Verified after #84–#86: `bun run check`, `smoke:routes` (41 checks), both
+  browser matrices (142 and 145 passed), a manual pass by Leo, and live cart
+  switching (USD → EUR → JPY → GBP → USD keeps its lines).
+- The handoff of 2026-09-30 07:11 predates #84–#86; this log supersedes its
+  "What's Next".
