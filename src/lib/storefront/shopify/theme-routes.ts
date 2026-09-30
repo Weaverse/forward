@@ -16,7 +16,21 @@ const THEME_ROUTES: readonly [RegExp, (match: RegExpMatchArray) => string][] = [
   [/^\/(search|account|cart)$/, (match) => match[0]],
 ];
 
+/**
+ * Shopify answers a market's reads with that market's subfolder on every path
+ * (`/en-gb/collections/forward`). The theme `Link` prefixes the shopper's own
+ * market, so a theme route never carries one.
+ */
+const MARKET_SUBFOLDER = /^\/[a-z]{2}(?:-[a-z]{2})?(?=\/|$)/;
+
 export function toThemePath(path: string): string | null {
+  return (
+    matchThemeRoute(path) ??
+    matchThemeRoute(path.replace(MARKET_SUBFOLDER, "") || "/")
+  );
+}
+
+function matchThemeRoute(path: string): string | null {
   for (const [pattern, route] of THEME_ROUTES) {
     const match = path.match(pattern);
     if (match !== null) {
