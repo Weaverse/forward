@@ -35,3 +35,7 @@
   `.weaverse/specs/2026-09-30--market-cart-and-prices/`.
 - Store finding: every product is sold out outside the US market, so non-US
   PDPs show "Sold out" and a cart moved there loses its lines.
+- Every PDP on a non-default market jumped back to US: the canonical selection
+  `router.replace` bypassed the theme `Link`. The address Server Action's
+  redirect had the same gap. Tracked as #86 and fixed here; see
+  `.weaverse/specs/2026-09-30--market-redirects/`.
