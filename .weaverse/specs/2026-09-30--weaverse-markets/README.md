@@ -7,7 +7,7 @@
 | **Issue**        | [#87](https://github.com/Weaverse/forward/issues/87)   |
 | **Branch**       | `feat/weaverse-markets`                                |
 | **Created**      | 2026-09-30                                             |
-| **Last Updated** | 2026-09-30                                             |
+| **Last Updated** | 2026-10-02                                             |
 
 ## Original Prompt
 
@@ -58,6 +58,24 @@
 > - [ ] `bun run check`, `smoke:routes`, both browser matrices
 > - [ ] Browser coverage for a translated string and a localized page on a non-default market
 >
+
+## Clarified Acceptance Criteria
+
+Added 2026-10-01 after a Codex review of the plan. The Original Prompt above stays verbatim; where it conflicts with this section, this section wins.
+
+- **Erratum, §2 of the prompt:** `loadPage` does not turn its `locale` argument into `i18n`.
+  - Request-context `i18n` is posted at the top level of the Builder request.
+  - An explicit `loadPage({ locale })` travels separately inside `params`.
+  - Three identities exist and stay separate: the URL id (`de-de`), BCP-47 (`de-DE`), and Shopify's enums (`{ language: "DE", country: "DE" }`).
+- **Clarification, §4 of the prompt:** every indexable page gets a self-canonical, but `hreflang` lists only verified equivalents, never every market by prefix-swapping. Shopify handles can be localized and resources unpublished per market. Sitemap entries come from per-market reads.
+- **Translation:**
+  - Theme copy renders through a client `<T>` leaf and `useT()`, so Studio's live edits reach text inside Server Components.
+  - A server `getTranslator` is used only for attributes and metadata.
+  - Precedence: live Studio edit → Translation Manager override → English `staticContent` → key. An empty override is kept.
+- **Item-level translations** of merchant-authored section fields are rendered by the SDK. The theme verifies them, including after client navigation between markets.
+- **Account:** login, refresh and logout all keep the market. Account money formats per market.
+- **`<html dir>`** comes from the market.
+- **Saved theme settings must reach the storefront.** `readThemeSettings` read a `themeSettings` key the SDK never returns; it reads `theme` now.
 
 ## Summary
 
