@@ -3,7 +3,7 @@
 ## Original Prompt
 
 See `README.md` for the Original Prompt (issue #87, verbatim) and the clarified acceptance criteria.
-Planning input: `/work #87`, Leo's answers below, and a Codex review of the first draft (2026-10-01).
+Planning input: `/work #87`, Leo's answers below, a Codex review of the first draft (2026-10-01), and a comparison with Pilot's implementation (`workspace/pilot`, 2026-10-02). SEO, account return targets and merchant copy follow Pilot's approach.
 
 ## Decisions
 
@@ -12,9 +12,10 @@ Planning input: `/work #87`, Leo's answers below, and a Codex review of the firs
 | Translation architecture (Leo) | Server and client share one key set. Text nodes render through a small client `<T>` leaf, so Studio's live edits reach them inside Server Components. A server `t()` is used only where a client leaf can't go: attributes built on the server, metadata, `aria-*` on server markup. |
 | Copy before the merchant translates (Leo) | English `staticContent` only; merchants translate in Studio's Translation Manager |
 | Studio verification (Leo) | A separate agent with Studio access, driven by the prompt in step 4 |
-| Logout per market (Leo) | One Customer Account runtime per market, each with its own post-logout URI |
+| Market-preserving account flows (Leo, revised after the Pilot comparison) | One Customer Account handler. Every login, refresh and logout passes a localized `return_to`, which the Hydrogen handlers already honor per request (`session.mjs:176,191-194`), the same per-request shape as Pilot's `logout.ts:23` |
 | `readThemeSettings` bug (Leo) | Fixed in this PR (step 0) |
-| Legacy text settings | Out of scope. `announcement`/`footerTagline` are merchant settings, not theme copy. Per-locale theme settings are a separate question. |
+| SEO (Leo, follows Pilot) | Self-canonical everywhere. `hreflang` only for a fixed allowlist of market-invariant paths. The sitemap stays on the default market. No per-market equivalence reads. |
+| Merchant copy settings (Leo, follows Pilot) | `announcement` and `footerTagline` become translation keys (Pilot keeps `announcement.topbarText` and `footer.copyright` as keys), so the Translation Manager localizes them. Forward has no saved values to carry over: the settings were never read before step 0. |
 
 ## Findings that shape the plan
 
@@ -38,9 +39,12 @@ Planning input: `/work #87`, Leo's answers below, and a Codex review of the firs
   - `staticContent`
   - `publicEnv`
   - `schema` → `themeSchema`
-- **Account pages pass neutral `/account` paths to `loginHref()`/`refreshHref()`,** which override any runtime default.
+- **Account pages pass neutral `/account` paths to `loginHref()`/`refreshHref()`.** The Hydrogen login and logout handlers both read `return_to` per request, so localizing that value is the whole fix; there is no need for a runtime per market.
 - **Account money formatting:** `account-view.ts` formats money itself, in `en-US`.
 - **Handles can be localized per market (Translate & Adapt) and resources can be unpublished per market,** so `hreflang` built by prefix-swapping can advertise 404s.
+  - Pilot answers this with an exact allowlist (`isMarketInvariantPath`, `locale.ts:640-712`): handle routes, account, the catch-all and custom pages get no `hreflang`.
+  - Its sitemap lists only the default market, for the same reason (`sitemap-page.ts:181-187`).
+- **Pilot ships 174 keys in `en.json`,** grouped by surface (`cart`, `product`, `collection`, `account`, `footer`, `announcement`…). Bundled market copy goes into `staticContent`, never `merchantOverrides`, so provenance stays honest (`.server/translations.ts`).
 - **AGENTS.md forbids shopper-visible source-regex assertions,** so a "no bare English" source guard is out.
 
 ## Requirements
@@ -50,10 +54,11 @@ Planning input: `/work #87`, Leo's answers below, and a Codex review of the firs
 - [ ] FR1: The theme schema declares `i18n` (`urlStructure: "url-path"`, `defaultLocale`, `shopLocales`, `translation: true`, `staticContent`), derived from `LOCALES`.
 - [ ] FR2: A localized page authored for DE in Studio renders on `/de-de`, and `/` keeps the default. Item-level translations render on non-default markets, including after client navigation between markets.
 - [ ] FR3: Every theme-owned string resolves through one key set. Precedence: live Studio edit → Translation Manager override (current market) → English `staticContent` → key. An intentionally empty override is kept.
-- [ ] FR4: Every indexable page emits a self-canonical. `hreflang` (plus `x-default`) lists only verified equivalents. The sitemap lists real per-market URLs.
+- [ ] FR4: Every indexable page emits a self-canonical. `hreflang` (plus `x-default`) is emitted only on the market-invariant allowlist (`/`, `/shop`, `/journal`). The sitemap lists the default market only.
 - [ ] FR5: Money and dates format with the market's `localeTag`, including on account pages (`221,78 €` on `/de-de`).
 - [ ] FR6: Login, refresh and logout keep the shopper's market: started on `/de-de/account`, the shopper ends on `/de-de/...`.
 - [ ] FR7: `<html dir>` comes from the market (`ltr` for all current markets).
+- [ ] FR8: The announcement bar and footer tagline are translation keys, so they can differ per market.
 
 ### Non-functional
 - [ ] No merchant content, credentials or Shopify payloads reach a Studio payload (AGENTS.md seam rule). `publicEnv` passes through the existing env suppression.
@@ -63,7 +68,8 @@ Planning input: `/work #87`, Leo's answers below, and a Codex review of the firs
 
 ### Out of scope
 - Translating Shopify content: Shopify returns it per `@inContext(language)`.
-- Per-locale values for merchant theme settings (`announcement`, `footerTagline`).
+- Redirecting a default-market handle to its localized handle (Pilot's `redirectIfHandleIsLocalized`). Follow-up issue.
+- `hreflang` on handle routes and per-market sitemaps. They need per-market handle reads, and Pilot does without them too.
 - RTL visual work: `dir` is set, styling is not audited.
 - AI translation, bundled de/fr/ja copy, and markets beyond the current five.
 
@@ -132,6 +138,7 @@ LOCALES ──► shopLocales/defaultLocale ─┐
 | --- | --- |
 | Header, market selector, mobile menu | `src/components/site-header/**` (incl. the hardcoded stack line) |
 | Footer | `src/components/site-footer*.tsx` |
+| Announcement and tagline | Remove the `announcement` input from `settings/header.ts` and `footerTagline` from `settings/footer.ts`; render `announcement.text` and `footer.tagline`. An empty value renders nothing, as the settings did. |
 | Cart drawer, cart page, add to cart | `src/lib/cart/shopify-cart-react.tsx`, `src/components/add-to-cart-form.tsx`, `src/app/[locale]/cart/**`, `src/components/cart*` |
 | PDP children | `src/sections/main-product/**` |
 | Catalog | `src/components/catalog-*.tsx`, `facet-list.tsx`, `sort-form.tsx`, `product-card.tsx`, `src/sections/main-collection/**`, `src/sections/all-products/**` |
@@ -173,21 +180,19 @@ any error text.
 
 ### Step 5 — Per-market SEO
 
+Follows Pilot's rule: a wrong `hreflang` is worse than none.
+
 - `src/lib/i18n/alternates.ts`:
-  - `marketAlternates({ locale, path, equivalents })` returns Next's `{ canonical, languages }`.
-  - `canonical` is always the current market's URL.
-  - `languages` lists only the `equivalents` passed in, plus `x-default` when the default market is among them.
-- Static, market-invariant routes (home, `/shop`, `/journal`) pass every market.
-- Resource routes (product, collection, article, page, policy) resolve equivalents per market by resource id:
-  - A per-market read through `getStorefront(id)` returns the localized handle, or `null` when the resource is unpublished there.
-  - Only resolved markets are listed.
-- Custom Weaverse pages: list only markets whose locale-scoped `fetchCustomPages({ locale })` contains the page.
-- Cart, search and account: `robots: noindex` and no alternates.
-- `sitemap.ts`: build entries from per-market list reads (localized handles, per-market availability). Each entry carries its own verified `alternates.languages`. Never multiply default-market results.
+  - `MARKET_INVARIANT_PATHS`: `/`, `/shop`, `/journal`. These are the route-contract paths with no dynamic segment that render the same page in every market.
+  - `marketAlternates(path, locale)` returns Next's `{ canonical, languages? }`.
+  - `canonical` is always the current market's URL, without the query string.
+  - `languages` (every `localeTag` plus `x-default`) is emitted only when the path is on the allowlist.
+- Every indexable page's `generateMetadata` uses it. Handle routes (product, collection, article, page, policy) and the custom-page catch-all therefore get a self-canonical and no alternates.
+- Cart, search and account get `robots: noindex` and no alternates.
+- `sitemap.ts` keeps the default market only. Write a comment explaining why, so nobody "fixes" it by prefix-swapping.
 - Tests:
-  - Unit: only verified equivalents, plus `x-default`.
-  - Sitemap: a resource missing in one market is absent there.
-  - Smoke: `/de-de/shop` has a self-canonical and an `x-default` alternate.
+  - Unit: allowlisted paths carry every market plus `x-default`; a handle path carries only its canonical; the query is dropped.
+  - Smoke: `/de-de/shop` has a self-canonical and an `x-default` alternate; `/de-de/products/<primary>` has a canonical and no `hreflang`.
 
 ### Step 6 — Locale formatting
 
@@ -199,18 +204,17 @@ any error text.
 
 ### Step 7 — Customer account per market
 
-- `getCustomerAccountRuntime(source, locale)` memoizes one runtime per locale, each with:
-  - `postLogoutRedirectUri = localizePath("/", locale)`
-  - `defaultPostLoginRedirectPathname = localizePath("/account", locale)`
+There is one handler. The market rides on `return_to`, which the Hydrogen login and logout handlers already read per request.
+
 - `loginHref(returnTo, locale)` and `refreshHref(returnTo, locale)` localize every explicit return target. Update every caller:
   - account overview, orders, order detail, addresses
   - `account-access.tsx`
   - `account-view.ts`
-- `proxy.ts` protocol branch picks the runtime from the `forward_locale` cookie, the same source `/api/cart` uses.
+- The logout form in `account-shell.tsx` posts to `CUSTOMER_ACCOUNT_LOGOUT_PATH?return_to=<localizePath("/", locale)>`. The handler sanitizes it to a same-origin absolute URL.
+- `proxy.ts`: confirm the protocol branch forwards the query string untouched.
 - Store side: register `/`, `/en-gb`, `/de-de`, `/fr-fr`, `/ja-jp` as allowed post-logout URIs in Customer Account settings. Put the store-agent prompt in `work-logs.md`.
 - Tests:
-  - Unit: per-locale URIs and localized `loginHref`/`refreshHref`.
-  - Proxy: logout picks the runtime from the cookie.
+  - Unit: localized `loginHref`/`refreshHref`, and the logout action URL per market.
   - Browser (live-account-enabled): login from `/de-de/account` returns to `/de-de/account`, and logout lands on `/de-de`.
 
 ### Step 8 — Docs and verification
@@ -219,7 +223,7 @@ any error text.
   - The three locale identities and where each is used.
   - Theme copy goes through `<T>`/`useT()`/`getTranslator` with keys in `static-content.ts`.
   - The schema `i18n` derives from `LOCALES`.
-  - `hreflang` only for verified equivalents.
+  - `hreflang` only on the market-invariant allowlist in `alternates.ts`; the sitemap stays on the default market.
 - README: the Markets paragraph mentions Studio localized pages and translations.
 - `work-logs.md`: decisions, Studio fixture, and the `loadPage.locale` outcome.
 - Run the full AGENTS.md verification, plus `test:browser` (both matrices) and `verify:shopify`.
@@ -237,7 +241,7 @@ any error text.
 | `src/lib/i18n/alternates.ts` | `marketAlternates` |
 | `tests/translator.test.ts` | Precedence, ownership, interpolation |
 | `tests/dom/translation.test.tsx` | `<T>` live update, override and empty override |
-| `tests/alternates.test.ts` | Verified equivalents, `x-default` |
+| `tests/alternates.test.ts` | Allowlist, canonical-only handle paths, `x-default` |
 | `tests/browser/weaverse-markets.pw.ts` | Localized page, item translation, translated key, account round-trip |
 
 ### Files to modify
@@ -252,15 +256,15 @@ any error text.
 | `src/app/[locale]/layout.tsx` | `dir`, `WeaverseNextRootProvider` |
 | `src/app/[locale]/**/page.tsx` | `alternates`/`robots` in `generateMetadata`; copy keys |
 | `src/app/[locale]/error.tsx`, `not-found.tsx` | Copy keys |
-| `src/app/sitemap.ts` | Per-market reads and verified alternates |
-| `src/lib/storefront/data-source.ts` (+ Shopify adapter) | Per-market localized-handle reads for alternates, if not already exposed |
+| `src/app/sitemap.ts` | Comment why it stays on the default market (no code change otherwise) |
+| `src/lib/weaverse/settings/header.ts`, `footer.ts` | Drop `announcement` / `footerTagline` inputs (now keys) |
 | `src/components/**`, `src/sections/**` | Copy keys; formatter calls pass the locale |
 | `src/lib/storefront/format.ts` | `formatMoney`/`formatDate` take `LocaleId` |
 | `src/lib/cart/shopify-cart-react.tsx` | Copy and formatting |
 | `src/lib/account/account-view.ts` | Locale-aware money; localized return targets |
-| `src/lib/account/customer-account.ts` | Per-locale runtime; `loginHref`/`refreshHref` take `LocaleId` |
-| `src/components/account-access.tsx` | Localized return targets |
-| `src/proxy.ts` | Protocol branch picks the runtime by locale cookie |
+| `src/lib/account/customer-account.ts` | `loginHref`/`refreshHref` take `LocaleId` |
+| `src/components/account-access.tsx`, `account-shell.tsx` | Localized return targets; logout `return_to` |
+| `src/proxy.ts` | Only if the protocol branch drops the query string |
 | `biome.json` | Restrict `useTranslation` to `src/lib/i18n/t.tsx` |
 | `src/lib/routes/route-contract.ts`, `scripts/smoke-routes.mts` | Canonical / `x-default` smoke |
 | `tests/**` | Assertions for keys, formatting, account runtime, `loaderLocale` |
@@ -271,9 +275,9 @@ any error text.
 
 ```plaintext
 src/lib/i18n/            locales, locale-context, translate, translator, t, static-content, alternates
-src/lib/weaverse/        server, theme-schema, request-info, resource
+src/lib/weaverse/        server, theme-schema, request-info, resource, settings/{header,footer}
 src/lib/account/         customer-account, account-view
-src/lib/storefront/      format, data-source (+ adapter)
+src/lib/storefront/      format
 src/app/[locale]/        layout, every page (metadata + copy), error, not-found
 src/app/sitemap.ts, src/proxy.ts
 src/components/, src/sections/   copy + formatting
@@ -288,7 +292,7 @@ tests/, tests/browser/
 4. One commit per surface in step 3
 5. Locale formatting, including account (step 6)
 6. Per-market SEO (step 5)
-7. Customer account per market (step 7)
+7. Market-preserving account return targets (step 7)
 8. Studio verification and browser tests (step 4), once the Studio agent reports
 9. Docs and log (step 8)
 
@@ -300,5 +304,6 @@ tests/, tests/browser/
 | Changing `i18n.locale` to BCP-47 breaks loader routing | `loaderLocale` maps language + country instead and has a round-trip test |
 | Moving about 110 strings churns DOM tests | Assert through `STATIC_CONTENT` values, one surface per commit |
 | Server-built attributes miss live Studio edits | Accepted for attributes and metadata only; text nodes use `<T>` |
-| Per-market equivalence reads add queries to resource pages | One small id-scoped query per market, cached like other reads |
+| Handle routes lose `hreflang` discovery in other markets | Accepted, as in Pilot; localized-handle redirects are a follow-up |
+| Proxy rebuilds the protocol request and drops `return_to` | Step 7 checks it and the browser test covers logout on `/de-de` |
 | Saved theme settings now apply (step 0) | Today the project has none saved; defaults match what consumers already assume |
