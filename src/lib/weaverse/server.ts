@@ -166,8 +166,10 @@ export async function revalidateServerClient(
 export async function readThemeSettings(
   locale: LocaleId = DEFAULT_LOCALE,
 ): Promise<Partial<ThemeSettings>> {
-  const theme = await loadWeaverseThemeSettings(locale);
-  return (theme?.themeSettings ?? {}) as Partial<ThemeSettings>;
+  /* The SDK answers `theme`: the merchant's saved values over the schema
+   * defaults. There is no `themeSettings` key on the response. */
+  const response = await loadWeaverseThemeSettings(locale);
+  return (response?.theme ?? {}) as Partial<ThemeSettings>;
 }
 
 /** The configured project id, or `null` when Weaverse is not configured. */
