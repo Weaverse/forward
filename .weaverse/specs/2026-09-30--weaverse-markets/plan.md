@@ -56,7 +56,7 @@ Planning input: `/work #87`, Leo's answers below, a Codex review of the first dr
 - [ ] FR3: Every theme-owned string resolves through one key set. Precedence: live Studio edit → Translation Manager override (current market) → English `staticContent` → key. An intentionally empty override is kept.
 - [ ] FR4: Every indexable page emits a self-canonical. `hreflang` (plus `x-default`) is emitted only on the market-invariant allowlist (`/`, `/shop`, `/journal`). The sitemap lists the default market only.
 - [ ] FR5: Money and dates format with the market's `localeTag`, including on account pages (`221,78 €` on `/de-de`).
-- [ ] FR6: Login, refresh and logout keep the shopper's market: started on `/de-de/account`, the shopper ends on `/de-de/...`.
+- [ ] FR6: A successful login, a refresh and a logout keep the shopper's market: started on `/de-de/account`, the shopper ends on `/de-de/...`. A failed login still lands on the fixed `/account?login=failed`, because Hydrogen's `loginFailedRedirectPath` is set once per handler (`session.mjs:202`). Out of scope here.
 - [ ] FR7: `<html dir>` comes from the market (`ltr` for all current markets).
 - [ ] FR8: The announcement bar and footer tagline are translation keys, so they can differ per market.
 
@@ -125,12 +125,12 @@ LOCALES ──► shopLocales/defaultLocale ─┐
   - `publicEnv`
   - `themeSchema = response.schema ?? themeSchema`
 - `src/lib/i18n/t.tsx` (client):
-  - `useT()`: `useTranslation().t` narrowed to `TranslationKey`.
-  - `<T k vars? />`: a text leaf. Server Components render `<T k="cart.title" />`, which keeps live Studio edits working.
+  - `useT()` does not use the SDK's `t`, whose lookup skips the own-property check. It reads `merchantOverrides` and `translationStore` from `useTranslation()`, subscribes to the store with `useSyncExternalStore`, and resolves through the same `createTranslator` the server uses (design snapshot → overrides → `STATIC_CONTENT` → key). Both sides share one resolver.
+  - `<T k vars? />`: a text leaf over `useT()`. Server Components render `<T k="cart.title" />`, which keeps live Studio edits working.
 - Biome: restrict `useTranslation` from `@weaverse/next` to `src/lib/i18n/t.tsx`.
 - Tests:
   - Translator: design wins, an override wins, `""` is kept, inherited/prototype keys are ignored, a missing key returns the key, interpolation works.
-  - DOM test: `<T>` re-renders when the `TranslationStore` changes (live edit).
+  - DOM test: `<T>` re-renders when the `TranslationStore` changes (live edit), keeps an empty override, and ignores inherited/prototype keys in `merchantOverrides` (for example a payload with `__proto__` or `constructor`).
 
 ### Step 3 — Move theme copy onto keys, one surface per commit
 
@@ -165,7 +165,9 @@ On Weaverse Studio for the Forward project, using the preview <URL>:
    heading to "Forward DE — Test", publish.
 3. Still on Germany, translate one section field (any heading on the default home) through
    item translation, publish.
-4. Translation Manager → German: run Sync Theme Keys, set `catalog.filters` to "Filter", publish.
+4. Translation Manager → German: run Sync Theme Keys, set `catalog.filters` to "Filter",
+   `announcement.text` to "Kostenloser Versand ab 100 €", and `footer.tagline` to an empty
+   string; publish. Confirm both migrated keys are listed.
 Don't change the default (US) pages or theme settings. Report each step with screenshots and
 any error text.
 ```
@@ -174,9 +176,11 @@ any error text.
   - `/de-de` shows the localized home and `/` the default.
   - The item translation shows on `/de-de` after reload and after client navigation `/` → `/de-de`. The default item data is unchanged on `/`.
   - `/de-de/shop` shows "Filter" and `/fr-fr/shop` shows "Filters".
+  - `/de-de` shows the German announcement, and `/` shows the English default (or nothing when unset).
+  - The `/de-de` footer renders no tagline (empty override kept), while `/` renders its default.
   - Studio previews `/de-de` and section loaders read `de-de` through `loaderLocale`.
 - If localized pages don't select with top-level `i18n` alone, add `loadPage({ ..., locale })` in the format Studio reports, test it, and log it.
-- Add a browser test (live-account-disabled) for the localized home marker, the item translation and the translated key. Record the Studio fixture in `work-logs.md`.
+- Add a browser test (live-account-disabled) for the localized home marker, the item translation, the translated key, the localized announcement and the empty tagline override. Record the Studio fixture in `work-logs.md`.
 
 ### Step 5 — Per-market SEO
 
@@ -212,7 +216,7 @@ There is one handler. The market rides on `return_to`, which the Hydrogen login 
   - `account-view.ts`
 - The logout form in `account-shell.tsx` posts to `CUSTOMER_ACCOUNT_LOGOUT_PATH?return_to=<localizePath("/", locale)>`. The handler sanitizes it to a same-origin absolute URL.
 - `proxy.ts`: confirm the protocol branch forwards the query string untouched.
-- Store side: register `/`, `/en-gb`, `/de-de`, `/fr-fr`, `/ja-jp` as allowed post-logout URIs in Customer Account settings. Put the store-agent prompt in `work-logs.md`.
+- Store side: register absolute post-logout URIs in Customer Account settings: `${storefrontOrigin}`, `${storefrontOrigin}/en-gb`, `/de-de`, `/fr-fr` and `/ja-jp` under the same origin. Do this for every origin that runs the account flow (production, Vercel preview, local tunnel), because the handler builds them from the configured `storefrontOrigin` (`customer-account.ts:74`). Put the store-agent prompt in `work-logs.md`.
 - Tests:
   - Unit: localized `loginHref`/`refreshHref`, and the logout action URL per market.
   - Browser (live-account-enabled): login from `/de-de/account` returns to `/de-de/account`, and logout lands on `/de-de`.
@@ -240,7 +244,7 @@ There is one handler. The market rides on `return_to`, which the Hydrogen login 
 | `src/lib/i18n/t.tsx` | Client `useT()` and the `<T>` leaf |
 | `src/lib/i18n/alternates.ts` | `marketAlternates` |
 | `tests/translator.test.ts` | Precedence, ownership, interpolation |
-| `tests/dom/translation.test.tsx` | `<T>` live update, override and empty override |
+| `tests/dom/translation.test.tsx` | `<T>` live update, override, empty override, prototype keys ignored |
 | `tests/alternates.test.ts` | Allowlist, canonical-only handle paths, `x-default` |
 | `tests/browser/weaverse-markets.pw.ts` | Localized page, item translation, translated key, account round-trip |
 
