@@ -67,14 +67,15 @@ Added 2026-10-01 after a Codex review of the plan. The Original Prompt above sta
   - Request-context `i18n` is posted at the top level of the Builder request.
   - An explicit `loadPage({ locale })` travels separately inside `params`.
   - Three identities exist and stay separate: the URL id (`de-de`), BCP-47 (`de-DE`), and Shopify's enums (`{ language: "DE", country: "DE" }`).
-- **Clarification, §4 of the prompt:** every indexable page gets a self-canonical, but `hreflang` lists only verified equivalents, never every market by prefix-swapping. Shopify handles can be localized and resources unpublished per market. Sitemap entries come from per-market reads.
+- **Clarification, §4 of the prompt:** every indexable page gets a self-canonical. `hreflang` is emitted only on an allowlist of market-invariant paths, never by prefix-swapping a handle, as in Pilot. Shopify handles can be localized and resources unpublished per market. The sitemap stays on the default market.
 - **Translation:**
   - Theme copy renders through a client `<T>` leaf and `useT()`, so Studio's live edits reach text inside Server Components.
   - A server `getTranslator` is used only for attributes and metadata.
   - Precedence: live Studio edit → Translation Manager override → English `staticContent` → key. An empty override is kept.
 - **Item-level translations** of merchant-authored section fields are rendered by the SDK. The theme verifies them, including after client navigation between markets.
-- **Account:** login, refresh and logout all keep the market. Account money formats per market.
+- **Account:** login, refresh and logout all keep the market through a localized `return_to` on the single handler (no runtime per market). Account money formats per market.
 - **`<html dir>`** comes from the market.
+- **Announcement bar and footer tagline** become translation keys, so they localize per market.
 - **Saved theme settings must reach the storefront.** `readThemeSettings` read a `themeSettings` key the SDK never returns; it reads `theme` now.
 
 ## Summary
