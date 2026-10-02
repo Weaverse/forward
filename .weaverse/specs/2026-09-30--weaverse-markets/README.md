@@ -72,8 +72,9 @@ Added 2026-10-01 after a Codex review of the plan. The Original Prompt above sta
   - Theme copy renders through a client `<T>` leaf and `useT()`, so Studio's live edits reach text inside Server Components.
   - A server `getTranslator` is used only for attributes and metadata.
   - Precedence: live Studio edit → Translation Manager override → English `staticContent` → key. An empty override is kept.
+  - Server and client share one resolver that checks own properties; the client never falls back to the SDK's `t`.
 - **Item-level translations** of merchant-authored section fields are rendered by the SDK. The theme verifies them, including after client navigation between markets.
-- **Account:** login, refresh and logout all keep the market through a localized `return_to` on the single handler (no runtime per market). Account money formats per market.
+- **Account:** a successful login, a refresh and a logout keep the market through a localized `return_to` on the single handler (no runtime per market). A failed login keeps Hydrogen's fixed failure path. Post-logout URIs are registered as absolute URLs for every origin. Account money formats per market.
 - **`<html dir>`** comes from the market.
 - **Announcement bar and footer tagline** become translation keys, so they localize per market.
 - **Saved theme settings must reach the storefront.** `readThemeSettings` read a `themeSettings` key the SDK never returns; it reads `theme` now.
