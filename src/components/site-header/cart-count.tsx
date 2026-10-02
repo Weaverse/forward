@@ -1,14 +1,19 @@
 "use client";
 
 import { useShopifyCart } from "@/lib/cart/shopify-cart-react";
+import { useT } from "@/lib/i18n/t";
 
 /** Live cart badge announced politely to assistive technology. */
 export function CartCount() {
+  const t = useT();
   const count = useShopifyCart((state) => state.data.totalQuantity);
   return (
     <span aria-live="polite" aria-atomic="true">
       <span className="sr-only">
-        , {count} {count === 1 ? "item" : "items"} in cart
+        ,{" "}
+        {t(count === 1 ? "header.cartCountOne" : "header.cartCountOther", {
+          count,
+        })}
       </span>
       <span
         aria-hidden="true"

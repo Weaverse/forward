@@ -6,13 +6,13 @@ import { Link } from "@/components/link";
 import { Wordmark } from "@/components/wordmark";
 import { cn } from "@/lib/cn";
 import { usePathname } from "@/lib/i18n/locale-context";
+import { useT } from "@/lib/i18n/t";
 import type { Collection, NavItem } from "@/lib/storefront/types";
 import { AboutIndexPanel } from "./about-index-panel";
 import { CartCount } from "./cart-count";
 import { CountryControl } from "./country-control";
 import { FieldIndexPanel } from "./field-index-panel";
 import {
-  accountNavigationLabel,
   activeCollectionIndex,
   createHeaderNavigationHref,
   fieldIndexCollections,
@@ -20,6 +20,7 @@ import {
   isActive,
   isBranchActive,
   isShopActive,
+  navigationLabel,
   SEARCH_LINK,
 } from "./header-navigation";
 import {
@@ -40,7 +41,6 @@ const UTILITY_ICONS: Readonly<Record<string, IconName>> = {
 const SCROLL_THRESHOLD = 8;
 
 export interface FieldIndexHeaderProps {
-  announcement: string;
   /** The store's collections, which dress the Shop panel's rows. */
   collections: readonly Collection[];
   primary: readonly NavItem[];
@@ -49,12 +49,14 @@ export interface FieldIndexHeaderProps {
 }
 
 export function FieldIndexHeader({
-  announcement,
   collections: storeCollections,
   primary,
   queryString = "",
   utility,
 }: FieldIndexHeaderProps) {
+  const t = useT();
+  /* The merchant's announcement, translated per market; empty renders none. */
+  const announcement = t("announcement.text");
   const pathname = usePathname();
   const shopItem = findShopItem(primary);
   /* The other branch with links under it opens the index panel. */
@@ -228,11 +230,9 @@ export function FieldIndexHeader({
       <aside
         className="flex min-h-announcement items-center justify-center bg-signal px-page-gutter py-1.5 text-center font-body text-micro font-ui text-ink tracking-announcement uppercase md:justify-between"
         data-shell-background
-        aria-label="Store announcement"
+        aria-label={t("header.announcementLabel")}
       >
-        <span className="hidden md:inline">
-          Shopify · Hydrogen · Next.js · Weaverse
-        </span>
+        <span className="hidden md:inline">{t("header.stack")}</span>
         {announcement === "" ? null : <span>{announcement}</span>}
         <CountryControl />
       </aside>
@@ -252,7 +252,7 @@ export function FieldIndexHeader({
         />
         <nav
           className="hidden self-stretch justify-center lg:flex"
-          aria-label="Primary navigation"
+          aria-label={t("header.primaryNavigation")}
         >
           {shopItem === undefined ? null : collections === null ? (
             <Link
@@ -342,7 +342,7 @@ export function FieldIndexHeader({
               }
             >
               <Icon name="magnifying-glass" />
-              <span>Search</span>
+              <span>{t("header.search")}</span>
             </Link>
           ) : null}
           {utilityLinks.map((item) => {
@@ -360,7 +360,7 @@ export function FieldIndexHeader({
                 }
               >
                 {icon === undefined ? null : <Icon name={icon} />}
-                <span>{accountNavigationLabel(item, accountSignedIn)}</span>
+                <span>{navigationLabel(item, accountSignedIn, t)}</span>
               </Link>
             );
           })}
@@ -370,7 +370,7 @@ export function FieldIndexHeader({
             aria-current={isActive(pathname, "/cart") ? "page" : undefined}
           >
             <Icon name="shopping-bag" />
-            <span className="sr-only md:not-sr-only">Cart</span>
+            <span className="sr-only md:not-sr-only">{t("header.cart")}</span>
             <CartCount />
           </Link>
           <button
@@ -382,7 +382,7 @@ export function FieldIndexHeader({
             onClick={openMobile}
           >
             <Icon name="list" />
-            <span className="sr-only md:not-sr-only">Menu</span>
+            <span className="sr-only md:not-sr-only">{t("header.menu")}</span>
           </button>
           <MiniCart />
         </div>

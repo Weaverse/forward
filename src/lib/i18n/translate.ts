@@ -48,12 +48,18 @@ function interpolate(text: string, variables?: TranslationVariables): string {
   );
 }
 
+/** A resolved translation function over a known key set. */
+export type Translate<Key extends string> = (
+  key: Key,
+  variables?: TranslationVariables,
+) => string;
+
 export function createTranslator<Key extends string>({
   designOverrides,
   overrides,
   staticContent,
-}: TranslationSources) {
-  return function t(key: Key, variables?: TranslationVariables): string {
+}: TranslationSources): Translate<Key> {
+  return function t(key, variables) {
     const design =
       designOverrides !== undefined && Object.hasOwn(designOverrides, key)
         ? designOverrides[key]

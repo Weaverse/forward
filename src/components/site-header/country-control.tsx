@@ -12,6 +12,7 @@ import {
   type LocaleId,
   splitLocale,
 } from "@/lib/i18n/locales";
+import { useT } from "@/lib/i18n/t";
 
 const CONTROL_CLASS =
   "inline-flex items-center gap-1.5 font-body text-ui font-ui tracking-control uppercase";
@@ -54,6 +55,7 @@ function MarketStatement({ locale }: { locale: LocaleId }) {
  * next page are the ones the store quotes that market.
  */
 function MarketSelector({ locale }: { locale: LocaleId }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -109,7 +111,7 @@ function MarketSelector({ locale }: { locale: LocaleId }) {
       >
         <LocaleFlag locale={locale} />
         {LOCALES[locale].label}
-        <span className="sr-only">. Change shipping market</span>
+        <span className="sr-only">. {t("market.change")}</span>
         <Icon name={open ? "caret-up" : "caret-down"} size={12} />
       </button>
       {open ? (
@@ -118,7 +120,7 @@ function MarketSelector({ locale }: { locale: LocaleId }) {
           id={panelId}
         >
           <p className="m-0 border-border-subtle border-b px-4 py-2.5 font-body text-micro text-text-muted tracking-field-meta uppercase">
-            Shipping market
+            {t("market.heading")}
           </p>
           <ul className="m-0 list-none p-0">
             {LOCALE_IDS.map((option) => (
