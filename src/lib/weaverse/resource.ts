@@ -11,7 +11,7 @@
 
 import "server-only";
 
-import { DEFAULT_LOCALE, type LocaleId, parseLocale } from "@/lib/i18n/locales";
+import type { LocaleId } from "@/lib/i18n/locales";
 import { getStorefront } from "@/lib/storefront/data-source";
 import type { Collection, Product } from "@/lib/storefront/types";
 
@@ -113,18 +113,5 @@ export async function resolveCollections(
   );
   return collections.filter(
     (collection): collection is Collection => collection !== null,
-  );
-}
-
-/**
- * The market a section loader runs in: the locale the page's request context
- * reports, or the default when a caller (a Studio revalidation without one)
- * reports none.
- */
-export function loaderLocale(context: unknown): LocaleId {
-  const locale = (context as { i18n?: { locale?: unknown } } | undefined)?.i18n
-    ?.locale;
-  return (
-    parseLocale(typeof locale === "string" ? locale : null) ?? DEFAULT_LOCALE
   );
 }

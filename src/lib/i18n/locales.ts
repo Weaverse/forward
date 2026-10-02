@@ -21,6 +21,8 @@ export interface StorefrontLocale {
   country: string;
   /** The currency the market is expected to price in. */
   currency: string;
+  /** Text direction of the market's language, for `<html dir>`. */
+  direction: "ltr" | "rtl";
 }
 
 export const LOCALES = {
@@ -30,6 +32,7 @@ export const LOCALES = {
     language: "EN",
     country: "US",
     currency: "USD",
+    direction: "ltr",
   },
   "en-gb": {
     id: "en-gb",
@@ -37,6 +40,7 @@ export const LOCALES = {
     language: "EN",
     country: "GB",
     currency: "GBP",
+    direction: "ltr",
   },
   "de-de": {
     id: "de-de",
@@ -44,6 +48,7 @@ export const LOCALES = {
     language: "DE",
     country: "DE",
     currency: "EUR",
+    direction: "ltr",
   },
   "fr-fr": {
     id: "fr-fr",
@@ -51,6 +56,7 @@ export const LOCALES = {
     language: "FR",
     country: "FR",
     currency: "EUR",
+    direction: "ltr",
   },
   "ja-jp": {
     id: "ja-jp",
@@ -58,6 +64,7 @@ export const LOCALES = {
     language: "JA",
     country: "JP",
     currency: "JPY",
+    direction: "ltr",
   },
 } as const satisfies Record<string, StorefrontLocale>;
 
@@ -139,4 +146,23 @@ export function localeFromCookieHeader(header: string | null): LocaleId {
     }
   }
   return DEFAULT_LOCALE;
+}
+
+/** The URL prefix a market's paths carry: none for the default market. */
+export function localePathPrefix(locale: LocaleId): string {
+  return locale === DEFAULT_LOCALE ? "" : `/${locale}`;
+}
+
+/** Inverse of {@link localeI18n}: the market for a Storefront API pair. */
+export function localeFromI18n(
+  language: string | null | undefined,
+  country: string | null | undefined,
+): LocaleId | null {
+  return (
+    LOCALE_IDS.find(
+      (id) =>
+        LOCALES[id].language === language?.toUpperCase() &&
+        LOCALES[id].country === country?.toUpperCase(),
+    ) ?? null
+  );
 }

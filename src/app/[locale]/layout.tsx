@@ -10,6 +10,7 @@ import { cn } from "@/lib/cn";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
 import {
   LOCALE_IDS,
+  LOCALES,
   type LocaleId,
   localeTag,
   parseLocale,
@@ -90,6 +91,7 @@ export default async function RootLayout({
   return (
     <html
       lang={localeTag(locale)}
+      dir={LOCALES[locale].direction}
       data-scroll-behavior="smooth"
       className={cn(
         archivo.variable,
