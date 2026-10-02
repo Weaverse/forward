@@ -11,11 +11,14 @@ import { LocaleProvider } from "@/lib/i18n/locale-context";
 import {
   LOCALE_IDS,
   LOCALES,
-  type LocaleId,
   localeTag,
   parseLocale,
 } from "@/lib/i18n/locales";
-import { readThemeSettings, weaverseProjectId } from "@/lib/weaverse/server";
+import { WeaverseRoot } from "@/lib/weaverse/root";
+import {
+  loadWeaverseThemeSettings,
+  weaverseProjectId,
+} from "@/lib/weaverse/server";
 import { StudioConnect } from "@/lib/weaverse/studio-connect";
 
 import "../globals.css";
@@ -63,8 +66,7 @@ export const viewport: Viewport = {
  * as a CSS variable rather than a prop because `max-w-page` is a Tailwind
  * token every section already resolves through.
  */
-async function pageWidthStyle(locale: LocaleId): Promise<string | null> {
-  const { pageWidth } = await readThemeSettings(locale);
+function pageWidthStyle(pageWidth: unknown): string | null {
   if (typeof pageWidth !== "number" || pageWidth <= 0) {
     return null;
   }
@@ -87,7 +89,8 @@ export default async function RootLayout({
     notFound();
   }
   const weaverseEnabled = weaverseProjectId() !== null;
-  const pageWidth = await pageWidthStyle(locale);
+  const themeResponse = await loadWeaverseThemeSettings(locale);
+  const pageWidth = pageWidthStyle(themeResponse?.theme?.pageWidth);
   return (
     <html
       lang={localeTag(locale)}
@@ -117,24 +120,30 @@ export default async function RootLayout({
       <body className="m-0 max-w-full overflow-x-clip bg-canvas font-body text-copy-sm leading-body text-ink antialiased">
         {weaverseEnabled ? <StudioConnect /> : null}
         <LocaleProvider locale={locale}>
-          <ShopifyCartRuntime>
-            <a
-              className="fixed top-2.5 left-2.5 z-1000 -translate-y-3/2 bg-ink px-4 py-2.75 text-text-inverse focus:translate-y-0"
-              data-shell-background
-              href="#main-content"
-            >
-              Skip to content
-            </a>
-            <SiteHeader locale={locale} />
-            <main
-              className="min-h-[66vh]"
-              data-shell-background
-              id="main-content"
-            >
-              {children}
-            </main>
-            <SiteFooter locale={locale} />
-          </ShopifyCartRuntime>
+          <WeaverseRoot
+            merchantOverrides={themeResponse?.merchantOverrides}
+            publicEnv={themeResponse?.publicEnv}
+            theme={themeResponse?.theme}
+          >
+            <ShopifyCartRuntime>
+              <a
+                className="fixed top-2.5 left-2.5 z-1000 -translate-y-3/2 bg-ink px-4 py-2.75 text-text-inverse focus:translate-y-0"
+                data-shell-background
+                href="#main-content"
+              >
+                Skip to content
+              </a>
+              <SiteHeader locale={locale} />
+              <main
+                className="min-h-[66vh]"
+                data-shell-background
+                id="main-content"
+              >
+                {children}
+              </main>
+              <SiteFooter locale={locale} />
+            </ShopifyCartRuntime>
+          </WeaverseRoot>
         </LocaleProvider>
       </body>
     </html>

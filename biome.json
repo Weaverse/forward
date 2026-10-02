@@ -44,6 +44,10 @@
           "options": {
             "paths": {
               "next/link": "Use the locale-aware `Link` from `@/components/link`.",
+              "@weaverse/next": {
+                "importNames": ["useTranslation"],
+                "message": "Use `useT` or `<T>` from `@/lib/i18n/t`: they resolve through the theme's own-property-safe translator."
+              },
               "next/navigation": {
                 "importNames": ["usePathname"],
                 "message": "Use `usePathname` from `@/lib/i18n/locale-context`: Next reports the internal `/en-us` rewrite while rendering on the server."
@@ -69,7 +73,8 @@
     {
       "includes": [
         "src/components/link.tsx",
-        "src/lib/i18n/locale-context.tsx"
+        "src/lib/i18n/locale-context.tsx",
+        "src/lib/i18n/t.tsx"
       ],
       "linter": {
         "rules": {
