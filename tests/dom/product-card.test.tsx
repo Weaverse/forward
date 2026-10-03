@@ -6,11 +6,15 @@
 
 import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
-import { render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { ProductCard } from "@/components/product-card";
-import { productByHandle, visibleText } from "./harness";
+import {
+  productByHandle,
+  renderInShell as render,
+  visibleText,
+} from "./harness";
 
 const SHELL = productByHandle("weatherline-shell");
 

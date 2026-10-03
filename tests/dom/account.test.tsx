@@ -2,10 +2,11 @@
 
 import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
-import { render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 
 import { AccountAccessPanel } from "@/components/account-access";
 import { AccountShell } from "@/components/account-shell";
+import { renderInShell as render } from "./harness";
 
 describe("account access affordances", () => {
   it("keeps signed-out login as a raw full-page handoff", () => {

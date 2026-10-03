@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { act, render, screen } from "@testing-library/react";
 import { TranslationProvider, TranslationStore } from "@weaverse/next";
 
+import { SortForm } from "@/components/sort-form";
 import { STATIC_CONTENT } from "@/lib/i18n/static-content";
 import { T } from "@/lib/i18n/t";
 import { renderWithCart } from "./harness";
@@ -61,5 +62,24 @@ describe("theme copy", () => {
       JSON.parse('{"__proto__": {"announcement": {"text": "polluted"}}}'),
     );
     assert.equal(screen.getByTestId("copy").textContent, "");
+  });
+
+  it("labels the theme's sort options in the market's language", () => {
+    renderWithCart(
+      <SortForm
+        id="sort"
+        params={new URLSearchParams()}
+        pathname="/shop"
+        sort="name"
+      />,
+      undefined,
+      "de-de",
+      {
+        catalog: { sort: "Sortieren", sortOptions: { name: "Name A–Z (DE)" } },
+      },
+    );
+    assert.ok(screen.getByLabelText("Sortieren"));
+    assert.ok(screen.getByRole("option", { name: "Name A–Z (DE)" }));
+    assert.ok(screen.getByRole("option", { name: "Featured" }));
   });
 });

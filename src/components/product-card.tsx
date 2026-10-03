@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useId, useState } from "react";
 import { Link } from "@/components/link";
-
+import { useT } from "@/lib/i18n/t";
 import { formatMoney } from "@/lib/storefront/format";
 import {
   colorwaySwatchStyle,
@@ -23,6 +23,7 @@ interface ProductCardProps {
  * image treatment and real colorway controls.
  */
 export function ProductCard({ product, priority }: ProductCardProps) {
+  const t = useT();
   const [activeColorwayId, setActiveColorwayId] = useState(
     product.colorways[0]?.id ?? "",
   );
@@ -36,7 +37,7 @@ export function ProductCard({ product, priority }: ProductCardProps) {
       <Link
         className="group relative block overflow-hidden bg-media-card"
         href={href}
-        aria-label={`View ${product.title}`}
+        aria-label={t("catalog.viewProduct", { title: product.title })}
       >
         <Image
           className="aspect-4/5 object-cover saturate-76 transition-transform duration-450 ease-media group-hover:scale-102.5"
@@ -66,7 +67,9 @@ export function ProductCard({ product, priority }: ProductCardProps) {
           {product.category} / {product.activities.join(" · ")}
         </p>
         <fieldset className="mt-4 flex min-h-touch items-center gap-3">
-          <legend className="sr-only">{product.title} colorway</legend>
+          <legend className="sr-only">
+            {t("catalog.productColorway", { title: product.title })}
+          </legend>
           {product.colorways.map((entry) => (
             <label
               key={entry.id}
@@ -80,7 +83,9 @@ export function ProductCard({ product, priority }: ProductCardProps) {
                 checked={entry.id === activeColorway.id}
                 onChange={() => setActiveColorwayId(entry.id)}
               />
-              <span className="sr-only">{entry.name} colorway</span>
+              <span className="sr-only">
+                {t("catalog.colorway", { name: entry.name })}
+              </span>
               <span
                 aria-hidden="true"
                 className="inline-flex size-5.5 items-center justify-center border border-transparent transition-colors duration-fast ease-standard peer-checked:border-ink peer-focus-visible:outline-3 peer-focus-visible:outline-focus peer-focus-visible:outline-offset-2"
