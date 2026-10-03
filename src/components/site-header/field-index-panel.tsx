@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Icon } from "@/components/icon";
 import { Link } from "@/components/link";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/t";
 import {
   createHeaderNavigationHref,
   currentCollectionIndex,
@@ -31,6 +32,7 @@ export function FieldIndexPanel({
   pathname,
   queryString,
 }: FieldIndexPanelProps) {
+  const t = useT();
   const active = collections[activeIndex] ?? collections[0];
   /* The panel is an enhancement on merchant-owned navigation: with nothing to
    * show it degrades to no panel instead of taking down the root layout. */
@@ -43,14 +45,21 @@ export function FieldIndexPanel({
     <section
       className="absolute inset-x-0 top-full -z-1 hidden animate-shell-panel border-ink border-b bg-canvas text-ink shadow-panel motion-reduce:animate-none lg:block"
       id={id}
-      aria-label="Shop field index"
+      aria-label={t("header.shopIndexLabel")}
     >
       <div className="flex min-h-10.5 items-center justify-between border-border-subtle border-b px-page-gutter font-body text-micro text-text-muted tracking-field-meta uppercase">
-        <span>Shop / Field index</span>
-        <span>{String(collections.length).padStart(2, "0")} systems</span>
+        <span>{t("header.shopIndexHeading")}</span>
+        <span>
+          {t("header.systemCount", {
+            count: String(collections.length).padStart(2, "0"),
+          })}
+        </span>
       </div>
       <div className="grid min-h-92 grid-cols-[minmax(0,1.18fr)_minmax(360px,0.82fr)]">
-        <nav className="grid auto-rows-fr" aria-label="Shop collections">
+        <nav
+          className="grid auto-rows-fr"
+          aria-label={t("header.shopCollections")}
+        >
           {collections.map((collection, index) => (
             <Link
               key={collection.id}

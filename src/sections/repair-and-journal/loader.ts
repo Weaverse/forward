@@ -1,7 +1,7 @@
 import type { WeaverseNextComponent } from "@weaverse/next";
 import { getStorefront } from "@/lib/storefront/data-source";
 import type { JournalArticle } from "@/lib/storefront/types";
-import { loaderLocale } from "@/lib/weaverse/resource";
+import { loaderLocale } from "@/lib/weaverse/request-info";
 
 type LoaderArgs = Parameters<NonNullable<WeaverseNextComponent["loader"]>>[0];
 

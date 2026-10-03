@@ -224,7 +224,7 @@ describe("cart count", () => {
 
 describe("footer payment marks", () => {
   it("draws every mark with its brand name available to assistive tech", () => {
-    renderWithCart(<PaymentMarks />);
+    renderWithCart(<PaymentMarks label="Accepted payment methods" />);
 
     const row = screen.getByRole("list", { name: "Accepted payment methods" });
     assert.deepEqual(

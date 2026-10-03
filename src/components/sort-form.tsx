@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/lib/i18n/t";
 import { SORT_OPTIONS } from "@/lib/storefront/sort";
 import type { ProductSort } from "@/lib/storefront/types";
 
@@ -21,6 +22,7 @@ export function SortForm({
   params: URLSearchParams;
   id: string;
 }) {
+  const t = useT();
   const preserved = [...params.entries()].filter(
     ([key]) => key !== "sort" && key !== "after" && key !== "before",
   );
@@ -38,7 +40,7 @@ export function SortForm({
         className="font-field-meta text-caption font-medium text-text-muted tracking-field-meta uppercase"
         htmlFor={id}
       >
-        Sort
+        {t("catalog.sort")}
       </label>
       <select
         className="min-h-touch flex-1 rounded-none border border-ink bg-transparent py-0 pr-9.5 pl-3.5 font-body text-micro font-bold uppercase sm:flex-initial"
@@ -48,7 +50,7 @@ export function SortForm({
       >
         {SORT_OPTIONS.map((option) => (
           <option key={option.value} value={option.value}>
-            {option.label}
+            {t(option.labelKey)}
           </option>
         ))}
       </select>
@@ -56,7 +58,7 @@ export function SortForm({
         className="min-h-touch border border-ink bg-transparent px-3.5 font-body text-micro font-extrabold tracking-label uppercase hover:bg-surface-subtle"
         type="submit"
       >
-        Apply
+        {t("catalog.apply")}
       </button>
     </form>
   );

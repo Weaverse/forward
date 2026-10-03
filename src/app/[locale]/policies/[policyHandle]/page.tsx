@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
+import { marketAlternates } from "@/lib/i18n/alternates";
 import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
+import { getTranslator } from "@/lib/i18n/translator";
 import { getStorefront } from "@/lib/storefront/data-source";
 import { IndexHeader } from "@/sections/index-header";
 import { PolicyDocument } from "@/sections/policy-document";
@@ -29,20 +31,23 @@ export async function generateMetadata({
   const locale = parseLocale(segment) ?? DEFAULT_LOCALE;
   const policy = await getStorefront(locale).getPolicy(policyHandle);
   if (policy === null) {
-    return { title: "Policy not found" };
+    const t = await getTranslator(locale);
+    return { title: t("meta.policyNotFound") };
   }
   return {
     title: policy.title,
     ...(policy.summary === "" ? {} : { description: policy.summary }),
+    alternates: marketAlternates(`/policies/${policyHandle}`, locale),
   };
 }
 
 export default async function PolicyPage({ params }: PolicyPageProps) {
   const { locale: segment, policyHandle } = await params;
   const locale = parseLocale(segment) ?? DEFAULT_LOCALE;
-  const [policy, allPolicies] = await Promise.all([
+  const [policy, allPolicies, t] = await Promise.all([
     getStorefront(locale).getPolicy(policyHandle),
     getStorefront(locale).listPolicies(),
+    getTranslator(locale),
   ]);
   if (policy === null) {
     notFound();
@@ -52,7 +57,7 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
   return (
     <>
       <IndexHeader
-        eyebrowLabel="Support / Policy"
+        eyebrowLabel={t("policy.eyebrow")}
         heading={policy.title}
         lede={policy.summary}
       />
@@ -61,6 +66,8 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
         policy={policy}
         allPolicies={allPolicies}
         accountEnabled={accountEnabled}
+        locale={locale}
+        t={t}
       />
     </>
   );

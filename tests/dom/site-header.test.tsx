@@ -52,6 +52,7 @@ afterEach(() => {
 });
 
 interface MountOptions {
+  overrides?: Record<string, unknown>;
   pathname?: string;
   primary?: readonly NavItem[];
   queryString?: string;
@@ -60,6 +61,9 @@ interface MountOptions {
 }
 
 function mountHeader({
+  overrides = {
+    announcement: { text: "Free shipping over $150 · Repairs for life" },
+  },
   pathname = "/",
   primary = PRIMARY_NAV,
   queryString = "",
@@ -70,12 +74,14 @@ function mountHeader({
   account = stubAccountStatus(signedIn);
   return renderWithCart(
     <FieldIndexHeader
-      announcement="Free shipping over $150 · Repairs for life"
       collections={COLLECTION_FIXTURES}
       primary={primary}
       queryString={queryString}
       utility={withAccount ? UTILITY_NAV_WITH_ACCOUNT : UTILITY_NAV_NO_ACCOUNT}
     />,
+    undefined,
+    undefined,
+    overrides,
   );
 }
 
@@ -105,6 +111,26 @@ describe("header shell", () => {
     assert.ok(screen.getByRole("link", { name: /^Account/ }));
     assert.ok(screen.getByRole("link", { name: /^Cart/ }));
     assert.ok(screen.getByRole("button", { name: /^Menu$/ }));
+  });
+
+  it("renders the market's translation of its own copy", () => {
+    mountHeader({
+      overrides: {
+        announcement: { text: "" },
+        header: { search: "Suche", cart: "Warenkorb", account: "Konto" },
+      },
+    });
+
+    assert.ok(screen.getByRole("link", { name: /^Suche/ }));
+    assert.ok(screen.getByRole("link", { name: /^Warenkorb/ }));
+    assert.ok(screen.getByRole("link", { name: /^Konto/ }));
+    /* An empty announcement override hides the merchant line. */
+    assert.doesNotMatch(
+      visibleText(
+        screen.getByRole("complementary", { name: "Store announcement" }),
+      ),
+      /Free shipping/,
+    );
   });
 
   it("drops the Account affordance and session probe when accounts are disabled", () => {

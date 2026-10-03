@@ -15,8 +15,14 @@ import {
 } from "@shopify/hydrogen/customer-account";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { DEFAULT_LOCALE, type LocaleId, localeI18n } from "@/lib/i18n/locales";
-
+import {
+  DEFAULT_LOCALE,
+  type LocaleId,
+  localeI18n,
+  localizePath,
+} from "@/lib/i18n/locales";
+import type { TranslationKey } from "@/lib/i18n/static-content";
+import { formatMoney } from "@/lib/storefront/format";
 import {
   getCustomerAccountRuntime,
   REFRESH_MARKER_PARAM,
@@ -52,7 +58,9 @@ export interface AccountOrderSummary {
   name: string;
   href: string;
   processedAt: string;
+  /** English label, the fallback for a status the theme has no key for. */
   status: string;
+  statusKey: TranslationKey | null;
   total: string;
 }
 
@@ -80,7 +88,9 @@ export interface AccountOrderLine {
 export interface AccountOrderDetail {
   name: string;
   processedAt: string;
+  /** English label, the fallback for a status the theme has no key for. */
   status: string;
+  statusKey: TranslationKey | null;
   lines: readonly AccountOrderLine[];
   subtotal: string | null;
   shipping: string | null;
@@ -95,26 +105,53 @@ export type AccountSession =
   | {
       status: "authenticated";
       accessToken: string;
+      /** The page's market: money formats the way it writes it. */
+      locale: LocaleId;
       client: CustomerAccountClient;
       /** Writable boundary used only by approved Server Actions. */
       commitSession(): Promise<HeadersInit>;
     };
 
-/** Formats a Customer Account `MoneyV2`, whose amount is a decimal string. */
-export function formatAccountMoney(money: AccountMoney): string {
+/**
+ * Formats a Customer Account `MoneyV2`, whose amount is a decimal string, in
+ * the page's market. An unparseable amount renders as a dash.
+ */
+export function formatAccountMoney(
+  money: AccountMoney,
+  locale: LocaleId,
+): string {
   const amount = Number(money.amount);
   if (!Number.isFinite(amount)) {
     return "—";
   }
-  // Whole amounts read as "$390" like the rest of the theme; anything with a
-  // fractional part keeps both cents digits rather than rendering "$12.5".
-  const fractionDigits = Number.isInteger(amount) ? 0 : 2;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: money.currencyCode,
-    minimumFractionDigits: fractionDigits,
-    maximumFractionDigits: fractionDigits,
-  }).format(amount);
+  return formatMoney({ amount, currencyCode: money.currencyCode }, locale);
+}
+
+const STATUS_KEYS: Record<string, TranslationKey> = {
+  FULFILLED: "account.status.fulfilled",
+  UNFULFILLED: "account.status.unfulfilled",
+  PARTIALLY_FULFILLED: "account.status.partiallyFulfilled",
+  IN_PROGRESS: "account.status.inProgress",
+  ON_HOLD: "account.status.onHold",
+  OPEN: "account.status.open",
+  PENDING_FULFILLMENT: "account.status.pendingFulfillment",
+  RESTOCKED: "account.status.restocked",
+  SCHEDULED: "account.status.scheduled",
+};
+
+/**
+ * The translation key for a fulfillment status, or `null` for one Shopify adds
+ * later; the page then shows the English label from `formatStatusLabel`.
+ */
+export function orderStatusKey(
+  value: string | null | undefined,
+): TranslationKey | null {
+  if (value === null || value === undefined || value === "") {
+    return "account.status.processing";
+  }
+  return Object.hasOwn(STATUS_KEYS, value)
+    ? (STATUS_KEYS[value] ?? null)
+    : null;
 }
 
 /** Turns `PARTIALLY_FULFILLED` into `Partially fulfilled`. */
@@ -179,6 +216,7 @@ export async function readAccountSession(options: {
     return {
       status: "authenticated",
       accessToken,
+      locale: options.locale ?? DEFAULT_LOCALE,
       client: createCustomerAccountClient({
         shopId: runtime.config.shopId,
         requestContext,
@@ -190,25 +228,34 @@ export async function readAccountSession(options: {
     !options.refreshed &&
     (await runtime.customerSession.isLoggedIn(sessionManager, requestContext))
   ) {
-    return { status: "needs-refresh", href: refreshHref(options.path) };
+    return {
+      status: "needs-refresh",
+      href: refreshHref(
+        localizePath(options.path, options.locale ?? DEFAULT_LOCALE),
+      ),
+    };
   }
   return { status: "signed-out" };
 }
 
-function mapOrderSummary(order: {
-  name: string;
-  number: number;
-  processedAt: string;
-  fulfillmentStatus: string;
-  totalPrice: AccountMoney;
-}): AccountOrderSummary {
+function mapOrderSummary(
+  locale: LocaleId,
+  order: {
+    name: string;
+    number: number;
+    processedAt: string;
+    fulfillmentStatus: string;
+    totalPrice: AccountMoney;
+  },
+): AccountOrderSummary {
   return {
     number: order.number,
     name: order.name,
     href: `/account/orders/${order.number}`,
     processedAt: order.processedAt,
     status: formatStatusLabel(order.fulfillmentStatus),
-    total: formatAccountMoney(order.totalPrice),
+    statusKey: orderStatusKey(order.fulfillmentStatus),
+    total: formatAccountMoney(order.totalPrice, locale),
   };
 }
 
@@ -235,7 +282,9 @@ export async function readAccountProfile(
       lines: address.formatted,
       isDefault: address.id === defaultAddressId,
     })),
-    orders: customer.orders.nodes.map(mapOrderSummary),
+    orders: customer.orders.nodes.map((order) =>
+      mapOrderSummary(session.locale, order),
+    ),
   };
 }
 
@@ -290,6 +339,7 @@ export async function readAccountOrder(
     name: order.name,
     processedAt: order.processedAt,
     status: formatStatusLabel(order.fulfillmentStatus),
+    statusKey: orderStatusKey(order.fulfillmentStatus),
     lines: order.lineItems.nodes.map((line) => ({
       id: line.id,
       title: line.title,
@@ -298,12 +348,16 @@ export async function readAccountOrder(
       total:
         line.totalPrice === null || line.totalPrice === undefined
           ? "—"
-          : formatAccountMoney(line.totalPrice),
+          : formatAccountMoney(line.totalPrice, session.locale),
     })),
-    subtotal: order.subtotal ? formatAccountMoney(order.subtotal) : null,
-    shipping: formatAccountMoney(order.totalShipping),
-    tax: order.totalTax ? formatAccountMoney(order.totalTax) : null,
-    total: formatAccountMoney(order.totalPrice),
+    subtotal: order.subtotal
+      ? formatAccountMoney(order.subtotal, session.locale)
+      : null,
+    shipping: formatAccountMoney(order.totalShipping, session.locale),
+    tax: order.totalTax
+      ? formatAccountMoney(order.totalTax, session.locale)
+      : null,
+    total: formatAccountMoney(order.totalPrice, session.locale),
     shippingAddress: order.shippingAddress?.formatted ?? null,
   };
 }

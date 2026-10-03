@@ -102,6 +102,31 @@ Forward is a fresh Next.js App Router storefront theme using
   `src/lib/i18n/locale-context.tsx`, never `next/navigation`'s: during server
   rendering Next reports the proxy's `/en-us/*` rewrite target (Biome enforces
   this too).
+- A market has three identities, never interchanged: the URL id (`de-de`),
+  BCP-47 (`de-DE`, `localeTag`), and Shopify's enums (`{ language: "DE",
+  country: "DE" }`). Weaverse's request `i18n.locale` is BCP-47; loaders map
+  `language` + `country` back to the URL id (`loaderLocale`).
+- The theme schema's `i18n` (markets, `staticContent`, `translation: true`) is
+  derived from `LOCALES`, so Studio's market selector and Translation Manager
+  see exactly the markets the storefront serves.
+- Theme-owned copy lives in `src/lib/i18n/static-content.ts` (English) and is
+  never hardcoded in markup: client components use `useT()`, Server
+  Components render text through `<T k>` (so Studio's live edits reach it) and
+  use `getTranslator(locale)` only for attributes and metadata. Server
+  components that DOM tests render take the page's `t` as a prop. Every path
+  resolves through `createTranslator`, which checks own properties and keeps
+  an empty translation; the SDK's `useTranslation` is restricted to
+  `src/lib/i18n/t.tsx` (Biome). Merchant-authored settings and Shopify
+  content are not theme copy.
+- Money and dates format with the market (`formatMoney(money, locale)`,
+  `formatDate(iso, locale)`); there is no default.
+- Every indexable page sets `alternates: marketAlternates(path, locale)`: a
+  self-canonical always, `hreflang` + `x-default` only for the
+  market-invariant allowlist in `src/lib/i18n/alternates.ts`. Handle routes
+  never get prefix-swapped `hreflang`, and the sitemap stays on the default
+  market, because Shopify handles are per-market data.
+- Account flows keep the market through a localized `return_to` on the single
+  Customer Account handler; protocol paths themselves stay unprefixed.
 
 ## Storefront data boundary
 

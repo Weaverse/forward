@@ -16,9 +16,17 @@ import type { ShopifyCartData } from "@/lib/cart/shopify-cart";
 import { ShopifyCartProvider } from "@/lib/cart/shopify-cart-react";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
 import { DEFAULT_LOCALE, type LocaleId } from "@/lib/i18n/locales";
+import { STATIC_CONTENT, type TranslationKey } from "@/lib/i18n/static-content";
+import { createTranslator } from "@/lib/i18n/translate";
 import type { NavItem, Product } from "@/lib/storefront/types";
+import { WeaverseRoot } from "@/lib/weaverse/root";
 import { NAVIGATION_FIXTURE } from "../fixtures/storefront/navigation";
 import { PRODUCT_FIXTURES } from "../fixtures/storefront/products";
+
+/** The theme's English copy, as a server page would pass it down. */
+export const ENGLISH_T = createTranslator<TranslationKey>({
+  staticContent: STATIC_CONTENT,
+});
 
 export const PRIMARY_NAV: readonly NavItem[] = NAVIGATION_FIXTURE.primary;
 
@@ -70,17 +78,44 @@ export function cartLine(
   };
 }
 
-/** Renders inside the locale and Shopify cart providers every page mounts. */
+/**
+ * Wraps `ui` in the providers the layout mounts around every page: locale,
+ * the Weaverse root (theme copy and its translations) and the Shopify cart.
+ */
+export function shell(
+  ui: ReactNode,
+  {
+    data = cartData(),
+    locale = DEFAULT_LOCALE,
+    merchantOverrides,
+  }: {
+    data?: ShopifyCartData;
+    locale?: LocaleId;
+    merchantOverrides?: Record<string, unknown>;
+  } = {},
+) {
+  return (
+    <LocaleProvider locale={locale}>
+      <WeaverseRoot merchantOverrides={merchantOverrides}>
+        <ShopifyCartProvider initialData={data}>{ui}</ShopifyCartProvider>
+      </WeaverseRoot>
+    </LocaleProvider>
+  );
+}
+
+/** `render` with the layout's providers, for tests that need no cart data. */
+export function renderInShell(ui: ReactNode) {
+  return render(shell(ui));
+}
+
+/** Renders inside the providers every page mounts. */
 export function renderWithCart(
   ui: ReactNode,
   data = cartData(),
   locale: LocaleId = DEFAULT_LOCALE,
+  merchantOverrides?: Record<string, unknown>,
 ) {
-  return render(
-    <LocaleProvider locale={locale}>
-      <ShopifyCartProvider initialData={data}>{ui}</ShopifyCartProvider>
-    </LocaleProvider>,
-  );
+  return render(shell(ui, { data, locale, merchantOverrides }));
 }
 
 export function productByHandle(handle: string): Product {

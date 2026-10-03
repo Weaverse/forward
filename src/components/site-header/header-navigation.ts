@@ -1,13 +1,25 @@
 import { splitLocale } from "@/lib/i18n/locales";
+import type { ThemeTranslate, TranslationKey } from "@/lib/i18n/static-content";
 import type {
   Collection,
   NavItem,
   StorefrontImage,
 } from "@/lib/storefront/types";
 
+/** A destination the theme adds itself, labelled by a translation key. */
+export type ThemeNavItem = NavItem & { labelKey?: TranslationKey };
+
 /** Theme routes the header always offers; they are the theme's, not a menu's. */
-export const SEARCH_LINK: NavItem = { href: "/search", label: "Search" };
-export const ACCOUNT_LINK: NavItem = { href: "/account", label: "Account" };
+export const SEARCH_LINK: ThemeNavItem = {
+  href: "/search",
+  label: "Search",
+  labelKey: "header.search",
+};
+export const ACCOUNT_LINK: ThemeNavItem = {
+  href: "/account",
+  label: "Account",
+  labelKey: "header.account",
+};
 
 export interface FieldIndexCollection {
   id: string;
@@ -163,10 +175,17 @@ export function fieldIndexCollections(
   });
 }
 
-/** Account entry reports session state; every other destination keeps its label. */
-export function accountNavigationLabel(
-  item: NavItem,
+/**
+ * Account entry reports session state, a theme destination reads its key, and
+ * a merchant's menu item keeps its own label.
+ */
+export function navigationLabel(
+  item: ThemeNavItem,
   signedIn: boolean,
+  t: ThemeTranslate,
 ): string {
-  return item.href === "/account" && signedIn ? "Signed in" : item.label;
+  if (item.href === "/account" && signedIn) {
+    return t("header.signedIn");
+  }
+  return item.labelKey === undefined ? item.label : t(item.labelKey);
 }

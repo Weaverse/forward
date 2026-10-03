@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { marketAlternates } from "@/lib/i18n/alternates";
+import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
-
+import { getTranslator } from "@/lib/i18n/translator";
 import { getStorefront } from "@/lib/storefront/data-source";
 import {
   AFTER_PARAM,
@@ -17,10 +19,17 @@ import {
   weaverseProjectId,
 } from "@/lib/weaverse/server";
 
-export const metadata: Metadata = {
-  title: "Shop",
-  description: "Every product this store publishes.",
-};
+export async function generateMetadata({
+  params,
+}: Pick<ShopPageProps, "params">): Promise<Metadata> {
+  const locale = parseLocale((await params).locale) ?? DEFAULT_LOCALE;
+  const t = await getTranslator(locale);
+  return {
+    title: t("meta.shopTitle"),
+    description: t("meta.shopDescription"),
+    alternates: marketAlternates("/shop", locale),
+  };
+}
 
 interface ShopPageProps {
   params: Promise<{ locale: string }>;

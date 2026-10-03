@@ -9,7 +9,9 @@ import {
   readAccountSession,
 } from "@/lib/account/account-view";
 import { cn } from "@/lib/cn";
+import { DEFAULT_LOCALE, localizePath, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
+import { getTranslator } from "@/lib/i18n/translator";
 import { eyebrow, textLink } from "@/lib/presentation/variants";
 import { formatDate } from "@/lib/storefront/format";
 
@@ -20,11 +22,18 @@ import { formatDate } from "@/lib/storefront/format";
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-export const metadata: Metadata = {
-  title: "Order · Account",
-  description: "Your Forward order.",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata({
+  params,
+}: Pick<OrderPageProps, "params">): Promise<Metadata> {
+  const t = await getTranslator(
+    parseLocale((await params).locale) ?? DEFAULT_LOCALE,
+  );
+  return {
+    title: t("account.meta.orderTitle"),
+    description: t("account.meta.orderDescription"),
+    robots: { index: false, follow: false },
+  };
+}
 
 interface OrderPageProps {
   params: Promise<{ locale: string; orderId: string }>;
@@ -47,6 +56,7 @@ export default async function OrderPage({
 }: OrderPageProps) {
   const [{ orderId }, search] = await Promise.all([params, searchParams]);
   const locale = await routeLocale(params);
+  const t = await getTranslator(locale);
   const path = `/account/orders/${orderId}`;
   const session = await readAccountSession({
     locale,
@@ -57,11 +67,17 @@ export default async function OrderPage({
   if (session.status !== "authenticated") {
     return (
       <AccountShell
+        locale={locale}
         activePath="/account/orders"
-        eyebrow="Field account / Order"
-        title="Order"
+        t={t}
+        eyebrow={t("account.orderEyebrow")}
+        title={t("account.orderTitle")}
       >
-        <AccountAccessPanel path={path} session={session} />
+        <AccountAccessPanel
+          t={t}
+          path={localizePath(path, locale)}
+          session={session}
+        />
       </AccountShell>
     );
   }
@@ -73,21 +89,27 @@ export default async function OrderPage({
 
   return (
     <AccountShell
+      locale={locale}
       activePath="/account/orders"
-      eyebrow="Field account / Order"
+      t={t}
+      eyebrow={t("account.orderEyebrow")}
       title={order.name}
       signedIn
       heroAside={
         <div>
-          <span className="font-bold text-signal-strong">{order.status}</span>
+          <span className="font-bold text-signal-strong">
+            {order.statusKey === null ? order.status : t(order.statusKey)}
+          </span>
           <p className="m-0 max-w-full justify-self-start text-lede leading-lede text-text-dark-lede md:max-w-lede md:justify-self-end">
-            Placed {formatDate(order.processedAt.slice(0, 10))}
+            {t("account.placed", {
+              date: formatDate(order.processedAt.slice(0, 10), locale),
+            })}
           </p>
         </div>
       }
     >
       <Link className={textLink()} href="/account/orders">
-        Back to orders
+        {t("account.backToOrders")}
       </Link>
 
       <div className="border-border-subtle border-t py-section-block-compact">
@@ -99,7 +121,7 @@ export default async function OrderPage({
               </h2>
               <p className="text-text-muted">
                 {line.variantTitle === null ? "" : `${line.variantTitle} · `}
-                Qty {line.quantity}
+                {t("account.quantity", { quantity: line.quantity })}
               </p>
             </div>
             <div className="col-start-2 font-bold whitespace-nowrap sm:col-start-auto">
@@ -111,11 +133,9 @@ export default async function OrderPage({
 
       <div className="mt-12.5 grid grid-cols-1 gap-3 py-section-block-compact sm:grid-cols-2">
         <article className={ACCOUNT_BLOCK_CLASS}>
-          <p className={eyebrow()}>Delivery address</p>
+          <p className={eyebrow()}>{t("account.deliveryAddress")}</p>
           {order.shippingAddress === null ? (
-            <p className="text-text-muted">
-              No delivery address on this order.
-            </p>
+            <p className="text-text-muted">{t("account.noDeliveryAddress")}</p>
           ) : (
             <address>
               {order.shippingAddress.map((line) => (
@@ -128,22 +148,22 @@ export default async function OrderPage({
           )}
         </article>
         <article className={ACCOUNT_BLOCK_CLASS}>
-          <p className={eyebrow()}>Order total</p>
+          <p className={eyebrow()}>{t("account.orderTotal")}</p>
           {order.subtotal === null ? null : (
             <div className={SUMMARY_ROW_CLASS}>
-              <span>Subtotal</span>
+              <span>{t("account.subtotal")}</span>
               <span>{order.subtotal}</span>
             </div>
           )}
           {order.shipping === null ? null : (
             <div className={SUMMARY_ROW_CLASS}>
-              <span>Delivery</span>
+              <span>{t("account.delivery")}</span>
               <span>{order.shipping}</span>
             </div>
           )}
           {order.tax === null ? null : (
             <div className={SUMMARY_ROW_CLASS}>
-              <span>Tax</span>
+              <span>{t("account.tax")}</span>
               <span>{order.tax}</span>
             </div>
           )}
@@ -153,7 +173,7 @@ export default async function OrderPage({
               "py-5 font-heading text-heading-4",
             )}
           >
-            <span>Total</span>
+            <span>{t("account.columns.total")}</span>
             <strong>{order.total}</strong>
           </div>
         </article>

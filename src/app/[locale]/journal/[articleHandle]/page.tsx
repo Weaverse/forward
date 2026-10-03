@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { marketAlternates } from "@/lib/i18n/alternates";
 import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
-
+import { getTranslator } from "@/lib/i18n/translator";
 import { getStorefront } from "@/lib/storefront/data-source";
 import { WeaversePage } from "@/lib/weaverse/page";
 import {
@@ -33,11 +34,18 @@ export async function generateMetadata({
 }: ArticlePageProps): Promise<Metadata> {
   const { locale: segment, articleHandle } = await params;
   const locale = parseLocale(segment) ?? DEFAULT_LOCALE;
-  const article = await getStorefront(locale).getArticle(articleHandle);
+  const [article, t] = await Promise.all([
+    getStorefront(locale).getArticle(articleHandle),
+    getTranslator(locale),
+  ]);
   if (article === null) {
-    return { title: "Article not found" };
+    return { title: t("meta.articleNotFound") };
   }
-  return { title: `${article.title} · Journal`, description: article.excerpt };
+  return {
+    title: t("meta.articleTitle", { title: article.title }),
+    description: article.excerpt,
+    alternates: marketAlternates(`/journal/${articleHandle}`, locale),
+  };
 }
 
 /**

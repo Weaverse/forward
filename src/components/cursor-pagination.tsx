@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/components/link";
-
+import { useT } from "@/lib/i18n/t";
 import { pageHref } from "@/lib/storefront/filter-params";
 import type { CollectionProductsPage } from "@/lib/storefront/types";
 
@@ -25,13 +25,14 @@ export function CursorPagination({
   pathname: string;
   params: URLSearchParams;
 }) {
+  const t = useT();
   if (!pageInfo.hasPreviousPage && !pageInfo.hasNextPage) {
     return null;
   }
   return (
     <nav
       className="mt-14 flex items-center justify-center gap-2.5"
-      aria-label="Pagination"
+      aria-label={t("catalog.pagination")}
     >
       {pageInfo.hasPreviousPage && pageInfo.startCursor !== null ? (
         <Link
@@ -39,7 +40,7 @@ export function CursorPagination({
           href={pageHref(pathname, params, pageInfo.startCursor, "previous")}
           rel="prev"
         >
-          Previous
+          {t("catalog.previous")}
         </Link>
       ) : null}
       {pageInfo.hasNextPage && pageInfo.endCursor !== null ? (
@@ -48,7 +49,7 @@ export function CursorPagination({
           href={pageHref(pathname, params, pageInfo.endCursor, "next")}
           rel="next"
         >
-          Next
+          {t("catalog.next")}
         </Link>
       ) : null}
     </nav>

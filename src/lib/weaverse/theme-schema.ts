@@ -10,12 +10,36 @@
  * instead of in the component registry.
  */
 
-import type { WeaverseNextThemeSchema } from "@weaverse/next";
+import type { WeaverseNextI18n, WeaverseNextThemeSchema } from "@weaverse/next";
+
+import {
+  DEFAULT_LOCALE,
+  LOCALE_IDS,
+  LOCALES,
+  type LocaleId,
+  localePathPrefix,
+  localeTag,
+} from "@/lib/i18n/locales";
+import { STATIC_CONTENT } from "@/lib/i18n/static-content";
 
 import { editorialImagerySettings } from "./settings/editorial-imagery";
 import { footerSettings } from "./settings/footer";
 import { headerSettings } from "./settings/header";
 import { layoutSettings } from "./settings/layout";
+
+/** A market as Studio's market selector and Translation Manager read it. */
+function shopLocale(locale: LocaleId): WeaverseNextI18n {
+  const { country, currency, direction, label, language } = LOCALES[locale];
+  return {
+    pathPrefix: localePathPrefix(locale),
+    label,
+    language,
+    country,
+    currency,
+    hreflang: localeTag(locale),
+    direction,
+  };
+}
 
 export const themeSchema: WeaverseNextThemeSchema = {
   info: {
@@ -28,6 +52,15 @@ export const themeSchema: WeaverseNextThemeSchema = {
     footerSettings,
     editorialImagerySettings,
   ],
+  /* Derived from `LOCALES`, so a market is added in one place. `translation`
+   * and `staticContent` are what Studio's Translation Manager reads. */
+  i18n: {
+    urlStructure: "url-path",
+    defaultLocale: shopLocale(DEFAULT_LOCALE),
+    shopLocales: LOCALE_IDS.map(shopLocale),
+    translation: true,
+    staticContent: STATIC_CONTENT,
+  },
 };
 
 export type {

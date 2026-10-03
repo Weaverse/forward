@@ -19,6 +19,7 @@ import {
   ACCOUNT_ADDRESS_UPDATE_MUTATION,
   ACCOUNT_ADDRESSES_QUERY,
 } from "../src/lib/account/queries.ts";
+import { STATIC_CONTENT } from "../src/lib/i18n/static-content.ts";
 
 const ORIGIN = "https://forward-sandy.vercel.app";
 const ACCESS_TOKEN = "shcat_live_access_token_value";
@@ -131,6 +132,7 @@ async function run(
     requestHeaders,
     origin: ORIGIN,
     formData,
+    locale: "en-us",
   });
 }
 
@@ -201,6 +203,20 @@ describe("address authentication boundary", () => {
     assert.deepEqual(result, {
       status: "redirect",
       href: "/account/login?return_to=%2Faccount%2Faddresses",
+    });
+  });
+
+  it("sends a signed-out caller to login and back to their market", async () => {
+    const result = await performAddressAction({
+      session: forbiddenSession("signed-out"),
+      requestHeaders: sameOriginHeaders(),
+      origin: ORIGIN,
+      formData: createForm(),
+      locale: "de-de",
+    });
+    assert.deepEqual(result, {
+      status: "redirect",
+      href: "/account/login?return_to=%2Fde-de%2Faccount%2Faddresses",
     });
   });
 
@@ -659,11 +675,10 @@ describe("readAccountAddresses", () => {
 
 describe("address action boundary", () => {
   it("explains the optional zone-code contract in the form", async () => {
-    const source = await readFile(
-      path.join(process.cwd(), "src/app/[locale]/account/addresses/page.tsx"),
-      "utf8",
+    assert.match(
+      STATIC_CONTENT.account.fields.zoneCodeHint,
+      /Leave blank[\s\S]*Vietnam/,
     );
-    assert.match(source, /Leave blank[\s\S]*Vietnam/);
   });
 
   it("keeps the writable mutation surface behind one Server Action", async () => {

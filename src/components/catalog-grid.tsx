@@ -7,6 +7,7 @@ import { CursorPagination } from "@/components/cursor-pagination";
 import { ProductCard } from "@/components/product-card";
 import { cn } from "@/lib/cn";
 import { usePathname } from "@/lib/i18n/locale-context";
+import { useT } from "@/lib/i18n/t";
 import type { CollectionProductsPage, Product } from "@/lib/storefront/types";
 import {
   elementAttributes,
@@ -49,6 +50,7 @@ export function CatalogGrid({
   empty,
   ...rest
 }: CatalogGridProps) {
+  const t = useT();
   const pathname = usePathname();
   const params = useSearchParams();
 
@@ -56,9 +58,9 @@ export function CatalogGrid({
     <section
       {...elementAttributes(rest)}
       className={className}
-      aria-label="Products"
+      aria-label={t("catalog.products")}
     >
-      <h2 className="sr-only">Products</h2>
+      <h2 className="sr-only">{t("catalog.products")}</h2>
       {products.length === 0 ? (
         empty
       ) : (

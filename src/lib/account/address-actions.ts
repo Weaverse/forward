@@ -34,7 +34,9 @@ export async function saveAddress(
   }
 
   const requestHeaders = await headers();
+  const locale = localeFromCookieHeader(requestHeaders.get("cookie"));
   const session = await readAccountSession({
+    locale,
     path: ADDRESSES_PATH,
     refreshed: false,
   });
@@ -56,6 +58,7 @@ export async function saveAddress(
     // The configured origin, never a Host/Forwarded header.
     origin: runtime.config.storefrontOrigin,
     formData,
+    locale,
   });
 
   if (result.status === "error") {
@@ -65,10 +68,5 @@ export async function saveAddress(
     redirect(result.href);
   }
   revalidatePath(ADDRESSES_PATH);
-  redirect(
-    localizePath(
-      ADDRESSES_PATH,
-      localeFromCookieHeader(requestHeaders.get("cookie")),
-    ),
-  );
+  redirect(localizePath(ADDRESSES_PATH, locale));
 }

@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
 import type { LocaleId } from "@/lib/i18n/locales";
 import { getStorefront } from "@/lib/storefront/data-source";
-import { readThemeSettings } from "@/lib/weaverse/server";
 import { FieldIndexHeader } from "./field-index-header";
 import { ACCOUNT_LINK } from "./header-navigation";
 import { QueryPreservingFieldIndexHeader } from "./query-preserving-field-index-header";
@@ -13,20 +12,17 @@ import { QueryPreservingFieldIndexHeader } from "./query-preserving-field-index-
  * reader's Suspense fallback so static pages never bail out to client rendering.
  */
 export async function SiteHeader({ locale }: { locale: LocaleId }) {
-  const [navigation, settings, collections] = await Promise.all([
+  const [navigation, collections] = await Promise.all([
     getStorefront(locale).getNavigation(),
-    readThemeSettings(locale),
     getStorefront(locale).listCollections(),
   ]);
 
   const utility = getCustomerAccountRuntime() === null ? [] : [ACCOUNT_LINK];
-  const announcement = settings.announcement ?? "";
 
   return (
     <Suspense
       fallback={
         <FieldIndexHeader
-          announcement={announcement}
           collections={collections}
           primary={navigation.primary}
           utility={utility}
@@ -34,7 +30,6 @@ export async function SiteHeader({ locale }: { locale: LocaleId }) {
       }
     >
       <QueryPreservingFieldIndexHeader
-        announcement={announcement}
         collections={collections}
         primary={navigation.primary}
         utility={utility}

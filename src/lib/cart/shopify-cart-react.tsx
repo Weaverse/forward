@@ -11,7 +11,7 @@ import {
   createProductComponents,
 } from "@shopify/hydrogen/react";
 import type { ReactNode } from "react";
-
+import type { LocaleId } from "@/lib/i18n/locales";
 import { formatMoney } from "@/lib/storefront/format";
 import type { Product } from "@/lib/storefront/types";
 
@@ -39,12 +39,15 @@ export function ShopifyCartRuntime({ children }: { children: ReactNode }) {
 }
 
 /** Renders Shopify cart money, or an em dash when it is absent or off-currency. */
-export function formatShopifyMoney(value: ShopifyMoney | undefined): string {
+export function formatShopifyMoney(
+  value: ShopifyMoney | undefined,
+  locale: LocaleId,
+): string {
   if (value === undefined) return "—";
-  return formatMoney({
-    amount: Number(value.amount),
-    currencyCode: value.currencyCode,
-  });
+  return formatMoney(
+    { amount: Number(value.amount), currencyCode: value.currencyCode },
+    locale,
+  );
 }
 
 export function toHydrogenProductInput(

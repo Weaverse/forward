@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { marketAlternates } from "@/lib/i18n/alternates";
 import { DEFAULT_LOCALE, type LocaleId, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
-
+import { getTranslator } from "@/lib/i18n/translator";
 import { getStorefront } from "@/lib/storefront/data-source";
 import type { Product } from "@/lib/storefront/types";
 import { WeaversePage } from "@/lib/weaverse/page";
@@ -44,9 +45,14 @@ export async function generateMetadata({
   const locale = parseLocale(segment) ?? DEFAULT_LOCALE;
   const product = await getStorefront(locale).getProduct(productHandle);
   if (product === null) {
-    return { title: "Product not found" };
+    const t = await getTranslator(locale);
+    return { title: t("meta.productNotFound") };
   }
-  return { title: product.title, description: product.subtitle };
+  return {
+    title: product.title,
+    description: product.subtitle,
+    alternates: marketAlternates(`/products/${productHandle}`, locale),
+  };
 }
 
 async function relatedProducts(product: Product, locale: LocaleId) {

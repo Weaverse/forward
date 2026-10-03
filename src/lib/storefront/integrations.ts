@@ -10,7 +10,8 @@
  * Status (2026-08-18):
  * - Social: the four URLs below are the accounts the live Weaverse footer
  *   already publishes. They belong to Weaverse, not to Forward, so the Footer
- *   renders them under `SOCIAL_SECTION_HEADING` and never as store accounts.
+ *   renders them under the `footer.social` heading ("Weaverse community") and
+ *   never as store accounts.
  * - Payments: the Forward Store reports `ADMIN_ONBOARDING_REQUIRED` and has no
  *   wallets enabled, so `VERIFIED_CHECKOUT_PAYMENT_MARKS` stays empty and the
  *   Footer falls back to clearly-labelled theme-preview marks. Those previews
@@ -48,9 +49,6 @@ export interface PaymentMark {
   /** Brand name, announced to assistive technology beside the mark. */
   label: string;
 }
-
-/** Heading the social row must render under; these are not Forward accounts. */
-export const SOCIAL_SECTION_HEADING = "Weaverse community";
 
 export const VERIFIED_SOCIAL_LINKS: readonly SocialLink[] = [
   {

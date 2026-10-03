@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { marketAlternates } from "@/lib/i18n/alternates";
 import { routeLocale } from "@/lib/i18n/route-locale";
-
 import { WeaversePage } from "@/lib/weaverse/page";
 import {
   loadWeaversePage,
@@ -65,5 +65,6 @@ export async function generateMetadata(
   return {
     ...(seo?.title === undefined ? {} : { title: seo.title }),
     ...(seo?.description === undefined ? {} : { description: seo.description }),
+    alternates: marketAlternates(`/${slug.join("/")}`, locale),
   };
 }

@@ -36,7 +36,7 @@ const MARK_ICONS = {
  * once the Store reports any and labelled previews until then. An empty list
  * renders nothing rather than an empty rail.
  */
-export function PaymentMarks() {
+export function PaymentMarks({ label }: { label: string }) {
   if (CHECKOUT_PAYMENT_MARKS.length === 0) {
     return null;
   }
@@ -44,7 +44,7 @@ export function PaymentMarks() {
   return (
     <ul
       className="m-0 flex list-none items-center gap-1.5 p-0"
-      aria-label="Accepted payment methods"
+      aria-label={label}
     >
       {CHECKOUT_PAYMENT_MARKS.map(({ id, label }) => {
         const Mark = MARK_ICONS[id];

@@ -18,6 +18,7 @@ import {
   LOCALE_IDS,
   LOCALES,
 } from "../src/lib/i18n/locales.ts";
+import { STATIC_CONTENT } from "../src/lib/i18n/static-content.ts";
 import {
   CANONICAL_ROUTES,
   THEME_CUSTOM_PAGE_LINKS,
@@ -25,7 +26,6 @@ import {
 import {
   CHECKOUT_PAYMENT_MARKS,
   NEWSLETTER_PROVIDER,
-  SOCIAL_SECTION_HEADING,
   VERIFIED_CHECKOUT_PAYMENT_MARKS,
   VERIFIED_SOCIAL_LINKS,
 } from "../src/lib/storefront/integrations.ts";
@@ -152,7 +152,7 @@ describe("market list", () => {
 
 describe("verified footer integrations", () => {
   it("publishes only verified live social accounts, named as Weaverse's", () => {
-    assert.equal(SOCIAL_SECTION_HEADING, "Weaverse community");
+    assert.equal(STATIC_CONTENT.footer.social, "Weaverse community");
     assert.deepEqual(
       VERIFIED_SOCIAL_LINKS.map((link) => link.href),
       [

@@ -3,6 +3,7 @@
 import { Icon } from "@/components/icon";
 import { Link } from "@/components/link";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/t";
 import type { NavItem } from "@/lib/storefront/types";
 import { createHeaderNavigationHref, isActive } from "./header-navigation";
 import { INDEX_ROW_TRANSITION } from "./header-styles";
@@ -23,14 +24,15 @@ export function AboutIndexPanel({
   pathname,
   queryString,
 }: AboutIndexPanelProps) {
+  const t = useT();
   return (
     <section
       className="absolute inset-x-0 top-full -z-1 hidden animate-shell-panel border-ink border-b bg-canvas text-ink shadow-panel motion-reduce:animate-none lg:block"
       id={id}
-      aria-label="About Forward pages"
+      aria-label={t("header.aboutLabel")}
     >
       <div className="flex min-h-10.5 items-center justify-between border-border-subtle border-b px-page-gutter font-body text-micro text-text-muted tracking-field-meta uppercase">
-        <span>About / Field manual</span>
+        <span>{t("header.aboutHeading")}</span>
         <span className="inline-flex gap-4.5">
           <Link
             href={createHeaderNavigationHref(item.href, queryString)}
@@ -38,14 +40,16 @@ export function AboutIndexPanel({
             aria-current={isActive(pathname, item.href) ? "page" : undefined}
             onClick={onClose}
           >
-            Overview <Icon name="arrow-up-right" size={13} />
+            {t("header.overview")} <Icon name="arrow-up-right" size={13} />
           </Link>
-          {String(item.children?.length ?? 0).padStart(2, "0")} pages
+          {t("header.pageCount", {
+            count: String(item.children?.length ?? 0).padStart(2, "0"),
+          })}
         </span>
       </div>
       <nav
         className="col-span-full grid grid-cols-3"
-        aria-label="About Forward"
+        aria-label={t("header.aboutNavigation")}
       >
         {item.children?.map((child, index) => (
           <Link

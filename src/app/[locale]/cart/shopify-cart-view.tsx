@@ -10,7 +10,8 @@ import {
   useShopifyCartForm,
 } from "@/lib/cart/shopify-cart-react";
 import { cn } from "@/lib/cn";
-
+import { useLocale } from "@/lib/i18n/locale-context";
+import { useT } from "@/lib/i18n/t";
 import {
   CART_DISABLED_CTA,
   CART_EMPTY_HEADING,
@@ -37,8 +38,10 @@ function ShopifyCartLine({
   line: ShopifyCartLineData;
   pending: boolean;
 }) {
+  const t = useT();
+  const locale = useLocale();
   const { formProps, register } = useShopifyCartForm();
-  const title = line.merchandise?.product.title ?? "Forward gear";
+  const title = line.merchandise?.product.title ?? t("cart.fallbackTitle");
   const handle = line.merchandise?.product.handle;
   const href = handle === undefined ? "/shop" : `/products/${handle}`;
   const details = line.merchandise?.selectedOptions
@@ -72,7 +75,7 @@ function ShopifyCartLine({
           <div className={CART_QUANTITY}>
             <button
               {...register("decrease")}
-              aria-label={`Decrease quantity of ${title}`}
+              aria-label={t("cart.decreaseLine", { title })}
               className={CART_QUANTITY_BUTTON}
               disabled={pending}
               type="submit"
@@ -87,7 +90,7 @@ function ShopifyCartLine({
             </output>
             <button
               {...register("increase")}
-              aria-label={`Increase quantity of ${title}`}
+              aria-label={t("cart.increaseLine", { title })}
               className={CART_QUANTITY_BUTTON}
               disabled={pending}
               type="submit"
@@ -101,19 +104,21 @@ function ShopifyCartLine({
             disabled={pending}
             type="submit"
           >
-            Remove
-            <span className="sr-only"> {title} from cart</span>
+            {t("cart.remove")}
+            <span className="sr-only"> {t("cart.removeLine", { title })}</span>
           </button>
         </form>
       </div>
       <div className="col-start-2 font-bold whitespace-nowrap sm:col-start-auto">
-        {money(line.cost.totalAmount)}
+        {money(line.cost.totalAmount, locale)}
       </div>
     </article>
   );
 }
 
 export function ShopifyCartView() {
+  const t = useT();
+  const locale = useLocale();
   const cart = useShopifyCart((state) => state.data);
   const errors = useShopifyCart((state) => state.errors);
   const pendingLines = useShopifyCart((state) => state.pending.lines);
@@ -133,16 +138,17 @@ export function ShopifyCartView() {
       <p aria-live="polite" className="sr-only" role="status">
         {errorMessages.join(" ")}
       </p>
-      <p className={CART_EYEBROW}>Your field bag · live Shopify cart</p>
+      <p className={CART_EYEBROW}>{t("cart.eyebrow")}</p>
       <h1 className={CART_PAGE_HEADING}>
-        Cart · {cart.totalQuantity}{" "}
-        {cart.totalQuantity === 1 ? "item" : "items"}
+        {t(cart.totalQuantity === 1 ? "cart.headingOne" : "cart.headingOther", {
+          count: cart.totalQuantity,
+        })}
       </h1>
 
       {lines.length > 0 ? (
         <div className="grid grid-cols-1 gap-feature-gap py-section-block-compact md:grid-cols-cart">
           <section
-            aria-label="Cart items"
+            aria-label={t("cart.items")}
             className="border-border-subtle border-t"
           >
             {lines.map((line) => (
@@ -154,25 +160,25 @@ export function ShopifyCartView() {
             ))}
           </section>
           <aside
-            aria-label="Order summary"
+            aria-label={t("cart.summary")}
             className="self-start bg-signal p-7 text-ink"
           >
-            <p className={CART_EYEBROW}>Order summary</p>
+            <p className={CART_EYEBROW}>{t("cart.summary")}</p>
             <div className={CART_SUMMARY_ROW}>
-              <span>Subtotal</span>
-              <strong>{money(cart.cost.subtotalAmount)}</strong>
+              <span>{t("cart.subtotal")}</span>
+              <strong>{money(cart.cost.subtotalAmount, locale)}</strong>
             </div>
             <div className={CART_SUMMARY_ROW}>
-              <span>Delivery</span>
-              <span>Calculated by Shopify at checkout</span>
+              <span>{t("cart.delivery")}</span>
+              <span>{t("cart.deliveryNote")}</span>
             </div>
             <div className={CART_SUMMARY_TOTAL}>
-              <span>Total</span>
-              <strong>{money(cart.cost.totalAmount)}</strong>
+              <span>{t("cart.total")}</span>
+              <strong>{money(cart.cost.totalAmount, locale)}</strong>
             </div>
             {cart.checkoutUrl === null || cart.checkoutUrl === undefined ? (
               <p aria-disabled className={CART_DISABLED_CTA}>
-                Checkout unavailable
+                {t("cart.checkoutUnavailable")}
               </p>
             ) : (
               <a
@@ -180,13 +186,10 @@ export function ShopifyCartView() {
                 href={cart.checkoutUrl}
                 rel="external nofollow"
               >
-                Checkout securely with Shopify
+                {t("cart.checkoutSecure")}
               </a>
             )}
-            <p className={CART_SUMMARY_NOTE}>
-              Checkout is a validated handoff to Shopify. Forward does not
-              collect payment details on this page.
-            </p>
+            <p className={CART_SUMMARY_NOTE}>{t("cart.handoffNote")}</p>
             {errorMessages.length === 0 ? null : (
               <div className={CART_SUMMARY_NOTE} role="alert">
                 {errorMessages.map((message) => (
@@ -199,12 +202,10 @@ export function ShopifyCartView() {
       ) : (
         <div className={CART_EMPTY_STATE}>
           <div className="max-w-form">
-            <h2 className={CART_EMPTY_HEADING}>Nothing packed yet.</h2>
-            <p className="text-text-muted">
-              Build a field system around the weather and miles ahead.
-            </p>
+            <h2 className={CART_EMPTY_HEADING}>{t("cart.emptyHeading")}</h2>
+            <p className="text-text-muted">{t("cart.emptyCopy")}</p>
             <Link className={CART_PRIMARY_CTA} href="/shop">
-              Explore all gear
+              {t("cart.emptyCta")}
             </Link>
           </div>
         </div>
