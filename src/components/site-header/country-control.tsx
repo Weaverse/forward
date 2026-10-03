@@ -36,13 +36,12 @@ function LocaleFlag({ locale }: { locale: LocaleId }) {
 
 /** Topbar market indicator when the theme serves a single locale. */
 function MarketStatement({ locale }: { locale: LocaleId }) {
+  const t = useT();
   return (
     <span className={CONTROL_CLASS}>
       <Icon name="globe-hemisphere-west" size={14} />
       {LOCALES[locale].label}
-      <span className="sr-only">
-        . Forward currently ships to this market only.
-      </span>
+      <span className="sr-only">. {t("market.single")}</span>
     </span>
   );
 }

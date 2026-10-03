@@ -301,9 +301,34 @@ export const STATIC_CONTENT = {
       addressesDescription: "Your saved Forward addresses.",
     },
   },
+  common: {
+    skipToContent: "Skip to content",
+    home: "Forward — home",
+  },
+  journal: {
+    eyebrow: "The field journal",
+    heading: "Notes from farther out.",
+    lede: "Routes, useful skills, working knowledge, and the weather worth going out in.",
+    leadLink: "Read field note",
+    gridEyebrow: "Latest dispatches",
+    gridHeading: "Read, learn, head out.",
+    gridLink: "Read story",
+    minuteRead: "{{count}} minute read",
+    routeNotes: "Route notes",
+    filed: "Filed",
+  },
+  policy: {
+    eyebrow: "Support / Policy",
+    storePolicies: "Store policies",
+    updated: "Updated {{date}}",
+    questions: "Questions about this policy? Visit the",
+    contactPage: "contact page",
+    openAccount: "Open the field account",
+  },
   market: {
     change: "Change shipping market",
     heading: "Shipping market",
+    single: "Forward currently ships to this market only.",
   },
 } as const;
 

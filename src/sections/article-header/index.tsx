@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Link } from "@/components/link";
 
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/t";
 import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { formatDate } from "@/lib/storefront/format";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
@@ -28,6 +29,7 @@ function ArticleHeader({
   breadcrumbHref,
   ...rest
 }: ArticleHeaderProps) {
+  const t = useT();
   const { article } = useStorefrontContext();
   if (article === undefined) return null;
   return (
@@ -59,7 +61,9 @@ function ArticleHeader({
         <div className="mt-7 flex flex-wrap gap-6 text-ui font-bold tracking-button uppercase">
           <span>{formatDate(article.publishedAt)}</span>
           {article.location === "" ? null : <span>{article.location}</span>}
-          <span>{article.readingMinutes} minute read</span>
+          <span>
+            {t("journal.minuteRead", { count: article.readingMinutes })}
+          </span>
         </div>
       </div>
     </header>

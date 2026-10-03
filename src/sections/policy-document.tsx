@@ -4,12 +4,15 @@ import {
   RichTextParagraph,
   richTextParagraphKey,
 } from "@/components/rich-text-paragraph";
+import type { ThemeTranslate } from "@/lib/i18n/static-content";
 import { cta, eyebrow } from "@/lib/presentation/variants";
 import { formatDate } from "@/lib/storefront/format";
 import type { Policy } from "@/lib/storefront/types";
 
 interface PolicyDocumentProps {
   policy: Policy;
+  /** The page's translator, so the theme copy reads in the page's market. */
+  t: ThemeTranslate;
   /** Every policy, for the sibling navigation column. */
   allPolicies: readonly Policy[];
   /** Renders the account link only where Customer Account is configured. */
@@ -21,13 +24,14 @@ export function PolicyDocument({
   policy,
   allPolicies,
   accountEnabled,
+  t,
 }: PolicyDocumentProps) {
   return (
     <article>
       <div className="mx-auto grid w-full max-w-page grid-cols-1 justify-center gap-article-gap px-page-gutter py-section-block-short md:grid-cols-article-body">
         <aside className="border-border-subtle border-b pb-5 text-caption text-text-muted md:border-b-0 md:pb-0">
-          <p className={eyebrow()}>Store policies</p>
-          <nav aria-label="Store policies">
+          <p className={eyebrow()}>{t("policy.storePolicies")}</p>
+          <nav aria-label={t("policy.storePolicies")}>
             {allPolicies.map((entry) => (
               <p key={entry.handle}>
                 <Link
@@ -43,7 +47,7 @@ export function PolicyDocument({
           </nav>
           {policy.updatedAt ? (
             <p className="font-field-meta text-caption font-medium text-text-muted tracking-field-meta uppercase">
-              Updated {formatDate(policy.updatedAt)}
+              {t("policy.updated", { date: formatDate(policy.updatedAt) })}
             </p>
           ) : null}
         </aside>
@@ -69,12 +73,12 @@ export function PolicyDocument({
             </section>
           ))}
           <p className="mb-prose-block text-text-muted">
-            Questions about this policy? Visit the{" "}
-            <Link href="/pages/contact">contact page</Link>.
+            {t("policy.questions")}{" "}
+            <Link href="/pages/contact">{t("policy.contactPage")}</Link>.
           </p>
           {accountEnabled ? (
             <Link className={cta()} href="/account">
-              Open the field account
+              {t("policy.openAccount")}
             </Link>
           ) : null}
         </div>

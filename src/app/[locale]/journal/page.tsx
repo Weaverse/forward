@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { routeLocale } from "@/lib/i18n/route-locale";
+import { getTranslator } from "@/lib/i18n/translator";
 import { getStorefront } from "@/lib/storefront/data-source";
 import { IndexHeader } from "@/sections/index-header";
 import { JournalGrid } from "@/sections/journal-grid";
@@ -16,25 +17,28 @@ export default async function JournalPage(props: {
   params: Promise<{ locale: string }>;
 }) {
   const locale = await routeLocale(props.params);
-  const articles = await getStorefront(locale).listArticles();
+  const [articles, t] = await Promise.all([
+    getStorefront(locale).listArticles(),
+    getTranslator(locale),
+  ]);
   const [lead, ...rest] = articles;
 
   return (
     <>
       <IndexHeader
-        eyebrowLabel="The field journal"
-        heading="Notes from farther out."
-        lede="Routes, useful skills, working knowledge, and the weather worth going out in."
+        eyebrowLabel={t("journal.eyebrow")}
+        heading={t("journal.heading")}
+        lede={t("journal.lede")}
       />
 
       {lead !== undefined ? (
-        <JournalLead linkLabel="Read field note" article={lead} />
+        <JournalLead linkLabel={t("journal.leadLink")} article={lead} />
       ) : null}
 
       <JournalGrid
-        eyebrowLabel="Latest dispatches"
-        heading="Read, learn, head out."
-        linkLabel="Read story"
+        eyebrowLabel={t("journal.gridEyebrow")}
+        heading={t("journal.gridHeading")}
+        linkLabel={t("journal.gridLink")}
         articles={rest}
       />
     </>

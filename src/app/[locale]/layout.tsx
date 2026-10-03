@@ -22,6 +22,7 @@ import {
 import { StudioConnect } from "@/lib/weaverse/studio-connect";
 
 import "../globals.css";
+import { T } from "@/lib/i18n/t";
 
 /* Premium type contract: Archivo for display, Manrope for body/UI, and
  * IBM Plex Mono only for compact field metadata. Next serves all three. */
@@ -131,7 +132,7 @@ export default async function RootLayout({
                 data-shell-background
                 href="#main-content"
               >
-                Skip to content
+                <T k="common.skipToContent" />
               </a>
               <SiteHeader locale={locale} />
               <main

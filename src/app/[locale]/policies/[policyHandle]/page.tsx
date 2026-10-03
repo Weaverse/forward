@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
 import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
+import { getTranslator } from "@/lib/i18n/translator";
 import { getStorefront } from "@/lib/storefront/data-source";
 import { IndexHeader } from "@/sections/index-header";
 import { PolicyDocument } from "@/sections/policy-document";
@@ -40,9 +41,10 @@ export async function generateMetadata({
 export default async function PolicyPage({ params }: PolicyPageProps) {
   const { locale: segment, policyHandle } = await params;
   const locale = parseLocale(segment) ?? DEFAULT_LOCALE;
-  const [policy, allPolicies] = await Promise.all([
+  const [policy, allPolicies, t] = await Promise.all([
     getStorefront(locale).getPolicy(policyHandle),
     getStorefront(locale).listPolicies(),
+    getTranslator(locale),
   ]);
   if (policy === null) {
     notFound();
@@ -52,7 +54,7 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
   return (
     <>
       <IndexHeader
-        eyebrowLabel="Support / Policy"
+        eyebrowLabel={t("policy.eyebrow")}
         heading={policy.title}
         lede={policy.summary}
       />
@@ -61,6 +63,7 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
         policy={policy}
         allPolicies={allPolicies}
         accountEnabled={accountEnabled}
+        t={t}
       />
     </>
   );
