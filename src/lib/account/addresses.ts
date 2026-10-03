@@ -45,16 +45,21 @@ export type AddressIntent = (typeof ADDRESS_INTENTS)[number];
  * Every user-facing outcome, fixed at build time. Nothing here is derived from
  * a provider response.
  */
-export const ADDRESS_ERROR_REJECTED =
-  "That request could not be verified. Reload the page and try again.";
-export const ADDRESS_ERROR_INVALID = "Check the address details and try again.";
-export const ADDRESS_ERROR_FAILED =
-  "That address change could not be completed. Reload the page to check before trying again.";
+/* Translation keys, not copy: the form renders them in the shopper's market. */
+export const ADDRESS_ERROR_REJECTED = "account.addressErrors.rejected";
+export const ADDRESS_ERROR_INVALID = "account.addressErrors.invalid";
+export const ADDRESS_ERROR_FAILED = "account.addressErrors.failed";
 
 export type AddressActionResult =
   | { status: "success" }
   | { status: "redirect"; href: string }
-  | { status: "error"; message: string };
+  | {
+      status: "error";
+      message:
+        | typeof ADDRESS_ERROR_REJECTED
+        | typeof ADDRESS_ERROR_INVALID
+        | typeof ADDRESS_ERROR_FAILED;
+    };
 
 /** The exact `CustomerAddressInput` subset Forward writes. */
 const ADDRESS_FIELDS = [

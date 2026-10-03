@@ -9,6 +9,7 @@ import {
   formatAccountMoney,
   formatStatusLabel,
   hasRefreshMarker,
+  orderStatusKey,
   readAccountOrder,
   readAccountProfile,
 } from "../src/lib/account/account-view.ts";
@@ -148,6 +149,11 @@ describe("account formatting", () => {
     );
     assert.equal(formatStatusLabel("FULFILLED"), "Fulfilled");
     assert.equal(formatStatusLabel(null), "Processing");
+    assert.equal(orderStatusKey("ON_HOLD"), "account.status.onHold");
+    assert.equal(orderStatusKey(null), "account.status.processing");
+    /* A status Shopify adds later falls back to the English label. */
+    assert.equal(orderStatusKey("RETURNED_TO_SENDER"), null);
+    assert.equal(orderStatusKey("constructor"), null);
   });
 
   it("detects the one fixed refresh marker", () => {
@@ -177,6 +183,7 @@ describe("readAccountProfile", () => {
         href: "/account/orders/1001",
         processedAt: "2026-07-21T09:30:00Z",
         status: "Partially fulfilled",
+        statusKey: "account.status.partiallyFulfilled",
         total: "$390",
       },
     ]);
@@ -213,6 +220,7 @@ describe("readAccountOrder", () => {
     assert.ok(order);
     assert.equal(order.name, "#1001");
     assert.equal(order.status, "Fulfilled");
+    assert.equal(order.statusKey, "account.status.fulfilled");
     assert.equal(order.total, "$390");
     assert.equal(order.subtotal, "$390");
     assert.equal(order.tax, null);

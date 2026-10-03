@@ -16,7 +16,7 @@ import {
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { DEFAULT_LOCALE, type LocaleId, localeI18n } from "@/lib/i18n/locales";
-
+import type { TranslationKey } from "@/lib/i18n/static-content";
 import {
   getCustomerAccountRuntime,
   REFRESH_MARKER_PARAM,
@@ -52,7 +52,9 @@ export interface AccountOrderSummary {
   name: string;
   href: string;
   processedAt: string;
+  /** English label, the fallback for a status the theme has no key for. */
   status: string;
+  statusKey: TranslationKey | null;
   total: string;
 }
 
@@ -80,7 +82,9 @@ export interface AccountOrderLine {
 export interface AccountOrderDetail {
   name: string;
   processedAt: string;
+  /** English label, the fallback for a status the theme has no key for. */
   status: string;
+  statusKey: TranslationKey | null;
   lines: readonly AccountOrderLine[];
   subtotal: string | null;
   shipping: string | null;
@@ -115,6 +119,33 @@ export function formatAccountMoney(money: AccountMoney): string {
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
   }).format(amount);
+}
+
+const STATUS_KEYS: Record<string, TranslationKey> = {
+  FULFILLED: "account.status.fulfilled",
+  UNFULFILLED: "account.status.unfulfilled",
+  PARTIALLY_FULFILLED: "account.status.partiallyFulfilled",
+  IN_PROGRESS: "account.status.inProgress",
+  ON_HOLD: "account.status.onHold",
+  OPEN: "account.status.open",
+  PENDING_FULFILLMENT: "account.status.pendingFulfillment",
+  RESTOCKED: "account.status.restocked",
+  SCHEDULED: "account.status.scheduled",
+};
+
+/**
+ * The translation key for a fulfillment status, or `null` for one Shopify adds
+ * later; the page then shows the English label from `formatStatusLabel`.
+ */
+export function orderStatusKey(
+  value: string | null | undefined,
+): TranslationKey | null {
+  if (value === null || value === undefined || value === "") {
+    return "account.status.processing";
+  }
+  return Object.hasOwn(STATUS_KEYS, value)
+    ? (STATUS_KEYS[value] ?? null)
+    : null;
 }
 
 /** Turns `PARTIALLY_FULFILLED` into `Partially fulfilled`. */
@@ -208,6 +239,7 @@ function mapOrderSummary(order: {
     href: `/account/orders/${order.number}`,
     processedAt: order.processedAt,
     status: formatStatusLabel(order.fulfillmentStatus),
+    statusKey: orderStatusKey(order.fulfillmentStatus),
     total: formatAccountMoney(order.totalPrice),
   };
 }
@@ -290,6 +322,7 @@ export async function readAccountOrder(
     name: order.name,
     processedAt: order.processedAt,
     status: formatStatusLabel(order.fulfillmentStatus),
+    statusKey: orderStatusKey(order.fulfillmentStatus),
     lines: order.lineItems.nodes.map((line) => ({
       id: line.id,
       title: line.title,

@@ -3,17 +3,20 @@ import { Link } from "@/components/link";
 
 import { CUSTOMER_ACCOUNT_LOGOUT_PATH } from "@/lib/account/customer-account";
 import { cn } from "@/lib/cn";
+import type { ThemeTranslate, TranslationKey } from "@/lib/i18n/static-content";
 import { eyebrow as eyebrowClass, textLink } from "@/lib/presentation/variants";
 
-const ACCOUNT_NAV = [
-  { href: "/account", label: "Overview" },
-  { href: "/account/orders", label: "Orders" },
-  { href: "/account/addresses", label: "Addresses" },
-] as const;
+const ACCOUNT_NAV: readonly { href: string; labelKey: TranslationKey }[] = [
+  { href: "/account", labelKey: "account.nav.overview" },
+  { href: "/account/orders", labelKey: "account.nav.orders" },
+  { href: "/account/addresses", labelKey: "account.nav.addresses" },
+];
 
 interface AccountShellProps {
   /** Current canonical path, used to mark the active nav item. */
   activePath: string;
+  /** The page's translator, so this frame renders in the page's market. */
+  t: ThemeTranslate;
   /** Mono report line above the title, e.g. "Field account / Order". */
   eyebrow?: string;
   title: string;
@@ -34,7 +37,8 @@ interface AccountShellProps {
  */
 export function AccountShell({
   activePath,
-  eyebrow = "Field account",
+  t,
+  eyebrow,
   title,
   lede,
   heroAside,
@@ -46,7 +50,9 @@ export function AccountShell({
       <header className="flex min-h-107.5 items-end bg-ink px-page-gutter pt-17.5 pb-18.75 text-text-inverse sm:min-h-130 sm:pt-25 md:min-h-140">
         <div className="mx-auto grid w-full grid-cols-1 items-end gap-7 md:grid-cols-page-header md:gap-12.5">
           <div>
-            <p className={eyebrowClass({ tone: "signal" })}>{eyebrow}</p>
+            <p className={eyebrowClass({ tone: "signal" })}>
+              {eyebrow ?? t("account.eyebrow")}
+            </p>
             <h1 className="m-0 max-w-feature text-balance font-heading text-index-display-mobile leading-display font-medium tracking-heading sm:text-display">
               {title}
             </h1>
@@ -61,7 +67,7 @@ export function AccountShell({
       <div className="mx-auto grid w-full max-w-page grid-cols-1 gap-[clamp(42px,8vw,120px)] px-page-gutter pt-17.5 pb-30 md:grid-cols-media-row">
         <nav
           className="flex self-start overflow-x-auto border-border-subtle border-t font-body md:block md:overflow-x-visible"
-          aria-label="Account navigation"
+          aria-label={t("account.navigation")}
         >
           {ACCOUNT_NAV.map((item) => {
             const selected = item.href === activePath;
@@ -75,14 +81,14 @@ export function AccountShell({
                   selected && "text-signal-strong",
                 )}
               >
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             );
           })}
           {signedIn ? (
             <form method="post" action={CUSTOMER_ACCOUNT_LOGOUT_PATH}>
               <button type="submit" className={textLink()}>
-                Sign out
+                {t("account.signOut")}
               </button>
             </form>
           ) : null}

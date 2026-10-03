@@ -6,13 +6,14 @@ import { screen, within } from "@testing-library/react";
 
 import { AccountAccessPanel } from "@/components/account-access";
 import { AccountShell } from "@/components/account-shell";
-import { renderInShell as render } from "./harness";
+import { ENGLISH_T, renderInShell as render } from "./harness";
 
 describe("account access affordances", () => {
   it("keeps signed-out login as a raw full-page handoff", () => {
     render(
-      <AccountShell activePath="/account/orders" title="Orders">
+      <AccountShell t={ENGLISH_T} activePath="/account/orders" title="Orders">
         <AccountAccessPanel
+          t={ENGLISH_T}
           path="/account/orders"
           session={{ status: "signed-out" }}
         />
@@ -44,6 +45,7 @@ describe("account access affordances", () => {
       "/account/refresh?return_to=%2Faccount%2Faddresses%3Faccount_refresh%3D1";
     render(
       <AccountAccessPanel
+        t={ENGLISH_T}
         loginFailed
         path="/account/addresses"
         session={{ status: "needs-refresh", href }}
@@ -62,7 +64,12 @@ describe("account access affordances", () => {
 
   it("keeps signed-in logout as a same-origin POST form", () => {
     render(
-      <AccountShell activePath="/account" signedIn title="Account">
+      <AccountShell
+        t={ENGLISH_T}
+        activePath="/account"
+        signedIn
+        title="Account"
+      >
         Private account content
       </AccountShell>,
     );

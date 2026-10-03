@@ -16,10 +16,17 @@ import type { ShopifyCartData } from "@/lib/cart/shopify-cart";
 import { ShopifyCartProvider } from "@/lib/cart/shopify-cart-react";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
 import { DEFAULT_LOCALE, type LocaleId } from "@/lib/i18n/locales";
+import { STATIC_CONTENT, type TranslationKey } from "@/lib/i18n/static-content";
+import { createTranslator } from "@/lib/i18n/translate";
 import type { NavItem, Product } from "@/lib/storefront/types";
 import { WeaverseRoot } from "@/lib/weaverse/root";
 import { NAVIGATION_FIXTURE } from "../fixtures/storefront/navigation";
 import { PRODUCT_FIXTURES } from "../fixtures/storefront/products";
+
+/** The theme's English copy, as a server page would pass it down. */
+export const ENGLISH_T = createTranslator<TranslationKey>({
+  staticContent: STATIC_CONTENT,
+});
 
 export const PRIMARY_NAV: readonly NavItem[] = NAVIGATION_FIXTURE.primary;
 
