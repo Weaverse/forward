@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useId, useState } from "react";
 import { Link } from "@/components/link";
+import { useLocale } from "@/lib/i18n/locale-context";
 import { useT } from "@/lib/i18n/t";
 import { formatMoney } from "@/lib/storefront/format";
 import {
@@ -24,6 +25,7 @@ interface ProductCardProps {
  */
 export function ProductCard({ product, priority }: ProductCardProps) {
   const t = useT();
+  const locale = useLocale();
   const [activeColorwayId, setActiveColorwayId] = useState(
     product.colorways[0]?.id ?? "",
   );
@@ -60,7 +62,7 @@ export function ProductCard({ product, priority }: ProductCardProps) {
             <Link href={href}>{product.title}</Link>
           </h3>
           <span className="mt-0.75 block whitespace-nowrap text-label sm:mt-0 sm:inline">
-            {formatMoney(product.price)}
+            {formatMoney(product.price, locale)}
           </span>
         </div>
         <p className="mt-1.25 hidden font-body text-micro font-semibold text-text-muted uppercase sm:block">

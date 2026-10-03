@@ -96,7 +96,7 @@ export default async function OrderPage({
           </span>
           <p className="m-0 max-w-full justify-self-start text-lede leading-lede text-text-dark-lede md:max-w-lede md:justify-self-end">
             {t("account.placed", {
-              date: formatDate(order.processedAt.slice(0, 10)),
+              date: formatDate(order.processedAt.slice(0, 10), locale),
             })}
           </p>
         </div>

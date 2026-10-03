@@ -35,6 +35,7 @@ function fakeSession(
   return {
     status: "authenticated",
     accessToken: ACCESS_TOKEN,
+    locale: "en-us",
     client: {
       apiUrl: "https://shopify.com/1/account/customer/api/2026-07/graphql",
       graphql: async (document: unknown, options: GraphqlOptions) => ({
@@ -129,15 +130,18 @@ function respondWithFixtures(document: unknown): GraphqlResponse {
 describe("account formatting", () => {
   it("formats Customer Account decimal money strings", () => {
     assert.equal(
-      formatAccountMoney({ amount: "390.0", currencyCode: "USD" }),
+      formatAccountMoney({ amount: "390.0", currencyCode: "USD" }, "en-us"),
       "$390",
     );
     assert.equal(
-      formatAccountMoney({ amount: "12.50", currencyCode: "USD" }),
+      formatAccountMoney({ amount: "12.50", currencyCode: "USD" }, "en-us"),
       "$12.50",
     );
     assert.equal(
-      formatAccountMoney({ amount: "not-a-number", currencyCode: "USD" }),
+      formatAccountMoney(
+        { amount: "not-a-number", currencyCode: "USD" },
+        "en-us",
+      ),
       "—",
     );
   });

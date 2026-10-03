@@ -11,6 +11,7 @@ import {
   useShopifyProductForm,
 } from "@/lib/cart/shopify-cart-react";
 import { cn } from "@/lib/cn";
+import { useLocale } from "@/lib/i18n/locale-context";
 import { useT } from "@/lib/i18n/t";
 import { cta } from "@/lib/presentation/variants";
 import { formatMoney } from "@/lib/storefront/format";
@@ -72,6 +73,7 @@ function ShopifyAddToCartForm({
   showCartNote = true,
 }: AddToCartFormProps) {
   const t = useT();
+  const locale = useLocale();
   const { formProps, pending, register, selectedVariant } =
     useShopifyProductForm();
   const [quantity, setQuantity] = useState(1);
@@ -168,12 +170,15 @@ function ShopifyAddToCartForm({
               ? (addToCartText ?? t("cart.addToCart"))
               : (soldOutText ?? t("cart.soldOut"))}{" "}
           ·{" "}
-          {formatMoney({
-            amount: selectedPrice * quantity,
-            currencyCode:
-              selectedVariant?.price.currencyCode ??
-              selection.variant.price.currencyCode,
-          })}
+          {formatMoney(
+            {
+              amount: selectedPrice * quantity,
+              currencyCode:
+                selectedVariant?.price.currencyCode ??
+                selection.variant.price.currencyCode,
+            },
+            locale,
+          )}
         </button>
       </div>
       <p className={feedback({ tone })} role="status" aria-live="polite">

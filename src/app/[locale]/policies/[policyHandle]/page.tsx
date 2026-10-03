@@ -63,6 +63,7 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
         policy={policy}
         allPolicies={allPolicies}
         accountEnabled={accountEnabled}
+        locale={locale}
         t={t}
       />
     </>

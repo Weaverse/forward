@@ -8,6 +8,7 @@ import { AddToCartForm } from "@/components/add-to-cart-form";
 import { Link } from "@/components/link";
 import { Section } from "@/components/section";
 import { cn } from "@/lib/cn";
+import { useLocale } from "@/lib/i18n/locale-context";
 import { useT } from "@/lib/i18n/t";
 import {
   cta,
@@ -166,6 +167,7 @@ function SpotlightProduct({
   showThumbnails,
 }: SpotlightContentProps & { product: Product }) {
   const t = useT();
+  const locale = useLocale();
   const [colorwayId, setColorwayId] = useState(product.colorways[0]?.id);
   const [requestedOptions, setRequestedOptions] = useState<
     Record<string, string>
@@ -203,12 +205,12 @@ function SpotlightProduct({
                 compareAt !== null ? "product.salePrice" : "product.price",
               )}{" "}
             </span>
-            {formatMoney(variant.price)}
+            {formatMoney(variant.price, locale)}
           </strong>
           {compareAt !== null ? (
             <del className="text-text-muted">
               <span className="sr-only">{t("product.regularPrice")} </span>
-              {formatMoney(compareAt)}
+              {formatMoney(compareAt, locale)}
             </del>
           ) : null}
         </p>

@@ -10,6 +10,7 @@ import {
   formatShopifyMoney,
   useShopifyCart,
 } from "@/lib/cart/shopify-cart-react";
+import { useLocale } from "@/lib/i18n/locale-context";
 import { useT } from "@/lib/i18n/t";
 
 /** Long enough to read, short enough not to sit over the page. */
@@ -113,6 +114,7 @@ function MiniCartBody({ checkoutUrl, line, subtotalLabel }: MiniCartBodyProps) {
 /** The server-owned cart, read only — never a second cart. */
 function ShopifyMiniCartBody({ variantId }: { variantId: string }) {
   const t = useT();
+  const locale = useLocale();
   const cart = useShopifyCart((state) => state.data);
   const node =
     cart.lines.nodes.find((entry) => entry.merchandise?.id === variantId) ??
@@ -147,7 +149,7 @@ function ShopifyMiniCartBody({ variantId }: { variantId: string }) {
               quantity: node.quantity,
             }
       }
-      subtotalLabel={formatShopifyMoney(cart.cost.subtotalAmount)}
+      subtotalLabel={formatShopifyMoney(cart.cost.subtotalAmount, locale)}
     />
   );
 }

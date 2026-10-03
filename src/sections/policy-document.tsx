@@ -4,6 +4,7 @@ import {
   RichTextParagraph,
   richTextParagraphKey,
 } from "@/components/rich-text-paragraph";
+import type { LocaleId } from "@/lib/i18n/locales";
 import type { ThemeTranslate } from "@/lib/i18n/static-content";
 import { cta, eyebrow } from "@/lib/presentation/variants";
 import { formatDate } from "@/lib/storefront/format";
@@ -11,6 +12,7 @@ import type { Policy } from "@/lib/storefront/types";
 
 interface PolicyDocumentProps {
   policy: Policy;
+  locale: LocaleId;
   /** The page's translator, so the theme copy reads in the page's market. */
   t: ThemeTranslate;
   /** Every policy, for the sibling navigation column. */
@@ -24,6 +26,7 @@ export function PolicyDocument({
   policy,
   allPolicies,
   accountEnabled,
+  locale,
   t,
 }: PolicyDocumentProps) {
   return (
@@ -47,7 +50,9 @@ export function PolicyDocument({
           </nav>
           {policy.updatedAt ? (
             <p className="font-field-meta text-caption font-medium text-text-muted tracking-field-meta uppercase">
-              {t("policy.updated", { date: formatDate(policy.updatedAt) })}
+              {t("policy.updated", {
+                date: formatDate(policy.updatedAt, locale),
+              })}
             </p>
           ) : null}
         </aside>

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Fragment } from "react";
 import { Link } from "@/components/link";
+import { useLocale } from "@/lib/i18n/locale-context";
 import { useT } from "@/lib/i18n/t";
 import { eyebrow, textLink } from "@/lib/presentation/variants";
 import { formatDate } from "@/lib/storefront/format";
@@ -111,6 +112,7 @@ function ArticleAside({
   index: number;
 }) {
   const t = useT();
+  const locale = useLocale();
   if (index === 0) {
     return (
       <aside className="border-border-subtle border-b pb-5 text-caption text-text-muted md:border-b-0 md:pb-0">
@@ -138,7 +140,7 @@ function ArticleAside({
       <p>
         {article.plate}
         <br />
-        {formatDate(article.publishedAt)}
+        {formatDate(article.publishedAt, locale)}
       </p>
     </aside>
   );

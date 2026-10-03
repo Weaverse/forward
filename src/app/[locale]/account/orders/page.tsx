@@ -119,7 +119,7 @@ export default async function OrdersPage({
                   className={ORDER_CELL_CLASS}
                   data-label={t("account.columns.date")}
                 >
-                  {formatDate(order.processedAt.slice(0, 10))}
+                  {formatDate(order.processedAt.slice(0, 10), locale)}
                 </td>
                 <td
                   className={ORDER_CELL_CLASS}

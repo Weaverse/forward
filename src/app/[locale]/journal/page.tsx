@@ -32,7 +32,11 @@ export default async function JournalPage(props: {
       />
 
       {lead !== undefined ? (
-        <JournalLead linkLabel={t("journal.leadLink")} article={lead} />
+        <JournalLead
+          linkLabel={t("journal.leadLink")}
+          locale={locale}
+          article={lead}
+        />
       ) : null}
 
       <JournalGrid
