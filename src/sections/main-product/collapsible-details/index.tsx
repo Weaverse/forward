@@ -2,9 +2,8 @@
 
 import type { ReactNode } from "react";
 import { Link } from "@/components/link";
-
+import { useT } from "@/lib/i18n/t";
 import { textLink } from "@/lib/presentation/variants";
-
 import {
   elementAttributes,
   type WeaverseElementProps,
@@ -48,16 +47,17 @@ function ProductCollapsibleDetails({
   repairLinkHref,
   ...rest
 }: ProductCollapsibleDetailsProps) {
+  const t = useT();
   const state = useMainProduct();
   if (state === null) return null;
   const { product } = state;
-  const linkText = repairLinkText ?? "The repairs programme";
+  const linkText = repairLinkText ?? t("product.repairLink");
 
   const panels: { key: string; title: string; body: ReactNode }[] = [];
   if (showDetails !== false && product.detailParagraphs.length > 0) {
     panels.push({
       key: "details",
-      title: detailsTitle || "Why it works",
+      title: detailsTitle || t("product.details"),
       body: product.detailParagraphs.map((paragraph) => (
         <p
           className="text-label text-text-dark-muted"
@@ -71,7 +71,7 @@ function ProductCollapsibleDetails({
   if (showSpecs !== false && product.specs.length > 0) {
     panels.push({
       key: "specs",
-      title: specsTitle || "Specifications",
+      title: specsTitle || t("product.specs"),
       body: (
         <dl>
           {product.specs.map((row) => (
@@ -92,7 +92,7 @@ function ProductCollapsibleDetails({
   if (showCare !== false && product.care.length > 0) {
     panels.push({
       key: "care",
-      title: careTitle || "Materials + care",
+      title: careTitle || t("product.care"),
       body: (
         <ul className="mt-0 mb-prose-block pl-[1.2em]">
           {product.care.map((entry) => (
@@ -107,7 +107,7 @@ function ProductCollapsibleDetails({
   if (showRepair !== false && product.repair !== "") {
     panels.push({
       key: "repair",
-      title: repairTitle || "Repair",
+      title: repairTitle || t("product.repair"),
       body: (
         <>
           <p className="text-label text-text-dark-muted">{product.repair}</p>

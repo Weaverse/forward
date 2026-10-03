@@ -5,8 +5,8 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/t";
 import { galleryImages } from "@/lib/storefront/product-state";
-
 import {
   elementAttributes,
   type WeaverseElementProps,
@@ -75,6 +75,7 @@ function ProductMedia({
   zoomHintText,
   ...rest
 }: ProductMediaProps) {
+  const t = useT();
   const state = useMainProduct();
   const [modalIndex, setModalIndex] = useState<number | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -84,7 +85,8 @@ function ProductMedia({
   const images = galleryImages(colorway);
   const resolvedLayout = layout ?? "editorial";
   const zoom = enableZoom !== false;
-  const hint = showZoomHint === false ? "" : (zoomHintText ?? "Zoom +");
+  const hint =
+    showZoomHint === false ? "" : (zoomHintText ?? t("product.zoomHint"));
 
   function closeModal() {
     setModalIndex(null);
@@ -131,7 +133,10 @@ function ProductMedia({
               key={image.src}
               type="button"
               className={frame}
-              aria-label={`Zoom image ${index + 1}: ${image.alt}`}
+              aria-label={t("product.zoomImage", {
+                index: index + 1,
+                alt: image.alt,
+              })}
               onClick={(event) => {
                 triggerRef.current = event.currentTarget;
                 setModalIndex(index);

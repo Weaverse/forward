@@ -1,7 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n/t";
 import { eyebrow } from "@/lib/presentation/variants";
-
 import {
   elementAttributes,
   type WeaverseElementProps,
@@ -15,10 +15,11 @@ interface ProductMetaProps extends WeaverseElementProps {
 
 /** Signal eyebrow on the left, the product's lead spec on the right. */
 function ProductMeta({ label, showSpecBadge, ...rest }: ProductMetaProps) {
+  const t = useT();
   const state = useMainProduct();
   if (state === null) return null;
   const { product } = state;
-  const text = label ?? "Forward equipment";
+  const text = label ?? t("product.eyebrow");
   return (
     <div
       {...elementAttributes(rest)}
