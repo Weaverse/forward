@@ -10,6 +10,7 @@ import {
   formatShopifyMoney,
   useShopifyCart,
 } from "@/lib/cart/shopify-cart-react";
+import { useT } from "@/lib/i18n/t";
 
 /** Long enough to read, short enough not to sit over the page. */
 const AUTO_DISMISS_MS = 8000;
@@ -52,11 +53,12 @@ interface MiniCartBodyProps {
 }
 
 function MiniCartBody({ checkoutUrl, line, subtotalLabel }: MiniCartBodyProps) {
+  const t = useT();
   return (
     <>
       {line === null ? (
         <p className="mt-1 mb-0 text-caption text-text-muted">
-          Your cart was updated.
+          {t("cart.updated")}
         </p>
       ) : (
         <article className="grid grid-cols-[64px_minmax(0,1fr)] items-start gap-3">
@@ -83,17 +85,17 @@ function MiniCartBody({ checkoutUrl, line, subtotalLabel }: MiniCartBodyProps) {
               </p>
             )}
             <p className="mt-1 mb-0 text-caption text-text-muted">
-              Qty {line.quantity}
+              {t("cart.quantityShort", { quantity: line.quantity })}
             </p>
           </div>
         </article>
       )}
       <p className="m-0 flex items-baseline justify-between gap-3 border-border-subtle border-t pt-3 font-body text-caption tracking-link uppercase">
-        <span>Subtotal</span>
+        <span>{t("cart.subtotal")}</span>
         <strong>{subtotalLabel}</strong>
       </p>
       <Link className={miniCartAction({ intent: "cart" })} href="/cart">
-        View cart
+        {t("cart.viewCart")}
       </Link>
       {checkoutUrl === null ? null : (
         <a
@@ -101,7 +103,7 @@ function MiniCartBody({ checkoutUrl, line, subtotalLabel }: MiniCartBodyProps) {
           href={checkoutUrl}
           rel="external nofollow"
         >
-          Checkout
+          {t("cart.checkout")}
         </a>
       )}
     </>
@@ -110,6 +112,7 @@ function MiniCartBody({ checkoutUrl, line, subtotalLabel }: MiniCartBodyProps) {
 
 /** The server-owned cart, read only — never a second cart. */
 function ShopifyMiniCartBody({ variantId }: { variantId: string }) {
+  const t = useT();
   const cart = useShopifyCart((state) => state.data);
   const node =
     cart.lines.nodes.find((entry) => entry.merchandise?.id === variantId) ??
@@ -117,7 +120,7 @@ function ShopifyMiniCartBody({ variantId }: { variantId: string }) {
   const merchandise = node?.merchandise;
   const image = merchandise?.image;
   const handle = merchandise?.product.handle;
-  const title = merchandise?.product.title ?? "Forward gear";
+  const title = merchandise?.product.title ?? t("cart.fallbackTitle");
 
   return (
     <MiniCartBody
@@ -159,10 +162,12 @@ function ShopifyMiniCartBody({ variantId }: { variantId: string }) {
  * unless the visitor's focus is already inside it.
  */
 export function MiniCart() {
+  const t = useT();
   const [presentation, setPresentation] = useState<MiniCartPresentation | null>(
     null,
   );
-  const [announcement, setAnnouncement] = useState("");
+  /* 0 is silent; 1 and 2 alternate so a repeat add is announced again. */
+  const [announcement, setAnnouncement] = useState<0 | 1 | 2>(0);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(
@@ -172,11 +177,7 @@ export function MiniCart() {
           variantId,
           eventId: (current?.eventId ?? 0) + 1,
         }));
-        setAnnouncement((current) =>
-          current === "Added to cart."
-            ? "Item added to cart."
-            : "Added to cart.",
-        );
+        setAnnouncement((current) => (current === 1 ? 2 : 1));
       }),
     [],
   );
@@ -191,7 +192,7 @@ export function MiniCart() {
 
     function close() {
       setPresentation(null);
-      setAnnouncement("");
+      setAnnouncement(0);
     }
 
     function scheduleDismiss() {
@@ -251,21 +252,21 @@ export function MiniCart() {
     <div ref={rootRef} className="contents" data-mini-cart-mount>
       {presentation === null ? null : (
         <div
-          aria-label="Cart updated"
+          aria-label={t("cart.previewLabel")}
           className="absolute top-[calc(100%+12px)] right-0 z-130 grid w-[min(340px,calc(100vw-28px))] gap-3 border border-ink bg-canvas p-4.5 text-start text-ink shadow-mini-cart"
           role="dialog"
         >
           <p className="m-0 flex items-center gap-2 font-body text-ui font-ui-strong tracking-label uppercase">
             <Icon name="check-circle" size={16} />
-            Added to cart
+            {t("cart.added")}
           </p>
           <button
             className="absolute top-2.5 right-2.5 inline-grid size-8 place-items-center border-0 bg-transparent text-inherit"
             type="button"
-            aria-label="Close cart preview"
+            aria-label={t("cart.closePreview")}
             onClick={() => {
               setPresentation(null);
-              setAnnouncement("");
+              setAnnouncement(0);
             }}
           >
             <Icon name="x" size={16} />
@@ -274,7 +275,13 @@ export function MiniCart() {
         </div>
       )}
       <p aria-live="polite" className="sr-only" role="status">
-        {announcement}
+        {announcement === 0
+          ? ""
+          : t(
+              announcement === 1
+                ? "cart.addedAnnouncement"
+                : "cart.addedAgainAnnouncement",
+            )}
       </p>
     </div>
   );

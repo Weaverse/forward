@@ -11,6 +11,7 @@ import {
   useShopifyProductForm,
 } from "@/lib/cart/shopify-cart-react";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/t";
 import { cta } from "@/lib/presentation/variants";
 import { formatMoney } from "@/lib/storefront/format";
 import type { ProductSelection } from "@/lib/storefront/product-state";
@@ -66,10 +67,11 @@ const note = cva(
 function ShopifyAddToCartForm({
   selection,
   tone = "dark",
-  addToCartText = "Add to cart",
-  soldOutText = "Sold out",
+  addToCartText,
+  soldOutText,
   showCartNote = true,
 }: AddToCartFormProps) {
+  const t = useT();
   const { formProps, pending, register, selectedVariant } =
     useShopifyProductForm();
   const [quantity, setQuantity] = useState(1);
@@ -125,7 +127,7 @@ function ShopifyAddToCartForm({
         <div className={quantityBox({ tone })}>
           <button
             className={QUANTITY_BUTTON_CLASS}
-            aria-label="Decrease quantity"
+            aria-label={t("cart.decrease")}
             disabled={pending || quantity <= 1}
             onClick={() => setQuantity((current) => Math.max(1, current - 1))}
             type="button"
@@ -135,13 +137,13 @@ function ShopifyAddToCartForm({
           <output
             className={QUANTITY_OUTPUT_CLASS}
             aria-live="polite"
-            aria-label="Quantity"
+            aria-label={t("cart.quantity")}
           >
             {quantity}
           </output>
           <button
             className={QUANTITY_BUTTON_CLASS}
-            aria-label="Increase quantity"
+            aria-label={t("cart.increase")}
             disabled={pending || quantity >= MAX_LINE_QUANTITY}
             onClick={() =>
               setQuantity((current) => Math.min(MAX_LINE_QUANTITY, current + 1))
@@ -161,10 +163,10 @@ function ShopifyAddToCartForm({
           }
         >
           {pending
-            ? "Adding…"
+            ? t("cart.adding")
             : selectedVariant?.availableForSale
-              ? addToCartText
-              : soldOutText}{" "}
+              ? (addToCartText ?? t("cart.addToCart"))
+              : (soldOutText ?? t("cart.soldOut"))}{" "}
           ·{" "}
           {formatMoney({
             amount: selectedPrice * quantity,
@@ -175,13 +177,10 @@ function ShopifyAddToCartForm({
         </button>
       </div>
       <p className={feedback({ tone })} role="status" aria-live="polite">
-        {pending ? "Updating your cart…" : ""}
+        {pending ? t("cart.updating") : ""}
       </p>
       {showCartNote ? (
-        <p className={note({ tone })}>
-          Secure Shopify cart. Checkout is handed off to Shopify; no payment
-          runs on this page.
-        </p>
+        <p className={note({ tone })}>{t("cart.secureNote")}</p>
       ) : null}
     </form>
   );
