@@ -5,13 +5,22 @@ import { Wordmark } from "@/components/wordmark";
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
 import { cn } from "@/lib/cn";
 import type { LocaleId } from "@/lib/i18n/locales";
+import type { TranslationKey } from "@/lib/i18n/static-content";
+import { T } from "@/lib/i18n/t";
+import { getTranslator } from "@/lib/i18n/translator";
 import { THEME_CUSTOM_PAGE_LINKS } from "@/lib/routes/route-contract";
 import { getStorefront } from "@/lib/storefront/data-source";
-import {
-  SOCIAL_SECTION_HEADING,
-  VERIFIED_SOCIAL_LINKS,
-} from "@/lib/storefront/integrations";
-import { readThemeSettings } from "@/lib/weaverse/server";
+import { VERIFIED_SOCIAL_LINKS } from "@/lib/storefront/integrations";
+
+/** The theme's own field-guide pages, labelled per market. */
+const FIELD_GUIDE_LABELS: Record<
+  (typeof THEME_CUSTOM_PAGE_LINKS)[number]["href"],
+  TranslationKey
+> = {
+  "/about": "footer.fieldGuidePages.about",
+  "/materials": "footer.fieldGuidePages.materials",
+  "/field-testing": "footer.fieldGuidePages.fieldTesting",
+};
 
 const FOOTER_COLUMN_CLASS =
   "[&>a]:flex [&>a]:min-h-9 [&>a]:items-center [&>a]:text-caption [&>a:hover]:text-signal [&>h2]:mt-0 [&>h2]:mb-3.75 [&>h2]:font-body [&>h2]:text-field-meta [&>h2]:text-text-dark-muted [&>h2]:tracking-field-meta [&>h2]:uppercase";
@@ -25,10 +34,11 @@ const FOOTER_COLUMN_CLASS =
  * at all rather than a decorative claim the shopper cannot check.
  */
 export async function SiteFooter({ locale }: { locale: LocaleId }) {
-  const [navigation, settings] = await Promise.all([
+  const [navigation, t] = await Promise.all([
     getStorefront(locale).getNavigation(),
-    readThemeSettings(locale),
+    getTranslator(locale),
   ]);
+  const tagline = t("footer.tagline");
 
   const accountEnabled = getCustomerAccountRuntime() !== null;
   const footerColumns = accountEnabled
@@ -49,17 +59,19 @@ export async function SiteFooter({ locale }: { locale: LocaleId }) {
       >
         <div className="col-auto sm:col-span-full md:col-auto">
           <Wordmark variant="footer" />
-          {settings.footerTagline ? (
+          {/* Checked on the server so an empty tagline renders no paragraph;
+           * `<T>` still carries Studio's live edits once it renders. */}
+          {tagline === "" ? null : (
             <p className="mt-7.5 mb-prose-paragraph max-w-95 text-text-dark-muted">
-              {settings.footerTagline}
+              <T k="footer.tagline" />
             </p>
-          ) : null}
+          )}
         </div>
         {footerColumns.map((column) => (
           <nav
             key={column.heading}
             className={FOOTER_COLUMN_CLASS}
-            aria-label={`${column.heading} links`}
+            aria-label={t("footer.columnLinks", { heading: column.heading })}
           >
             <h2>{column.heading}</h2>
             {column.links.map((link) => (
@@ -71,12 +83,14 @@ export async function SiteFooter({ locale }: { locale: LocaleId }) {
         ))}
         <nav
           className={FOOTER_COLUMN_CLASS}
-          aria-label="Forward field guide links"
+          aria-label={t("footer.fieldGuideLinks")}
         >
-          <h2>Field guide</h2>
+          <h2>
+            <T k="footer.fieldGuide" />
+          </h2>
           {THEME_CUSTOM_PAGE_LINKS.map((link) => (
             <Link key={link.href} href={link.href}>
-              {link.label}
+              <T k={FIELD_GUIDE_LABELS[link.href]} />
             </Link>
           ))}
         </nav>
@@ -84,7 +98,7 @@ export async function SiteFooter({ locale }: { locale: LocaleId }) {
       {VERIFIED_SOCIAL_LINKS.length > 0 ? (
         <div className="mx-auto mt-11 flex w-full max-w-page flex-col items-start justify-between gap-6 border-white/20 border-t pt-5.5 sm:flex-row sm:items-center">
           <h2 className="m-0 text-ui font-ui text-text-dark-muted tracking-field-meta uppercase">
-            {SOCIAL_SECTION_HEADING}
+            <T k="footer.social" />
           </h2>
           <ul className="m-0 flex list-none gap-2.5 p-0">
             {VERIFIED_SOCIAL_LINKS.map((link) => (
@@ -107,8 +121,10 @@ export async function SiteFooter({ locale }: { locale: LocaleId }) {
           VERIFIED_SOCIAL_LINKS.length > 0 ? "mt-6" : "mt-15",
         )}
       >
-        <span>FORWARD · Field office 54.4609° N / 3.0886° W</span>
-        <PaymentMarks />
+        <span>
+          <T k="footer.fieldOffice" />
+        </span>
+        <PaymentMarks label={t("footer.paymentMethods")} />
       </div>
     </footer>
   );

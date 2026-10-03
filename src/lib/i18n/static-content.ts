@@ -21,6 +21,17 @@ export const STATIC_CONTENT = {
   footer: {
     /** Empty by default: an unset tagline renders nothing. */
     tagline: "",
+    columnLinks: "{{heading}} links",
+    fieldGuide: "Field guide",
+    fieldGuideLinks: "Forward field guide links",
+    fieldGuidePages: {
+      about: "Inside Forward",
+      materials: "Material library",
+      fieldTesting: "Field testing",
+    },
+    social: "Weaverse community",
+    fieldOffice: "FORWARD · Field office 54.4609° N / 3.0886° W",
+    paymentMethods: "Accepted payment methods",
   },
   header: {
     stack: "Shopify · Hydrogen · Next.js · Weaverse",
