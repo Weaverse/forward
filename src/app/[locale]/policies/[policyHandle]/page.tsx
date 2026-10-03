@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
+import { marketAlternates } from "@/lib/i18n/alternates";
 import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
 import { getTranslator } from "@/lib/i18n/translator";
 import { getStorefront } from "@/lib/storefront/data-source";
@@ -30,11 +31,13 @@ export async function generateMetadata({
   const locale = parseLocale(segment) ?? DEFAULT_LOCALE;
   const policy = await getStorefront(locale).getPolicy(policyHandle);
   if (policy === null) {
-    return { title: "Policy not found" };
+    const t = await getTranslator(locale);
+    return { title: t("meta.policyNotFound") };
   }
   return {
     title: policy.title,
     ...(policy.summary === "" ? {} : { description: policy.summary }),
+    alternates: marketAlternates(`/policies/${policyHandle}`, locale),
   };
 }
 

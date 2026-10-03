@@ -15,7 +15,11 @@ export async function generateMetadata({
   const t = await getTranslator(
     parseLocale((await params).locale) ?? DEFAULT_LOCALE,
   );
-  return { title: t("cart.metaTitle"), description: t("cart.metaDescription") };
+  return {
+    title: t("cart.metaTitle"),
+    description: t("cart.metaDescription"),
+    robots: { index: false, follow: false },
+  };
 }
 
 export const dynamic = "force-dynamic";

@@ -23,6 +23,7 @@ export async function generateMetadata({
   return {
     title: t("search.metaTitle"),
     description: t("search.metaDescription"),
+    robots: { index: false, follow: true },
   };
 }
 

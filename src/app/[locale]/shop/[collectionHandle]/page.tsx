@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { marketAlternates } from "@/lib/i18n/alternates";
 import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
+import { getTranslator } from "@/lib/i18n/translator";
 import { getStorefront } from "@/lib/storefront/data-source";
 import {
   AFTER_PARAM,
@@ -47,12 +49,14 @@ export async function generateMetadata({
   const locale = parseLocale(segment) ?? DEFAULT_LOCALE;
   const collection =
     await getStorefront(locale).getCollection(collectionHandle);
+  const t = await getTranslator(locale);
   if (collection === null) {
-    return { title: "Collection not found" };
+    return { title: t("meta.collectionNotFound") };
   }
   return {
-    title: `${collection.title} · Shop`,
+    title: t("meta.collectionTitle", { title: collection.title }),
     description: collection.description,
+    alternates: marketAlternates(`/shop/${collectionHandle}`, locale),
   };
 }
 

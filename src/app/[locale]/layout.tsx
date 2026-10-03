@@ -9,6 +9,7 @@ import { ShopifyCartRuntime } from "@/lib/cart/shopify-cart-react";
 import { cn } from "@/lib/cn";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
 import {
+  DEFAULT_LOCALE,
   LOCALE_IDS,
   LOCALES,
   localeTag,
@@ -23,6 +24,7 @@ import { StudioConnect } from "@/lib/weaverse/studio-connect";
 
 import "../globals.css";
 import { T } from "@/lib/i18n/t";
+import { getTranslator } from "@/lib/i18n/translator";
 
 /* Premium type contract: Archivo for display, Manrope for body/UI, and
  * IBM Plex Mono only for compact field metadata. Next serves all three. */
@@ -47,14 +49,19 @@ const plexMono = IBM_Plex_Mono({
   variable: "--font-plex-mono",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Forward — Gear for the way out",
-    template: "%s · Forward",
-  },
-  description:
-    "Forward is an outdoor gear storefront theme built on Next.js and powered by Weaverse.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const t = await getTranslator(
+    parseLocale((await params).locale) ?? DEFAULT_LOCALE,
+  );
+  return {
+    title: { default: t("meta.siteTitle"), template: "%s · Forward" },
+    description: t("meta.siteDescription"),
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#11130f",

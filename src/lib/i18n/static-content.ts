@@ -349,6 +349,23 @@ export const STATIC_CONTENT = {
       },
     },
   },
+  meta: {
+    siteTitle: "Forward — Gear for the way out",
+    siteDescription:
+      "Forward is an outdoor gear storefront theme built on Next.js and powered by Weaverse.",
+    shopTitle: "Shop",
+    shopDescription: "Every product this store publishes.",
+    journalTitle: "Journal",
+    journalDescription:
+      "Field notes from the Forward journal: trips, gear arguments, and weather worth going out in.",
+    collectionTitle: "{{title}} · Shop",
+    articleTitle: "{{title}} · Journal",
+    collectionNotFound: "Collection not found",
+    productNotFound: "Product not found",
+    articleNotFound: "Article not found",
+    pageNotFound: "Page not found",
+    policyNotFound: "Policy not found",
+  },
   market: {
     change: "Change shipping market",
     heading: "Shipping market",
