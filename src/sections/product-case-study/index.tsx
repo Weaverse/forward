@@ -4,6 +4,8 @@ import { IMAGES_PLACEHOLDERS } from "@weaverse/schema";
 import Image from "next/image";
 import { Link } from "@/components/link";
 import { cn } from "@/lib/cn";
+import type { TranslationKey } from "@/lib/i18n/static-content";
+import { useT } from "@/lib/i18n/t";
 import { cta, eyebrow } from "@/lib/presentation/variants";
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
 import {
@@ -20,17 +22,12 @@ interface ProductCaseStudyProps extends WeaverseElementProps {
 
 /* Shown until a product is picked (or when it no longer resolves), so a fresh
  * section keeps its real layout instead of collapsing to a notice. */
-const PLACEHOLDER = {
-  title: "Product title",
-  description:
-    "A product description appears here once a product is selected, followed by its spec list.",
-  specs: [
-    { label: "Weight", value: "—" },
-    { label: "Material", value: "—" },
-    { label: "Fit", value: "—" },
-    { label: "Care", value: "—" },
-  ],
-};
+const PLACEHOLDER_SPECS: readonly TranslationKey[] = [
+  "sections.placeholder.specs.weight",
+  "sections.placeholder.specs.material",
+  "sections.placeholder.specs.fit",
+  "sections.placeholder.specs.care",
+];
 
 const IMAGE_CLASS = "h-[62svh] object-cover md:h-190";
 
@@ -41,9 +38,12 @@ function ProductCaseStudy({
   loaderData,
   ...rest
 }: ProductCaseStudyProps) {
+  const t = useT();
   const product = loaderData?.product ?? null;
   const image = loaderData?.image ?? null;
-  const specs = product?.specs ?? PLACEHOLDER.specs;
+  const specs =
+    product?.specs ??
+    PLACEHOLDER_SPECS.map((key) => ({ label: t(key), value: "—" }));
   const ctaClass = cta({ tone: "light" });
 
   return (
@@ -54,9 +54,12 @@ function ProductCaseStudy({
       <div className="order-2 self-center p-[clamp(50px,7vw,110px)] md:order-none">
         <p className={eyebrow({ tone: "warm" })}>{eyebrowLabel}</p>
         <h2 className="text-balance font-heading text-field-case-title leading-field-case">
-          {product?.title ?? PLACEHOLDER.title}
+          {product?.title ?? t("sections.placeholder.productTitle")}
         </h2>
-        <p>{product?.description ?? PLACEHOLDER.description}</p>
+        <p>
+          {product?.description ??
+            t("sections.placeholder.caseStudyDescription")}
+        </p>
         <dl className="my-8.75 border-border-dark border-t">
           {specs.map((spec) => (
             <div

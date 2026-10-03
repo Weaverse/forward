@@ -7,9 +7,9 @@ import { type ReactNode, useContext } from "react";
 import { Link } from "@/components/link";
 
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/t";
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
 import { weaverseImage } from "@/lib/weaverse/image";
-
 import {
   elementAttributes,
   type WeaverseElementProps,
@@ -150,6 +150,7 @@ function FeaturedBadge({
   product: Product | null;
   className?: string;
 }) {
+  const t = useT();
   if (product === null) {
     return (
       <div
@@ -161,10 +162,10 @@ function FeaturedBadge({
         <ThumbnailPlaceholder />
         <span className="grid min-w-0 flex-1 gap-1">
           <span className="font-field-meta text-micro text-text-dark-meta uppercase">
-            Featured system
+            {t("sections.featuredSystem")}
           </span>
           <span className="line-clamp-1 font-heading text-lede text-text-dark-meta leading-copy">
-            Product Title
+            {t("sections.placeholder.productTitle")}
           </span>
         </span>
       </div>
@@ -173,7 +174,7 @@ function FeaturedBadge({
   const thumbnail = product.colorways[0]?.images.primary;
   return (
     <Link
-      aria-label={`Featured system: ${product.title}`}
+      aria-label={t("sections.featuredSystemLabel", { title: product.title })}
       className={cn(
         "group flex items-center gap-4 px-6 text-text-inverse hover:bg-ink/35",
         className,
@@ -194,7 +195,7 @@ function FeaturedBadge({
       )}
       <span className="grid min-w-0 flex-1 gap-1">
         <span className="font-field-meta text-micro text-text-dark-meta uppercase">
-          Featured system
+          {t("sections.featuredSystem")}
         </span>
         <span className="line-clamp-1 text-balance font-heading text-lede leading-copy md:line-clamp-2">
           {product.title}

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { Link } from "@/components/link";
+import { useT } from "@/lib/i18n/t";
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
 import { weaverseImage } from "@/lib/weaverse/image";
 import { parseRows } from "../parse";
@@ -29,6 +30,7 @@ function HomeHero({
   loaderData,
   ...rest
 }: HomeHeroProps) {
+  const t = useT();
   const featuredProduct = loaderData?.featuredProduct ?? undefined;
   const resolvedImage = weaverseImage(image);
   return (
@@ -68,13 +70,13 @@ function HomeHero({
             href={`/products/${featuredProduct.handle}`}
           >
             <span className="font-field-meta text-micro uppercase">
-              Featured system
+              {t("sections.featuredSystem")}
             </span>
             <strong className="font-heading text-home-feature-title">
               {featuredProduct.title}
             </strong>
             <span className="font-field-meta text-micro uppercase">
-              View product →
+              {t("sections.viewProduct")}
             </span>
           </Link>
         ) : null}

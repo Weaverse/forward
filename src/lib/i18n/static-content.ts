@@ -325,6 +325,30 @@ export const STATIC_CONTENT = {
     contactPage: "contact page",
     openAccount: "Open the field account",
   },
+  sections: {
+    shopSystem: "Shop system →",
+    featuredSystem: "Featured system",
+    featuredSystemLabel: "Featured system: {{title}}",
+    viewProduct: "View product →",
+    inspectProduct: "Inspect product →",
+    heroSlides: "Hero slides",
+    viewDetails: "View full details",
+    /** Shown until the merchant picks a product, so a section keeps its layout. */
+    placeholder: {
+      productTitle: "Product title",
+      category: "Category",
+      spotlightHint:
+        "Select a product to show its colorways, sizes, and add to cart here.",
+      caseStudyDescription:
+        "A product description appears here once a product is selected, followed by its spec list.",
+      specs: {
+        weight: "Weight",
+        material: "Material",
+        fit: "Fit",
+        care: "Care",
+      },
+    },
+  },
   market: {
     change: "Change shipping market",
     heading: "Shipping market",
