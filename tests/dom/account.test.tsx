@@ -11,7 +11,12 @@ import { ENGLISH_T, renderInShell as render } from "./harness";
 describe("account access affordances", () => {
   it("keeps signed-out login as a raw full-page handoff", () => {
     render(
-      <AccountShell t={ENGLISH_T} activePath="/account/orders" title="Orders">
+      <AccountShell
+        locale="en-us"
+        t={ENGLISH_T}
+        activePath="/account/orders"
+        title="Orders"
+      >
         <AccountAccessPanel
           t={ENGLISH_T}
           path="/account/orders"
@@ -62,9 +67,10 @@ describe("account access affordances", () => {
     );
   });
 
-  it("keeps signed-in logout as a same-origin POST form", () => {
+  it("keeps signed-in logout as a same-origin POST form back to the market", () => {
     render(
       <AccountShell
+        locale="de-de"
         t={ENGLISH_T}
         activePath="/account"
         signedIn
@@ -78,6 +84,10 @@ describe("account access affordances", () => {
     const form = signOut.closest("form");
     assert.ok(form !== null);
     assert.equal(form.getAttribute("method"), "post");
-    assert.equal(form.getAttribute("action"), "/account/logout");
+    /* The protocol path stays unprefixed; the market rides on `return_to`. */
+    assert.equal(
+      form.getAttribute("action"),
+      "/account/logout?return_to=%2Fde-de",
+    );
   });
 });

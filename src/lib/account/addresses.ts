@@ -19,6 +19,7 @@
  *   GraphQL extensions, tokens, and address PII never leave this file.
  */
 
+import { type LocaleId, localizePath } from "@/lib/i18n/locales";
 import type { AccountSession } from "./account-view";
 import { CustomerAccountRequestError } from "./account-view";
 import { loginHref } from "./customer-account";
@@ -391,8 +392,10 @@ export async function performAddressAction(options: {
   /** The configured storefront origin, never a request-derived host. */
   origin: string;
   formData: FormData;
+  /** The shopper's market, so a sign-in returns them to it. */
+  locale: LocaleId;
 }): Promise<AddressActionResult> {
-  const { session, requestHeaders, origin, formData } = options;
+  const { session, requestHeaders, origin, formData, locale } = options;
 
   if (!isConfiguredOrigin(requestHeaders, origin)) {
     return { status: "error", message: ADDRESS_ERROR_REJECTED };
@@ -401,7 +404,10 @@ export async function performAddressAction(options: {
     return { status: "redirect", href: session.href };
   }
   if (session.status !== "authenticated") {
-    return { status: "redirect", href: loginHref(ADDRESSES_PATH) };
+    return {
+      status: "redirect",
+      href: loginHref(localizePath(ADDRESSES_PATH, locale)),
+    };
   }
 
   const parsed = parseAddressForm(formData);

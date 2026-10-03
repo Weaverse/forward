@@ -8,7 +8,7 @@ import {
   readAccountSession,
 } from "@/lib/account/account-view";
 import { ACCOUNT_ORDER_LIMIT } from "@/lib/account/queries";
-import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
+import { DEFAULT_LOCALE, localizePath, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
 import { getTranslator } from "@/lib/i18n/translator";
 import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
@@ -61,12 +61,17 @@ export default async function OrdersPage({
   if (session.status !== "authenticated") {
     return (
       <AccountShell
+        locale={locale}
         activePath={ORDERS_PATH}
         t={t}
         eyebrow={t("account.ordersEyebrow")}
         title={t("account.ordersTitle")}
       >
-        <AccountAccessPanel t={t} path={ORDERS_PATH} session={session} />
+        <AccountAccessPanel
+          t={t}
+          path={localizePath(ORDERS_PATH, locale)}
+          session={session}
+        />
       </AccountShell>
     );
   }
@@ -75,6 +80,7 @@ export default async function OrdersPage({
 
   return (
     <AccountShell
+      locale={locale}
       activePath={ORDERS_PATH}
       t={t}
       eyebrow={t("account.ordersEyebrow")}

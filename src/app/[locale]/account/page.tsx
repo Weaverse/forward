@@ -8,7 +8,7 @@ import {
   readAccountSession,
 } from "@/lib/account/account-view";
 import { ACCOUNT_RECENT_ORDER_LIMIT } from "@/lib/account/queries";
-import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
+import { DEFAULT_LOCALE, localizePath, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
 import { getTranslator } from "@/lib/i18n/translator";
 import { cta, eyebrow, sectionHeading } from "@/lib/presentation/variants";
@@ -65,6 +65,7 @@ export default async function AccountPage({
   if (session.status !== "authenticated") {
     return (
       <AccountShell
+        locale={locale}
         activePath={ACCOUNT_PATH}
         t={t}
         title={t("account.overviewTitle")}
@@ -72,7 +73,7 @@ export default async function AccountPage({
       >
         <AccountAccessPanel
           t={t}
-          path={ACCOUNT_PATH}
+          path={localizePath(ACCOUNT_PATH, locale)}
           session={session}
           loginFailed={params.login === "failed"}
         />
@@ -85,6 +86,7 @@ export default async function AccountPage({
 
   return (
     <AccountShell
+      locale={locale}
       activePath={ACCOUNT_PATH}
       t={t}
       title={t("account.overviewTitle")}

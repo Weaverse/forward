@@ -10,7 +10,7 @@ import {
   type AddressFormValues,
   readAccountAddresses,
 } from "@/lib/account/addresses";
-import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
+import { DEFAULT_LOCALE, localizePath, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
 import type { ThemeTranslate } from "@/lib/i18n/static-content";
 import { getTranslator } from "@/lib/i18n/translator";
@@ -247,12 +247,17 @@ export default async function AddressesPage({
   if (session.status !== "authenticated") {
     return (
       <AccountShell
+        locale={locale}
         activePath={ADDRESSES_PATH}
         t={t}
         eyebrow={t("account.addressesEyebrow")}
         title={t("account.addressesTitle")}
       >
-        <AccountAccessPanel t={t} path={ADDRESSES_PATH} session={session} />
+        <AccountAccessPanel
+          t={t}
+          path={localizePath(ADDRESSES_PATH, locale)}
+          session={session}
+        />
       </AccountShell>
     );
   }
@@ -261,6 +266,7 @@ export default async function AddressesPage({
 
   return (
     <AccountShell
+      locale={locale}
       activePath={ADDRESSES_PATH}
       t={t}
       eyebrow={t("account.addressesEyebrow")}

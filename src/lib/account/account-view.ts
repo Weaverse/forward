@@ -15,7 +15,12 @@ import {
 } from "@shopify/hydrogen/customer-account";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { DEFAULT_LOCALE, type LocaleId, localeI18n } from "@/lib/i18n/locales";
+import {
+  DEFAULT_LOCALE,
+  type LocaleId,
+  localeI18n,
+  localizePath,
+} from "@/lib/i18n/locales";
 import type { TranslationKey } from "@/lib/i18n/static-content";
 import { formatMoney } from "@/lib/storefront/format";
 import {
@@ -223,7 +228,12 @@ export async function readAccountSession(options: {
     !options.refreshed &&
     (await runtime.customerSession.isLoggedIn(sessionManager, requestContext))
   ) {
-    return { status: "needs-refresh", href: refreshHref(options.path) };
+    return {
+      status: "needs-refresh",
+      href: refreshHref(
+        localizePath(options.path, options.locale ?? DEFAULT_LOCALE),
+      ),
+    };
   }
   return { status: "signed-out" };
 }
