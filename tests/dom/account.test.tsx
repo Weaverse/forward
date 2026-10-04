@@ -6,7 +6,7 @@ import { screen, within } from "@testing-library/react";
 
 import { AccountAccessPanel } from "@/components/account-access";
 import { AccountShell } from "@/components/account-shell";
-import { ENGLISH_T, renderInShell as render } from "./harness";
+import { ENGLISH_T, renderWithCart as render } from "./harness";
 
 describe("account access affordances", () => {
   it("keeps signed-out login as a raw full-page handoff", () => {

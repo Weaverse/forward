@@ -12,7 +12,7 @@ import userEvent from "@testing-library/user-event";
 import { ProductCard } from "@/components/product-card";
 import {
   productByHandle,
-  renderInShell as render,
+  renderWithCart as render,
   visibleText,
 } from "./harness";
 

@@ -103,11 +103,6 @@ export function shell(
   );
 }
 
-/** `render` with the layout's providers, for tests that need no cart data. */
-export function renderInShell(ui: ReactNode) {
-  return render(shell(ui));
-}
-
 /** Renders inside the providers every page mounts. */
 export function renderWithCart(
   ui: ReactNode,

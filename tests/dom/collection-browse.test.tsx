@@ -12,7 +12,7 @@ import CollectionToolbar from "@/sections/main-collection/toolbar";
 import { COLLECTION_FIXTURES } from "../fixtures/storefront/collections";
 import { FILTER_FIXTURES } from "../fixtures/storefront/filters";
 import { PRODUCT_FIXTURES } from "../fixtures/storefront/products";
-import { renderInShell as render } from "./harness";
+import { renderWithCart as render } from "./harness";
 import { setRoute } from "./preload";
 
 const COLLECTION = COLLECTION_FIXTURES[0];
