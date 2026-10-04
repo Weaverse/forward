@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { marketAlternates } from "@/lib/i18n/alternates";
-import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
-import { getTranslator } from "@/lib/i18n/translator";
+import { getTranslator, translatedMetadata } from "@/lib/i18n/translator";
 import { getStorefront } from "@/lib/storefront/data-source";
 import { IndexHeader } from "@/sections/index-header";
 import { JournalGrid } from "@/sections/journal-grid";
@@ -12,16 +10,14 @@ interface JournalPageProps {
   params: Promise<{ locale: string }>;
 }
 
-export async function generateMetadata({
+export function generateMetadata({
   params,
 }: Pick<JournalPageProps, "params">): Promise<Metadata> {
-  const locale = parseLocale((await params).locale) ?? DEFAULT_LOCALE;
-  const t = await getTranslator(locale);
-  return {
-    title: t("meta.journalTitle"),
-    description: t("meta.journalDescription"),
-    alternates: marketAlternates("/journal", locale),
-  };
+  return translatedMetadata(params, {
+    title: "meta.journalTitle",
+    description: "meta.journalDescription",
+    path: "/journal",
+  });
 }
 
 export default async function JournalPage(props: JournalPageProps) {

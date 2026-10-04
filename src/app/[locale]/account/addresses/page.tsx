@@ -10,27 +10,24 @@ import {
   type AddressFormValues,
   readAccountAddresses,
 } from "@/lib/account/addresses";
-import { DEFAULT_LOCALE, localizePath, parseLocale } from "@/lib/i18n/locales";
+import { localizePath } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
 import type { ThemeTranslate } from "@/lib/i18n/static-content";
-import { getTranslator } from "@/lib/i18n/translator";
+import { getTranslator, translatedMetadata } from "@/lib/i18n/translator";
 import { eyebrow, sectionHeading, textLink } from "@/lib/presentation/variants";
 import { AddressActionForm } from "./address-form";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-export async function generateMetadata({
+export function generateMetadata({
   params,
 }: Pick<AddressesPageProps, "params">): Promise<Metadata> {
-  const t = await getTranslator(
-    parseLocale((await params).locale) ?? DEFAULT_LOCALE,
-  );
-  return {
-    title: t("account.meta.addressesTitle"),
-    description: t("account.meta.addressesDescription"),
+  return translatedMetadata(params, {
+    title: "account.meta.addressesTitle",
+    description: "account.meta.addressesDescription",
     robots: { index: false, follow: false },
-  };
+  });
 }
 
 const EMPTY_ADDRESS: AddressFormValues = {

@@ -3,23 +3,19 @@ import { headers } from "next/headers";
 
 import { readShopifyCart, type ShopifyCartData } from "@/lib/cart/shopify-cart";
 import { ShopifyCartProvider } from "@/lib/cart/shopify-cart-react";
-import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
-import { getTranslator } from "@/lib/i18n/translator";
+import { translatedMetadata } from "@/lib/i18n/translator";
 import { ShopifyCartView } from "./shopify-cart-view";
 
-export async function generateMetadata({
+export function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const t = await getTranslator(
-    parseLocale((await params).locale) ?? DEFAULT_LOCALE,
-  );
-  return {
-    title: t("cart.metaTitle"),
-    description: t("cart.metaDescription"),
+  return translatedMetadata(params, {
+    title: "cart.metaTitle",
+    description: "cart.metaDescription",
     robots: { index: false, follow: false },
-  };
+  });
 }
 
 export const dynamic = "force-dynamic";

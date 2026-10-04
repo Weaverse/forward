@@ -8,26 +8,23 @@ import {
   readAccountSession,
 } from "@/lib/account/account-view";
 import { ACCOUNT_RECENT_ORDER_LIMIT } from "@/lib/account/queries";
-import { DEFAULT_LOCALE, localizePath, parseLocale } from "@/lib/i18n/locales";
+import { localizePath } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
-import { getTranslator } from "@/lib/i18n/translator";
+import { getTranslator, translatedMetadata } from "@/lib/i18n/translator";
 import { cta, eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { formatDate } from "@/lib/storefront/format";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-export async function generateMetadata({
+export function generateMetadata({
   params,
 }: Pick<AccountPageProps, "params">): Promise<Metadata> {
-  const t = await getTranslator(
-    parseLocale((await params).locale) ?? DEFAULT_LOCALE,
-  );
-  return {
-    title: t("account.meta.overviewTitle"),
-    description: t("account.meta.overviewDescription"),
+  return translatedMetadata(params, {
+    title: "account.meta.overviewTitle",
+    description: "account.meta.overviewDescription",
     robots: { index: false, follow: false },
-  };
+  });
 }
 
 const ACCOUNT_PATH = "/account";

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
-import { DEFAULT_LOCALE, localizePath, parseLocale } from "@/lib/i18n/locales";
+import { localizePath } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
 import { T } from "@/lib/i18n/t";
-import { getTranslator } from "@/lib/i18n/translator";
+import { getTranslator, translatedMetadata } from "@/lib/i18n/translator";
 import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { getStorefront } from "@/lib/storefront/data-source";
 import { SearchEmptyState } from "@/sections/search-empty-state";
@@ -14,17 +14,14 @@ interface SearchPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export async function generateMetadata({
+export function generateMetadata({
   params,
 }: Pick<SearchPageProps, "params">): Promise<Metadata> {
-  const t = await getTranslator(
-    parseLocale((await params).locale) ?? DEFAULT_LOCALE,
-  );
-  return {
-    title: t("search.metaTitle"),
-    description: t("search.metaDescription"),
+  return translatedMetadata(params, {
+    title: "search.metaTitle",
+    description: "search.metaDescription",
     robots: { index: false, follow: true },
-  };
+  });
 }
 
 /** Plain GET search backed by the normalized server-side catalog. */
