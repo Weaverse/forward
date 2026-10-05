@@ -56,3 +56,13 @@ add these as allowed logout redirect URIs for every origin that runs the account
 <origin>/, <origin>/en-gb, <origin>/de-de, <origin>/fr-fr, <origin>/ja-jp.
 Keep existing entries. Change nothing else. Report the final list.
 ```
+
+## 2026-10-05 — @hta218
+
+- Studio's address bar snapped back to the default market after navigating:
+  `requestInfo.pathname` was the unprefixed route path. `buildRequestContext`
+  now reports the market-prefixed path (76e51ba). The Builder strips
+  `i18n.pathPrefix` itself; this was verified against the live API.
+- The SDK should own this rule: Weaverse/weaverse#534. Remove the
+  `localizePath` in `buildRequestContext` once `@weaverse/next` applies
+  `i18n.pathPrefix`.
