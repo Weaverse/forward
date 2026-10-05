@@ -35,6 +35,10 @@ describe("buildRequestContext", () => {
     });
     assert.equal(context.i18n?.locale, "de-DE");
     assert.equal(context.i18n?.pathPrefix, "/de-de");
+    /* Studio's address bar follows the reported path: it must keep the
+     * market, or Studio snaps back to the default market after navigating. */
+    assert.equal(context.pathname, "/de-de/shop");
+    assert.equal(String(context.url), "http://forward.example/de-de/shop");
 
     /* Section loaders see the same `i18n`, so every market must round-trip. */
     for (const locale of LOCALE_IDS) {
