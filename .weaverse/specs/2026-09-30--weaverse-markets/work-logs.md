@@ -66,3 +66,16 @@ Keep existing entries. Change nothing else. Report the final list.
 - The SDK should own this rule: Weaverse/weaverse#534. Remove the
   `localizePath` in `buildRequestContext` once `@weaverse/next` applies
   `i18n.pathPrefix`.
+- Manual test re-check (storefront probes against `bun run dev`):
+  - A2/B6 pass: `/de-de` resolves its own localized INDEX page while every
+    other market keeps the default. `loadPage` needs no `locale`.
+  - C10/C11 pass: `134,52 €` / `￥23,751` / `$148`, `5. August 2026`;
+    canonical + 5 `hreflang` + `x-default` on `/de-de` and `/de-de/shop`,
+    canonical only on PDP and articles; `<html lang="de-DE" dir="ltr">`.
+  - A4/B8 open: `/api/translation/static?locale=de-de` returns the synced
+    keys with English values only, so the German Translation Manager values
+    are not published yet. Studio-side, no code change.
+- `pageWidth` did not follow Studio's slider: the layout rendered it on the
+  server from the theme response, so live edits to the root theme-settings
+  store never reached it. `WeaverseRoot` now renders it through
+  `useThemeSettings()`; the server `<style>` is gone.
