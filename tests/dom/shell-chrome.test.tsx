@@ -5,7 +5,7 @@
 
 import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
-import { screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { ICON_PATHS, Icon } from "@/components/icon";
@@ -20,6 +20,7 @@ import {
   localizePath,
 } from "@/lib/i18n/locales";
 import { CHECKOUT_PAYMENT_MARKS } from "@/lib/storefront/integrations";
+import { WeaverseRoot } from "@/lib/weaverse/root";
 import {
   cartData,
   cartLine,
@@ -233,5 +234,24 @@ describe("footer payment marks", () => {
         .map((mark) => mark.getAttribute("aria-label")),
       CHECKOUT_PAYMENT_MARKS.map((mark) => mark.label),
     );
+  });
+});
+
+describe("page width", () => {
+  function pageWidthRule() {
+    return [...document.querySelectorAll("style")]
+      .map((style) => style.textContent)
+      .find((css) => css?.includes("--container-page"));
+  }
+
+  it("follows the theme setting, live, and keeps the theme's own when unset", () => {
+    const { rerender } = render(<WeaverseRoot theme={{}}>{null}</WeaverseRoot>);
+    assert.equal(pageWidthRule(), undefined);
+
+    rerender(<WeaverseRoot theme={{ pageWidth: 1080 }}>{null}</WeaverseRoot>);
+    assert.equal(pageWidthRule(), ":root{--container-page:1080px}");
+
+    rerender(<WeaverseRoot theme={{ pageWidth: 1400 }}>{null}</WeaverseRoot>);
+    assert.equal(pageWidthRule(), ":root{--container-page:1400px}");
   });
 });

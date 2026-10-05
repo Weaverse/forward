@@ -67,20 +67,6 @@ export const viewport: Viewport = {
   themeColor: "#11130f",
 };
 
-/**
- * Reads the merchant's page measure, or `null` to keep the theme's own.
- *
- * This is the first theme setting the storefront actually consumes. It lands
- * as a CSS variable rather than a prop because `max-w-page` is a Tailwind
- * token every section already resolves through.
- */
-function pageWidthStyle(pageWidth: unknown): string | null {
-  if (typeof pageWidth !== "number" || pageWidth <= 0) {
-    return null;
-  }
-  return `:root{--container-page:${pageWidth}px}`;
-}
-
 export function generateStaticParams() {
   return LOCALE_IDS.map((locale) => ({ locale }));
 }
@@ -98,7 +84,6 @@ export default async function RootLayout({
   }
   const weaverseEnabled = weaverseProjectId() !== null;
   const themeResponse = await loadWeaverseThemeSettings(locale);
-  const pageWidth = pageWidthStyle(themeResponse?.theme?.pageWidth);
   return (
     <html
       lang={localeTag(locale)}
@@ -112,12 +97,6 @@ export default async function RootLayout({
       )}
     >
       <head>
-        {pageWidth === null ? null : (
-          <style
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: one numeric theme setting rendered into a single custom property, never merchant markup.
-            dangerouslySetInnerHTML={{ __html: pageWidth }}
-          />
-        )}
         <script
           crossOrigin="anonymous"
           id="shopify-standard-actions"

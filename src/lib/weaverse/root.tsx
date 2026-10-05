@@ -1,10 +1,10 @@
 "use client";
 
-import { WeaverseNextRootProvider } from "@weaverse/next";
+import { useThemeSettings, WeaverseNextRootProvider } from "@weaverse/next";
 import type { ReactNode } from "react";
 
 import { STATIC_CONTENT } from "@/lib/i18n/static-content";
-import { themeSchema } from "./theme-schema";
+import { type ThemeSettings, themeSchema } from "./theme-schema";
 
 /**
  * The Weaverse root boundary the layout mounts once, above the header, the
@@ -39,7 +39,24 @@ export function WeaverseRoot({
       staticContent={STATIC_CONTENT}
       themeSchema={themeSchema}
     >
+      <PageWidthStyle />
       {children}
     </WeaverseNextRootProvider>
   );
+}
+
+/**
+ * The merchant's page measure as the `--container-page` token every
+ * `max-w-page` container resolves through.
+ *
+ * It reads the root theme-settings store rather than the server response, so
+ * dragging the slider in Studio resizes the page live. Unset keeps the theme's
+ * own measure from `globals.css`.
+ */
+function PageWidthStyle() {
+  const { pageWidth } = useThemeSettings<Partial<ThemeSettings>>();
+  if (typeof pageWidth !== "number" || pageWidth <= 0) {
+    return null;
+  }
+  return <style>{`:root{--container-page:${pageWidth}px}`}</style>;
 }
