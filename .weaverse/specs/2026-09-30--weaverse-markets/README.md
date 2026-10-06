@@ -2,12 +2,12 @@
 
 | Field            | Value                                                  |
 | ---------------- | ------------------------------------------------------ |
-| **Status**       | in-progress                                            |
+| **Status**       | completed                                              |
 | **Owner**        | @hta218                                                |
 | **Issue**        | [#87](https://github.com/Weaverse/forward/issues/87)   |
 | **Branch**       | `feat/weaverse-markets`                                |
 | **Created**      | 2026-09-30                                             |
-| **Last Updated** | 2026-10-05                                             |
+| **Last Updated** | 2026-10-06                                             |
 
 ## Original Prompt
 
