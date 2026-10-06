@@ -3,6 +3,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { Link } from "@/components/link";
+import { useT } from "@/lib/i18n/t";
 import { eyebrow } from "@/lib/presentation/variants";
 import type { Collection } from "@/lib/storefront/types";
 import {
@@ -22,6 +23,7 @@ function CollectionIndex({
   loaderData,
   ...rest
 }: CollectionIndexProps) {
+  const t = useT();
   const collections = loaderData?.collections ?? [];
   return (
     <section
@@ -59,7 +61,7 @@ function CollectionIndex({
                 {collection.description}
               </p>
               <span className="mt-6 block font-body text-ui uppercase">
-                Shop system →
+                {t("sections.shopSystem")}
               </span>
             </div>
           </Link>

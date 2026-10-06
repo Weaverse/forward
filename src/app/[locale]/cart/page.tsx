@@ -3,12 +3,20 @@ import { headers } from "next/headers";
 
 import { readShopifyCart, type ShopifyCartData } from "@/lib/cart/shopify-cart";
 import { ShopifyCartProvider } from "@/lib/cart/shopify-cart-react";
+import { translatedMetadata } from "@/lib/i18n/translator";
 import { ShopifyCartView } from "./shopify-cart-view";
 
-export const metadata: Metadata = {
-  title: "Cart",
-  description: "Your Forward cart.",
-};
+export function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  return translatedMetadata(params, {
+    title: "cart.metaTitle",
+    description: "cart.metaDescription",
+    robots: { index: false, follow: false },
+  });
+}
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";

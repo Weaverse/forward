@@ -15,6 +15,14 @@ function toUrl(path: string): string {
   return `${SITE_BASE_URL}${path === "/" ? "" : path}`;
 }
 
+/**
+ * The default market only, on purpose. A non-default market's URL for a
+ * product or collection is not the default handle with a prefix: Shopify
+ * localizes handles and can leave a resource unpublished in a market, so
+ * multiplying these entries per market would advertise pages that redirect or
+ * do not exist. The pages themselves carry their canonical and, where the path
+ * is market-invariant, their `hreflang` alternates.
+ */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [products, collections, articles, pages, policies] = await Promise.all([
     getStorefront().listProducts(),

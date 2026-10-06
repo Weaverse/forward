@@ -2,16 +2,23 @@
 
 import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
-import { render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 
 import { AccountAccessPanel } from "@/components/account-access";
 import { AccountShell } from "@/components/account-shell";
+import { ENGLISH_T, renderWithCart as render } from "./harness";
 
 describe("account access affordances", () => {
   it("keeps signed-out login as a raw full-page handoff", () => {
     render(
-      <AccountShell activePath="/account/orders" title="Orders">
+      <AccountShell
+        locale="en-us"
+        t={ENGLISH_T}
+        activePath="/account/orders"
+        title="Orders"
+      >
         <AccountAccessPanel
+          t={ENGLISH_T}
           path="/account/orders"
           session={{ status: "signed-out" }}
         />
@@ -43,6 +50,7 @@ describe("account access affordances", () => {
       "/account/refresh?return_to=%2Faccount%2Faddresses%3Faccount_refresh%3D1";
     render(
       <AccountAccessPanel
+        t={ENGLISH_T}
         loginFailed
         path="/account/addresses"
         session={{ status: "needs-refresh", href }}
@@ -59,9 +67,15 @@ describe("account access affordances", () => {
     );
   });
 
-  it("keeps signed-in logout as a same-origin POST form", () => {
+  it("keeps signed-in logout as a same-origin POST form back to the market", () => {
     render(
-      <AccountShell activePath="/account" signedIn title="Account">
+      <AccountShell
+        locale="de-de"
+        t={ENGLISH_T}
+        activePath="/account"
+        signedIn
+        title="Account"
+      >
         Private account content
       </AccountShell>,
     );
@@ -70,6 +84,10 @@ describe("account access affordances", () => {
     const form = signOut.closest("form");
     assert.ok(form !== null);
     assert.equal(form.getAttribute("method"), "post");
-    assert.equal(form.getAttribute("action"), "/account/logout");
+    /* The protocol path stays unprefixed; the market rides on `return_to`. */
+    assert.equal(
+      form.getAttribute("action"),
+      "/account/logout?return_to=%2Fde-de",
+    );
   });
 });

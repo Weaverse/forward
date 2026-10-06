@@ -8,6 +8,8 @@ import { AddToCartForm } from "@/components/add-to-cart-form";
 import { Link } from "@/components/link";
 import { Section } from "@/components/section";
 import { cn } from "@/lib/cn";
+import { useLocale } from "@/lib/i18n/locale-context";
+import { useT } from "@/lib/i18n/t";
 import {
   cta,
   eyebrow,
@@ -164,6 +166,8 @@ function SpotlightProduct({
   imagePosition,
   showThumbnails,
 }: SpotlightContentProps & { product: Product }) {
+  const t = useT();
+  const locale = useLocale();
   const [colorwayId, setColorwayId] = useState(product.colorways[0]?.id);
   const [requestedOptions, setRequestedOptions] = useState<
     Record<string, string>
@@ -197,23 +201,25 @@ function SpotlightProduct({
         <p className="mt-3 mb-0 flex flex-wrap items-baseline gap-2.5 text-label">
           <strong>
             <span className="sr-only">
-              {compareAt !== null ? "Sale price " : "Price "}
+              {t(
+                compareAt !== null ? "product.salePrice" : "product.price",
+              )}{" "}
             </span>
-            {formatMoney(variant.price)}
+            {formatMoney(variant.price, locale)}
           </strong>
           {compareAt !== null ? (
             <del className="text-text-muted">
-              <span className="sr-only">Regular price </span>
-              {formatMoney(compareAt)}
+              <span className="sr-only">{t("product.regularPrice")} </span>
+              {formatMoney(compareAt, locale)}
             </del>
           ) : null}
         </p>
         <p className="mt-4 mb-0 text-text-muted">{product.subtitle}</p>
 
         <fieldset className="mt-6 mb-0 border-0 p-0">
-          <legend className="sr-only">Color</legend>
+          <legend className="sr-only">{t("product.color")}</legend>
           <div className={OPTION_LABEL_CLASS}>
-            <span>Color</span>
+            <span>{t("product.color")}</span>
             <span>{colorway.name}</span>
           </div>
           <div className="flex flex-wrap gap-1.75">
@@ -311,7 +317,7 @@ function SpotlightProduct({
             selection.selectedOptions,
           )}
         >
-          {ctaLabel || "View full details"}
+          {ctaLabel || t("sections.viewDetails")}
         </Link>
       </div>
     </>
@@ -389,6 +395,7 @@ function SpotlightPlaceholder({
   imagePosition,
   showThumbnails,
 }: SpotlightContentProps) {
+  const t = useT();
   return (
     <>
       <div
@@ -421,14 +428,16 @@ function SpotlightPlaceholder({
       </div>
       <div className={PANEL_CLASS}>
         <p className={eyebrow()}>
-          {[eyebrowPrefix, "Category"].filter(Boolean).join(" ")}
+          {[eyebrowPrefix, t("sections.placeholder.category")]
+            .filter(Boolean)
+            .join(" ")}
         </p>
         <h2 id={titleId} className={TITLE_CLASS}>
-          Product title
+          {t("sections.placeholder.productTitle")}
         </h2>
         <p className="mt-3 mb-0 text-label">$00.00</p>
         <p className="mt-4 mb-0 text-text-muted">
-          Select a product to show its colorways, sizes, and add to cart here.
+          {t("sections.placeholder.spotlightHint")}
         </p>
         <div className="mt-6 flex gap-1.75" aria-hidden="true">
           {PLACEHOLDER_CHIPS.map((chip) => (
@@ -439,7 +448,7 @@ function SpotlightPlaceholder({
           ))}
         </div>
         <span className={cn(cta(), "mt-7.5 self-start")} aria-hidden="true">
-          Add to cart
+          {t("cart.addToCart")}
         </span>
       </div>
     </>

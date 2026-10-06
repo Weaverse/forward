@@ -5,6 +5,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { ProductCard } from "@/components/product-card";
 import { Section } from "@/components/section";
+import { useT } from "@/lib/i18n/t";
 import type { Product } from "@/lib/storefront/types";
 import type { WeaverseElementProps } from "../weaverse-element";
 
@@ -58,6 +59,7 @@ function FeaturedProducts({
 /* Weaverse's own placeholder art. Served from Weaverse's Shopify CDN as SVG,
  * outside this theme's `remotePatterns`, so it bypasses the optimizer. */
 function PlaceholderCard({ src }: { src: string }) {
+  const t = useT();
   return (
     <article className="min-w-0" aria-hidden="true">
       <Image
@@ -70,7 +72,7 @@ function PlaceholderCard({ src }: { src: string }) {
       />
       <div className="flex justify-between gap-4.5 border-ink border-t pt-3.5 pb-5.5">
         <span className="font-heading text-copy font-semibold text-text-muted sm:text-card-title">
-          Product title
+          {t("sections.placeholder.productTitle")}
         </span>
         <span className="whitespace-nowrap text-label text-text-muted">
           $00.00

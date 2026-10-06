@@ -1,8 +1,11 @@
 import type { AccountSession } from "@/lib/account/account-view";
 import { loginHref } from "@/lib/account/customer-account";
+import type { ThemeTranslate } from "@/lib/i18n/static-content";
 import { cta, eyebrow, sectionHeading } from "@/lib/presentation/variants";
 
 interface AccountAccessPanelProps {
+  /** The page's translator, so this frame renders in the page's market. */
+  t: ThemeTranslate;
   /** Same-origin path to return to after authentication. */
   path: string;
   session: Exclude<AccountSession, { status: "authenticated" }>;
@@ -20,6 +23,7 @@ interface AccountAccessPanelProps {
  * generic message.
  */
 export function AccountAccessPanel({
+  t,
   path,
   session,
   loginFailed = false,
@@ -28,18 +32,24 @@ export function AccountAccessPanel({
 
   return (
     <div className="min-h-70 border border-ink bg-transparent p-7">
-      <p className={eyebrow()}>Field account</p>
+      <p className={eyebrow()}>{t("account.eyebrow")}</p>
       <h2 className={sectionHeading()}>
-        {needsRefresh ? "Continue your session." : "Sign in to continue."}
+        {t(
+          needsRefresh
+            ? "account.access.continueHeading"
+            : "account.access.signInHeading",
+        )}
       </h2>
       <p className="text-text-muted">
-        {needsRefresh
-          ? "Your session needs to be renewed before this page can show your orders."
-          : "Orders, addresses, and repair records are only shown to a signed-in customer."}
+        {t(
+          needsRefresh
+            ? "account.access.refreshBody"
+            : "account.access.signInBody",
+        )}
       </p>
       {loginFailed ? (
         <p className="text-caption text-text-dark-muted">
-          Sign-in did not complete. Please try again.
+          {t("account.access.loginFailed")}
         </p>
       ) : null}
       {needsRefresh ? (
@@ -49,7 +59,7 @@ export function AccountAccessPanel({
           rel="nofollow"
           data-prefetch="false"
         >
-          Continue
+          {t("account.access.continue")}
         </a>
       ) : (
         <a
@@ -58,7 +68,7 @@ export function AccountAccessPanel({
           rel="nofollow"
           data-prefetch="false"
         >
-          Sign in
+          {t("account.access.signIn")}
         </a>
       )}
     </div>

@@ -33,6 +33,35 @@ test.describe("locale routing", () => {
     }
   });
 
+  test("announces market alternates only where the path is the same page", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/de-de/shop");
+    await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      /\/de-de\/shop$/,
+    );
+    await expect(
+      page.locator('link[rel="alternate"][hreflang="x-default"]'),
+    ).toHaveAttribute("href", /\/shop$/);
+    await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(
+      6,
+    );
+
+    /* A product handle is per-market data: canonical only, no hreflang. */
+    const product = page.locator('main a[href*="/products/"]').first();
+    await product.click();
+    await expect(page).toHaveURL(/\/de-de\/products\//);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      /\/de-de\/products\/[^/?]+$/,
+    );
+    await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(
+      0,
+    );
+  });
+
   test("switches market on the current page from the topbar", async ({
     page,
   }, testInfo) => {

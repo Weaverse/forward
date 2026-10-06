@@ -12,61 +12,60 @@ import type {
   ProductCollectionSortKeys,
   ProductSortKeys,
 } from "@shopify/hydrogen/storefront-api-types";
-
+import type { TranslationKey } from "@/lib/i18n/static-content";
 import type { ProductSort } from "./types";
 
 /** Each option's label and the key a collection and the whole catalog take. */
 const SORTS: Record<
   ProductSort,
   {
-    label: string;
+    labelKey: TranslationKey;
     collection: ProductCollectionSortKeys;
     catalog: ProductSortKeys;
     reverse: boolean;
   }
 > = {
   featured: {
-    label: "Featured",
+    labelKey: "catalog.sortOptions.featured",
     collection: "COLLECTION_DEFAULT",
     catalog: "RELEVANCE",
     reverse: false,
   },
   "best-selling": {
-    label: "Best selling",
+    labelKey: "catalog.sortOptions.bestSelling",
     collection: "BEST_SELLING",
     catalog: "BEST_SELLING",
     reverse: false,
   },
   newest: {
-    label: "Newest",
+    labelKey: "catalog.sortOptions.newest",
     collection: "CREATED",
     catalog: "CREATED_AT",
     reverse: true,
   },
   "price-asc": {
-    label: "Price low–high",
+    labelKey: "catalog.sortOptions.priceAsc",
     collection: "PRICE",
     catalog: "PRICE",
     reverse: false,
   },
   "price-desc": {
-    label: "Price high–low",
+    labelKey: "catalog.sortOptions.priceDesc",
     collection: "PRICE",
     catalog: "PRICE",
     reverse: true,
   },
   name: {
-    label: "Name A–Z",
+    labelKey: "catalog.sortOptions.name",
     collection: "TITLE",
     catalog: "TITLE",
     reverse: false,
   },
 };
 
-export const SORT_OPTIONS = Object.entries(SORTS).map(([value, { label }]) => ({
-  value: value as ProductSort,
-  label,
-}));
+export const SORT_OPTIONS = Object.entries(SORTS).map(
+  ([value, { labelKey }]) => ({ value: value as ProductSort, labelKey }),
+);
 
 export function parseProductSort(
   value: string | null | undefined,

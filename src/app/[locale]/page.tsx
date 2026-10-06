@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-
+import { marketAlternates } from "@/lib/i18n/alternates";
+import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
 import { WeaversePage } from "@/lib/weaverse/page";
 import {
@@ -14,6 +16,13 @@ interface HomePageProps {
 }
 
 export const revalidate = 3600;
+
+export async function generateMetadata({
+  params,
+}: Pick<HomePageProps, "params">): Promise<Metadata> {
+  const locale = parseLocale((await params).locale) ?? DEFAULT_LOCALE;
+  return { alternates: marketAlternates("/", locale) };
+}
 
 /**
  * Home.

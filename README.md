@@ -81,6 +81,8 @@ The single source of truth is [`src/lib/routes/route-contract.ts`](src/lib/route
 
 Every rendered route lives under `src/app/[locale]/`, with markets listed in [`src/lib/i18n/locales.ts`](src/lib/i18n/locales.ts). The default market (`en-us`) is never in the URL: the proxy redirects `/en-us/shop` to `/shop` (308) and rewrites `/shop` to `/en-us/shop` internally. Other markets keep their prefix (`/de-de/shop`); an unknown prefix is a 404. The routes below are the default-market paths.
 
+The markets are also declared to Weaverse (`themeSchema.i18n`), so Studio can author a localized page per market and translate the theme's own copy (`src/lib/i18n/static-content.ts`) in the Translation Manager. Pages carry a self-canonical, and market-invariant paths (`/`, `/shop`, `/journal`) list every market as `hreflang` alternates.
+
 ### Canonical routes
 
 | Route | Surface |

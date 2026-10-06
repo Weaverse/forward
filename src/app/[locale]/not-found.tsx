@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Link } from "@/components/link";
 import { cn } from "@/lib/cn";
 import { DEFAULT_LOCALE } from "@/lib/i18n/locales";
+import { T } from "@/lib/i18n/t";
 import { cta, sectionHeading } from "@/lib/presentation/variants";
 import { getStorefront } from "@/lib/storefront/data-source";
 import { weaverseImage } from "@/lib/weaverse/image";
@@ -22,21 +23,20 @@ export default async function NotFound() {
     <div className="m-3 grid min-h-[72svh] grid-cols-1 border border-ink md:m-6 md:grid-cols-split-65">
       <section className="flex min-h-[55svh] flex-col justify-center bg-signal p-page-gutter md:min-h-auto">
         <span className="mb-7 font-field-meta text-label font-medium text-signal-strong tracking-field-meta">
-          404 / Off route
+          <T k="errors.notFoundEyebrow" />
         </span>
         <h1 className={sectionHeading({ size: "display" })}>
-          This trail ends here.
+          <T k="errors.notFoundHeading" />
         </h1>
         <p className="max-w-lede text-lede leading-lede text-text-muted">
-          The page may have moved, or the route was never marked. Return to
-          familiar ground and choose another direction.
+          <T k="errors.notFoundBody" />
         </p>
         <div className="flex flex-col flex-wrap items-stretch gap-3 sm:flex-row">
           <Link className={cn(cta(), "w-full sm:w-auto")} href="/">
-            Return home
+            <T k="errors.home" />
           </Link>
           <Link className={cn(cta(), "w-full sm:w-auto")} href="/shop">
-            Explore gear
+            <T k="errors.explore" />
           </Link>
         </div>
       </section>

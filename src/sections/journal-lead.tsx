@@ -1,17 +1,18 @@
 import Image from "next/image";
 import { Link } from "@/components/link";
-
+import type { LocaleId } from "@/lib/i18n/locales";
 import { eyebrow } from "@/lib/presentation/variants";
 import { formatDate } from "@/lib/storefront/format";
 import type { JournalArticle } from "@/lib/storefront/types";
 
 interface JournalLeadProps {
   linkLabel: string;
+  locale: LocaleId;
   article: JournalArticle;
 }
 
 /** The lead field note, rendered as one full-width link card. */
-export function JournalLead({ linkLabel, article }: JournalLeadProps) {
+export function JournalLead({ linkLabel, locale, article }: JournalLeadProps) {
   return (
     <Link
       className="mx-3 grid min-h-205 grid-cols-1 bg-ink text-text-inverse md:mx-7 md:grid-cols-split-65"
@@ -33,7 +34,7 @@ export function JournalLead({ linkLabel, article }: JournalLeadProps) {
       <div className="order-2 flex flex-col justify-center p-[clamp(36px,6vw,90px)] md:order-1">
         <p className={eyebrow({ tone: "warm" })}>
           {article.plate} · {article.readingMinutes} min read ·{" "}
-          {formatDate(article.publishedAt)}
+          {formatDate(article.publishedAt, locale)}
         </p>
         <h2 className="m-0 mb-7 text-balance font-heading text-journal-display leading-heading font-medium tracking-heading">
           {article.title}

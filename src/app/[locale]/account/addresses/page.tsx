@@ -10,18 +10,25 @@ import {
   type AddressFormValues,
   readAccountAddresses,
 } from "@/lib/account/addresses";
+import { localizePath } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
+import type { ThemeTranslate } from "@/lib/i18n/static-content";
+import { getTranslator, translatedMetadata } from "@/lib/i18n/translator";
 import { eyebrow, sectionHeading, textLink } from "@/lib/presentation/variants";
 import { AddressActionForm } from "./address-form";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-export const metadata: Metadata = {
-  title: "Addresses · Account",
-  description: "Your saved Forward addresses.",
-  robots: { index: false, follow: false },
-};
+export function generateMetadata({
+  params,
+}: Pick<AddressesPageProps, "params">): Promise<Metadata> {
+  return translatedMetadata(params, {
+    title: "account.meta.addressesTitle",
+    description: "account.meta.addressesDescription",
+    robots: { index: false, follow: false },
+  });
+}
 
 const EMPTY_ADDRESS: AddressFormValues = {
   firstName: "",
@@ -44,6 +51,7 @@ interface AddressesPageProps {
 interface AddressFieldsProps {
   /** Unique per rendered form, so labels stay bound to their own inputs. */
   idPrefix: string;
+  t: ThemeTranslate;
   values: AddressFormValues;
 }
 
@@ -59,13 +67,13 @@ const ACCOUNT_BLOCK_CLASS = "min-h-70 border border-ink bg-transparent p-7";
  * `required`/`maxLength`/`pattern` mirror the server-side schema; the server
  * revalidates all of it and never trusts these attributes.
  */
-function AddressFields({ idPrefix, values }: AddressFieldsProps) {
+function AddressFields({ idPrefix, t, values }: AddressFieldsProps) {
   const field = (name: string) => `${idPrefix}-${name}`;
   return (
     <>
       <div className={FIELD_CLASS}>
         <label className={LABEL_CLASS} htmlFor={field("firstName")}>
-          First name
+          {t("account.fields.firstName")}
         </label>
         <input
           className={INPUT_CLASS}
@@ -79,7 +87,7 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
       </div>
       <div className={FIELD_CLASS}>
         <label className={LABEL_CLASS} htmlFor={field("lastName")}>
-          Last name
+          {t("account.fields.lastName")}
         </label>
         <input
           className={INPUT_CLASS}
@@ -93,7 +101,7 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
       </div>
       <div className={FIELD_CLASS}>
         <label className={LABEL_CLASS} htmlFor={field("company")}>
-          Company (optional)
+          {t("account.fields.company")}
         </label>
         <input
           className={INPUT_CLASS}
@@ -106,7 +114,7 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
       </div>
       <div className={FIELD_CLASS}>
         <label className={LABEL_CLASS} htmlFor={field("address1")}>
-          Address
+          {t("account.fields.address1")}
         </label>
         <input
           className={INPUT_CLASS}
@@ -120,7 +128,7 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
       </div>
       <div className={FIELD_CLASS}>
         <label className={LABEL_CLASS} htmlFor={field("address2")}>
-          Apartment, suite, unit (optional)
+          {t("account.fields.address2")}
         </label>
         <input
           className={INPUT_CLASS}
@@ -133,7 +141,7 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
       </div>
       <div className={FIELD_CLASS}>
         <label className={LABEL_CLASS} htmlFor={field("city")}>
-          City
+          {t("account.fields.city")}
         </label>
         <input
           className={INPUT_CLASS}
@@ -147,7 +155,7 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
       </div>
       <div className={FIELD_CLASS}>
         <label className={LABEL_CLASS} htmlFor={field("zoneCode")}>
-          State / province code (optional)
+          {t("account.fields.zoneCode")}
         </label>
         <input
           className={INPUT_CLASS}
@@ -158,14 +166,11 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
           placeholder="CA"
           autoComplete="address-level1"
         />
-        <p className={FORM_NOTE_CLASS}>
-          Use a region code, not a name. Leave blank when the country has no
-          state or province code, such as Vietnam.
-        </p>
+        <p className={FORM_NOTE_CLASS}>{t("account.fields.zoneCodeHint")}</p>
       </div>
       <div className={FIELD_CLASS}>
         <label className={LABEL_CLASS} htmlFor={field("zip")}>
-          Postal code (optional)
+          {t("account.fields.zip")}
         </label>
         <input
           className={INPUT_CLASS}
@@ -178,7 +183,7 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
       </div>
       <div className={FIELD_CLASS}>
         <label className={LABEL_CLASS} htmlFor={field("territoryCode")}>
-          Country code
+          {t("account.fields.territoryCode")}
         </label>
         <input
           className={INPUT_CLASS}
@@ -192,12 +197,12 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
           required
         />
         <p className={FORM_NOTE_CLASS}>
-          Two-letter ISO country code, such as US.
+          {t("account.fields.territoryCodeHint")}
         </p>
       </div>
       <div className={FIELD_CLASS}>
         <label className={LABEL_CLASS} htmlFor={field("phoneNumber")}>
-          Phone (optional)
+          {t("account.fields.phone")}
         </label>
         <input
           className={INPUT_CLASS}
@@ -209,9 +214,7 @@ function AddressFields({ idPrefix, values }: AddressFieldsProps) {
           placeholder="+16135551111"
           autoComplete="tel"
         />
-        <p className={FORM_NOTE_CLASS}>
-          E.164 format, including the country code.
-        </p>
+        <p className={FORM_NOTE_CLASS}>{t("account.fields.phoneHint")}</p>
       </div>
     </>
   );
@@ -230,6 +233,7 @@ export default async function AddressesPage({
   searchParams,
 }: AddressesPageProps) {
   const locale = await routeLocale(routeParams);
+  const t = await getTranslator(locale);
   const params = await searchParams;
   const session = await readAccountSession({
     locale,
@@ -240,11 +244,17 @@ export default async function AddressesPage({
   if (session.status !== "authenticated") {
     return (
       <AccountShell
+        locale={locale}
         activePath={ADDRESSES_PATH}
-        eyebrow="Field account / Addresses"
-        title="Where the gear ships."
+        t={t}
+        eyebrow={t("account.addressesEyebrow")}
+        title={t("account.addressesTitle")}
       >
-        <AccountAccessPanel path={ADDRESSES_PATH} session={session} />
+        <AccountAccessPanel
+          t={t}
+          path={localizePath(ADDRESSES_PATH, locale)}
+          session={session}
+        />
       </AccountShell>
     );
   }
@@ -253,22 +263,28 @@ export default async function AddressesPage({
 
   return (
     <AccountShell
+      locale={locale}
       activePath={ADDRESSES_PATH}
-      eyebrow="Field account / Addresses"
-      title="Where the gear ships."
-      lede="Add, edit, or retire the addresses we ship your kit to."
+      t={t}
+      eyebrow={t("account.addressesEyebrow")}
+      title={t("account.addressesTitle")}
+      lede={t("account.addressesLede")}
       signedIn
     >
       <div className="mb-13">
-        <p className={eyebrow()}>Saved trailheads</p>
-        <h2 className={sectionHeading()}>Addresses</h2>
+        <p className={eyebrow()}>{t("account.savedTrailheads")}</p>
+        <h2 className={sectionHeading()}>{t("account.addressesHeading")}</h2>
       </div>
       {addresses.length > 0 ? (
         <div className="mt-12.5 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {addresses.map((address) => (
             <article key={address.id} className={ACCOUNT_BLOCK_CLASS}>
               <p className={eyebrow()}>
-                {address.isDefault ? "Default" : "Saved"}
+                {t(
+                  address.isDefault
+                    ? "account.defaultBadge"
+                    : "account.savedBadge",
+                )}
               </p>
               <address>
                 {address.lines.map((line) => (
@@ -280,7 +296,7 @@ export default async function AddressesPage({
               </address>
               {address.isDefault ? null : (
                 <AddressActionForm
-                  submitLabel="Make default"
+                  submitLabel={t("account.makeDefault")}
                   submitClassName={textLink()}
                 >
                   <input type="hidden" name="intent" value="default" />
@@ -288,19 +304,22 @@ export default async function AddressesPage({
                 </AddressActionForm>
               )}
               <AddressActionForm
-                submitLabel="Delete address"
+                submitLabel={t("account.deleteAddress")}
                 submitClassName={textLink()}
               >
                 <input type="hidden" name="intent" value="delete" />
                 <input type="hidden" name="addressId" value={address.id} />
               </AddressActionForm>
               <details>
-                <summary className={textLink()}>Edit address</summary>
-                <AddressActionForm submitLabel="Save changes">
+                <summary className={textLink()}>
+                  {t("account.editAddress")}
+                </summary>
+                <AddressActionForm submitLabel={t("account.saveChanges")}>
                   <input type="hidden" name="intent" value="update" />
                   <input type="hidden" name="addressId" value={address.id} />
                   <AddressFields
                     idPrefix={address.id}
+                    t={t}
                     values={address.values}
                   />
                 </AddressActionForm>
@@ -309,14 +328,18 @@ export default async function AddressesPage({
           ))}
         </div>
       ) : (
-        <p className="text-text-muted">No addresses saved yet.</p>
+        <p className="text-text-muted">{t("account.noAddresses")}</p>
       )}
       <div className={ACCOUNT_BLOCK_CLASS}>
         <details>
-          <summary className={textLink()}>Add an address</summary>
-          <AddressActionForm submitLabel="Save address">
+          <summary className={textLink()}>{t("account.addAddress")}</summary>
+          <AddressActionForm submitLabel={t("account.saveAddress")}>
             <input type="hidden" name="intent" value="create" />
-            <AddressFields idPrefix="new-address" values={EMPTY_ADDRESS} />
+            <AddressFields
+              idPrefix="new-address"
+              t={t}
+              values={EMPTY_ADDRESS}
+            />
             <div className="flex min-h-10 items-center gap-2.5 font-body text-micro text-text-muted">
               <input
                 className="size-4.25 accent-signal-strong"
@@ -325,7 +348,7 @@ export default async function AddressesPage({
                 name="defaultAddress"
               />
               <label htmlFor="new-address-default">
-                Use this as my default address
+                {t("account.useAsDefault")}
               </label>
             </div>
           </AddressActionForm>

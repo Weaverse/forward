@@ -3,6 +3,7 @@
 import { Link } from "@/components/link";
 
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/t";
 import {
   AFTER_PARAM,
   BEFORE_PARAM,
@@ -104,6 +105,7 @@ function PriceRange({
   params: URLSearchParams;
   idPrefix: string;
 }) {
+  const t = useT();
   const bounds = (() => {
     try {
       const parsed = JSON.parse(filter.values[0]?.input ?? "{}") as {
@@ -132,7 +134,7 @@ function PriceRange({
       ))}
       <div className="flex items-center gap-2.5">
         <label className="sr-only" htmlFor={`${idPrefix}-price-min`}>
-          Minimum price
+          {t("catalog.minimumPrice")}
         </label>
         <input
           className="min-h-touch w-full min-w-0 rounded-none border border-border-subtle bg-transparent px-2.5 font-body text-micro tabular-nums"
@@ -145,9 +147,11 @@ function PriceRange({
           placeholder={bounds.min === undefined ? "" : String(bounds.min)}
           defaultValue={applied.min}
         />
-        <span className="font-body text-micro text-text-muted">to</span>
+        <span className="font-body text-micro text-text-muted">
+          {t("catalog.priceTo")}
+        </span>
         <label className="sr-only" htmlFor={`${idPrefix}-price-max`}>
-          Maximum price
+          {t("catalog.maximumPrice")}
         </label>
         <input
           className="min-h-touch w-full min-w-0 rounded-none border border-border-subtle bg-transparent px-2.5 font-body text-micro tabular-nums"
@@ -165,7 +169,7 @@ function PriceRange({
         className="min-h-touch self-start border border-ink bg-transparent px-3.5 font-body text-micro font-extrabold tracking-label uppercase hover:bg-surface-subtle"
         type="submit"
       >
-        Apply
+        {t("catalog.apply")}
       </button>
     </form>
   );

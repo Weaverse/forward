@@ -1,17 +1,12 @@
 import type { WeaverseNextThemeSchemaGroup } from "@weaverse/next";
 
 /**
- * Footer theme settings.
-
+ * Footer theme settings. The tagline is a translation key (`footer.tagline`),
+ * not a setting, so it can differ per market in the Translation Manager.
  */
 export const footerSettings = {
   group: "Footer",
   inputs: [
-    {
-      type: "text",
-      name: "footerTagline",
-      label: "Tagline",
-    },
     {
       type: "text",
       name: "footerMenuHandle",

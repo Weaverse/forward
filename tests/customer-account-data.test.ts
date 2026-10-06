@@ -9,6 +9,7 @@ import {
   formatAccountMoney,
   formatStatusLabel,
   hasRefreshMarker,
+  orderStatusKey,
   readAccountOrder,
   readAccountProfile,
 } from "../src/lib/account/account-view.ts";
@@ -34,6 +35,7 @@ function fakeSession(
   return {
     status: "authenticated",
     accessToken: ACCESS_TOKEN,
+    locale: "en-us",
     client: {
       apiUrl: "https://shopify.com/1/account/customer/api/2026-07/graphql",
       graphql: async (document: unknown, options: GraphqlOptions) => ({
@@ -128,15 +130,18 @@ function respondWithFixtures(document: unknown): GraphqlResponse {
 describe("account formatting", () => {
   it("formats Customer Account decimal money strings", () => {
     assert.equal(
-      formatAccountMoney({ amount: "390.0", currencyCode: "USD" }),
+      formatAccountMoney({ amount: "390.0", currencyCode: "USD" }, "en-us"),
       "$390",
     );
     assert.equal(
-      formatAccountMoney({ amount: "12.50", currencyCode: "USD" }),
+      formatAccountMoney({ amount: "12.50", currencyCode: "USD" }, "en-us"),
       "$12.50",
     );
     assert.equal(
-      formatAccountMoney({ amount: "not-a-number", currencyCode: "USD" }),
+      formatAccountMoney(
+        { amount: "not-a-number", currencyCode: "USD" },
+        "en-us",
+      ),
       "—",
     );
   });
@@ -148,6 +153,11 @@ describe("account formatting", () => {
     );
     assert.equal(formatStatusLabel("FULFILLED"), "Fulfilled");
     assert.equal(formatStatusLabel(null), "Processing");
+    assert.equal(orderStatusKey("ON_HOLD"), "account.status.onHold");
+    assert.equal(orderStatusKey(null), "account.status.processing");
+    /* A status Shopify adds later falls back to the English label. */
+    assert.equal(orderStatusKey("RETURNED_TO_SENDER"), null);
+    assert.equal(orderStatusKey("constructor"), null);
   });
 
   it("detects the one fixed refresh marker", () => {
@@ -177,6 +187,7 @@ describe("readAccountProfile", () => {
         href: "/account/orders/1001",
         processedAt: "2026-07-21T09:30:00Z",
         status: "Partially fulfilled",
+        statusKey: "account.status.partiallyFulfilled",
         total: "$390",
       },
     ]);
@@ -213,6 +224,7 @@ describe("readAccountOrder", () => {
     assert.ok(order);
     assert.equal(order.name, "#1001");
     assert.equal(order.status, "Fulfilled");
+    assert.equal(order.statusKey, "account.status.fulfilled");
     assert.equal(order.total, "$390");
     assert.equal(order.subtotal, "$390");
     assert.equal(order.tax, null);

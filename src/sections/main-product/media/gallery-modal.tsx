@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/t";
 import { galleryImages } from "@/lib/storefront/product-state";
 import type { Product, ProductColorway } from "@/lib/storefront/types";
 
@@ -19,6 +20,7 @@ export function GalleryModal({
   initialIndex: number;
   onClose(): void;
 }) {
+  const t = useT();
   const images = galleryImages(colorway);
   const [index, setIndex] = useState(initialIndex);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -59,7 +61,7 @@ export function GalleryModal({
     <dialog
       ref={dialogRef}
       className="m-0 flex h-dvh max-h-none w-screen max-w-none flex-col overflow-hidden border-0 bg-ink p-0 text-text-inverse backdrop:bg-black/94"
-      aria-label={`${product.title} image gallery`}
+      aria-label={t("product.gallery", { title: product.title })}
       onClose={onClose}
       onCancel={(event) => {
         event.preventDefault();
@@ -78,9 +80,9 @@ export function GalleryModal({
           className="min-h-touch bg-signal px-4 text-ink"
           type="button"
           onClick={onClose}
-          aria-label="Close image gallery"
+          aria-label={t("product.closeGallery")}
         >
-          Close ×
+          {t("product.close")}
         </button>
       </div>
       <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden px-12.5 py-3 md:px-20 md:py-4.5">
@@ -100,7 +102,7 @@ export function GalleryModal({
           onClick={() =>
             setIndex((current) => (current - 1 + images.length) % images.length)
           }
-          aria-label="Previous image"
+          aria-label={t("product.previousImage")}
         >
           ←
         </button>
@@ -108,13 +110,13 @@ export function GalleryModal({
           className="absolute top-1/2 right-4 h-14 w-12 -translate-y-1/2 bg-signal text-product-price text-ink"
           type="button"
           onClick={() => setIndex((current) => (current + 1) % images.length)}
-          aria-label="Next image"
+          aria-label={t("product.nextImage")}
         >
           →
         </button>
       </div>
       <fieldset className="flex h-20 shrink-0 justify-center gap-2 border-border-dark border-t p-2.25 md:h-22.5">
-        <legend className="sr-only">Choose gallery image</legend>
+        <legend className="sr-only">{t("product.chooseImage")}</legend>
         {images.map((entry, entryIndex) => (
           <button
             key={entry.src}
@@ -125,7 +127,10 @@ export function GalleryModal({
                 ? "border-signal opacity-100"
                 : "border-transparent opacity-55",
             )}
-            aria-label={`View image ${entryIndex + 1}: ${entry.alt}`}
+            aria-label={t("product.viewImage", {
+              index: entryIndex + 1,
+              alt: entry.alt,
+            })}
             aria-pressed={entryIndex === index}
             onClick={() => setIndex(entryIndex)}
           >

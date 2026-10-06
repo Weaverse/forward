@@ -39,7 +39,10 @@ const USD = (amount: number): Money => ({ amount, currencyCode: "USD" });
 
 /** The rendered money string, escaped for a regular expression. */
 function money(amount: number): string {
-  return formatMoney(USD(amount)).replace(/[$.]/g, (match) => `\\${match}`);
+  return formatMoney(USD(amount), "en-us").replace(
+    /[$.]/g,
+    (match) => `\\${match}`,
+  );
 }
 
 function withVariants(

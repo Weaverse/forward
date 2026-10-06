@@ -2,7 +2,7 @@
 
 import { cva } from "class-variance-authority";
 import { Link } from "@/components/link";
-
+import { useT } from "@/lib/i18n/t";
 import {
   colorwayIsSoldOut,
   colorwaySwatchStyle,
@@ -10,7 +10,6 @@ import {
   productSelectionHref,
   resolveProductSelection,
 } from "@/lib/storefront/product-state";
-
 import {
   elementAttributes,
   type WeaverseElementProps,
@@ -67,11 +66,12 @@ function ProductVariantSelector({
   showSelectedValue,
   ...rest
 }: ProductVariantSelectorProps) {
+  const t = useT();
   const state = useMainProduct();
   if (state === null) return null;
   const { product, selection, currentParams } = state;
   const { colorway } = selection;
-  const label = colorLabel || "Color";
+  const label = colorLabel || t("product.color");
 
   return (
     <div {...elementAttributes(rest)}>
@@ -105,7 +105,13 @@ function ProductVariantSelector({
                   currentParams,
                 )}
                 scroll={false}
-                aria-label={`${entry.name} colorway${selected ? " (selected)" : ""}${soldOut ? " (sold out)" : ""}`}
+                aria-label={[
+                  t("product.colorway", { name: entry.name }),
+                  selected ? t("product.selected") : "",
+                  soldOut ? t("product.soldOutSuffix") : "",
+                ]
+                  .filter((part) => part !== "")
+                  .join(" ")}
                 aria-current={selected ? "true" : undefined}
               >
                 {showSwatches === false ? null : (
@@ -150,10 +156,13 @@ function ProductVariantSelector({
                     })}
                     aria-disabled="true"
                     aria-current={selected ? "true" : undefined}
-                    title={`${value} is unavailable`}
+                    title={t("product.unavailable", { value })}
                   >
                     {value}
-                    <span className="sr-only"> (sold out)</span>
+                    <span className="sr-only">
+                      {" "}
+                      {t("product.soldOutSuffix")}
+                    </span>
                   </span>
                 );
               }

@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import { Link } from "@/components/link";
+import { useT } from "@/lib/i18n/t";
 
 interface WordmarkProps {
   href?: string;
@@ -30,13 +33,14 @@ const WORDMARKS = {
 
 /** Approved FOR / WARD horizontal lockup for light and dark site surfaces. */
 export function Wordmark({ href = "/", variant = "header" }: WordmarkProps) {
+  const t = useT();
   const wordmark = WORDMARKS[variant];
 
   return (
     <Link
       className={wordmark.className}
       href={href}
-      aria-label="Forward — home"
+      aria-label={t("common.home")}
     >
       <Image
         className="block h-auto w-full bg-transparent"

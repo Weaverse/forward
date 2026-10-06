@@ -8,10 +8,10 @@ import {
 } from "@/lib/presentation/variants";
 
 interface SearchEmptyStateProps {
-  eyebrowLabel: string;
+  eyebrowLabel: React.ReactNode;
   heading: React.ReactNode;
-  body: string;
-  ctaLabel: string;
+  body: React.ReactNode;
+  ctaLabel: React.ReactNode;
   ctaHref: string;
   /** Announce the body copy when it reports a result count. */
   announce?: boolean;

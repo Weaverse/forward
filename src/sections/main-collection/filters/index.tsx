@@ -4,8 +4,8 @@ import { useSearchParams } from "next/navigation";
 import { FacetList } from "@/components/facet-list";
 import { cn } from "@/lib/cn";
 import { usePathname } from "@/lib/i18n/locale-context";
+import { useT } from "@/lib/i18n/t";
 import { useStorefrontContext } from "@/lib/weaverse/data-context";
-
 import {
   elementAttributes,
   type WeaverseElementProps,
@@ -34,6 +34,7 @@ function CollectionFilters({
   sticky,
   ...rest
 }: CollectionFiltersProps) {
+  const t = useT();
   const { browse } = useStorefrontContext();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -62,7 +63,7 @@ function CollectionFilters({
     >
       <details className="group/disclosure border-ink border-b lg:hidden">
         <summary className="flex min-h-touch list-none items-center justify-between font-body text-micro font-medium tracking-label uppercase after:content-['+'] group-open/disclosure:after:content-['−'] [&::-webkit-details-marker]:hidden">
-          {heading ?? "Filters"}
+          {heading ?? t("catalog.filters")}
         </summary>
         {facets("collection-mobile")}
       </details>
@@ -73,7 +74,7 @@ function CollectionFilters({
         )}
       >
         <h2 className="font-body text-micro font-extrabold tracking-label uppercase">
-          {heading ?? "Filters"}
+          {heading ?? t("catalog.filters")}
         </h2>
         {facets("collection-desktop")}
       </div>

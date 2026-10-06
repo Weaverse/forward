@@ -8,18 +8,24 @@ import {
   readAccountSession,
 } from "@/lib/account/account-view";
 import { ACCOUNT_ORDER_LIMIT } from "@/lib/account/queries";
+import { localizePath } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
+import { getTranslator, translatedMetadata } from "@/lib/i18n/translator";
 import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { formatDate } from "@/lib/storefront/format";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-export const metadata: Metadata = {
-  title: "Order history · Account",
-  description: "Your Forward order history.",
-  robots: { index: false, follow: false },
-};
+export function generateMetadata({
+  params,
+}: Pick<OrdersPageProps, "params">): Promise<Metadata> {
+  return translatedMetadata(params, {
+    title: "account.meta.ordersTitle",
+    description: "account.meta.ordersDescription",
+    robots: { index: false, follow: false },
+  });
+}
 
 const ORDERS_PATH = "/account/orders";
 
@@ -41,6 +47,7 @@ export default async function OrdersPage({
   searchParams,
 }: OrdersPageProps) {
   const locale = await routeLocale(routeParams);
+  const t = await getTranslator(locale);
   const params = await searchParams;
   const session = await readAccountSession({
     locale,
@@ -51,11 +58,17 @@ export default async function OrdersPage({
   if (session.status !== "authenticated") {
     return (
       <AccountShell
+        locale={locale}
         activePath={ORDERS_PATH}
-        eyebrow="Field account / Order history"
-        title="Your recent field orders."
+        t={t}
+        eyebrow={t("account.ordersEyebrow")}
+        title={t("account.ordersTitle")}
       >
-        <AccountAccessPanel path={ORDERS_PATH} session={session} />
+        <AccountAccessPanel
+          t={t}
+          path={localizePath(ORDERS_PATH, locale)}
+          session={session}
+        />
       </AccountShell>
     );
   }
@@ -64,43 +77,67 @@ export default async function OrdersPage({
 
   return (
     <AccountShell
+      locale={locale}
       activePath={ORDERS_PATH}
-      eyebrow="Field account / Order history"
-      title="Your recent field orders."
-      lede={`Your ${ACCOUNT_ORDER_LIMIT} most recent orders, newest first.`}
+      t={t}
+      eyebrow={t("account.ordersEyebrow")}
+      title={t("account.ordersTitle")}
+      lede={t("account.ordersLede", { count: ACCOUNT_ORDER_LIMIT })}
       signedIn
     >
       <div className="mb-13">
-        <p className={eyebrow()}>Recent log</p>
-        <h2 className={sectionHeading()}>Orders</h2>
+        <p className={eyebrow()}>{t("account.recentLog")}</p>
+        <h2 className={sectionHeading()}>{t("account.ordersHeading")}</h2>
       </div>
       {profile.orders.length > 0 ? (
         <table className="w-full border-collapse">
           <thead className="hidden sm:table-header-group">
             <tr>
-              <th className={ORDER_HEADING_CLASS}>Order</th>
-              <th className={ORDER_HEADING_CLASS}>Date</th>
-              <th className={ORDER_HEADING_CLASS}>Status</th>
-              <th className={ORDER_HEADING_CLASS}>Total</th>
+              <th className={ORDER_HEADING_CLASS}>
+                {t("account.columns.order")}
+              </th>
+              <th className={ORDER_HEADING_CLASS}>
+                {t("account.columns.date")}
+              </th>
+              <th className={ORDER_HEADING_CLASS}>
+                {t("account.columns.status")}
+              </th>
+              <th className={ORDER_HEADING_CLASS}>
+                {t("account.columns.total")}
+              </th>
             </tr>
           </thead>
           <tbody>
             {profile.orders.map((order) => (
               <tr className={ORDER_ROW_CLASS} key={order.number}>
-                <td className={ORDER_CELL_CLASS} data-label="Order">
+                <td
+                  className={ORDER_CELL_CLASS}
+                  data-label={t("account.columns.order")}
+                >
                   <strong>
                     <Link href={order.href}>{order.name}</Link>
                   </strong>
                 </td>
-                <td className={ORDER_CELL_CLASS} data-label="Date">
-                  {formatDate(order.processedAt.slice(0, 10))}
+                <td
+                  className={ORDER_CELL_CLASS}
+                  data-label={t("account.columns.date")}
+                >
+                  {formatDate(order.processedAt.slice(0, 10), locale)}
                 </td>
-                <td className={ORDER_CELL_CLASS} data-label="Status">
+                <td
+                  className={ORDER_CELL_CLASS}
+                  data-label={t("account.columns.status")}
+                >
                   <span className="font-bold text-signal-strong">
-                    {order.status}
+                    {order.statusKey === null
+                      ? order.status
+                      : t(order.statusKey)}
                   </span>
                 </td>
-                <td className={ORDER_CELL_CLASS} data-label="Total">
+                <td
+                  className={ORDER_CELL_CLASS}
+                  data-label={t("account.columns.total")}
+                >
                   {order.total}
                 </td>
               </tr>
@@ -108,7 +145,7 @@ export default async function OrdersPage({
           </tbody>
         </table>
       ) : (
-        <p className="text-text-muted">No orders on record yet.</p>
+        <p className="text-text-muted">{t("account.noOrders")}</p>
       )}
     </AccountShell>
   );

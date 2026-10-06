@@ -5,15 +5,16 @@ import { Icon } from "@/components/icon";
 import { Link } from "@/components/link";
 import { Wordmark } from "@/components/wordmark";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/t";
 import type { NavItem } from "@/lib/storefront/types";
 import { CartCount } from "./cart-count";
 import {
-  accountNavigationLabel,
   createHeaderNavigationHref,
   currentCollectionIndex,
   type FieldIndexCollection,
   findShopItem,
   isActive,
+  navigationLabel,
   SEARCH_LINK,
 } from "./header-navigation";
 import { HEADER_CONTROL_CLASS } from "./header-styles";
@@ -31,14 +32,19 @@ function MobileFieldIndex({
   pathname,
   queryString,
 }: MobileFieldIndexProps) {
+  const t = useT();
   const currentIndex = currentCollectionIndex(pathname, collections);
   return (
     <div>
       <div className="flex min-h-12 items-center justify-between border-white/22 border-b font-body text-micro text-text-dark-muted tracking-field-meta uppercase">
-        <span>Shop / Field index</span>
-        <span>{String(collections.length).padStart(2, "0")} systems</span>
+        <span>{t("header.shopIndexHeading")}</span>
+        <span>
+          {t("header.systemCount", {
+            count: String(collections.length).padStart(2, "0"),
+          })}
+        </span>
       </div>
-      <nav aria-label="Mobile shop collections">
+      <nav aria-label={t("header.mobileCollections")}>
         {collections.map((collection, index) => (
           <Link
             key={collection.id}
@@ -60,7 +66,7 @@ function MobileFieldIndex({
         ))}
       </nav>
       <p className="mt-5.5 mb-0 font-body text-nano text-text-dark-muted tracking-label uppercase">
-        Designed for weather, miles, and repeat use.
+        {t("header.mobileTagline")}
       </p>
     </div>
   );
@@ -92,6 +98,7 @@ export function MobileMenu({
   queryString,
   utilityLinks,
 }: MobileMenuProps) {
+  const t = useT();
   const panelRef = useRef<HTMLElement>(null);
   /* Escape reads the latest handler without re-arming the modal contract. */
   const onCloseRef = useRef(onClose);
@@ -170,7 +177,7 @@ export function MobileMenu({
       id={id}
       role="dialog"
       aria-modal="true"
-      aria-label="Site menu"
+      aria-label={t("header.mobileMenu")}
     >
       <div className="sticky top-0 z-2 flex h-18 items-center justify-between gap-3.5 border-white/25 border-b bg-inherit">
         <Wordmark
@@ -182,7 +189,7 @@ export function MobileMenu({
           type="button"
           className={cn(HEADER_CONTROL_CLASS, "inline-flex")}
           onClick={onClose}
-          aria-label="Close menu"
+          aria-label={t("header.closeMenu")}
         >
           <Icon name="x" size={20} />
         </button>
@@ -197,7 +204,7 @@ export function MobileMenu({
       )}
       <nav
         className="mt-7.5 border-white/22 border-t"
-        aria-label="Mobile primary navigation"
+        aria-label={t("header.mobileNavigation")}
       >
         {links.map(({ item, child }, index) => (
           <Link
@@ -215,7 +222,7 @@ export function MobileMenu({
             <span className="font-body text-nano text-text-dark-muted">
               {String(index + 4).padStart(2, "0")}
             </span>
-            {accountNavigationLabel(item, accountSignedIn)}
+            {navigationLabel(item, accountSignedIn, t)}
             <i
               className="font-body text-nano text-text-dark-muted not-italic"
               aria-hidden="true"
@@ -233,14 +240,14 @@ export function MobileMenu({
           <span className="font-body text-nano text-text-dark-muted">
             {String(links.length + 4).padStart(2, "0")}
           </span>
-          Cart
+          {t("header.cart")}
           <CartCount />
         </Link>
       </nav>
       <p className="mt-11.25 mb-0 text-ui text-text-inverse-subtle leading-mobile-rail tracking-label uppercase">
-        FOR / WARD · Field index
+        {t("header.mobileRailTitle")}
         <br />
-        Shopify menu structure · Forward field system
+        {t("header.mobileRailCaption")}
       </p>
     </aside>
   );

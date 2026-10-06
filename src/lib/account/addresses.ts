@@ -19,6 +19,7 @@
  *   GraphQL extensions, tokens, and address PII never leave this file.
  */
 
+import { type LocaleId, localizePath } from "@/lib/i18n/locales";
 import type { AccountSession } from "./account-view";
 import { CustomerAccountRequestError } from "./account-view";
 import { loginHref } from "./customer-account";
@@ -45,16 +46,21 @@ export type AddressIntent = (typeof ADDRESS_INTENTS)[number];
  * Every user-facing outcome, fixed at build time. Nothing here is derived from
  * a provider response.
  */
-export const ADDRESS_ERROR_REJECTED =
-  "That request could not be verified. Reload the page and try again.";
-export const ADDRESS_ERROR_INVALID = "Check the address details and try again.";
-export const ADDRESS_ERROR_FAILED =
-  "That address change could not be completed. Reload the page to check before trying again.";
+/* Translation keys, not copy: the form renders them in the shopper's market. */
+export const ADDRESS_ERROR_REJECTED = "account.addressErrors.rejected";
+export const ADDRESS_ERROR_INVALID = "account.addressErrors.invalid";
+export const ADDRESS_ERROR_FAILED = "account.addressErrors.failed";
 
 export type AddressActionResult =
   | { status: "success" }
   | { status: "redirect"; href: string }
-  | { status: "error"; message: string };
+  | {
+      status: "error";
+      message:
+        | typeof ADDRESS_ERROR_REJECTED
+        | typeof ADDRESS_ERROR_INVALID
+        | typeof ADDRESS_ERROR_FAILED;
+    };
 
 /** The exact `CustomerAddressInput` subset Forward writes. */
 const ADDRESS_FIELDS = [
@@ -386,8 +392,10 @@ export async function performAddressAction(options: {
   /** The configured storefront origin, never a request-derived host. */
   origin: string;
   formData: FormData;
+  /** The shopper's market, so a sign-in returns them to it. */
+  locale: LocaleId;
 }): Promise<AddressActionResult> {
-  const { session, requestHeaders, origin, formData } = options;
+  const { session, requestHeaders, origin, formData, locale } = options;
 
   if (!isConfiguredOrigin(requestHeaders, origin)) {
     return { status: "error", message: ADDRESS_ERROR_REJECTED };
@@ -396,7 +404,10 @@ export async function performAddressAction(options: {
     return { status: "redirect", href: session.href };
   }
   if (session.status !== "authenticated") {
-    return { status: "redirect", href: loginHref(ADDRESSES_PATH) };
+    return {
+      status: "redirect",
+      href: loginHref(localizePath(ADDRESSES_PATH, locale)),
+    };
   }
 
   const parsed = parseAddressForm(formData);

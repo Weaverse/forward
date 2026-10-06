@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Link } from "@/components/link";
+import { useT } from "@/lib/i18n/t";
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
 import {
   elementAttributes,
@@ -17,6 +18,7 @@ interface ProductTilesProps extends WeaverseElementProps {
 
 /** Full-bleed product tiles, each linking through to its product page. */
 function ProductTiles({ loaderData, ...rest }: ProductTilesProps) {
+  const t = useT();
   const tiles = loaderData?.tiles ?? [];
   return (
     <section
@@ -40,7 +42,7 @@ function ProductTiles({ loaderData, ...rest }: ProductTilesProps) {
           <div className="absolute right-5 bottom-5 left-5 grid gap-1.75 bg-ink/92 p-5">
             <span>{product.category}</span>
             <strong>{product.title}</strong>
-            <span>Inspect product →</span>
+            <span>{t("sections.inspectProduct")}</span>
           </div>
         </Link>
       ))}

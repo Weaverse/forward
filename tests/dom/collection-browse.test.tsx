@@ -1,6 +1,5 @@
 import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
-import { render } from "@testing-library/react";
 import type { CollectionProductsPage } from "@/lib/storefront/types";
 import {
   type StorefrontDataContext,
@@ -13,7 +12,7 @@ import CollectionToolbar from "@/sections/main-collection/toolbar";
 import { COLLECTION_FIXTURES } from "../fixtures/storefront/collections";
 import { FILTER_FIXTURES } from "../fixtures/storefront/filters";
 import { PRODUCT_FIXTURES } from "../fixtures/storefront/products";
-
+import { renderWithCart as render } from "./harness";
 import { setRoute } from "./preload";
 
 const COLLECTION = COLLECTION_FIXTURES[0];

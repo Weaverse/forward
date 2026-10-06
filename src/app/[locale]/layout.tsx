@@ -9,15 +9,22 @@ import { ShopifyCartRuntime } from "@/lib/cart/shopify-cart-react";
 import { cn } from "@/lib/cn";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
 import {
+  DEFAULT_LOCALE,
   LOCALE_IDS,
-  type LocaleId,
+  LOCALES,
   localeTag,
   parseLocale,
 } from "@/lib/i18n/locales";
-import { readThemeSettings, weaverseProjectId } from "@/lib/weaverse/server";
+import { WeaverseRoot } from "@/lib/weaverse/root";
+import {
+  loadWeaverseThemeSettings,
+  weaverseProjectId,
+} from "@/lib/weaverse/server";
 import { StudioConnect } from "@/lib/weaverse/studio-connect";
 
 import "../globals.css";
+import { T } from "@/lib/i18n/t";
+import { getTranslator } from "@/lib/i18n/translator";
 
 /* Premium type contract: Archivo for display, Manrope for body/UI, and
  * IBM Plex Mono only for compact field metadata. Next serves all three. */
@@ -42,33 +49,23 @@ const plexMono = IBM_Plex_Mono({
   variable: "--font-plex-mono",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Forward — Gear for the way out",
-    template: "%s · Forward",
-  },
-  description:
-    "Forward is an outdoor gear storefront theme built on Next.js and powered by Weaverse.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const t = await getTranslator(
+    parseLocale((await params).locale) ?? DEFAULT_LOCALE,
+  );
+  return {
+    title: { default: t("meta.siteTitle"), template: "%s · Forward" },
+    description: t("meta.siteDescription"),
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#11130f",
 };
-
-/**
- * Reads the merchant's page measure, or `null` to keep the theme's own.
- *
- * This is the first theme setting the storefront actually consumes. It lands
- * as a CSS variable rather than a prop because `max-w-page` is a Tailwind
- * token every section already resolves through.
- */
-async function pageWidthStyle(locale: LocaleId): Promise<string | null> {
-  const { pageWidth } = await readThemeSettings(locale);
-  if (typeof pageWidth !== "number" || pageWidth <= 0) {
-    return null;
-  }
-  return `:root{--container-page:${pageWidth}px}`;
-}
 
 export function generateStaticParams() {
   return LOCALE_IDS.map((locale) => ({ locale }));
@@ -86,10 +83,11 @@ export default async function RootLayout({
     notFound();
   }
   const weaverseEnabled = weaverseProjectId() !== null;
-  const pageWidth = await pageWidthStyle(locale);
+  const themeResponse = await loadWeaverseThemeSettings(locale);
   return (
     <html
       lang={localeTag(locale)}
+      dir={LOCALES[locale].direction}
       data-scroll-behavior="smooth"
       className={cn(
         archivo.variable,
@@ -99,12 +97,6 @@ export default async function RootLayout({
       )}
     >
       <head>
-        {pageWidth === null ? null : (
-          <style
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: one numeric theme setting rendered into a single custom property, never merchant markup.
-            dangerouslySetInnerHTML={{ __html: pageWidth }}
-          />
-        )}
         <script
           crossOrigin="anonymous"
           id="shopify-standard-actions"
@@ -115,24 +107,30 @@ export default async function RootLayout({
       <body className="m-0 max-w-full overflow-x-clip bg-canvas font-body text-copy-sm leading-body text-ink antialiased">
         {weaverseEnabled ? <StudioConnect /> : null}
         <LocaleProvider locale={locale}>
-          <ShopifyCartRuntime>
-            <a
-              className="fixed top-2.5 left-2.5 z-1000 -translate-y-3/2 bg-ink px-4 py-2.75 text-text-inverse focus:translate-y-0"
-              data-shell-background
-              href="#main-content"
-            >
-              Skip to content
-            </a>
-            <SiteHeader locale={locale} />
-            <main
-              className="min-h-[66vh]"
-              data-shell-background
-              id="main-content"
-            >
-              {children}
-            </main>
-            <SiteFooter locale={locale} />
-          </ShopifyCartRuntime>
+          <WeaverseRoot
+            merchantOverrides={themeResponse?.merchantOverrides}
+            publicEnv={themeResponse?.publicEnv}
+            theme={themeResponse?.theme}
+          >
+            <ShopifyCartRuntime>
+              <a
+                className="fixed top-2.5 left-2.5 z-1000 -translate-y-3/2 bg-ink px-4 py-2.75 text-text-inverse focus:translate-y-0"
+                data-shell-background
+                href="#main-content"
+              >
+                <T k="common.skipToContent" />
+              </a>
+              <SiteHeader locale={locale} />
+              <main
+                className="min-h-[66vh]"
+                data-shell-background
+                id="main-content"
+              >
+                {children}
+              </main>
+              <SiteFooter locale={locale} />
+            </ShopifyCartRuntime>
+          </WeaverseRoot>
         </LocaleProvider>
       </body>
     </html>

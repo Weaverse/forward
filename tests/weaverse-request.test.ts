@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { buildRequestContext } from "../src/lib/weaverse/request-info.ts";
+import { LOCALE_IDS } from "../src/lib/i18n/locales.ts";
+import {
+  buildRequestContext,
+  loaderLocale,
+} from "../src/lib/weaverse/request-info.ts";
 
 /**
  * These cover the fields the Studio bridge reads and the storefront never
@@ -19,7 +23,33 @@ describe("buildRequestContext", () => {
     /* The bridge does `i18n.language`; undefined here crashed Studio. */
     assert.equal(context.i18n?.language, "EN");
     assert.equal(context.i18n?.country, "US");
-    assert.equal(context.i18n?.locale, "en-us");
+    assert.equal(context.i18n?.locale, "en-US");
+    assert.equal(context.i18n?.pathPrefix, "");
+  });
+
+  it("reports a market in Weaverse's format and gets it back in a loader", () => {
+    const context = buildRequestContext({
+      headers,
+      pathname: "/shop",
+      locale: "de-de",
+    });
+    assert.equal(context.i18n?.locale, "de-DE");
+    assert.equal(context.i18n?.pathPrefix, "/de-de");
+    /* Studio's address bar follows the reported path: it must keep the
+     * market, or Studio snaps back to the default market after navigating. */
+    assert.equal(context.pathname, "/de-de/shop");
+    assert.equal(String(context.url), "http://forward.example/de-de/shop");
+
+    /* Section loaders see the same `i18n`, so every market must round-trip. */
+    for (const locale of LOCALE_IDS) {
+      const { i18n } = buildRequestContext({ headers, pathname: "/", locale });
+      assert.equal(loaderLocale({ i18n }), locale);
+    }
+    assert.equal(loaderLocale(undefined), "en-us");
+    assert.equal(
+      loaderLocale({ i18n: { language: "XX", country: "YY" } }),
+      "en-us",
+    );
   });
 
   it("carries the page identity Studio edits against", () => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/lib/i18n/t";
 import {
   cta,
   emptyState,
@@ -15,21 +16,22 @@ export default function ErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useT();
   return (
     <div className={emptyState({ size: "page" })}>
       <div className="max-w-state" role="alert">
-        <p className={eyebrow()}>Field report / Error</p>
-        <h1 className={sectionHeading()}>Weather moved in.</h1>
+        <p className={eyebrow()}>{t("errors.eyebrow")}</p>
+        <h1 className={sectionHeading()}>{t("errors.heading")}</h1>
         <p className="max-w-lede text-lede leading-lede text-text-muted">
-          An unexpected error interrupted this page.
+          {t("errors.body")}
         </p>
         {error.digest ? (
           <p className="font-field-meta text-caption font-medium text-text-muted tracking-field-meta uppercase">
-            Reference / {error.digest}
+            {t("errors.reference", { digest: error.digest })}
           </p>
         ) : null}
         <button className={cta()} type="button" onClick={reset}>
-          Try again
+          {t("errors.retry")}
         </button>
       </div>
     </div>

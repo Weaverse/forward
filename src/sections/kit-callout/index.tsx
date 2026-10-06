@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Link } from "@/components/link";
 import { Section } from "@/components/section";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/t";
 import {
   eyebrow,
   sectionHeading,
@@ -50,6 +51,7 @@ function KitCallout({
   loaderData,
   ...rest
 }: KitCalloutProps) {
+  const t = useT();
   const product = loaderData?.product ?? null;
   const tiles = loaderData?.tiles ?? [];
   return (
@@ -103,7 +105,7 @@ function KitCallout({
                   unoptimized
                 />
                 <span className={cn(TILE_TITLE_CLASS, "text-text-muted")}>
-                  Product title
+                  {t("sections.placeholder.productTitle")}
                 </span>
               </div>
             ))}

@@ -1,8 +1,9 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n/locale-context";
+import { useT } from "@/lib/i18n/t";
 import { formatMoney } from "@/lib/storefront/format";
 import { saleCompareAtPrice } from "@/lib/storefront/product-state";
-
 import {
   elementAttributes,
   type WeaverseElementProps,
@@ -22,12 +23,14 @@ function ProductPrices({
   saleBadgeText,
   ...rest
 }: ProductPricesProps) {
+  const t = useT();
+  const locale = useLocale();
   const state = useMainProduct();
   if (state === null) return null;
   const { variant } = state.selection;
   const compareAt =
     showCompareAtPrice === false ? null : saleCompareAtPrice(variant);
-  const badge = saleBadgeText || "On sale";
+  const badge = saleBadgeText || t("product.onSale");
 
   return (
     <p
@@ -36,15 +39,15 @@ function ProductPrices({
     >
       <strong>
         <span className="sr-only">
-          {compareAt !== null ? "Sale price " : "Price "}
+          {t(compareAt !== null ? "product.salePrice" : "product.price")}{" "}
         </span>
-        {formatMoney(variant.price)}
+        {formatMoney(variant.price, locale)}
       </strong>
       {compareAt !== null ? (
         <>
           <del className="text-text-dark-muted line-through">
-            <span className="sr-only">Regular price </span>
-            {formatMoney(compareAt)}
+            <span className="sr-only">{t("product.regularPrice")} </span>
+            {formatMoney(compareAt, locale)}
           </del>
           {showSaleBadge === false ? null : (
             <span className="bg-signal px-2 py-1 font-body text-ui font-extrabold text-ink tracking-control uppercase">

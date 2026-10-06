@@ -2,7 +2,7 @@
 
 import { cva } from "class-variance-authority";
 import type { ReactNode } from "react";
-
+import { useT } from "@/lib/i18n/t";
 import {
   elementAttributes,
   type WeaverseElementProps,
@@ -43,12 +43,13 @@ interface ProductInfoProps extends WeaverseElementProps {
 
 /** The purchase panel: whatever `mp--*` elements the merchant stacks in it. */
 function ProductInfo({ children, sticky, ...rest }: ProductInfoProps) {
+  const t = useT();
   const state = useMainProduct();
   return (
     <section
       {...elementAttributes(rest)}
       className={panel({ position: state?.galleryPosition })}
-      aria-label="Purchase panel"
+      aria-label={t("product.purchasePanel")}
     >
       <div className={inner({ sticky: sticky !== false })}>{children}</div>
     </section>

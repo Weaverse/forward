@@ -9,6 +9,7 @@ import {
 } from "@/lib/account/address-action-state";
 import { saveAddress } from "@/lib/account/address-actions";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/t";
 import { cta } from "@/lib/presentation/variants";
 
 const PRIMARY_BUTTON_CLASS = cn(
@@ -39,6 +40,7 @@ export function AddressActionForm({
   submitClassName,
   className,
 }: AddressActionFormProps) {
+  const t = useT();
   const [state, formAction, pending] = useActionState<
     AddressActionState,
     FormData
@@ -56,7 +58,7 @@ export function AddressActionForm({
       </button>
       {state.message === null ? null : (
         <p className="text-caption text-text-dark-muted" role="alert">
-          {state.message}
+          {t(state.message)}
         </p>
       )}
     </form>

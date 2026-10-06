@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { marketAlternates } from "@/lib/i18n/alternates";
 import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
-
+import { getTranslator } from "@/lib/i18n/translator";
 import { getStorefront } from "@/lib/storefront/data-source";
 import { WeaversePage } from "@/lib/weaverse/page";
 import {
@@ -35,9 +36,14 @@ export async function generateMetadata({
   const locale = parseLocale(segment) ?? DEFAULT_LOCALE;
   const page = await getStorefront(locale).getPage(pageHandle);
   if (page === null) {
-    return { title: "Page not found" };
+    const t = await getTranslator(locale);
+    return { title: t("meta.pageNotFound") };
   }
-  return { title: page.title, description: page.intro };
+  return {
+    title: page.title,
+    description: page.intro,
+    alternates: marketAlternates(`/pages/${pageHandle}`, locale),
+  };
 }
 
 /**

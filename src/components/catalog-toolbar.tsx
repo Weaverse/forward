@@ -5,6 +5,7 @@ import { Link } from "@/components/link";
 import { SortForm } from "@/components/sort-form";
 import { cn } from "@/lib/cn";
 import { usePathname } from "@/lib/i18n/locale-context";
+import { useT } from "@/lib/i18n/t";
 import {
   clearFiltersHref,
   hasAppliedFilters,
@@ -49,6 +50,7 @@ export function CatalogToolbar({
   sticky,
   ...rest
 }: CatalogToolbarProps) {
+  const t = useT();
   const pathname = usePathname();
   const params = useSearchParams();
 
@@ -63,7 +65,9 @@ export function CatalogToolbar({
       <div className="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-start">
         {showCount === false ? null : (
           <span className="text-ui sm:text-copy-sm" aria-live="polite">
-            {count} {count === 1 ? "product" : "products"}
+            {t(count === 1 ? "catalog.countOne" : "catalog.countOther", {
+              count,
+            })}
           </span>
         )}
         {clearable && hasAppliedFilters(params) ? (
@@ -71,7 +75,7 @@ export function CatalogToolbar({
             className="font-body text-micro font-medium tracking-label text-text-muted uppercase underline underline-offset-4 hover:text-ink"
             href={clearFiltersHref(pathname, params)}
           >
-            Clear filters
+            {t("catalog.clearFilters")}
           </Link>
         ) : null}
       </div>
