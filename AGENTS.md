@@ -183,8 +183,8 @@ Forward is a fresh Next.js App Router storefront theme using
   spec's guarded Store-operation protocol. Public-token browser use, payment
   activation, and uncontrolled customer/order data remain outside that
   approval. Never add a `.env` file to a repository or worktree.
-- Install only an exact registry-verified `@weaverse/next` version. The npm
-  `latest` tag is stale and must never be installed. Keep the Shopify data
+- Install only an exact registry-verified `@weaverse/next` version, never a
+  dist-tag or range: the package is still a prerelease. Keep the Shopify data
   seam and the Weaverse composition seam separate: no Shopify credential,
   private token, or raw API payload may reach a Studio payload. Analytics
   pageview transport and deduplication are owned by the SDK; the theme must

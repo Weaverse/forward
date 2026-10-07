@@ -6,7 +6,7 @@
       "name": "forward",
       "dependencies": {
         "@shopify/hydrogen": "0.0.0-preview-116d5d7-20260730141607",
-        "@weaverse/next": "0.1.0-alpha.18",
+        "@weaverse/next": "0.1.0-alpha.19",
         "class-variance-authority": "0.7.1",
         "next": "16.3.0",
         "parse5": "8.0.1",
@@ -209,13 +209,13 @@
 
     "@types/ws": ["@types/ws@8.18.1", "", { "dependencies": { "@types/node": "*" } }, "sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg=="],
 
-    "@weaverse/core": ["@weaverse/core@5.20.3", "", {}, "sha512-fPF8D/MAeLvWh2k2JaINdSHKVZSuOKiQtjLhy58c4YBkg8LWRi2nZaEebUNiQuLLCpHfXoZbGTroyY6l4YVNwQ=="],
+    "@weaverse/core": ["@weaverse/core@5.22.1", "", {}, "sha512-nJ2NpIMzXrJ1sIsyCYMV/7NsdFADIH3ffXG3IvOLJA2ryeBEb4ny6Zsm7lQtYI8FxLxaE+aQ5AyhBaaQUbFrJA=="],
 
-    "@weaverse/next": ["@weaverse/next@0.1.0-alpha.18", "", { "dependencies": { "@weaverse/react": "5.20.3", "@weaverse/schema": "0.16.0" }, "peerDependencies": { "next": ">=14", "react": ">=19", "react-dom": ">=19" } }, "sha512-Pz04yq+dOTs6ZZzMe4dtI4mkg/tgSrMFwPFizo5/x1JBpSN/as7CgbtbiYfSHwPxj1+Q8srGKRilUG2VajTOzg=="],
+    "@weaverse/next": ["@weaverse/next@0.1.0-alpha.19", "", { "dependencies": { "@weaverse/react": "5.22.1", "@weaverse/schema": "0.17.0" }, "peerDependencies": { "next": ">=14", "react": ">=19", "react-dom": ">=19" } }, "sha512-vD3HehaJFePSrh2qtn/+tXGdCwQ3PsyiEtsaw2k4IOnH3sf2niZyLjQppWfOuK4WX1RA6ZXTAMeQuiCljw+z8Q=="],
 
-    "@weaverse/react": ["@weaverse/react@5.20.3", "", { "dependencies": { "@weaverse/core": "5.20.3", "clsx": "^2.1.1", "react": ">=19", "react-dom": ">=19" } }, "sha512-6J/Gd6npD1gG/Gf461TudJ3erXl2YQEzWqjHXHuPZVVEBGb+laArDov0MOgb9blWvgU37KPEfU3gQcDfqI0B+A=="],
+    "@weaverse/react": ["@weaverse/react@5.22.1", "", { "dependencies": { "@weaverse/core": "5.22.1", "clsx": "^2.1.1", "react": ">=19", "react-dom": ">=19" } }, "sha512-2jCVzeBjYtdy76LaHBdZEBmbfQPp8bmVvKgBfQx/rBgwq8qDnkdAEAgjO/sC6ZanMYvXbwoobm3XdnLH5SlC2w=="],
 
-    "@weaverse/schema": ["@weaverse/schema@0.16.0", "", { "dependencies": { "zod": "^4.3.6" } }, "sha512-fLdYD10vPa79JgRH6e28lM3QlZnaMzBS2WA3MiHmlaBTavflCOIDbdReysxeN1LC33v4+ur9n1sJhT6PNxMj8w=="],
+    "@weaverse/schema": ["@weaverse/schema@0.17.0", "", { "dependencies": { "zod": "^4.3.6" } }, "sha512-L/FRgId9M5reYOhjLeQMYU6ezU2Z+lQX5BUdiDmD4E5WQE1nGgMCEVcvCLDd1PKLzAVz/jza+OeYLHMbgJc1CQ=="],
 
     "ansi-regex": ["ansi-regex@5.0.1", "", {}, "sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ=="],
 
