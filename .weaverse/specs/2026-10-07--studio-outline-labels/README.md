@@ -2,7 +2,7 @@
 
 | Field            | Value                                                    |
 | ---------------- | -------------------------------------------------------- |
-| **Status**       | in-progress                                              |
+| **Status**       | completed                                                |
 | **Owner**        | @hta218                                                  |
 | **Issue**        | [#89](https://github.com/Weaverse/forward/issues/89)     |
 | **Branch**       | `feat/studio-outline-labels`                             |
