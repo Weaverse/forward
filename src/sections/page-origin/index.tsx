@@ -8,7 +8,7 @@ import type { StorefrontImage } from "@/lib/storefront/types";
 import { weaverseImage } from "@/lib/weaverse/image";
 import type { WeaverseElementProps } from "../weaverse-element";
 
-interface PageOriginProps extends WeaverseElementProps {
+export interface PageOriginProps extends WeaverseElementProps {
   eyebrowLabel: string;
   /** Line breaks are preserved, so an authored break stays where it was put. */
   heading: string;

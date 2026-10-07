@@ -118,6 +118,46 @@ describe("Weaverse registry split", () => {
   });
 });
 
+describe("Studio outline labels", () => {
+  function labelOf(type: string, data: Record<string, unknown>) {
+    const schema = SECTION_SCHEMAS.find((entry) => entry.type === type);
+    assert.ok(schema?.label, `${type} declares no label`);
+    return schema.label(data);
+  }
+
+  it("names an instance by its own text", () => {
+    assert.equal(labelOf("heading", { content: "Summer sale" }), "Summer sale");
+    assert.equal(labelOf("button", { label: "Shop now" }), "Shop now");
+    assert.equal(
+      labelOf("repair-and-journal", { repairHeading: "Keep moving." }),
+      "Keep moving.",
+    );
+    assert.equal(labelOf("hero-slide", { fieldTag: "N 49°13′" }), "N 49°13′");
+  });
+
+  it("flattens multi-line text onto one outline row", () => {
+    assert.equal(
+      labelOf("page-origin", { heading: "A short catalog,\nbuilt slowly." }),
+      "A short catalog, built slowly.",
+    );
+  });
+
+  it("reads the loader's product, so a resource picker change renames it", () => {
+    const loaderData = { product: { title: "Ridge Shell" } };
+    assert.equal(labelOf("product-spotlight", { loaderData }), "Ridge Shell");
+    assert.equal(labelOf("product-case-study", { loaderData }), "Ridge Shell");
+  });
+
+  it("returns no label, rather than throwing, for an empty instance", () => {
+    /* Studio falls back to the title on an empty label; a throw is also a
+     * fallback, but it would mask a real defect in a callback. */
+    for (const schema of SECTION_SCHEMAS) {
+      assert.equal(schema.label?.({}) ?? undefined, undefined, schema.type);
+    }
+    assert.equal(labelOf("product-spotlight", { loaderData: null }), undefined);
+  });
+});
+
 describe("section loaders", () => {
   it("never lets a loader reach Shopify outside the storefront seam", async () => {
     const roots = ["src/sections", "src/components"];

@@ -8,7 +8,7 @@ import { eyebrow, sectionHeading, textLink } from "@/lib/presentation/variants";
 import type { JournalArticle } from "@/lib/storefront/types";
 import type { WeaverseElementProps } from "../weaverse-element";
 
-interface RepairAndJournalProps extends WeaverseElementProps {
+export interface RepairAndJournalProps extends WeaverseElementProps {
   repairEyebrowLabel: string;
   repairHeading: string;
   repairBody: string;

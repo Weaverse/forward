@@ -1,8 +1,10 @@
 import { createSchema } from "@weaverse/schema";
+import type { ButtonProps } from ".";
 
 export const schema = createSchema({
   type: "button",
   title: "Button",
+  label: (data: ButtonProps) => data.label,
   settings: [
     {
       group: "Button",

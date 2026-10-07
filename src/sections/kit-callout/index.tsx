@@ -15,7 +15,7 @@ import {
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
 import type { WeaverseElementProps } from "../weaverse-element";
 
-interface KitCalloutProps extends WeaverseElementProps {
+export interface KitCalloutProps extends WeaverseElementProps {
   eyebrowLabel: string;
   heading: string;
   linkLabel: string;

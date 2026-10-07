@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { buildWeaverseNextRequestInfo } from "@weaverse/next";
+
 import { LOCALE_IDS } from "../src/lib/i18n/locales.ts";
 import {
   buildRequestContext,
@@ -35,10 +37,11 @@ describe("buildRequestContext", () => {
     });
     assert.equal(context.i18n?.locale, "de-DE");
     assert.equal(context.i18n?.pathPrefix, "/de-de");
-    /* Studio's address bar follows the reported path: it must keep the
-     * market, or Studio snaps back to the default market after navigating. */
-    assert.equal(context.pathname, "/de-de/shop");
-    assert.equal(String(context.url), "http://forward.example/de-de/shop");
+    /* Studio's address bar follows the request info's path: it must keep
+     * the market, or Studio snaps back to the default market after
+     * navigating. The theme reports the route path; the SDK adds the prefix. */
+    assert.equal(context.pathname, "/shop");
+    assert.equal(buildWeaverseNextRequestInfo(context).pathname, "/de-de/shop");
 
     /* Section loaders see the same `i18n`, so every market must round-trip. */
     for (const locale of LOCALE_IDS) {

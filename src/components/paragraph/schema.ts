@@ -1,10 +1,12 @@
 import { createSchema } from "@weaverse/schema";
 
 import { blockSpacingInputs } from "@/components/section/inputs";
+import type { ParagraphProps } from ".";
 
 export const schema = createSchema({
   type: "paragraph",
   title: "Paragraph",
+  label: (data: ParagraphProps) => data.content?.replace(/\s+/g, " "),
   settings: [
     {
       group: "Paragraph",

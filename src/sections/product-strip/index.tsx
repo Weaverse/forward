@@ -7,7 +7,7 @@ import { sectionHeading, textLink } from "@/lib/presentation/variants";
 import type { Product } from "@/lib/storefront/types";
 import type { WeaverseElementProps } from "../weaverse-element";
 
-interface ProductStripProps extends WeaverseElementProps {
+export interface ProductStripProps extends WeaverseElementProps {
   eyebrowLabel: string;
   heading: string;
   linkLabel: string;

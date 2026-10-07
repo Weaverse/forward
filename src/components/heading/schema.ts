@@ -1,10 +1,12 @@
 import { createSchema } from "@weaverse/schema";
 
 import { blockSpacingInputs } from "@/components/section/inputs";
+import type { HeadingProps } from ".";
 
 export const schema = createSchema({
   type: "heading",
   title: "Heading",
+  label: (data: HeadingProps) => data.content,
   settings: [
     {
       group: "Heading",
