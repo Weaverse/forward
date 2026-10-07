@@ -1,10 +1,12 @@
 import { createSchema } from "@weaverse/schema";
 
 import { blockSpacingInputs } from "@/components/section/inputs";
+import type { SubheadingProps } from ".";
 
 export const schema = createSchema({
   type: "subheading",
   title: "Subheading",
+  label: (data: SubheadingProps) => data.content,
   settings: [
     {
       group: "Subheading",

@@ -1,10 +1,12 @@
 import { createSchema } from "@weaverse/schema";
 
 import { layoutInputs } from "@/components/section/inputs";
+import type { PageOriginProps } from ".";
 
 export const schema = createSchema({
   type: "page-origin",
   title: "Page origin",
+  label: (data: PageOriginProps) => data.heading?.replace(/\s+/g, " "),
   settings: [
     { group: "Layout", inputs: layoutInputs },
     {

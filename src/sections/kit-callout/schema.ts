@@ -1,10 +1,12 @@
 import { createSchema } from "@weaverse/schema";
 
 import { layoutInputs } from "@/components/section/inputs";
+import type { KitCalloutProps } from ".";
 
 export const schema = createSchema({
   type: "kit-callout",
   title: "Kit callout",
+  label: (data: KitCalloutProps) => data.heading,
   settings: [
     { group: "Layout", inputs: layoutInputs },
     {

@@ -1,8 +1,10 @@
 import { createSchema } from "@weaverse/schema";
+import type { ProductCaseStudyProps } from ".";
 
 export const schema = createSchema({
   type: "product-case-study",
   title: "Product case study",
+  label: (data: ProductCaseStudyProps) => data.loaderData?.product.title,
   settings: [
     {
       group: "Content",

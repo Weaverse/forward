@@ -1,8 +1,10 @@
 import { createSchema } from "@weaverse/schema";
+import type { HeroSlideProps } from ".";
 
 export const schema = createSchema({
   type: "hero-slide",
   title: "Slide",
+  label: (data: HeroSlideProps) => data.fieldTag,
   childTypes: ["section-content"],
   settings: [
     {

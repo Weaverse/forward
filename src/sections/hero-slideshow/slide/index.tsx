@@ -38,7 +38,7 @@ const STAGGER =
 
 type ImagePosition = "center" | "right" | "right-low";
 
-interface HeroSlideProps extends WeaverseElementProps {
+export interface HeroSlideProps extends WeaverseElementProps {
   children?: ReactNode;
   /** A Builder image value, a StorefrontImage, or nothing. */
   image?: StorefrontImage | unknown;

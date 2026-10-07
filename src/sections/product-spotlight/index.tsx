@@ -35,7 +35,7 @@ import type { WeaverseElementProps } from "../weaverse-element";
 
 type ImagePosition = "left" | "right";
 
-interface ProductSpotlightProps extends WeaverseElementProps {
+export interface ProductSpotlightProps extends WeaverseElementProps {
   eyebrowPrefix?: string;
   ctaLabel?: string;
   /** How many of the product's specs to list. */

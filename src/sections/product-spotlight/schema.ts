@@ -1,10 +1,12 @@
 import { createSchema } from "@weaverse/schema";
 
 import { layoutInputs } from "@/components/section/inputs";
+import type { ProductSpotlightProps } from ".";
 
 export const schema = createSchema({
   type: "product-spotlight",
   title: "Product spotlight",
+  label: (data: ProductSpotlightProps) => data.loaderData?.product.title,
   settings: [
     {
       group: "Layout",

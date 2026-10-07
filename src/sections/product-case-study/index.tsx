@@ -13,7 +13,7 @@ import {
   type WeaverseElementProps,
 } from "../weaverse-element";
 
-interface ProductCaseStudyProps extends WeaverseElementProps {
+export interface ProductCaseStudyProps extends WeaverseElementProps {
   eyebrowLabel: string;
   ctaLabel: string;
   /** Resolved by `./loader` from the merchant's product selection. */

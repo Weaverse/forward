@@ -1,10 +1,12 @@
 import { createSchema } from "@weaverse/schema";
 
 import { layoutInputs } from "@/components/section/inputs";
+import type { RepairAndJournalProps } from ".";
 
 export const schema = createSchema({
   type: "repair-and-journal",
   title: "Repair and journal",
+  label: (data: RepairAndJournalProps) => data.repairHeading,
   settings: [
     { group: "Layout", inputs: layoutInputs },
     {
