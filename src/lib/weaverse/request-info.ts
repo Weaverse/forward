@@ -7,7 +7,6 @@ import {
   localeFromI18n,
   localePathPrefix,
   localeTag,
-  localizePath,
 } from "@/lib/i18n/locales";
 
 /** Weaverse page roles this theme composes. See the contract in the spec. */
@@ -81,8 +80,8 @@ export interface RequestContextInput {
   searchParams?: SearchParams;
   page?: { type: WeaversePageType; handle?: string };
   /**
-   * The request's market. `pathname` is the unprefixed route path; the
-   * context reports it under the market prefix, the URL the browser shows.
+   * The request's market. `pathname` is the unprefixed route path; the SDK
+   * puts `i18n.pathPrefix` on it, so Studio sees the URL the browser shows.
    */
   locale?: LocaleId;
 }
@@ -111,9 +110,6 @@ export function buildRequestContext({
   locale = DEFAULT_LOCALE,
 }: RequestContextInput): WeaverseNextRequestContext {
   const search = toSearchParams(searchParams);
-  /* Studio's address bar follows this path, so it must carry the market; the
-   * Builder strips `i18n.pathPrefix` itself when it resolves the page. */
-  const path = localizePath(pathname, locale);
   const host = headers.get("x-forwarded-host") ?? headers.get("host");
   const proto = headers.get("x-forwarded-proto") ?? "http";
   const origin = host === null ? "" : `${proto}://${host}`;
@@ -121,9 +117,9 @@ export function buildRequestContext({
   return {
     headers,
     i18n: weaverseI18n(locale),
-    pathname: path,
+    pathname,
     searchParams: search,
-    url: `${origin}${path}${search.size > 0 ? `?${search}` : ""}`,
+    url: `${origin}${pathname}${search.size > 0 ? `?${search}` : ""}`,
     ...(page === undefined
       ? {}
       : {
