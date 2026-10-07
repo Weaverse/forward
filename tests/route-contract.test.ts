@@ -218,3 +218,20 @@ describe("route-segment display helpers", () => {
     assert.equal(formatRouteSegment("100%"), "100%");
   });
 });
+
+describe("theme routes", () => {
+  it("point Studio at routes the app actually serves", async () => {
+    const { themeSchema } = await import("../src/lib/weaverse/theme-schema.ts");
+    const served = new Set(
+      ROUTE_CONTRACT.map(({ pattern }) =>
+        pattern.replace(/\[\w+\]/g, ":handle"),
+      ),
+    );
+    const routes = Object.values(themeSchema.routes as Record<string, string>);
+
+    assert.ok(routes.length > 0);
+    for (const route of routes) {
+      assert.ok(served.has(route), `${route} is not a served route`);
+    }
+  });
+});
