@@ -62,7 +62,7 @@ const CATEGORY_LABEL: Record<ProductCategory, string> = {
 };
 
 const GRID_CLASS =
-  "grid grid-cols-1 items-stretch md:min-h-[min(calc(100svh_-_var(--spacing-header)_-_6rem),760px)] md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]";
+  "grid grid-cols-1 items-stretch md:min-h-[min(calc(100svh-var(--spacing-header)-6rem),760px)] md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]";
 const PANEL_CLASS =
   "flex min-w-0 flex-col justify-center bg-surface-subtle p-[clamp(28px,5vw,72px)]";
 const TITLE_CLASS = cn(sectionHeading(), "md:text-spotlight-title");
