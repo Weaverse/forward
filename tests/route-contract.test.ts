@@ -227,7 +227,7 @@ describe("theme routes", () => {
         pattern.replace(/\[\w+\]/g, ":handle"),
       ),
     );
-    const routes = Object.values(themeSchema.routes as Record<string, string>);
+    const routes = Object.values(themeSchema.routes ?? {});
 
     assert.ok(routes.length > 0);
     for (const route of routes) {
