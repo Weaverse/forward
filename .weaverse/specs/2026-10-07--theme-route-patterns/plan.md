@@ -12,7 +12,7 @@
 
 `PRODUCT` (`/products/:handle`), `PAGE` (`/pages/:handle`) and `INDEX` (`/`) already match the convention and are left out. Forward registers no `BLOG` or `COLLECTION_LIST` Weaverse page.
 
-`WeaverseNextThemeSchema` accepts extra keys and design mode sends the whole schema to Studio, so this works on `@weaverse/next@0.1.0-alpha.19`; the SDK types `routes` after the `@weaverse/schema` release.
+`@weaverse/next@0.1.0-alpha.20` (on `@weaverse/schema@0.18.0`) types `routes` as `ThemeRoutes`, and design mode sends the whole schema to Studio.
 
 The Studio side is Weaverse/builder (`getPagePath`). Studio prefixes the market (`/de-de`) itself.
 
@@ -30,6 +30,7 @@ The Studio side is Weaverse/builder (`getPagePath`). Studio prefixes the market 
 
 | File | Change |
 | --- | --- |
+| `package.json`, `bun.lock` | `@weaverse/next` 0.1.0-alpha.20 |
 | `src/lib/weaverse/theme-schema.ts` | `routes` |
 | `tests/route-contract.test.ts` | Route test |
 | `.weaverse/specs/2026-10-07--theme-route-patterns/` | This spec |
