@@ -15,6 +15,7 @@ import {
   localeTag,
   parseLocale,
 } from "@/lib/i18n/locales";
+import { weaversePublicEnv } from "@/lib/weaverse/env";
 import { WeaverseRoot } from "@/lib/weaverse/root";
 import {
   loadWeaverseThemeSettings,
@@ -109,7 +110,7 @@ export default async function RootLayout({
         <LocaleProvider locale={locale}>
           <WeaverseRoot
             merchantOverrides={themeResponse?.merchantOverrides}
-            publicEnv={themeResponse?.publicEnv}
+            publicEnv={weaversePublicEnv(process.env)}
             theme={themeResponse?.theme}
           >
             <ShopifyCartRuntime>

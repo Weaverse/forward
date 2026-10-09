@@ -19,8 +19,13 @@
  * deliberately: the values Weaverse legitimately needs, and an explicit empty
  * string for the ones it must not see. That is the same explicit-empty
  * discipline `scripts/env-matrix.mts` already uses for the credential
- * matrices, and it is what keeps `PUBLIC_STOREFRONT_API_TOKEN` out of the
- * SDK's browser-visible `publicEnv` payload.
+ * matrices.
+ *
+ * `PUBLIC_STOREFRONT_API_TOKEN` is forwarded, and so reaches the browser in the
+ * SDK's `publicEnv` payload. That is deliberate: it is Shopify's public
+ * Storefront token, made to be shipped to browsers, and Studio needs it to
+ * resolve the store's default product, collection and page for the page
+ * selector. The private token never enters this object.
  */
 
 import { ShopifyConfigurationError } from "@/lib/storefront/shopify/errors";
@@ -50,17 +55,10 @@ export const SDK_ENV_KEYS = [
 /**
  * Keys deliberately blanked before the SDK sees them.
  *
- * `PUBLIC_STOREFRONT_API_TOKEN` lands in the SDK's `publicEnv`, which reaches
- * the browser. Public-token browser use is outside the current approval, so it
- * is suppressed rather than forwarded.
- *
  * `WEAVERSE_PUBLIC_API_BASE` is a self-hosted override Forward does not use;
  * blanking it keeps the API base derived from the resolved host alone.
  */
-export const SUPPRESSED_ENV_KEYS = [
-  PUBLIC_STOREFRONT_TOKEN_ENV_KEY,
-  WEAVERSE_PUBLIC_API_BASE_ENV_KEY,
-] as const;
+export const SUPPRESSED_ENV_KEYS = [WEAVERSE_PUBLIC_API_BASE_ENV_KEY] as const;
 
 export type EnvSource = Readonly<Record<string, string | undefined>>;
 
@@ -125,6 +123,29 @@ export function readWeaverseConfig(source: EnvSource): WeaverseConfig | null {
     projectId,
     ...(weaverseHost === undefined ? {} : { weaverseHost }),
     sdkEnv: buildSdkEnv(source),
+  };
+}
+
+/**
+ * The `publicEnv` the root provider hands Studio, which resolves the store's
+ * default product, collection and page with it.
+ *
+ * The SDK attaches `publicEnv` to the theme settings only in design mode, which
+ * it reads from `?isDesignMode=true`. Next gives a layout no search params, so
+ * the root layout's response never carries it; the layout builds it here
+ * instead. Both values are made for the browser.
+ */
+export function weaversePublicEnv(
+  source: EnvSource,
+): Record<string, string> | undefined {
+  const env = readWeaverseConfig(source)?.sdkEnv;
+  if (env === undefined) {
+    return undefined;
+  }
+  return {
+    [STORE_DOMAIN_ENV_KEY]: env[STORE_DOMAIN_ENV_KEY] ?? "",
+    [PUBLIC_STOREFRONT_TOKEN_ENV_KEY]:
+      env[PUBLIC_STOREFRONT_TOKEN_ENV_KEY] ?? "",
   };
 }
 

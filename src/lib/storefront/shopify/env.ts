@@ -7,8 +7,8 @@
  *
  * `PUBLIC_STOREFRONT_API_TOKEN` and `PUBLIC_STOREFRONT_ID` are intentionally
  * not read here. Catalog reads are server-owned and use the private token with
- * `private_no_buyer_context`; the public token stays reserved for a deliberate
- * future client/Studio/ShopifyScripts slice.
+ * `private_no_buyer_context`. The public token's only consumer is Weaverse
+ * Studio, which receives it through the SDK (`src/lib/weaverse/env.ts`).
  */
 
 import { ShopifyConfigurationError } from "./errors";
