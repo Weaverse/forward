@@ -8,6 +8,7 @@ import {
   readWeaverseConfig,
   SDK_ENV_KEYS,
   SUPPRESSED_ENV_KEYS,
+  weaversePublicEnv,
 } from "../src/lib/weaverse/env.ts";
 
 const SDK_SERVER_BUNDLE = "node_modules/@weaverse/next/dist/server.mjs";
@@ -141,9 +142,21 @@ describe("readWeaverseConfig", () => {
     assert.equal(config?.weaverseHost, "https://staging.example");
   });
 
-  it("suppresses the public storefront token on the resolved config", () => {
+  it("hands Studio the store domain and public token from the layout", () => {
+    /* A layout never sees `?isDesignMode=true`, so the SDK's theme settings
+     * response carries no `publicEnv` there; the layout supplies it. */
+    assert.deepEqual(weaversePublicEnv(FULL_ENV), {
+      PUBLIC_STORE_DOMAIN: "forward.myshopify.com",
+      PUBLIC_STOREFRONT_API_TOKEN: "public-token",
+    });
+    assert.equal(weaversePublicEnv({}), undefined);
+  });
+
+  it("forwards the public storefront token, which Studio needs", () => {
+    /* Studio resolves the store's default product, collection and page with
+     * it; without it, the page selector cannot open those templates. */
     const config = readWeaverseConfig(FULL_ENV);
 
-    assert.equal(config?.sdkEnv.PUBLIC_STOREFRONT_API_TOKEN, "");
+    assert.equal(config?.sdkEnv.PUBLIC_STOREFRONT_API_TOKEN, "public-token");
   });
 });
