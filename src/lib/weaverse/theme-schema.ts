@@ -61,6 +61,14 @@ export const themeSchema: WeaverseNextThemeSchema = {
     translation: true,
     staticContent: STATIC_CONTENT,
   },
+  /* Where Forward's routes differ from the Shopify convention, so Studio's
+   * page selector can navigate to them (Weaverse/weaverse#518). `:handle` is
+   * the page's own handle. */
+  routes: {
+    ALL_PRODUCTS: "/shop",
+    COLLECTION: "/shop/:handle",
+    ARTICLE: "/journal/:handle",
+  },
 };
 
 export type {
