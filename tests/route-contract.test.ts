@@ -154,6 +154,7 @@ describe("route contract shape", () => {
         "/shop/__forward-missing__",
         "/products/__forward-missing__",
         "/journal/__forward-missing__",
+        "/archive/__forward-missing__",
         "/pages/__forward-missing__",
         "/policies/__forward-missing__",
         "/account/orders/__forward-missing__",
