@@ -1,12 +1,7 @@
 import Image from "next/image";
 import { Link } from "@/components/link";
 
-import {
-  eyebrow,
-  SHELL_SECTION_CLASS,
-  sectionHeading,
-  textLink,
-} from "@/lib/presentation/variants";
+import { eyebrow, sectionHeading, textLink } from "@/lib/presentation/variants";
 import type { JournalArticle } from "@/lib/storefront/types";
 
 interface JournalGridProps {
@@ -16,7 +11,7 @@ interface JournalGridProps {
   articles: readonly JournalArticle[];
 }
 
-/** The remaining field notes, three across. */
+/** Articles three across, under an eyebrow and heading. Its container is the caller's. */
 export function JournalGrid({
   eyebrowLabel,
   heading,
@@ -24,7 +19,7 @@ export function JournalGrid({
   articles,
 }: JournalGridProps) {
   return (
-    <section className={SHELL_SECTION_CLASS}>
+    <>
       <div className="mb-11 flex flex-col items-start justify-between gap-7.5 sm:flex-row sm:items-end">
         <div>
           <p className={eyebrow()}>{eyebrowLabel}</p>
@@ -61,6 +56,6 @@ export function JournalGrid({
           </article>
         ))}
       </div>
-    </section>
+    </>
   );
 }

@@ -1,0 +1,6 @@
+{
+  "pageType": "CUSTOM",
+  "handle": "journal",
+  "name": "Journal",
+  "sections": [{ "type": "all-articles" }]
+}

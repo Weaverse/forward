@@ -19,11 +19,15 @@ import { schema as main } from "@/components/main/schema";
 import { schema as paragraph } from "@/components/paragraph/schema";
 import { schema as sectionContent } from "@/components/section-content/schema";
 import { schema as subheading } from "@/components/subheading/schema";
+import { schema as allArticles } from "@/sections/all-articles/schema";
 import { schema as allProductsHeader } from "@/sections/all-products/header/schema";
 import { schema as allProductsGrid } from "@/sections/all-products/product-grid/schema";
 import { schema as allProducts } from "@/sections/all-products/schema";
 import { schema as allProductsToolbar } from "@/sections/all-products/toolbar/schema";
 import { schema as articleBody } from "@/sections/article-body/schema";
+import { schema as articleFeedGrid } from "@/sections/article-feed/grid/schema";
+import { schema as articleFeedHeader } from "@/sections/article-feed/header/schema";
+import { schema as articleFeedLead } from "@/sections/article-feed/lead/schema";
 import { schema as articleHeader } from "@/sections/article-header/schema";
 import { schema as collectionHero } from "@/sections/collection-hero/schema";
 import { schema as collectionIndex } from "@/sections/collection-index/schema";
@@ -36,6 +40,7 @@ import { schema as heroSlideshow } from "@/sections/hero-slideshow/schema";
 import { schema as heroSlide } from "@/sections/hero-slideshow/slide/schema";
 import { schema as homeHero } from "@/sections/home-hero/schema";
 import { schema as kitCallout } from "@/sections/kit-callout/schema";
+import { schema as mainBlog } from "@/sections/main-blog/schema";
 import { schema as collectionContent } from "@/sections/main-collection/content/schema";
 import { schema as collectionFilters } from "@/sections/main-collection/filters/schema";
 import { schema as collectionProductGrid } from "@/sections/main-collection/product-grid/schema";
@@ -117,6 +122,11 @@ export const SECTION_SCHEMAS: readonly SchemaType[] = [
   fieldPractice,
 
   /* ALL_PRODUCTS */
+  allArticles,
+  mainBlog,
+  articleFeedHeader,
+  articleFeedLead,
+  articleFeedGrid,
   allProducts,
   allProductsHeader,
   allProductsToolbar,
