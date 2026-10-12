@@ -13,6 +13,7 @@
 - `all-products` child types become `ap--header`, `ap--toolbar`, `ap--product-grid`; the preset nests the heading and lede in `ap--header`.
 - `AGENTS.md`: the `all-products` tree lists `ap--header`.
 - `collection-hero`: the CTA owns its top gap (`mt-8`) and the description drops `mb-8`. The only gap before the CTA was the description's bottom margin, so a collection with no description put the button against the title (over its descenders, given the 0.98 line height). Spacing with a description is unchanged.
+- Sort select (`src/components/sort-form.tsx`): still the native `<select>` in the GET form with Apply, so it works with no JavaScript. Where the browser supports `appearance: base-select` (Chromium 135+), Tailwind classes style the trigger, the dropdown (`::picker(select)`) and the options to the theme; other browsers ignore them and keep the platform select. `globals.css` gains one `@custom-variant picker` so the dropdown rules read `picker:*`. No new dependency (Radix was considered and set aside).
 
 The layout convention (browse shells on the shared section, a header child for the heading) follows how Pilot organizes its browse sections; the implementation is Forward's own.
 
@@ -35,5 +36,6 @@ The project's existing ALL_PRODUCTS template still has `heading` and `paragraph`
 | `src/sections/main-collection/{index.tsx,schema.ts}` | Shell on `Section` |
 | `src/lib/weaverse/{components.ts,section-schemas.ts}` | Register `ap--header` |
 | `src/sections/collection-hero/index.tsx` | CTA gap no longer depends on the description |
+| `src/components/sort-form.tsx`, `src/app/globals.css` | Customizable sort select, `picker` variant |
 | `AGENTS.md` | `all-products` tree |
 | `.weaverse/specs/2026-10-12--browse-section-shells/` | This spec |
