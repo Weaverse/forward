@@ -30,6 +30,7 @@ import * as Paragraph from "@/components/paragraph";
 import * as SectionContent from "@/components/section-content";
 import * as Subheading from "@/components/subheading";
 import * as AllProducts from "@/sections/all-products";
+import * as AllProductsHeader from "@/sections/all-products/header";
 import * as AllProductsGrid from "@/sections/all-products/product-grid";
 import * as AllProductsToolbar from "@/sections/all-products/toolbar";
 import * as ArticleBody from "@/sections/article-body";
@@ -145,6 +146,7 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
 
   /* ALL_PRODUCTS */
   entry(AllProducts),
+  entry(AllProductsHeader),
   entry(AllProductsToolbar),
   entry(AllProductsGrid),
 
