@@ -31,6 +31,7 @@ import type {
   CollectionProductsPage,
   CollectionProductsQuery,
   JournalArticle,
+  JournalBlog,
   Policy,
   Product,
   SiteNavigation,
@@ -66,6 +67,8 @@ export interface StorefrontDataSource {
   searchProducts(query: string): Promise<readonly Product[]>;
   listArticles(): Promise<readonly JournalArticle[]>;
   getArticle(handle: string): Promise<JournalArticle | null>;
+  listBlogs(): Promise<readonly JournalBlog[]>;
+  getBlog(handle: string): Promise<JournalBlog | null>;
   listPages(): Promise<readonly StorePage[]>;
   getPage(handle: string): Promise<StorePage | null>;
   listPolicies(): Promise<readonly Policy[]>;

@@ -1,0 +1,6 @@
+{
+  "pageType": "BLOG",
+  "handle": "",
+  "description": "Blog template.",
+  "sections": [{ "type": "main-blog" }]
+}

@@ -15,6 +15,7 @@ export type WeaversePageType =
   | "PRODUCT"
   | "COLLECTION"
   | "ALL_PRODUCTS"
+  | "BLOG"
   | "ARTICLE"
   | "PAGE"
   | "CUSTOM";

@@ -29,11 +29,15 @@ import * as Main from "@/components/main";
 import * as Paragraph from "@/components/paragraph";
 import * as SectionContent from "@/components/section-content";
 import * as Subheading from "@/components/subheading";
+import * as AllArticles from "@/sections/all-articles";
 import * as AllProducts from "@/sections/all-products";
 import * as AllProductsHeader from "@/sections/all-products/header";
 import * as AllProductsGrid from "@/sections/all-products/product-grid";
 import * as AllProductsToolbar from "@/sections/all-products/toolbar";
 import * as ArticleBody from "@/sections/article-body";
+import * as ArticleFeedGrid from "@/sections/article-feed/grid";
+import * as ArticleFeedHeader from "@/sections/article-feed/header";
+import * as ArticleFeedLead from "@/sections/article-feed/lead";
 import * as ArticleHeader from "@/sections/article-header";
 import * as CollectionHero from "@/sections/collection-hero";
 import * as CollectionIndex from "@/sections/collection-index";
@@ -46,6 +50,7 @@ import * as HeroSlideshow from "@/sections/hero-slideshow";
 import * as HeroSlide from "@/sections/hero-slideshow/slide";
 import * as HomeHero from "@/sections/home-hero";
 import * as KitCallout from "@/sections/kit-callout";
+import * as MainBlog from "@/sections/main-blog";
 import * as MainCollection from "@/sections/main-collection";
 import * as CollectionContent from "@/sections/main-collection/content";
 import * as CollectionFilters from "@/sections/main-collection/filters";
@@ -145,6 +150,11 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
   entry(FieldPractice),
 
   /* ALL_PRODUCTS */
+  entry(AllArticles),
+  entry(MainBlog),
+  entry(ArticleFeedHeader),
+  entry(ArticleFeedLead),
+  entry(ArticleFeedGrid),
   entry(AllProducts),
   entry(AllProductsHeader),
   entry(AllProductsToolbar),

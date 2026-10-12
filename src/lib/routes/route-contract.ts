@@ -63,6 +63,7 @@ export const SMOKE_FIXTURES = {
   ],
   collectionHandle: "outerwear",
   articleHandle: "layering-for-moving-weather",
+  blogHandle: "field-notes",
   pageHandle: "about-forward",
   policyHandle: "shipping-policy",
   orderId: "1001",
@@ -115,18 +116,18 @@ export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [
     category: "commerce",
     smoke: { path: "/cart", expectedStatus: 200 },
   },
-  {
-    pattern: "/journal",
-    label: "Journal",
-    category: "editorial",
-    smoke: { path: "/journal", expectedStatus: 200 },
-  },
   /*
    * Weaverse custom pages are all rendered by one internal route. Merchants
    * create them at paths this repository cannot know ahead of time, so there
-   * is no route file per page. The three entries below pin the pathnames the
+   * is no route file per page. The entries below pin the pathnames the
    * storefront ships with, which is what the smoke run actually exercises.
    */
+  {
+    pattern: "/[...slug]",
+    label: "Journal custom page",
+    category: "editorial",
+    smoke: { path: "/journal", expectedStatus: 200, composed: true },
+  },
   {
     pattern: "/[...slug]",
     label: "About Forward custom page",
@@ -144,6 +145,16 @@ export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [
     label: "Field testing custom page",
     category: "content",
     smoke: { path: "/field-testing", expectedStatus: 200, composed: true },
+  },
+  {
+    pattern: "/archive/[blogHandle]",
+    label: "Blog",
+    category: "editorial",
+    smoke: {
+      path: `/archive/${SMOKE_FIXTURES.blogHandle}`,
+      expectedStatus: 200,
+      composed: true,
+    },
   },
   {
     pattern: "/journal/[articleHandle]",
@@ -338,6 +349,7 @@ export const DYNAMIC_NOT_FOUND_SMOKES: readonly RouteSmoke[] = [
   "/shop/__forward-missing__",
   "/products/__forward-missing__",
   "/journal/__forward-missing__",
+  "/archive/__forward-missing__",
   "/pages/__forward-missing__",
   "/policies/__forward-missing__",
   "/account/orders/__forward-missing__",
@@ -371,17 +383,21 @@ export const REDIRECT_CONTRACT: readonly RedirectContractEntry[] = [
     },
   },
   {
-    source: "/blogs/journal",
-    destination: "/journal",
+    source: "/blogs/:blogHandle",
+    destination: "/archive/:blogHandle",
     permanent: true,
-    smoke: { path: "/blogs/journal", expectedLocation: "/journal" },
+    smoke: {
+      path: `/blogs/${SMOKE_FIXTURES.blogHandle}`,
+      expectedLocation: `/archive/${SMOKE_FIXTURES.blogHandle}`,
+    },
   },
   {
-    source: "/blogs/journal/:articleHandle",
+    /* Articles keep their own handle; the blog drops out of the path. */
+    source: "/blogs/:blogHandle/:articleHandle",
     destination: "/journal/:articleHandle",
     permanent: true,
     smoke: {
-      path: `/blogs/journal/${SMOKE_FIXTURES.articleHandle}`,
+      path: `/blogs/${SMOKE_FIXTURES.blogHandle}/${SMOKE_FIXTURES.articleHandle}`,
       expectedLocation: `/journal/${SMOKE_FIXTURES.articleHandle}`,
     },
   },

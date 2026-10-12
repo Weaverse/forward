@@ -67,6 +67,7 @@ export const themeSchema: WeaverseNextThemeSchema = {
   routes: {
     ALL_PRODUCTS: "/shop",
     COLLECTION: "/shop/:handle",
+    BLOG: "/archive/:handle",
     ARTICLE: "/journal/:handle",
   },
 };

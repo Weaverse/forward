@@ -11,9 +11,12 @@ type StaticJournalArticle = Omit<JournalArticle, "body"> & {
   body: readonly StaticArticleBlock[];
 };
 
+const FIELD_NOTES = { handle: "field-notes", title: "Field Notes" };
+
 const STATIC_JOURNAL_FIXTURES: readonly StaticJournalArticle[] = [
   {
     handle: "layering-for-moving-weather",
+    blog: FIELD_NOTES,
     title: "Layering for Moving Weather",
     excerpt:
       "How to layer for long climbs, fast descents, and uncertain forecasts.",
@@ -41,6 +44,7 @@ const STATIC_JOURNAL_FIXTURES: readonly StaticJournalArticle[] = [
   },
   {
     handle: "packing-thirty-liters-for-a-long-day",
+    blog: FIELD_NOTES,
     title: "Packing Thirty Liters for a Long Day",
     excerpt: "The honest pack list for a full mountain day.",
     plate: "No. 02",
@@ -63,6 +67,7 @@ const STATIC_JOURNAL_FIXTURES: readonly StaticJournalArticle[] = [
   },
   {
     handle: "reading-the-trail-underfoot",
+    blog: FIELD_NOTES,
     title: "Reading the Trail Underfoot",
     excerpt: "Foot placement, pace, and terrain cues for moving efficiently.",
     plate: "No. 03",
@@ -85,6 +90,7 @@ const STATIC_JOURNAL_FIXTURES: readonly StaticJournalArticle[] = [
   },
   {
     handle: "how-we-test-a-shell-before-calling-it-weatherproof",
+    blog: FIELD_NOTES,
     title: "How We Test a Shell Before Calling It Weatherproof",
     excerpt:
       "Hose tests, hill days, and the point where a seam decides everything.",
@@ -113,6 +119,7 @@ const STATIC_JOURNAL_FIXTURES: readonly StaticJournalArticle[] = [
   },
   {
     handle: "a-two-day-kit-built-around-nine-kilograms",
+    blog: FIELD_NOTES,
     title: "A Two-Day Kit Built Around Nine Kilograms",
     excerpt: "An overnight list with enough margin left for uncertain weather.",
     plate: "No. 05",
@@ -135,6 +142,7 @@ const STATIC_JOURNAL_FIXTURES: readonly StaticJournalArticle[] = [
   },
   {
     handle: "repair-notes-what-five-years-of-use-should-look-like",
+    blog: FIELD_NOTES,
     title: "Repair Notes: What Five Years of Use Should Look Like",
     excerpt:
       "Wear patterns, honest failures, and repairs that keep gear in service.",

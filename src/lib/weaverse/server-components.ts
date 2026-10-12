@@ -16,6 +16,7 @@ import "server-only";
 
 import type { WeaverseNextComponent } from "@weaverse/next";
 
+import { loader as allArticlesLoader } from "@/sections/all-articles/loader";
 import { loader as collectionIndexLoader } from "@/sections/collection-index/loader";
 import { loader as featuredProductsLoader } from "@/sections/featured-products/loader";
 import { loader as heroSlideLoader } from "@/sections/hero-slideshow/slide/loader";
@@ -35,6 +36,7 @@ import { SECTION_SCHEMAS } from "./section-schemas";
  * no data at all beyond its settings.
  */
 const LOADERS: Record<string, WeaverseNextComponent["loader"]> = {
+  "all-articles": allArticlesLoader,
   "collection-index": collectionIndexLoader,
   "featured-products": featuredProductsLoader,
   "hero-slide": heroSlideLoader,

@@ -47,7 +47,14 @@ function article(
   publishedAt: string,
   contentHtml: string,
 ) {
-  return { handle, title, excerpt, publishedAt, contentHtml };
+  return {
+    handle,
+    title,
+    blog: { handle: "field-notes", title: "Field Notes" },
+    excerpt,
+    publishedAt,
+    contentHtml,
+  };
 }
 
 function policy(
@@ -67,6 +74,7 @@ interface Connection {
 export interface ContentResponse {
   data: {
     pages: Connection;
+    blogs: Connection;
     articles: Connection;
     shop: {
       privacyPolicy: unknown;
@@ -151,6 +159,14 @@ export function contentResponse(): ContentResponse {
           materialsAndCare,
           fitAndSizing,
           fieldTesting,
+        ],
+      },
+      /* Shopify's default, empty "News" blog alongside the one with articles. */
+      blogs: {
+        pageInfo: { hasNextPage: false },
+        nodes: [
+          { handle: "news", title: "News" },
+          { handle: "field-notes", title: "Field Notes" },
         ],
       },
       articles: {

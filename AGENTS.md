@@ -46,6 +46,15 @@ Forward is a fresh Next.js App Router storefront theme using
   A section never parses a param or decides what a filter means, so reordering
   the tree cannot change which products a URL selects. `collection-grid`, `catalog-facets.ts`,
   `FilterSidebar` and `product-results` are retired.
+- Approved change (2026-10-12): a Shopify blog is the Weaverse `BLOG` page at
+  `/archive/:blog` (`main-blog`, blog from the route); an article keeps
+  `/journal/:article` by its own handle, the newest winning a cross-blog
+  collision; `/journal` is the Weaverse `CUSTOM` page `journal`, composed from
+  `all-articles`, which reads every article in its own loader. Both shells
+  hand their articles to the shared `af--header`, `af--lead` and `af--grid`
+  children through `ArticleFeedContext`. Shopify's
+  `/blogs/*` paths redirect and map to these by pattern, never by a blog
+  handle the theme assumes.
 - Approved change (2026-09-18): the PDP buy block is the composable
   `main-product` section, split into `mp--media`, `mp--info` and one `mp--*`
   child per element. The section shell alone owns the `colorway`/`size` query

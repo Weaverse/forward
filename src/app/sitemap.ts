@@ -24,13 +24,15 @@ function toUrl(path: string): string {
  * is market-invariant, their `hreflang` alternates.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [products, collections, articles, pages, policies] = await Promise.all([
-    getStorefront().listProducts(),
-    getStorefront().listCollections(),
-    getStorefront().listArticles(),
-    getStorefront().listPages(),
-    getStorefront().listPolicies(),
-  ]);
+  const [products, collections, blogs, articles, pages, policies] =
+    await Promise.all([
+      getStorefront().listProducts(),
+      getStorefront().listCollections(),
+      getStorefront().listBlogs(),
+      getStorefront().listArticles(),
+      getStorefront().listPages(),
+      getStorefront().listPolicies(),
+    ]);
 
   const staticEntries = CANONICAL_ROUTES.filter(
     (route) =>
@@ -47,6 +49,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const dynamicEntries = [
     ...products.map((product) => `/products/${product.handle}`),
     ...collections.map((collection) => `/shop/${collection.handle}`),
+    /* `/journal` is a composed custom page the theme ships, so the static
+     * routes above no longer list it. */
+    "/journal",
+    ...blogs.map((blog) => `/archive/${blog.handle}`),
     ...articles.map((article) => `/journal/${article.handle}`),
     ...pages.map((page) => `/pages/${page.handle}`),
     ...policies.map((policy) => `/policies/${policy.handle}`),

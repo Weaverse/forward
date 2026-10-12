@@ -1,6 +1,7 @@
 import { isShopifyProductImageUrl } from "../image-source";
 import type {
   JournalArticle,
+  JournalBlog,
   Policy,
   StorefrontImage,
   StorePage,
@@ -13,7 +14,10 @@ import {
 } from "./content-html-parser";
 import { ShopifyCatalogError } from "./errors";
 
+export type ContentBlog = Omit<JournalBlog, "articles">;
+
 export interface MappedContentResult {
+  blogs: readonly ContentBlog[];
   articles: readonly JournalArticle[];
   pages: readonly StorePage[];
   policies: readonly Policy[];
@@ -186,9 +190,14 @@ export function mapContentArticles(
       if (body === null) {
         return null;
       }
+      const blog = asRecord(node.blog, `${handle} blog`);
       return {
         handle,
         title,
+        blog: {
+          handle: asText(blog.handle, `${handle} blog handle`),
+          title: asText(blog.title, `${handle} blog title`),
+        },
         excerpt: asOptionalText(node.excerpt)?.trim() ?? "",
         plate: `No. ${String(nodes.length - index).padStart(2, "0")}`,
         publishedAt: normalizePublishedAt(
@@ -290,10 +299,21 @@ export function validateContentResult(result: ContentQueryResult): void {
   mapContentResult(result);
 }
 
+/** Every blog the store publishes, whether or not it has articles yet. */
+export function mapContentBlogs(
+  result: ContentQueryResult,
+): readonly ContentBlog[] {
+  return readConnection(readData(result).blogs, "content blogs").map((node) => {
+    const handle = asText(node.handle, "content blog handle");
+    return { handle, title: asText(node.title, `${handle} title`) };
+  });
+}
+
 export function mapContentResult(
   result: ContentQueryResult,
 ): MappedContentResult {
   return {
+    blogs: mapContentBlogs(result),
     articles: mapContentArticles(result),
     pages: mapContentPages(result),
     policies: mapContentPolicies(result),

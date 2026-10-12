@@ -6,6 +6,7 @@ import type {
   Collection,
   CollectionProductsPage,
   JournalArticle,
+  JournalBlog,
   Product,
   ProductSort,
   StorefrontFilter,
@@ -43,6 +44,7 @@ export interface CatalogBrowse {
  */
 export interface StorefrontDataContext {
   article?: JournalArticle;
+  blog?: JournalBlog;
   collection?: Collection;
   /** The page of products the route resolved, already narrowed and ordered. */
   collectionProducts?: readonly Product[];
