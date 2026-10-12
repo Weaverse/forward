@@ -7,18 +7,21 @@ import { gql } from "@shopify/hydrogen";
  */
 export const CONTENT_PAGE_LIMIT = 100;
 export const CONTENT_ARTICLE_LIMIT = 100;
+export const CONTENT_BLOG_LIMIT = 100;
 
 /**
  * Every page and article the store publishes, plus its policies.
  *
- * The theme has one journal, so articles are read across all blogs, newest
- * first. Location and coordinates are optional `forward.*` article
+ * Blogs are read on their own, so a blog with no articles still exists.
+ * Articles are read across all blogs, newest first, each with its blog: the
+ * journal lists them all and a blog page is the ones that share a blog. Location and coordinates are optional `forward.*` article
  * metafields; a store that sets neither renders articles without them.
  */
 export const CONTENT_QUERY = gql(`
   query ForwardContent(
     $pageFirst: Int!
     $articleFirst: Int!
+    $blogFirst: Int!
     $country: CountryCode
     $language: LanguageCode
   ) @inContext(country: $country, language: $language) {
@@ -33,6 +36,15 @@ export const CONTENT_QUERY = gql(`
         body
       }
     }
+    blogs(first: $blogFirst) {
+      pageInfo {
+        hasNextPage
+      }
+      nodes {
+        handle
+        title
+      }
+    }
     articles(first: $articleFirst, sortKey: PUBLISHED_AT, reverse: true) {
       pageInfo {
         hasNextPage
@@ -40,6 +52,10 @@ export const CONTENT_QUERY = gql(`
       nodes {
         handle
         title
+        blog {
+          handle
+          title
+        }
         excerpt
         contentHtml
         publishedAt

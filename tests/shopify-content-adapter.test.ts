@@ -572,6 +572,22 @@ describe("Shopify content data source", () => {
     assert.equal(policy?.title, "Shipping Policy");
   });
 
+  it("serves every blog, an empty one included, with its own articles", async () => {
+    /* Studio's default blog is often Shopify's empty "News": it must render,
+     * not 404, or the preview never connects. */
+    const source = shopifySource();
+    const [news, fieldNotes, missing] = await Promise.all([
+      source.getBlog("news"),
+      source.getBlog("field-notes"),
+      source.getBlog("__forward-missing__"),
+    ]);
+
+    assert.deepEqual(news, { handle: "news", title: "News", articles: [] });
+    assert.equal(fieldNotes?.title, "Field Notes");
+    assert.equal(fieldNotes?.articles.length, 6);
+    assert.equal(missing, null);
+  });
+
   it("returns null for unknown content handles", async () => {
     const source = shopifySource();
 

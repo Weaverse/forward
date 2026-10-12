@@ -9,6 +9,7 @@ import {
 import { type MappedContentResult, mapContentResult } from "./content-mapper";
 import {
   CONTENT_ARTICLE_LIMIT,
+  CONTENT_BLOG_LIMIT,
   CONTENT_PAGE_LIMIT,
   CONTENT_QUERY,
 } from "./content-query";
@@ -47,6 +48,7 @@ export function createContentQueryExecutor(
         variables: {
           pageFirst: CONTENT_PAGE_LIMIT,
           articleFirst: CONTENT_ARTICLE_LIMIT,
+          blogFirst: CONTENT_BLOG_LIMIT,
         },
       });
       const graphQLErrors = readGraphQLErrors(errors);

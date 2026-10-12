@@ -114,6 +114,8 @@ export type ArticleBlock =
 export interface JournalArticle {
   handle: string;
   title: string;
+  /** The Shopify blog the article belongs to. */
+  blog: { handle: string; title: string };
   excerpt: string;
   /** Editorial plate number, e.g. "No. 04". */
   plate: string;
@@ -126,6 +128,13 @@ export interface JournalArticle {
   /** The article's own image, or `null` when it has none. */
   heroImage: StorefrontImage | null;
   body: readonly ArticleBlock[];
+}
+
+/** A Shopify blog and its articles, newest first (possibly none). */
+export interface JournalBlog {
+  handle: string;
+  title: string;
+  articles: readonly JournalArticle[];
 }
 
 export interface PageSection {

@@ -13,6 +13,7 @@ import type {
   CollectionProductsPage,
   CollectionProductsQuery,
   JournalArticle,
+  JournalBlog,
   Policy,
   Product,
   SiteNavigation,
@@ -276,6 +277,23 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   async getArticle(handle: string): Promise<JournalArticle | null> {
     const { articles } = await this.#loadContent();
     return articles.find((article) => article.handle === handle) ?? null;
+  }
+
+  /** Every blog with its articles; a blog with none has an empty list. */
+  async listBlogs(): Promise<readonly JournalBlog[]> {
+    const { blogs, articles } = await this.#loadContent();
+    return blogs.map((blog) => ({
+      ...blog,
+      articles: articles.filter(
+        (article) => article.blog.handle === blog.handle,
+      ),
+    }));
+  }
+
+  async getBlog(handle: string): Promise<JournalBlog | null> {
+    return (
+      (await this.listBlogs()).find((blog) => blog.handle === handle) ?? null
+    );
   }
 
   async listPages(): Promise<readonly StorePage[]> {
