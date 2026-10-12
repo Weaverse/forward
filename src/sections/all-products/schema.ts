@@ -1,8 +1,9 @@
 import { createSchema } from "@weaverse/schema";
 
+import { layoutInputsWith } from "@/components/section/inputs";
+
 export const ALL_PRODUCTS_CHILD_TYPES = [
-  "heading",
-  "paragraph",
+  "ap--header",
   "ap--toolbar",
   "ap--product-grid",
 ];
@@ -17,6 +18,7 @@ export const schema = createSchema({
     {
       group: "Layout",
       inputs: [
+        ...layoutInputsWith({ width: "full", verticalPadding: "none" }),
         {
           type: "select",
           name: "spacing",
@@ -36,10 +38,12 @@ export const schema = createSchema({
   presets: {
     spacing: "standard",
     children: [
-      { type: "heading", content: "All products", as: "h1" },
       {
-        type: "paragraph",
-        content: "Every product this store publishes.",
+        type: "ap--header",
+        children: [
+          { type: "heading", content: "All products", as: "h1" },
+          { type: "paragraph", content: "Every product this store publishes." },
+        ],
       },
       { type: "ap--toolbar" },
       { type: "ap--product-grid" },

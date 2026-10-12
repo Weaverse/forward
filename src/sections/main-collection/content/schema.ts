@@ -1,5 +1,7 @@
 import { createSchema } from "@weaverse/schema";
 
+import { contentWidthInput } from "@/components/section/inputs";
+
 /** The results row's elements, in their default order. */
 export const COLLECTION_CONTENT_CHILD_TYPES = [
   "mc--filters",
@@ -16,6 +18,7 @@ export const schema = createSchema({
     {
       group: "Layout",
       inputs: [
+        ...contentWidthInput("fixed"),
         {
           type: "toggle-group",
           name: "gap",

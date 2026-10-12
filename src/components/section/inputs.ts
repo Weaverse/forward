@@ -46,6 +46,31 @@ export const layoutInputs: SectionInputs = [
 ];
 
 /**
+ * `layoutInputs` with section-specific defaults, so Studio shows the value the
+ * section actually renders with instead of an empty select.
+ */
+export function layoutInputsWith(
+  defaults: Record<string, string>,
+): SectionInputs {
+  return layoutInputs.map((input) =>
+    typeof input.name === "string" && input.name in defaults
+      ? { ...input, defaultValue: defaults[input.name] }
+      : input,
+  );
+}
+
+/**
+ * "Content width" alone, for an element that owns its own spacing: offering
+ * vertical padding or item spacing there would fight the rhythm it already
+ * carries.
+ */
+export function contentWidthInput(defaultValue: string): SectionInputs {
+  return layoutInputsWith({ width: defaultValue }).filter(
+    (input) => input.name === "width",
+  );
+}
+
+/**
  * Space above and below a shared element.
  *
  * One choice per edge, no breakpoint pickers: each step is a clamp that already

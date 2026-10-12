@@ -57,12 +57,13 @@ function CollectionHero({
           {collection.title}
         </h1>
         {collection.description === "" ? null : (
-          <p className="mt-6 mb-8 max-w-lede text-lede leading-lede text-text-dark-subtle">
+          <p className="mt-6 max-w-lede text-lede leading-lede text-text-dark-subtle">
             {collection.description}
           </p>
         )}
+        {/* The CTA owns its gap: the description above it is optional. */}
         <Link
-          className={cn(cta({ tone: "light" }), "self-start")}
+          className={cn(cta({ tone: "light" }), "mt-8 self-start")}
           href={ctaHref}
         >
           {ctaLabel}

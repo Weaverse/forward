@@ -19,6 +19,7 @@ import { schema as main } from "@/components/main/schema";
 import { schema as paragraph } from "@/components/paragraph/schema";
 import { schema as sectionContent } from "@/components/section-content/schema";
 import { schema as subheading } from "@/components/subheading/schema";
+import { schema as allProductsHeader } from "@/sections/all-products/header/schema";
 import { schema as allProductsGrid } from "@/sections/all-products/product-grid/schema";
 import { schema as allProducts } from "@/sections/all-products/schema";
 import { schema as allProductsToolbar } from "@/sections/all-products/toolbar/schema";
@@ -117,6 +118,7 @@ export const SECTION_SCHEMAS: readonly SchemaType[] = [
 
   /* ALL_PRODUCTS */
   allProducts,
+  allProductsHeader,
   allProductsToolbar,
   allProductsGrid,
 

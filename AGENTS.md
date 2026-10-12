@@ -37,9 +37,11 @@ Forward is a fresh Next.js App Router storefront theme using
 - Approved change (2026-09-22): catalog browsing is composed. A collection is
   the `main-collection` tree — `mc--toolbar` and `mc--content`, with
   `mc--filters` and `mc--product-grid` under content — and `/shop` is the
-  `ALL_PRODUCTS` page type with the `all-products` tree (`ap--toolbar`,
-  `ap--product-grid`). Query state stays theme-owned: the route validates the
-  facet params, the sort and the cursor, reads one page through
+  `ALL_PRODUCTS` page type with the `all-products` tree (`ap--header`,
+  `ap--toolbar`, `ap--product-grid`). Both browse shells render through the
+  shared `Section`, full width by default so the toolbar stays full-bleed; the
+  `/shop` heading and lede sit in `ap--header` on the page measure. Query
+  state stays theme-owned: the route validates the facet params, the sort and the cursor, reads one page through
   `getCollectionPage`/`getProductsPage`, and hands the result down as `browse`.
   A section never parses a param or decides what a filter means, so reordering
   the tree cannot change which products a URL selects. `collection-grid`, `catalog-facets.ts`,

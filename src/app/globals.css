@@ -6,6 +6,9 @@
   @media (min-width: 821px) and (max-height: 600px)
 );
 
+/* The dropdown of a customizable select (`appearance: base-select`). */
+@custom-variant picker (&::picker(select));
+
 @theme static {
   /* Surfaces and text */
   --color-canvas: #f2eee4;
