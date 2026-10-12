@@ -2,7 +2,7 @@
 
 | Field            | Value                                                    |
 | ---------------- | -------------------------------------------------------- |
-| **Status**       | in-progress                                              |
+| **Status**       | completed                                                |
 | **Owner**        | @hta218                                                  |
 | **Issue**        | [#95](https://github.com/Weaverse/forward/issues/95)     |
 | **Branch**       | `feat/blog-archive-routes`                               |
