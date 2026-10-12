@@ -7,6 +7,7 @@ import {
   type StorefrontDataContext,
   StorefrontDataProvider,
 } from "@/lib/weaverse/data-context";
+import { ArticleFeedContext } from "@/sections/article-feed/context";
 import EditorialHero from "@/sections/editorial-hero";
 import {
   MainProductContext,
@@ -43,6 +44,11 @@ const COMPOSED = WEAVERSE_COMPONENTS.map(
  */
 const ROUTE_CONTEXT: StorefrontDataContext = {
   article: JOURNAL_FIXTURES[0],
+  blog: {
+    handle: "field-notes",
+    title: "Field Notes",
+    articles: JOURNAL_FIXTURES,
+  },
   collection: COLLECTION_FIXTURES[0],
   collectionProducts: PRODUCT_FIXTURES,
   /* The route resolves filters, order and paging before any section renders,
@@ -154,6 +160,14 @@ describe("composed components are addressable by Studio", () => {
             <MainProductContext value={MAIN_PRODUCT_STATE}>
               {element}
             </MainProductContext>
+          ) : type.startsWith("af--") ? (
+            /* An `af--*` child renders the articles its shell provides; the
+             * title is a blog page's, which an unset header heading uses. */
+            <ArticleFeedContext
+              value={{ articles: JOURNAL_FIXTURES, title: "Field Notes" }}
+            >
+              {element}
+            </ArticleFeedContext>
           ) : (
             element
           )}
