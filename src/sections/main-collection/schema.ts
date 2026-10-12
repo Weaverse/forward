@@ -1,5 +1,6 @@
 import { createSchema } from "@weaverse/schema";
 
+import { layoutInputsWith } from "@/components/section/inputs";
 import { COLLECTION_CONTENT_CHILD_TYPES } from "./content/schema";
 
 export const schema = createSchema({
@@ -12,6 +13,7 @@ export const schema = createSchema({
     {
       group: "Layout",
       inputs: [
+        ...layoutInputsWith({ width: "full", verticalPadding: "none" }),
         {
           type: "select",
           name: "spacing",

@@ -46,6 +46,20 @@ export const layoutInputs: SectionInputs = [
 ];
 
 /**
+ * `layoutInputs` with section-specific defaults, so Studio shows the value the
+ * section actually renders with instead of an empty select.
+ */
+export function layoutInputsWith(
+  defaults: Record<string, string>,
+): SectionInputs {
+  return layoutInputs.map((input) =>
+    typeof input.name === "string" && input.name in defaults
+      ? { ...input, defaultValue: defaults[input.name] }
+      : input,
+  );
+}
+
+/**
  * Space above and below a shared element.
  *
  * One choice per edge, no breakpoint pickers: each step is a clamp that already
