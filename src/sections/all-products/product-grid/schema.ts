@@ -1,11 +1,14 @@
 import { createSchema } from "@weaverse/schema";
 
+import { contentWidthInput } from "@/components/section/inputs";
+
 export const schema = createSchema({
   type: "ap--product-grid",
   title: "Product grid",
   limit: 1,
   enabledOn: { pages: ["ALL_PRODUCTS"] },
   settings: [
+    { group: "Layout", inputs: contentWidthInput("fixed") },
     {
       group: "Grid",
       inputs: [

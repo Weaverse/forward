@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { CursorPagination } from "@/components/cursor-pagination";
 import { ProductCard } from "@/components/product-card";
-import { cn } from "@/lib/cn";
 import { usePathname } from "@/lib/i18n/locale-context";
 import { useT } from "@/lib/i18n/t";
 import type { CollectionProductsPage, Product } from "@/lib/storefront/types";
@@ -26,15 +25,10 @@ const grid = cva(
   },
 );
 
-/** Full-bleed placements put the grid and its paging in the page container. */
-const PAGE_CONTAINER = "mx-auto w-full max-w-page px-page-gutter";
-
 interface CatalogGridProps extends WeaverseElementProps {
   products: readonly Product[];
   pageInfo?: CollectionProductsPage["pageInfo"];
   columns?: CatalogColumns;
-  /** Whether the grid sits in the page container or in a row that has one. */
-  contained?: boolean;
   className?: string;
   /** What shows when the store returned no products for this page. */
   empty: ReactNode;
@@ -45,7 +39,6 @@ export function CatalogGrid({
   products,
   pageInfo,
   columns,
-  contained,
   className,
   empty,
   ...rest
@@ -65,13 +58,7 @@ export function CatalogGrid({
         empty
       ) : (
         <>
-          <div
-            className={cn(
-              grid({ columns }),
-              contained && PAGE_CONTAINER,
-              contained && "pt-15.5",
-            )}
-          >
+          <div className={grid({ columns })}>
             {products.map((product, index) => (
               <ProductCard
                 key={product.handle}
@@ -81,13 +68,11 @@ export function CatalogGrid({
             ))}
           </div>
           {pageInfo === undefined ? null : (
-            <div className={cn(contained && PAGE_CONTAINER)}>
-              <CursorPagination
-                pageInfo={pageInfo}
-                pathname={pathname}
-                params={params}
-              />
-            </div>
+            <CursorPagination
+              pageInfo={pageInfo}
+              pathname={pathname}
+              params={params}
+            />
           )}
         </>
       )}

@@ -60,6 +60,17 @@ export function layoutInputsWith(
 }
 
 /**
+ * "Content width" alone, for an element that owns its own spacing: offering
+ * vertical padding or item spacing there would fight the rhythm it already
+ * carries.
+ */
+export function contentWidthInput(defaultValue: string): SectionInputs {
+  return layoutInputsWith({ width: defaultValue }).filter(
+    (input) => input.name === "width",
+  );
+}
+
+/**
  * Space above and below a shared element.
  *
  * One choice per edge, no breakpoint pickers: each step is a clamp that already
