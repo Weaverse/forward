@@ -37,7 +37,7 @@ const expectedPrimary = [
       { href: "/shop/footwear", label: "Footwear" },
     ],
   },
-  { href: "/journal", label: "Field Notes" },
+  { href: "/archive/field-notes", label: "Field Notes" },
   {
     href: "/pages/about-forward",
     label: "About",
@@ -301,7 +301,7 @@ describe("Shopify navigation mapping", () => {
       ["/collections/all", "/shop"],
       ["/collections/packs", "/shop/packs"],
       ["/products/talus-trail-shoe", "/products/talus-trail-shoe"],
-      ["/blogs/field-notes", "/journal"],
+      ["/blogs/field-notes", "/archive/field-notes"],
       ["/blogs/field-notes/layering", "/journal/layering"],
       ["/policies/refund-policy", "/policies/refund-policy"],
       ["/search", "/search"],
