@@ -9,7 +9,7 @@
 
 - `src/components/section/inputs.ts`: `layoutInputsWith(defaults)` returns `layoutInputs` with section-specific defaults, so Studio shows what the section renders with.
 - `all-products` and `main-collection` render through `Section`, defaulting to `width: "full"` and `verticalPadding: "none"`, so the current look is unchanged and the toolbar stays full-bleed. Their schemas gain the layout inputs; "Space below" (`spacing`) stays.
-- New `ap--header` (`src/sections/all-products/header/`): `Section` with `width: "fixed"` and `verticalPadding: "compact"`, child types `heading` and `paragraph`. Registered in `src/lib/weaverse/components.ts`.
+- New `ap--header` (`src/sections/all-products/header/`): `Section` with `width: "fixed"` and `verticalPadding: "compact"`, child types `heading` and `paragraph`. Registered in `src/lib/weaverse/components.ts` and `src/lib/weaverse/section-schemas.ts`.
 - `all-products` child types become `ap--header`, `ap--toolbar`, `ap--product-grid`; the preset nests the heading and lede in `ap--header`.
 - `AGENTS.md`: the `all-products` tree lists `ap--header`.
 - `collection-hero`: the CTA owns its top gap (`mt-8`) and the description drops `mb-8`. The only gap before the CTA was the description's bottom margin, so a collection with no description put the button against the title (over its descenders, given the 0.98 line height). Spacing with a description is unchanged.
@@ -33,7 +33,7 @@ The project's existing ALL_PRODUCTS template still has `heading` and `paragraph`
 | `src/sections/all-products/{index.tsx,schema.ts}` | Shell on `Section`, `ap--header` child |
 | `src/sections/all-products/header/{index.tsx,schema.ts}` | New `ap--header` |
 | `src/sections/main-collection/{index.tsx,schema.ts}` | Shell on `Section` |
-| `src/lib/weaverse/components.ts` | Register `ap--header` |
+| `src/lib/weaverse/{components.ts,section-schemas.ts}` | Register `ap--header` |
 | `src/sections/collection-hero/index.tsx` | CTA gap no longer depends on the description |
 | `AGENTS.md` | `all-products` tree |
 | `.weaverse/specs/2026-10-12--browse-section-shells/` | This spec |
