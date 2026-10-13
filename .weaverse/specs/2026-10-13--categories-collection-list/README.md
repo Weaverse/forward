@@ -2,7 +2,7 @@
 
 | Field            | Value                                                    |
 | ---------------- | -------------------------------------------------------- |
-| **Status**       | in-progress                                              |
+| **Status**       | completed                                                |
 | **Owner**        | @hta218                                                  |
 | **Issue**        | [#98](https://github.com/Weaverse/forward/issues/98)     |
 | **Branch**       | `feat/categories-collection-list`                        |
