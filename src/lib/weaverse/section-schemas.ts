@@ -46,6 +46,9 @@ import { schema as collectionFilters } from "@/sections/main-collection/filters/
 import { schema as collectionProductGrid } from "@/sections/main-collection/product-grid/schema";
 import { schema as mainCollection } from "@/sections/main-collection/schema";
 import { schema as collectionToolbar } from "@/sections/main-collection/toolbar/schema";
+import { schema as collectionListGrid } from "@/sections/main-collection-list/grid/schema";
+import { schema as collectionListHeader } from "@/sections/main-collection-list/header/schema";
+import { schema as mainCollectionList } from "@/sections/main-collection-list/schema";
 import { schema as productBreadcrumb } from "@/sections/main-product/breadcrumb/schema";
 import { schema as productBuyButtons } from "@/sections/main-product/buy-buttons/schema";
 import { schema as productCollapsibleDetails } from "@/sections/main-product/collapsible-details/schema";
@@ -122,6 +125,9 @@ export const SECTION_SCHEMAS: readonly SchemaType[] = [
   fieldPractice,
 
   /* ALL_PRODUCTS */
+  mainCollectionList,
+  collectionListHeader,
+  collectionListGrid,
   allArticles,
   mainBlog,
   articleFeedHeader,

@@ -298,6 +298,7 @@ describe("Shopify navigation mapping", () => {
   it("routes Shopify paths onto the theme's own routes", () => {
     const cases = [
       ["/", "/"],
+      ["/collections", "/categories"],
       ["/collections/all", "/shop"],
       ["/collections/packs", "/shop/packs"],
       ["/products/talus-trail-shoe", "/products/talus-trail-shoe"],

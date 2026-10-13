@@ -50,6 +50,7 @@ const ROUTE_CONTEXT: StorefrontDataContext = {
     articles: JOURNAL_FIXTURES,
   },
   collection: COLLECTION_FIXTURES[0],
+  collections: COLLECTION_FIXTURES,
   collectionProducts: PRODUCT_FIXTURES,
   /* The route resolves filters, order and paging before any section renders,
    * so the `mc--*` and `ap--*` elements only ever see a result. */

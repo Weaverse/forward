@@ -1,0 +1,6 @@
+{
+  "pageType": "COLLECTION_LIST",
+  "handle": "",
+  "description": "Collection list template.",
+  "sections": [{ "type": "main-collection-list" }]
+}

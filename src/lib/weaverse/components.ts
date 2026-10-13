@@ -56,6 +56,9 @@ import * as CollectionContent from "@/sections/main-collection/content";
 import * as CollectionFilters from "@/sections/main-collection/filters";
 import * as CollectionProductGrid from "@/sections/main-collection/product-grid";
 import * as CollectionToolbar from "@/sections/main-collection/toolbar";
+import * as MainCollectionList from "@/sections/main-collection-list";
+import * as CollectionListGrid from "@/sections/main-collection-list/grid";
+import * as CollectionListHeader from "@/sections/main-collection-list/header";
 import * as MainProduct from "@/sections/main-product";
 import * as ProductBreadcrumb from "@/sections/main-product/breadcrumb";
 import * as ProductBuyButtons from "@/sections/main-product/buy-buttons";
@@ -150,6 +153,9 @@ export const WEAVERSE_COMPONENTS: WeaverseNextComponent[] = [
   entry(FieldPractice),
 
   /* ALL_PRODUCTS */
+  entry(MainCollectionList),
+  entry(CollectionListHeader),
+  entry(CollectionListGrid),
   entry(AllArticles),
   entry(MainBlog),
   entry(ArticleFeedHeader),

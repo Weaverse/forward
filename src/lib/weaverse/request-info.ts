@@ -14,6 +14,7 @@ export type WeaversePageType =
   | "INDEX"
   | "PRODUCT"
   | "COLLECTION"
+  | "COLLECTION_LIST"
   | "ALL_PRODUCTS"
   | "BLOG"
   | "ARTICLE"
