@@ -85,6 +85,12 @@ export const CANONICAL_ROUTES: readonly RouteContractEntry[] = [
     smoke: { path: "/shop", expectedStatus: 200, composed: true },
   },
   {
+    pattern: "/categories",
+    label: "Collection list",
+    category: "commerce",
+    smoke: { path: "/categories", expectedStatus: 200, composed: true },
+  },
+  {
     pattern: "/shop/[collectionHandle]",
     label: "Collection",
     category: "commerce",
@@ -364,6 +370,14 @@ export const DYNAMIC_NOT_FOUND_SMOKES: readonly RouteSmoke[] = [
  * `/collections/all` case must precede the parameterised collection rule.
  */
 export const REDIRECT_CONTRACT: readonly RedirectContractEntry[] = [
+  {
+    /* The collection list lives at `/categories`: a Forward category is a
+     * product's `productType`, so only the URL says it. */
+    source: "/collections",
+    destination: "/categories",
+    permanent: true,
+    smoke: { path: "/collections", expectedLocation: "/categories" },
+  },
   {
     source: "/collections/all",
     destination: "/shop",

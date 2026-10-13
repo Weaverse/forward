@@ -46,6 +46,12 @@ Forward is a fresh Next.js App Router storefront theme using
   A section never parses a param or decides what a filter means, so reordering
   the tree cannot change which products a URL selects. `collection-grid`, `catalog-facets.ts`,
   `FilterSidebar` and `product-results` are retired.
+- Approved change (2026-10-13): the collection list is the Weaverse
+  `COLLECTION_LIST` page at `/categories` (`main-collection-list` with
+  `cl--header` and `cl--grid`, collections from the route). Only the URL says
+  "categories": a Forward category is still a product's `productType`, so code,
+  schema and Studio call it the collection list. `/collections` redirects and
+  maps there; `/collections/all` and `/collections/:handle` keep `/shop`.
 - Approved change (2026-10-12): a Shopify blog is the Weaverse `BLOG` page at
   `/archive/:blog` (`main-blog`, blog from the route); an article keeps
   `/journal/:article` by its own handle, the newest winning a cross-blog

@@ -9,12 +9,13 @@
  */
 const THEME_ROUTES: readonly [RegExp, (match: RegExpMatchArray) => string][] = [
   [/^\/$/, () => "/"],
+  [/^\/collections$/, () => "/categories"],
   [/^\/collections\/all$/, () => "/shop"],
   [/^\/collections\/([^/]+)$/, (match) => `/shop/${match[1]}`],
   [/^\/blogs\/([^/]+)$/, (match) => `/archive/${match[1]}`],
   [/^\/blogs\/[^/]+\/([^/]+)$/, (match) => `/journal/${match[1]}`],
   [
-    /^\/(shop|journal|archive|products|pages|policies)(\/[^/]+)?$/,
+    /^\/(shop|categories|journal|archive|products|pages|policies)(\/[^/]+)?$/,
     (match) => match[0],
   ],
   [/^\/(search|account|cart)$/, (match) => match[0]],
