@@ -19,7 +19,12 @@ import {
  * redirects or does not exist. A wrong `hreflang` tells a search engine a page
  * exists where it does not, which is worse than none.
  */
-const MARKET_INVARIANT_PATHS = new Set(["/", "/shop", "/journal"]);
+const MARKET_INVARIANT_PATHS = new Set([
+  "/",
+  "/shop",
+  "/categories",
+  "/journal",
+]);
 
 /**
  * Next `alternates` for an unprefixed route path in the current market: a

@@ -46,6 +46,8 @@ export interface StorefrontDataContext {
   article?: JournalArticle;
   blog?: JournalBlog;
   collection?: Collection;
+  /** Every collection, on the `COLLECTION_LIST` page. */
+  collections?: readonly Collection[];
   /** The page of products the route resolved, already narrowed and ordered. */
   collectionProducts?: readonly Product[];
   browse?: CatalogBrowse;
