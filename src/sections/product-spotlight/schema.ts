@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/schema";
+import { createSchema } from "@weaverse/next";
 
 import { layoutInputs } from "@/components/section/inputs";
 import type { ProductSpotlightProps } from ".";

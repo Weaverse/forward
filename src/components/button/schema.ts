@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/schema";
+import { createSchema } from "@weaverse/next";
 import type { ButtonProps } from ".";
 
 export const schema = createSchema({

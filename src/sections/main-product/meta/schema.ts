@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/schema";
+import { createSchema } from "@weaverse/next";
 
 export const schema = createSchema({
   type: "mp--meta",

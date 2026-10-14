@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/schema";
+import { createSchema } from "@weaverse/next";
 import type { ProductCaseStudyProps } from ".";
 
 export const schema = createSchema({

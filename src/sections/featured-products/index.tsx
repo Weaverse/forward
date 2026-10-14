@@ -1,6 +1,6 @@
 "use client";
 
-import { IMAGES_PLACEHOLDERS } from "@weaverse/schema";
+import { IMAGES_PLACEHOLDERS } from "@weaverse/next";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { ProductCard } from "@/components/product-card";
