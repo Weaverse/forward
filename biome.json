@@ -44,6 +44,9 @@
           "options": {
             "paths": {
               "next/link": "Use the locale-aware `Link` from `@/components/link`.",
+              "@weaverse/schema": "Import from `@weaverse/next`: it re-exports `@weaverse/schema`, which is not a dependency of this theme.",
+              "@weaverse/react": "Import from `@weaverse/next`: `@weaverse/react` is not a dependency of this theme.",
+              "@weaverse/core": "Import from `@weaverse/next`: `@weaverse/core` is not a dependency of this theme.",
               "@weaverse/next": {
                 "importNames": ["useTranslation"],
                 "message": "Use `useT` or `<T>` from `@/lib/i18n/t`: they resolve through the theme's own-property-safe translator."
