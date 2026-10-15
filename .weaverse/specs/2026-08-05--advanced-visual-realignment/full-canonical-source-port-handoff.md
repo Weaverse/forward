@@ -8,11 +8,11 @@ Canonical POC source: `Weaverse/weaverse-hydrogen-next-poc@7e416404b5c9d7d8b9fed
 
 ## Original user correction and confirmed scope
 
-> "Tại sao chú k dùng đúng source code luôn? Chính chú là người viết cái poc preview đấy mà? hay chú quên?"
+> "Why don't you use the exact source code? You wrote that POC preview yourself, didn't you? Or did you forget?"
 
-> "Spec mới có mỗi home thôi à? tất cả các route chứ nhỉ?"
+> "The spec only covers home? Shouldn't it cover every route?"
 
-> "full canonical source-port -> thế này mới là đúng nhé"
+> "full canonical source-port -> this is the right way"
 
 The prior implementation used screenshots to approximate the owned Advanced POC. Leo rejected that result. The next pass is not another Home correction and not another visual reinterpretation. It is a **full canonical source-port** across the shared shell and every rendered route.
 

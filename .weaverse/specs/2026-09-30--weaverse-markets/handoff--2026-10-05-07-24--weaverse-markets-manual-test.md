@@ -123,5 +123,5 @@ Remaining manual checklist (agreed in session):
   - Localized pages could be created through the Content API with an API key, but Leo chose to do them in Studio.
 
 ## Additional Notes
-- Leo's request: "phần cần check vào specs của issue này đang làm nhé (phần markets), để a lên cty làm tiếp".
+- Leo's request: "put what needs checking into the specs of the issue in progress (the markets part), so I can continue at the office".
 - Resume point: manual test group A, step 2 (re-check the address bar, then create and publish the DE localized home), then continue A3–E above.

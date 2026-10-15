@@ -10,7 +10,7 @@ The screenshot-reconstructed Home correction and the earlier full-source-port im
 
 ## Original request
 
-> "Đúng r làm đi, nó là cái này nhé: https://weaverse-hydrogen-next-poc.vercel.app/theme-preview-advanced/index.html#/home — gửi lại cho chú khỏi nhầm"
+> "Right, go ahead. It is this one: https://weaverse-hydrogen-next-poc.vercel.app/theme-preview-advanced/index.html#/home — sending it again so you don't mix it up"
 
 Context: Leo rejected the merged static storefront's visual direction because it is completely different from the previously approved Advanced POC. Technical completeness did not constitute design acceptance.
 
