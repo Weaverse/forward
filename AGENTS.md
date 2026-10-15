@@ -5,16 +5,11 @@
 Forward is a fresh Next.js App Router storefront theme using
 `@shopify/hydrogen@preview`, powered by Weaverse.
 
+Weaverse maintainers must also read `.weaverse/AGENTS.md` (internal; absent
+from scaffolded copies).
+
 ## Architecture constraints
 
-- Implement from scratch in this repository.
-- Do not fork, import, copy, port, or emulate Pilot code, architecture,
-  sections, or visual design. Reading Pilot to learn how a Weaverse theme
-  *organizes* its files was authorized by Leo on 2026-09-08 and is the only
-  permitted use: layout conventions may be adopted, implementation may not.
-  Nothing in this repository is a translation of Pilot source.
-- The existing static Forward POC is a visual reference only; do not copy its implementation wholesale.
-- Storefront completeness is defined by `.weaverse/specs/2026-08-05--static-demo-productionization/README.md` and the Shopify route contract.
 - The catalog is the store's. No theme-side table decides which products are
   approved, what category or activities they have, or which facets exist:
   `category` is `productType`, `activities` are the product's tags, colorway
@@ -25,7 +20,6 @@ Forward is a fresh Next.js App Router storefront theme using
   Search & Discovery works with no code change. Sort options are Shopify sort
   keys. Never reintroduce an approved-handle allowlist or a presentation
   profile table — both made the theme unable to run on another store.
-- Build the theme before making deployment or demo-integration decisions.
 - Routes compose named sections from `src/sections/`; they do not inline
   section markup. A section is pure presentation: every piece of content and
   data arrives as props, and the page owns the `storefront` reads. Sections
@@ -34,7 +28,7 @@ Forward is a fresh Next.js App Router storefront theme using
 - Functional, stateful, and security-owned surfaces are not sections and stay
   theme-owned: Cart and `/account/**`. Header and Footer are theme-owned
   components configured through theme settings, never Weaverse global sections.
-- Approved change (2026-09-22): catalog browsing is composed. A collection is
+- Catalog browsing is composed. A collection is
   the `main-collection` tree — `mc--toolbar` and `mc--content`, with
   `mc--filters` and `mc--product-grid` under content — and `/shop` is the
   `ALL_PRODUCTS` page type with the `all-products` tree (`ap--header`,
@@ -44,15 +38,14 @@ Forward is a fresh Next.js App Router storefront theme using
   state stays theme-owned: the route validates the facet params, the sort and the cursor, reads one page through
   `getCollectionPage`/`getProductsPage`, and hands the result down as `browse`.
   A section never parses a param or decides what a filter means, so reordering
-  the tree cannot change which products a URL selects. `collection-grid`, `catalog-facets.ts`,
-  `FilterSidebar` and `product-results` are retired.
-- Approved change (2026-10-13): the collection list is the Weaverse
+  the tree cannot change which products a URL selects.
+- The collection list is the Weaverse
   `COLLECTION_LIST` page at `/categories` (`main-collection-list` with
   `cl--header` and `cl--grid`, collections from the route). Only the URL says
   "categories": a Forward category is still a product's `productType`, so code,
   schema and Studio call it the collection list. `/collections` redirects and
   maps there; `/collections/all` and `/collections/:handle` keep `/shop`.
-- Approved change (2026-10-12): a Shopify blog is the Weaverse `BLOG` page at
+- A Shopify blog is the Weaverse `BLOG` page at
   `/archive/:blog` (`main-blog`, blog from the route); an article keeps
   `/journal/:article` by its own handle, the newest winning a cross-blog
   collision; `/journal` is the Weaverse `CUSTOM` page `journal`, composed from
@@ -61,12 +54,12 @@ Forward is a fresh Next.js App Router storefront theme using
   children through `ArticleFeedContext`. Shopify's
   `/blogs/*` paths redirect and map to these by pattern, never by a blog
   handle the theme assumes.
-- Approved change (2026-09-18): the PDP buy block is the composable
+- The PDP buy block is the composable
   `main-product` section, split into `mp--media`, `mp--info` and one `mp--*`
   child per element. The section shell alone owns the `colorway`/`size` query
   state and shares the resolved selection through `MainProductContext`; all
   cart logic stays inside the shared `AddToCartForm`.
-- Approved exception (2026-09-15): `product-spotlight` may embed the shared
+- `product-spotlight` may embed the shared
   `AddToCartForm` (`src/components/add-to-cart-form.tsx`) with a selection held
   in component state. It never reads or writes the PDP's `colorway`/`size`
   query state, and all cart logic stays inside the shared form.
@@ -99,8 +92,6 @@ Forward is a fresh Next.js App Router storefront theme using
   interaction, or browser behavior coverage before migrating their styles.
   JSDOM does not prove layout, overflow, responsive visibility, focus geometry,
   or reduced motion; keep those contracts in the permanent browser suite.
-- `canonical-source.css`, `site-header.css`, and `production-polish.css` are
-  retired. Do not restore legacy selectors or compatibility imports.
 
 ## Markets
 
@@ -175,8 +166,6 @@ Forward is a fresh Next.js App Router storefront theme using
   handoff. There is no browser-local cart.
 - Theme-owned copy (announcement, footer tagline, fallback imagery) comes from
   Weaverse theme settings; an unset setting renders nothing.
-- The Shopify adapter continues to replace the data source one domain at a
-  time without rewriting page composition.
 - Run `bun run check:graphql` (`hydrogen gql check`) after adding or changing
   any `gql()` document; the editor plugin does not run during `tsc`.
 
@@ -195,13 +184,9 @@ Forward is a fresh Next.js App Router storefront theme using
   `.agents/skills/` guidance for Hydrogen wiring in this Next.js app.
 - Use Server Components by default; add Client Components only for real interactivity.
 - Keep route definitions and route-check fixtures centralized rather than duplicating path strings.
-- Storefront Content/Cart credentials, Customer Account setup, and the
-  Weaverse connection are approved for the current ordered slices under the
-  spec's guarded Store-operation protocol. Approved change (2026-10-09): the
-  public Storefront token reaches the browser through Weaverse's `publicEnv`,
-  because Studio needs it to resolve default resources; it has no other
-  browser use. Payment activation and uncontrolled customer/order data remain
-  outside that approval. Never add a `.env` file to a repository or worktree.
+- The public Storefront token reaches the browser through Weaverse's
+  `publicEnv`, because Studio needs it to resolve default resources; it has no
+  other browser use.
 - Install only an exact registry-verified `@weaverse/next` version, never a
   dist-tag or range, so every upgrade is a reviewed change. Keep the Shopify data
   seam and the Weaverse composition seam separate: no Shopify credential,
@@ -253,4 +238,3 @@ Inspect the final git diff and keep generated/build output untracked.
 
 - Never commit secrets or `.env` files.
 - Do not deploy, force-push, merge, or modify GitHub issues/PRs unless explicitly requested.
-- Do not rewrite the fresh root commit or remove the local legacy rollback bundle outside this repository.
