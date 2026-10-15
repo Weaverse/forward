@@ -6,7 +6,7 @@
 
 Leo reviewed the ordered Content → Cart → Customer Account plan, confirmed that
 required Shopify Store setup is in scope under guarded mutation rules, and said
-`Ok, làm đi`.
+`OK, do it`.
 
 ### Baseline
 

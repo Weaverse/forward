@@ -835,8 +835,8 @@ Branch `feat/weaverse-page-types` from `main@0c84182`.
 
 ### Removing the static fallbacks (same day)
 
-- **Leo had already ruled on this** — "giờ có data rồi thì cần gì fallback tĩnh
-  nữa … mấy route/page làm sau này cũng sẽ vậy" — and the five new routes were
+- **Leo had already ruled on this** — "now that we have data, why keep static
+  fallbacks … the routes/pages we build later will be the same" — and the five new routes were
   written with fallbacks anyway. The justification recorded for them ("the route
   contract requires 200 without Weaverse") was circular: the gate demanded that
   because we wrote the gate that way, not because the product does.
