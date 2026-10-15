@@ -1,3 +1,4 @@
+import { WeaverseNextStudioConnect } from "@weaverse/next";
 import type { Metadata, Viewport } from "next";
 import { Archivo, IBM_Plex_Mono, Manrope } from "next/font/google";
 import { notFound } from "next/navigation";
@@ -21,7 +22,6 @@ import {
   loadWeaverseThemeSettings,
   weaverseProjectId,
 } from "@/lib/weaverse/server";
-import { StudioConnect } from "@/lib/weaverse/studio-connect";
 
 import "../globals.css";
 import { T } from "@/lib/i18n/t";
@@ -106,7 +106,7 @@ export default async function RootLayout({
         />
       </head>
       <body className="m-0 max-w-full overflow-x-clip bg-canvas font-body text-copy-sm leading-body text-ink antialiased">
-        {weaverseEnabled ? <StudioConnect /> : null}
+        {weaverseEnabled ? <WeaverseNextStudioConnect /> : null}
         <LocaleProvider locale={locale}>
           <WeaverseRoot
             merchantOverrides={themeResponse?.merchantOverrides}

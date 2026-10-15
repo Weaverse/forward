@@ -1,6 +1,6 @@
 "use client";
 
-import { IMAGES_PLACEHOLDERS } from "@weaverse/schema";
+import { IMAGES_PLACEHOLDERS } from "@weaverse/next";
 import Image from "next/image";
 import { Link } from "@/components/link";
 import { cn } from "@/lib/cn";

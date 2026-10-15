@@ -208,6 +208,10 @@ Forward is a fresh Next.js App Router storefront theme using
   private token, or raw API payload may reach a Studio payload. Analytics
   pageview transport and deduplication are owned by the SDK; the theme must
   not reimplement them.
+- `@weaverse/next` is the only Weaverse dependency. Import every Weaverse API
+  from it (it re-exports `@weaverse/schema`), never from `@weaverse/schema`,
+  `@weaverse/react` or `@weaverse/core`: those resolve only because the
+  installer hoists the SDK's own dependencies (Biome enforces this).
 
 ## Required verification
 

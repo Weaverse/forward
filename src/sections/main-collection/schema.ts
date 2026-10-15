@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/schema";
+import { createSchema } from "@weaverse/next";
 
 import { layoutInputsWith } from "@/components/section/inputs";
 import { COLLECTION_CONTENT_CHILD_TYPES } from "./content/schema";

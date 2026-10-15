@@ -207,12 +207,12 @@ describe("Studio integration surface", () => {
   it("mounts the Studio bridge script in the document body", async () => {
     const layout = await read("src/app/[locale]/layout.tsx");
 
-    assert.match(layout, /<StudioConnect \/>/);
+    assert.match(layout, /<WeaverseNextStudioConnect \/>/);
     const bodyIndex = layout.indexOf("<body");
-    const connectIndex = layout.indexOf("<StudioConnect />");
+    const connectIndex = layout.indexOf("<WeaverseNextStudioConnect />");
     assert.ok(
       bodyIndex !== -1 && connectIndex > bodyIndex,
-      "StudioConnect is a Client Component and must render inside <body>",
+      "WeaverseNextStudioConnect is a Client Component and must render inside <body>",
     );
   });
 

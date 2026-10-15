@@ -10,7 +10,7 @@
  * tooling that runs outside Next, the test suite included.
  */
 
-import type { SchemaType } from "@weaverse/schema";
+import type { SchemaType } from "@weaverse/next";
 
 import { schema as button } from "@/components/button/schema";
 import { schema as buttons } from "@/components/buttons/schema";
