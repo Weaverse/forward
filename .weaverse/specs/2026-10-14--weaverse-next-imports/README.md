@@ -2,12 +2,12 @@
 
 | Field            | Value                                                                    |
 | ---------------- | ------------------------------------------------------------------------ |
-| **Status**       | in-progress                                                              |
+| **Status**       | completed                                                                |
 | **Owner**        | @hta218                                                                  |
 | **Issue**        | [#100](https://github.com/Weaverse/forward/issues/100), part of [Weaverse/weaverse#542](https://github.com/Weaverse/weaverse/issues/542) |
 | **Branch**       | `fix/weaverse-next-imports`                                              |
 | **Created**      | 2026-10-14                                                               |
-| **Last Updated** | 2026-10-14                                                               |
+| **Last Updated** | 2026-10-15                                                               |
 
 ## Original Prompt
 
