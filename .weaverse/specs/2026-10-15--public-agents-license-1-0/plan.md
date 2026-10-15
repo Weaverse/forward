@@ -39,6 +39,7 @@
 - `AGENTS.md`
 - `.weaverse/AGENTS.md` (new)
 - `LICENSE.md` (new)
+- `.env.example` (empty `PUBLIC_STOREFRONT_ORIGIN`, current catalog and Studio-token notes)
 - `package.json`
 - `src/lib/weaverse/theme-schema.ts`
 - `.weaverse/specs/2026-10-15--public-agents-license-1-0/` (this spec)
