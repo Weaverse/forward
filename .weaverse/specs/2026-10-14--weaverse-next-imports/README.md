@@ -11,7 +11,7 @@
 
 ## Original Prompt
 
-> vậy thì cần thêm 2 child issue cho issue này để sửa forward và docs nhé, sau đó /goal là chú làm cả 3 luôn cho a, xong thì /commit in multi commits + open PR nhé. A sẽ review mà merge lần lượt
+> Then this issue needs two child issues, to fix Forward and the docs. After that, the goal is for you to do all three for me, then /commit in multiple commits and open the PRs. I will review and merge them one by one.
 
 Context: Weaverse/weaverse#542. `@weaverse/next@1.0.0` lost its `'use client'` directives, so any value import from it in server code failed the build. Forward escaped only by importing `createSchema` from `@weaverse/schema`, which is not one of its dependencies.
 
