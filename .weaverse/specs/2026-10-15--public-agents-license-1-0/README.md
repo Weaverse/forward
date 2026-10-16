@@ -2,12 +2,12 @@
 
 | Field            | Value                                                                    |
 | ---------------- | ------------------------------------------------------------------------ |
-| **Status**       | in-progress                                                              |
+| **Status**       | completed                                                                |
 | **Owner**        | @hta218                                                                  |
 | **Issue**        | [#103](https://github.com/Weaverse/forward/issues/103), part of [Weaverse/weaverse#541](https://github.com/Weaverse/weaverse/issues/541) |
 | **Branch**       | `chore/public-agents-license-1-0`                                        |
 | **Created**      | 2026-10-15                                                               |
-| **Last Updated** | 2026-10-15                                                               |
+| **Last Updated** | 2026-10-16                                                               |
 
 ## Original Prompt
 
