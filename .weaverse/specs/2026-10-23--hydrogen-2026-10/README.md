@@ -2,7 +2,7 @@
 
 | Field            | Value                                                                    |
 | ---------------- | ------------------------------------------------------------------------ |
-| **Status**       | in-progress                                                              |
+| **Status**       | completed                                                                |
 | **Owner**        | @hta218                                                                  |
 | **Issue**        | [#109](https://github.com/Weaverse/forward/issues/109), part of [Weaverse/weaverse#543](https://github.com/Weaverse/weaverse/issues/543) |
 | **Branch**       | `update/hydrogen-2026-10`                                                |
