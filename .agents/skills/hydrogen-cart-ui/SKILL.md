@@ -2,9 +2,15 @@
 name: hydrogen-cart-ui
 description: >
   Behavioral guide for building cart UI with @shopify/hydrogen: line items,
-  quantity and remove controls, optimistic updates, discount and note inputs,
-  and the full-page /cart fallback. Use when writing, modifying, or reviewing cart
-  line-item UI, quantity/remove controls, or cart mutation forms. Framework agnostic.
+  quantity and remove controls, optimistic updates, discount, note, and cart
+  attribute inputs, and the full-page /cart fallback. Use when writing,
+  modifying, or reviewing cart line-item UI, quantity/remove controls, cart
+  mutation forms, or code that changes the cart without a form. Framework
+  agnostic.
+metadata:
+  source: "@shopify/hydrogen"
+  version: "2026.10.2"
+  hash: "sha256:71262883ce0aee8ff7c13ef9a256da6ff7d8b3aa831e5e031ce80f4069610436"
 ---
 
 # Cart Primitive
@@ -27,17 +33,43 @@ When creating a full cart page, use the app's existing route convention when pre
 
 **The native no-JS add-to-cart POST must set the cart cookie server-side.** With scripting off, the add-to-cart `<form method="post">` submits natively and the cart server handler must respond with the cart cookie so the next `/cart` request server-renders the seeded cart — not only service the hydrated `fetch`. See the `hydrogen-request-handlers` skill for the endpoint contract.
 
+## Prerequisites
+
+The store sends cart changes through Shopify's Standard Actions runtime (`window.Shopify.actions`) and listens for its events. Render `ShopifyScripts` once in the document head. When the app deliberately skips Shopify's other scripts, include only `<script type="module" src="https://cdn.shopify.com/storefront/standard-actions.js"></script>`. Without the runtime, cart actions reject with "Standard Actions not available".
+
 ## How the store works
 
-The store holds a `CartState` and notifies subscribers when it changes. `state.readyPromise` is present while an applicable full-cart load is pending and resolves after the resulting state is published. Mutations flow through Shopify Standard Actions — the store listens for `shopify:cart:lines-update`, `shopify:cart:discount-update`, and `shopify:cart:note-update` DOM events. Each event carries a `promise` that resolves with the server response.
+The store holds a `CartState` and notifies subscribers when it changes. `state.readyPromise` is present while an applicable full-cart load is pending and resolves after the resulting state is published. Mutations flow through Shopify Standard Actions — the store listens for `shopify:cart:lines-update`, `shopify:cart:discount-update`, `shopify:cart:note-update`, and `shopify:cart:attributes-update` DOM events. Each event carries a `promise` that resolves with the server response.
 
 On mutation:
-1. The store applies an **optimistic update** — the UI-visible state changes immediately.
-2. The affected entity is added to `pending` — a set of in-flight line IDs, discount codes, or a note boolean.
-3. When the promise resolves, the store **reconciles** optimistic state with server truth and clears the pending entry.
-4. On failure, the store **rolls back** to a captured baseline and clears the pending entry.
 
-The store manages one abort controller per line ID, one per discount batch, and one for the note. A new mutation for the same entity aborts the in-flight one — this is what makes rapid clicks safe without disabling controls.
+1. The store applies an **optimistic projection** over its settled state, so the UI-visible state changes immediately.
+2. The affected entity is added to `pending` — a set of in-flight line IDs or discount codes, or a note/attributes boolean.
+3. When the promise resolves, the store folds that transaction into settled state and reapplies remaining projections. Overlapping mutations discard ambiguous response snapshots, then coalesce one authoritative cart refresh after the burst settles.
+4. On failure, the store removes only the failed projection, preserves unrelated work, and clears the matching pending entry.
+
+When overlapping mutations make response snapshots ambiguous, the store sets `state.revalidating` to `true`. It starts one authoritative refresh after those mutations settle and clears the flag when the refresh completes or fails. Until then, server-derived values such as costs remain at their last trustworthy value. A refresh failure preserves the locally reconciled cart and appears in `errors.network`. A change made while a cart load is in flight is handled the same way: `loading` ends and the refresh brings in the rest of the cart.
+
+App-owned cart mutations outside Standard Actions do not emit the events the store normally observes. After such a mutation succeeds, call `CartStore.refresh()` directly or use the framework binding's `useCartActions().refresh()`. The refresh waits for active optimistic work, reconciles custom fragment fields from the configured cart endpoint, and loads the cart when none exists yet (e.g. one just created server-side). Do not call it after ordinary Hydrogen cart forms; their Standard Actions events already synchronize the store. For cart metafields specifically, see the `hydrogen-cart-metafields` skill.
+
+The store supersedes keyed mutations for the same line, discount batch, note, or complete attribute list. Relative additions remain independent so every submitted quantity reaches the server; their projections are reconciled together without disabling controls. A `Shopify.actions.updateCart` call that updates or removes several lines is keyed per line: each line is projected, pending and rolled back on its own, and a newer change to one of those lines supersedes only that line.
+
+The cart store combines its lifecycle, timeout, and caller signals with `AbortSignal.any`, which Safari added in 17.4. The store already requires Safari 16 for `toSorted`, so Safari 16.0 through 17.3 is the gap. To keep add to cart working there, load an `AbortSignal.any` polyfill in the browser bundle before the store is created.
+
+## Code-driven cart changes
+
+Some changes have no form: a free gift added when the cart crosses a threshold, removing a line that became unavailable, an attribute written by a script. Send them with `window.Shopify.actions.updateCart(payload, options)`. The store observes the events it dispatches, so these changes get the same optimistic projection, pending state and rollback as form submissions. Do not hand-roll `fetch` calls to the cart route.
+
+- **Wait for the store.** Call `updateCart` only after all of these hold:
+  - `window.Shopify.actions.updateCart.isDefault()` returns `false`, which happens once a connected cart store has configured it. Before that, Shopify's default handler runs instead of the app's cart route. The framework cart providers also configure the cart endpoint; a store from `createCartStore()` keeps using Shopify's default handler until the app calls `configureCartEndpoint(path)`.
+  - The initial cart load has finished: `state.loading` is `false` and `state.readyPromise` is absent (or await it). A change made during that load can hide the shopper's other lines.
+  - A cart exists: `state.data.id` is set. While it is `null`, the first add creates the cart. The store queues form adds behind it, but not `updateCart` calls: an add from code sent before the cart exists, alongside another add from code or a form, creates a second cart, and the shopper keeps only one of them. Send the first add alone and wait for it to settle.
+- **One kind of change per call.** Send `lines`, `discountCodes`, `attributes` or `note`, not several. The cart route rejects a combined call and the store rolls back its projections.
+- **Lines.** `{ merchandiseId, quantity }` adds, `{ id, quantity }` updates, `{ id, quantity: 0 }` removes, and `{ id, merchandiseId, quantity }` swaps the line to another variant. Only additions batch: send several adds in one call if needed, but send each update, removal or swap as its own call with one line. The store does not project a call that updates or removes several lines. A swap projects only the quantity; the new variant appears when Shopify responds, possibly under a new line ID, so don't hold on to the old one. When the response returns a new line ID while other changes are in flight, the new variant appears after the cart refresh that follows them.
+- **Previews for added lines.** Pass `{ event: { detail: { products: [{ id: merchandiseId, price, ...merchandise }] } } }` so a new line shows before Shopify responds. Events do not carry line attributes or selling plans, so the projected line does not show them.
+- **Rules that react to the cart.** Evaluate them on settled state only (`loading` false, no pending entries, `revalidating` false), and do not start another change while your own is in flight. Otherwise the rule reacts to its own projection and can loop.
+- **Several attribute writers.** `attributes` replaces the whole list. Build each write from the latest list you sent, falling back to `state.data.attributes` when nothing is in flight, so writers in the same tick keep each other's keys.
+- **Analytics.** `trackCartAnalytics` reports every confirmed change, including code-driven ones. Storefronts that keep system changes out of analytics must track shopper changes themselves.
 
 ## Stable selectors
 
@@ -70,9 +102,13 @@ const messages = deriveFromErrors(errors, () => {
 
 - `pending.lines` — `Set<string>` of line IDs with mutations in flight.
 - `pending.discountCodes` — `Set<string>` of discount codes being applied or removed.
+- `pending.cost` — `true` when pending line or discount mutations can leave totals stale.
 - `pending.note` — `boolean` indicating whether a note save is in flight.
+- `pending.attributes` — `boolean` indicating whether a complete attribute-list update is in flight.
 
 Any value whose entity is in a pending set is **optimistic and unconfirmed**. The UI must treat it differently from confirmed values.
+
+`state.revalidating` is `true` while the store refreshes authoritative cart-wide fields after overlapping mutations. Treat totals as unconfirmed and suppress cart analytics while it is true.
 
 ## Error state
 
@@ -81,11 +117,14 @@ Any value whose entity is in a pending set is **optimistic and unconfirmed**. Th
 - `errors.lines` — `Map<string, CartErrorGroup>` keyed by line ID.
 - `errors.discountCodes` — `Map<string, CartErrorGroup>` keyed by discount code string.
 - `errors.note` — `CartErrorGroup` for note-related errors.
+- `errors.attributes` — `Map<string, CartErrorGroup>` keyed by attribute key.
 - `errors.cart` — `CartErrorGroup` for cart-level errors not attributable to a specific entity.
 - `errors.network` — `CartNetworkEntry[]` for transport failures (timeouts, HTTP errors).
-- `errors.lastUpdatedAt` — timestamp of the most recent error update across any scope. Per-scope timestamps also exist (`linesUpdatedAt`, `discountCodesUpdatedAt`, etc.).
+- `errors.lastUpdatedAt` — timestamp of the most recent error update across any scope. Per-scope timestamps also exist (`linesUpdatedAt`, `discountCodesUpdatedAt`, `attributesUpdatedAt`, etc.).
 
 Each `CartErrorGroup` contains `{ userErrors: CartUserError[], warnings: CartWarning[] }`.
+
+Errors survive unrelated cart work and clear when a new mutation begins for the same key.
 
 ---
 
@@ -98,7 +137,7 @@ Each `CartErrorGroup` contains `{ userErrors: CartUserError[], warnings: CartWar
 
 ### Optimistic interactions
 
-- **NEVER disable interactive controls during pending state.** Increase, decrease, remove, apply, and remove-discount controls must always be interactive. The store's abort-controller pattern makes concurrent mutations safe — a new click supersedes the in-flight request. Disabling for a non-pending reason is fine — for example, the decrease control may be disabled when the quantity is already `<= 1`.
+- **Keep rapid-action controls interactive during pending state.** Increase, decrease, remove, apply, and remove-discount controls must remain interactive. The store's abort-controller pattern makes concurrent mutations safe — a new click supersedes the in-flight request. A save-style editor, such as a gift-message attribute form, may disable its own submit button while its scoped mutation is pending when duplicate saves provide no value. Disabling for a non-pending reason is also fine — for example, the decrease control may be disabled when the quantity is already `<= 1`.
 - **Inventory-aware set-quantity clamping is opt-in.** The default cart query does not request `ProductVariant.quantityAvailable` because that field requires the `unauthenticated_read_product_inventory` Storefront API scope. If a cart UI needs the entered quantity to clamp to sellable inventory before submission, add `quantityAvailable` to the app's custom cart fragment and enable the Hydrogen channel's product inventory permission (`unauthenticated_read_product_inventory`). Without that field, let Shopify validate inventory and surface the returned line error.
 - **NEVER show a spinner or skeleton where a stale value would do.** The user already sees a quantity and a price. Replacing confirmed-looking content with a loading state is a regression. Show the previous value with a visual indicator that it's unconfirmed.
 - **ALWAYS visually indicate unconfirmed data.** Any value whose entity is in a `pending` set must look visually distinct from confirmed values. Reduced opacity is the reference pattern — the stale text acts as a spatial placeholder (like a skeleton), not as readable content. Rules of contrast can be disregarded because the pending value is a signal, not content the user needs to read.
@@ -118,12 +157,22 @@ Each `CartErrorGroup` contains `{ userErrors: CartUserError[], warnings: CartWar
 - **Allow users to click the save button even when the draft matches the stored note** (nothing to save), but prevent any action. This enables progressive enhancement and prevents frustration.
 - **Show a pending indicator** while the note mutation is pending.
 
+### Cart attribute editing
+
+- **Treat an attribute update as complete-list replacement.** `attributes-update` sends the full next attribute list; attributes omitted from the submission are removed. When editing one attribute, explicitly include every unrelated existing attribute as a hidden keyed `attributeValue` field. Submit no attribute fields to clear all attributes.
+- **Keep each key attached to its value.** Pass the attribute key to every `register("attributeValue", {key, ...})` call. The generated `attributes.<key>` field name encodes that key, so the server never relies on parallel field positions. Storefront API mutation inputs require string values, so normalize a nullable returned value deliberately (usually to `""`) before resubmitting it.
+- **Use the register contract exactly.** Call `register("attributeValue", {key, ...})` rather than spelling its generated `attributes.<key>` field name by hand. The submit intent is kebab-case (`attributes-update`) because action intents follow the existing `discount-apply`, `discount-remove`, and `note-update` convention.
+- **Maintain a local draft** for an editable attribute when the UI can remain mounted across server responses. Only sync confirmed attribute data into that draft while `pending.attributes` is `false`, so a response does not clobber typing that happened during the request.
+- **Show scoped pending and errors.** Use `pending.attributes` for the save state and display entries from `errors.attributes` next to the editor for the matching key. A save-style submit button may be disabled until the attribute promise settles.
+
 ### Form structure
 
+- **Optionally render visible line-item attributes.** Each cart line may carry `attributes` — an array of `{ key, value }` pairs set during add-to-cart. If your storefront uses line-item attributes (e.g. engraving text, gift messages, custom options), render them below the variant subtitle as secondary text. Filter out attributes whose key starts with `_` (these are internal/private, set by apps or Shopify systems). The same variant with different attributes creates separate cart lines — the optimistic layer uses attributes in line identity matching.
 - **Each line item is its own form.** This gives each line its own identity input and its own submit buttons. A single form containing multiple lines creates ambiguity about which line an action targets.
 - **Each line item form must preserve the progressive-enhancement shape.** The rendered structure will vary by framework and design system, but every line item quantity form needs the same Hydrogen contract: `register("set")`, `register("lineId", { value: line.id })`, and a real editable quantity input using `register("quantity", { value: line.quantity, interactive: true })`. Increase, decrease, and remove buttons are additional submit controls, not replacements for the set intent or the quantity input.
 - **The `set` control is a hidden submit button, not a hidden input.** `register("set")` already returns `{ type: "submit", hidden: true }`; render it on a `<button>`. Do not swap it for `<input type="hidden">` — that removes the submit button, so pressing Enter in the quantity input no longer submits the set action.
 - **Each discount "remove" button is its own form** — separate from the "apply" form. The apply form needs input validation (empty/duplicate prevention); each remove form is a single action.
+- **Attribute forms submit keyed values.** Render one `register("attributeValue", {key, value})` control for every attribute in the complete next list, then submit with `register("attributes-update")`.
 
 ### Loading
 
@@ -160,36 +209,47 @@ Each `CartErrorGroup` contains `{ userErrors: CartUserError[], warnings: CartWar
 15. **No-op save** — When the draft matches the stored note, clicking on save does nothing (but can still be clicked).
 16. **Server sync without clobber** — After save completes, the local draft updates to match the server response — but only when `pending.note` is `false`, preserving any typing the user did in the meantime.
 
+### Cart attributes
+
+17. **Save attribute** — Edit an attribute and submit. The optimistic value appears immediately, `pending.attributes` is `true`, and the editor shows a saving state until confirmation.
+18. **Preserve unrelated attributes** — Saving one attribute includes all unrelated existing key/value pairs; those attributes remain after the server response.
+19. **Clear attributes** — Submitting an empty attribute list removes every cart attribute.
+20. **Failure rollback** — If the update fails, the complete attribute list returns to the last confirmed baseline.
+21. **Attribute-scoped error** — An error for a key appears next to that key's editor and marks its input invalid.
+22. **No draft clobber** — Typing that occurs while an attribute save is pending is not overwritten by the confirming response.
+
 ### Error banner
 
-17. **Network error** — When a mutation fails due to a transport error, a banner appears with the error message and a dismiss control.
-18. **Cart-level error** — Errors not attributable to a line, code, or note appear in the banner.
-19. **Orphaned line error** — If a line no longer exists in `state.data.lines.nodes` but `errors.lines` has an entry for its ID, that error appears in the banner.
-20. **Dismiss and re-trigger** — Dismissing the banner hides it. A subsequent error (with a newer `lastUpdatedAt`) re-shows it.
+23. **Network error** — When a mutation fails due to a transport error, a banner appears with the error message and a dismiss control.
+24. **Cart-level error** — Errors not attributable to a line, code, note, or attribute appear in the banner.
+25. **Orphaned line error** — If a line no longer exists in `state.data.lines.nodes` but `errors.lines` has an entry for its ID, that error appears in the banner.
+26. **Dismiss and re-trigger** — Dismissing the banner hides it. A subsequent error (with a newer `lastUpdatedAt`) re-shows it.
 
 ### Totals
 
-21. **Pending totals** — While any line or discount mutation is in-flight, subtotal and total appear in their pending visual state. The amounts shown are the last server-confirmed values — never client-computed.
-22. **Settled totals** — When all pending sets are empty, totals display normally with the latest server values.
+27. **Pending totals** — While any line or discount mutation is in-flight, subtotal and total appear in their pending visual state. The amounts shown are the last server-confirmed values — never client-computed.
+28. **Settled totals** — After an ordinary mutation settles, totals display the latest server values. Overlapping mutation bursts retain pending styling and the last trustworthy amounts while one authoritative cart refresh is in flight.
 
 ### Loading
 
-23. **Initial load** — Before the cart is fetched, show skeleton placeholders.
-24. **Empty cart** — After fetch completes with zero lines, show empty state.
+29. **Initial load** — Before the cart is fetched, show skeleton placeholders.
+30. **Empty cart** — After fetch completes with zero lines, show empty state.
+
+### Out-of-band mutations
+
+31. **Refresh custom data** — After an app-owned cart mutation succeeds, request a cart refresh. Every cart consumer receives the updated custom fragment data, `revalidating` represents the refresh, and a refresh failure preserves the confirmed cart while appearing in `errors.network`.
+
+### Code-driven changes
+
+32. **Rule on settled state** — A threshold rule that adds a line runs once per qualifying settled cart, never before the initial load finishes or on its own pending projection.
 
 ---
 
 ## Anti-patterns
 
-- **Client-computed totals.** Multiplying quantity by unit price drifts from the true total when discounts, taxes, or rounding apply. Always use server-provided amounts.
 - **Hand-rolled framework cart state.** If the skill has a matching framework reference, use its provider/hooks/helpers. Otherwise, use the core store directly instead of duplicating cart data in component state or custom reducers.
 - **Client-seeded `/cart` page.** Mounting `CartProvider` with no `initialData` (or reading the cart only through a `"use client"` `useCart` hook) leaves the SSR HTML empty, so the `/cart` page cannot render the server cart. Read the cart in the server data path and pass `initialData`. Use resolved `initialData` when strict no-JS live cart HTML is required; use promise `initialData` when the framework can stream and hydrated cart content is wrapped in Suspense.
-- **Disabling controls during pending.** The store's abort-controller pattern makes rapid interactions safe. Disabling controls makes the cart feel sluggish and punishes fast users.
-- **One form for all lines.** Each line needs its own identity — its own form. A shared form creates ambiguous intent when multiple submit buttons exist.
 - **Quantity as text only.** Rendering quantity as a `<span>` with only plus/minus buttons breaks the set-quantity path and the no-JS fallback. Use a real input wired with `register("quantity", { value, interactive: true })`.
 - **Plus/minus-only line forms.** Increase/decrease/remove buttons do not replace `register("set")` and the interactive quantity input. Omitting them breaks the form invariant even if hydrated clicks appear to work.
 - **Drawer-specific line form drift.** The cart drawer may have a different layout from the `/cart` page, but its line item forms must keep the same Hydrogen form contract. Prefer sharing line item form components between the page and drawer.
 - **Banner-only errors.** A line-level error displayed far from the line it refers to is effectively invisible. Show inline first; promote to the banner only when there's no inline target.
-- **Confirmed-looking pending values.** Showing full-opacity values for in-flight data misleads the user into thinking the data is settled. Always visually distinguish unconfirmed state.
-- **Disabling note save.** The save control is never disabled — it remains interactive even when there's nothing to save (draft matches store) or while a save is in-flight. When there's nothing to save, clicking does nothing. During flight, show a pending indicator.
-- **Blocking navigation during pending.** Cart mutations resolve in the background. Confirmation dialogs on route change frustrate users.

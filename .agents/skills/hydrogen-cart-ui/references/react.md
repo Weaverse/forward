@@ -5,6 +5,7 @@
 - Root Setup
 - Custom Cart Fields
 - Reading Cart State
+- Refreshing Cart State
 - Mutating Cart State
 
 For React apps, derive cart bindings once from the cart server handlers. Do not hand-roll `useState` cart state, custom mutation fetchers, or bespoke optimistic reducers unless the app is not using React.
@@ -30,7 +31,7 @@ import { createCartComponents } from "@shopify/hydrogen/react";
 
 import type { cartHandlers } from "./cart-handlers";
 
-export const { CartProvider, useCart, useSuspenseCart, useCartForm } =
+export const { CartProvider, useCart, useSuspenseCart, useCartActions, useCartForm } =
   createCartComponents<typeof cartHandlers>();
 ```
 
@@ -99,7 +100,7 @@ import { createCartComponents } from "@shopify/hydrogen/react";
 
 import type { cartHandlers } from "./cart-handlers";
 
-export const { CartProvider, useCart, useSuspenseCart, useCartForm } =
+export const { CartProvider, useCart, useSuspenseCart, useCartActions, useCartForm } =
   createCartComponents<typeof cartHandlers>();
 
 function CartLines() {
@@ -147,7 +148,10 @@ Use `useCart(selector)` for reactive state. Select only what the component needs
 const totalQuantity = useCart((state) => state.data.totalQuantity);
 const lines = useCart((state) => state.data.lines.nodes);
 const pendingLines = useCart((state) => state.pending.lines);
+const totalsPending = useCart((state) => state.pending.cost === true || state.revalidating === true);
 const lineErrors = useCart((state) => state.errors.lines);
+const attributesPending = useCart((state) => state.pending.attributes);
+const attributeErrors = useCart((state) => state.errors.attributes);
 ```
 
 Use this for the navbar cart count, cart line list, totals, pending state, and scoped errors. Do not mirror selected cart state into React state; the store already publishes updates.
@@ -171,9 +175,30 @@ function CartContentBody() {
 
 Keep using `useCart(selector)` for non-blocking UI such as cart counts, pending states, and optimistic controls.
 
+## Refreshing Cart State
+
+Use `useCartActions().refresh()` after an app-owned cart mutation that bypasses Standard Actions. This refetches the current cart through the configured cart endpoint, so custom fields selected by `CartFragment` update for every `useCart()` consumer.
+
+```tsx
+import { useCartActions } from "~/lib/cart";
+
+function CustomCartEditor() {
+  const { refresh } = useCartActions();
+
+  async function save() {
+    await saveCustomCartData();
+    refresh();
+  }
+
+  // Render the app-specific editor.
+}
+```
+
+`refresh()` is non-blocking. Read `state.revalidating` for progress and `state.errors.network` for failures. It waits for active optimistic mutations, and loads the cart when none exists yet (e.g. one just created server-side). Do not call it after `useCartForm()` submissions because their Standard Actions events already synchronize the store.
+
 ## Mutating Cart State
 
-Use `useCartForm()` for existing cart forms: line quantity changes, line removal, discount codes, and order notes. It returns `formProps()` and `register()` helpers that encode Hydrogen's cart action contract.
+Use `useCartForm()` for existing cart forms: line quantity changes, line removal, discount codes, order notes, and cart attributes. It returns `formProps()` and `register()` helpers that encode Hydrogen's cart action contract.
 
 Line item quantity forms must keep this shape even when the surrounding markup, styling, or component boundaries differ:
 
@@ -213,6 +238,43 @@ Important React form fields:
 - `register("increase")`, `register("decrease")`, and `register("remove")` create line item controls.
 - `register("discountCode", { defaultValue: "" })`, `register("discountCode", { value: code })`, `register("discount-apply")`, and `register("discount-remove")` create discount forms.
 - `register("note")` and `register("note-update")` create note forms.
+- Repeated `register("attributeValue", { key, value })` controls define the complete next cart attribute list; `register("attributes-update")` submits it. Preserve unrelated attributes explicitly because omitted attributes are removed.
+
+A save-style attribute editor can use the scoped pending boolean to prevent duplicate saves while the promise resolves:
+
+```tsx
+function GiftMessage({ attributes }: { attributes: Array<{ key: string; value: string | null }> }) {
+  const { formProps, register } = useCartForm();
+  const pending = useCart((state) => state.pending.attributes);
+  const key = "gift-message";
+
+  return (
+    <form {...formProps()}>
+      {attributes.filter((attribute) => attribute.key !== key).map((attribute) => (
+        <input
+          key={attribute.key}
+          type="hidden"
+          {...register("attributeValue", {
+            key: attribute.key,
+            value: attribute.value ?? "",
+          })}
+        />
+      ))}
+      <textarea
+        {...register("attributeValue", {
+          key,
+          defaultValue: attributes.find((attribute) => attribute.key === key)?.value ?? "",
+        })}
+      />
+      <button type="submit" {...register("attributes-update")} disabled={pending} aria-busy={pending}>
+        {pending ? "Saving…" : "Save message"}
+      </button>
+    </form>
+  );
+}
+```
+
+If the cart page and drawer can render together, give the textarea a `useId()`-generated ID instead of a hard-coded document ID.
 
 Each line item still gets its own form; the binding removes boilerplate, not the form identity requirement.
 

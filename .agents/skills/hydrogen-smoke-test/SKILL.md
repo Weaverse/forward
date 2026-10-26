@@ -5,6 +5,10 @@ description: >
   creating or modifying a Hydrogen storefront, setup flow, cart, product page,
   collection/search browsing, analytics, request handlers, Shopify redirects,
   Shop Pay, or framework middleware integration.
+metadata:
+  source: "@shopify/hydrogen"
+  version: "2026.10.2"
+  hash: "sha256:1145c52f9e45fdbab86b8a6e381d82215c297416479e61845d82b17094f63dc5"
 ---
 
 # Hydrogen Storefront Smoke Tests
@@ -30,6 +34,9 @@ Request handlers:
 - [ ] GET /admin redirects to the configured shop/admin domain
 - [ ] Unknown path returns framework 404 unless a Shopify URL redirect matches
 
+Navigation:
+- [ ] Every navbar and footer link href returns 200 when curled directly (no invented routes)
+
 Product page:
 - [ ] Server-renders title, gallery, price, variant options, add-to-cart form, and related products when available
 - [ ] URL option params select the expected variant on reload
@@ -49,11 +56,13 @@ Cart:
 - [ ] Each line item form includes hidden set, scoped lineId, and editable quantity
 - [ ] Quantity Enter key submits a set action
 - [ ] Rapid quantity clicks settle to the final expected quantity
-- [ ] Line, discount, note, network, and cart-level errors appear in the right scope
+- [ ] Line, discount, note, attribute, network, and cart-level errors appear in the right scope
+- [ ] Attribute editing submits the complete list, preserves unrelated attributes, and shows scoped pending UI
 - [ ] Totals are server-provided and visually pending during cart mutations
 
 Collection and search:
 - [ ] Collection filters and sort update the URL and product grid
+- [ ] Checkbox filters and price min/max controls both render, apply, and persist after reload
 - [ ] Reloading a filtered URL server-renders the same filter/sort state
 - [ ] Active filter chips remove one filter and preserve unrelated params
 - [ ] Search filters preserve q
@@ -63,9 +72,9 @@ Collection and search:
 Analytics:
 - [ ] Page view fires on initial load and client navigations
 - [ ] Product/collection/search/cart view events fire once per route data change
-- [ ] analytics.updateCart(cart) runs when confirmed cart data changes, and the cart query includes updatedAt
+- [ ] Cart tracking is wired once via trackCartAnalytics(cartStore) (React/Vue: useCartAnalytics()), and delta events fire on confirmed cart data changes
 - [ ] No browser module reads private env variables
-- [ ] Production does not override canTrack to always true
+- [ ] Production does not bypass Customer Privacy consent gating (no forced-always-true consent checks)
 
 Markets and money:
 - [ ] Market-aware Storefront API queries declare $country, $language, and @inContext
@@ -89,10 +98,10 @@ Run the app's available scripts:
 
 ## Request Handlers
 
-Replace `<port>` with the running app port:
+Replace `<port>` with the running app port, and `{api-version}` with the Storefront API version configured by the app:
 
 ```bash
-curl -i -X POST http://localhost:<port>/api/2026-04/graphql.json \
+curl -i -X POST http://localhost:<port>/api/{api-version}/graphql.json \
   -H "content-type: application/json" \
   -H "X-Shopify-Storefront-Access-Token: <public-token>" \
   -d '{"query":"{ shop { name } }"}'
@@ -100,7 +109,7 @@ curl -i -X POST http://localhost:<port>/api/2026-04/graphql.json \
 
 Expected: Storefront API JSON, not the framework 404.
 
-Use the Storefront API version configured by the app when it differs from `2026-04`. The SFAPI proxy forwards the incoming public token header; it does not inject a token from server config.
+The SFAPI proxy forwards the incoming public token header; it does not inject a token from server config.
 
 ```bash
 curl -i http://localhost:<port>/api/cart
@@ -119,6 +128,28 @@ curl -i http://localhost:<port>/this-does-not-exist
 ```
 
 Expected: framework 404 unless Shopify has a matching URL redirect.
+
+## Navigation
+
+Extract every `href` from the rendered navbar and footer and request each one directly:
+
+```bash
+curl -s -o /dev/null -w "%{http_code} <href>\n" http://localhost:<port><href>
+```
+
+Expected: 200 for every link. A 404 means the link points to a route the app never created or a handle the shop does not have. `/collections/all` is the classic failure: the Liquid "all" collection does not exist in the Storefront API, so only link to it when the shop really has a collection with that handle.
+
+## Account
+
+```bash
+curl -i http://localhost:<port>/account/login
+```
+
+Expected: a redirect whose `location` header points at Shopify's hosted login, not a framework 404 or 500.
+
+- `/account` renders the signed-out panel when no session exists, without touching access tokens.
+- The logout control is a native `<form method="post" action="/account/logout">`; the handler enforces same-origin POST and returns a raw redirect only a native browser submit can follow.
+- Completing a real login requires a public HTTPS origin registered for the OAuth callback; when the local origin is not registered, verify the signed-out checks and say so instead of faking signed-in ones.
 
 ## Product Page
 
@@ -145,12 +176,14 @@ Expected: framework 404 unless Shopify has a matching URL redirect.
 - Each line item form includes hidden `set`, scoped `lineId`, and editable `quantity`.
 - Quantity Enter key submits a set action.
 - Rapid quantity clicks settle to the final expected quantity.
-- Line, discount, note, network, and cart-level errors appear in the right scope.
+- Line, discount, note, attribute, network, and cart-level errors appear in the right scope.
+- Saving one cart attribute submits the complete next list, preserves unrelated attributes, and shows a saving state while `pending.attributes` is true. Submitting no attribute fields clears the list.
 - Totals are server-provided and visually pending during cart mutations.
 
 ## Collection And Search
 
 - Collection filters and sort update the URL and product grid.
+- Checkbox filters and price min/max controls both render, apply, and persist after reload.
 - Reloading a filtered URL server-renders the same filter/sort state.
 - Active filter chips remove one filter and preserve unrelated params.
 - Search filters preserve `q`.
@@ -161,7 +194,7 @@ Expected: framework 404 unless Shopify has a matching URL redirect.
 
 - Page view fires on initial load and client navigations.
 - Product/collection/search/cart view events fire once per route data change.
-- `trackCartAnalytics(cart)` runs when confirmed cart data changes, and the cart query includes `updatedAt`.
+- Cart tracking is wired once per cart store lifecycle via `trackCartAnalytics(cartStore)` (React/Vue: `useCartAnalytics()`), and cart delta events fire on confirmed cart data changes.
 - No browser module reads private env variables.
 - Analytics destinations only receive events after Shopify Customer Privacy allows analytics processing.
 

@@ -5,6 +5,10 @@ description: >
   creating or reviewing a cart drawer, mini cart, or slide-out cart, including
   native dialog element (showModal), closedby light dismiss, body scroll lock, exit
   animations, and wiring window.Shopify.actions.openCart().
+metadata:
+  source: "@shopify/hydrogen"
+  version: "2026.10.2"
+  hash: "sha256:50154a19133210d6e6c4852abf6cf0790d516cff576a2c02b14be652d30eb595"
 ---
 
 # Cart Drawer
@@ -22,19 +26,19 @@ Before building the cart drawer, these must be in place:
 
 ---
 
-## 2. What you're building
+## 2. Drawer structure
 
 The drawer has three layout zones (header / body / footer):
 
 1. **Header** — title, close button, and error banner (if any cart errors exist). Always visible, never scrolls.
 2. **Body** — line items only. This is the only zone that scrolls when content overflows.
-3. **Footer** — discount codes, order note, totals, and checkout button. Always visible (pinned to bottom), never scrolls.
+3. **Footer** — discount codes, order note and/or cart attribute editors, totals, and checkout button. Always visible (pinned to bottom), never scrolls.
 
 **Empty state**: When the cart has no items, the body shows an empty message ("Your cart is empty") and the footer is hidden entirely — no totals, no discounts, no notes, no checkout button.
 
 The drawer is a `<dialog>` (or primitive library equivalent) rendered once in the root layout. The storefront must also have a `/cart` route that renders a full cart page — this is the fallback route when the drawer is unavailable. The drawer is the progressively-enhanced experience that layers on top after hydration.
 
-The full `/cart` page shares the same content components (line items, discounts, note, totals, checkout) but uses a page layout instead of the fixed header/body/footer zones.
+The full `/cart` page shares the same content components (line items, discounts, note, attributes, totals, checkout) but uses a page layout instead of the fixed header/body/footer zones.
 
 The drawer's line item forms must use the same Hydrogen line-item form contract as the `/cart` page — see `hydrogen-cart-ui` ("Form structure"). The layout may differ by framework and design system; the form contract must not.
 
@@ -181,21 +185,21 @@ return (
 window.Shopify.actions.openCart();
 ```
 
-**3. After a successful add-to-cart** — if the product UX should open the drawer on add, pass the same helper to the product form's submit hooks.
+**3. From add-to-cart** — when the canonical cart trigger is an anchor, open the drawer immediately with optimistic state so pending cart contents remain inspectable. Opening only after success is compatible with the storefront contract only when the page also provides a visible button that opens the drawer while the mutation is pending.
 
 ```tsx
-<form {...formProps({ afterSubmit: openCartDrawer })}>
+<form {...formProps({ beforeSubmit: openCartDrawer })}>
   {/* add-to-cart controls */}
 </form>
 ```
 
-This opens the drawer only after the mutation succeeds. Keep validation and cancellation in `beforeSubmit` — for example, call `event.preventDefault()` there if the quantity is invalid and the drawer should not open. Do not push this policy into core cart mutations; some storefronts want a toast, a cart page navigation, or no automatic UI change.
+Validate before calling the drawer helper — for example, call `event.preventDefault()` and return if the quantity is invalid. Do not push this policy into core cart mutations; some storefronts want a toast, a cart page navigation, or no automatic UI change.
 
 ### Closing the drawer
 
 Native: Escape and the back gesture (fires `cancel` then `close`). App-provided: the explicit close `<button>` in the header (`aria-label="Close cart"`). Backdrop (light dismiss) requires `<dialog closedby="any">`.
 
-`closedby="any"` is the least compatible part of this pattern. Older browsers and Safari versions that have not shipped `closedby` will ignore the attribute, so the drawer will still close from Escape and the explicit close button, but backdrop click will not close it. Do not provide a polyfill for `closedby` unless the app explicitly requires backdrop click support in those browsers.
+`closedby="any"` is the least compatible part of this pattern. Browsers without `closedby` support will ignore the attribute, so the drawer will still close from Escape and the explicit close button, but backdrop click will not close it. Do not provide a polyfill for `closedby` unless the app explicitly requires backdrop click support in those browsers.
 
 If an app does require that polyfill, use a pointerdown-plus-click guard on the `<dialog>` itself: record whether `pointerdown` started on the dialog backdrop, then close only when the following `click` also targets the dialog. Do not close on a plain `click.self` alone, because a drag that starts inside the drawer and ends on the backdrop can produce an accidental close.
 

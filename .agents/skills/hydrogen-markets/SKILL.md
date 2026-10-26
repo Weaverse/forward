@@ -5,6 +5,10 @@ description: >
   market routing, country/language localization, Shopify Markets, subdomains,
   per-market domains, path-prefixed markets, Next.js App Router market routing,
   or Storefront API @inContext wiring.
+metadata:
+  source: "@shopify/hydrogen"
+  version: "2026.10.2"
+  hash: "sha256:ee0dfb62e65ca62e096e2dbbfbe5ba7949adbb61c78c09bde4eb8824e538d1a6"
 ---
 
 # Markets
@@ -113,8 +117,6 @@ export function getMarketFromRequest(request: Request): Market {
 }
 ```
 
-This keeps market selection at the server boundary. Product queries, collection queries, cart queries, and checkout URLs all become market-aware when they use `@inContext`.
-
 ---
 
 ## Per-Market Domains
@@ -135,8 +137,6 @@ export function getMarketFromRequest(request: Request): Market {
   return MARKET_BY_HOST[host] ?? DEFAULT_MARKET;
 }
 ```
-
-This is the cleanest option when SEO, legal entities, or merchant operations require distinct domains. The storefront does not need a visible market prefix in the path because the host already carries the market.
 
 ---
 
