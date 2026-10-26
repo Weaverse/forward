@@ -4,6 +4,7 @@ import { useThemeSettings, WeaverseNextRootProvider } from "@weaverse/next";
 import type { ReactNode } from "react";
 
 import { STATIC_CONTENT } from "@/lib/i18n/static-content";
+import { ThemeContentProvider } from "@/lib/i18n/t";
 import { type ThemeSettings, themeSchema } from "./theme-schema";
 
 /**
@@ -16,19 +17,22 @@ import { type ThemeSettings, themeSchema } from "./theme-schema";
  * creating their own.
  *
  * The SDK bundles this provider without a client directive, which is why the
- * boundary lives here. The schema and static copy are imported rather than
- * passed in, because a schema can hold functions that cannot cross from server
- * to client.
+ * boundary lives here. The schema is imported rather than passed in, because a
+ * schema can hold functions that cannot cross from server to client.
+ * `staticContent` is the market's copy from `themeContent()`; it defaults to
+ * English.
  */
 export function WeaverseRoot({
   children,
   merchantOverrides,
   publicEnv,
+  staticContent = STATIC_CONTENT,
   theme,
 }: {
   children: ReactNode;
   merchantOverrides?: Record<string, unknown>;
   publicEnv?: Record<string, string | undefined>;
+  staticContent?: Readonly<Record<string, unknown>>;
   theme?: Record<string, unknown>;
 }) {
   return (
@@ -36,11 +40,13 @@ export function WeaverseRoot({
       initialThemeSettings={theme}
       merchantOverrides={merchantOverrides}
       publicEnv={publicEnv}
-      staticContent={STATIC_CONTENT}
+      staticContent={staticContent}
       themeSchema={themeSchema}
     >
       <PageWidthStyle />
-      {children}
+      <ThemeContentProvider value={staticContent}>
+        {children}
+      </ThemeContentProvider>
     </WeaverseNextRootProvider>
   );
 }

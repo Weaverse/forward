@@ -29,6 +29,17 @@ describe("theme copy", () => {
     assert.equal(screen.getByTestId("copy").textContent, "Kostenloser Versand");
   });
 
+  it("renders the market's bundled language", () => {
+    renderWithCart(
+      <p data-testid="copy">
+        <T k="common.skipToContent" />
+      </p>,
+      undefined,
+      "de-de",
+    );
+    assert.equal(screen.getByTestId("copy").textContent, "Zum Inhalt springen");
+  });
+
   it("follows Studio's live edits and keeps an empty one", () => {
     const store = new TranslationStore();
     render(
@@ -80,6 +91,7 @@ describe("theme copy", () => {
     );
     assert.ok(screen.getByLabelText("Sortieren"));
     assert.ok(screen.getByRole("option", { name: "Name A–Z (DE)" }));
-    assert.ok(screen.getByRole("option", { name: "Featured" }));
+    // Not overridden: the German bundle, not English.
+    assert.ok(screen.getByRole("option", { name: "Empfohlen" }));
   });
 });
