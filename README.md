@@ -1,139 +1,130 @@
 # Forward
 
-Forward is a fresh Next.js App Router storefront theme for Shopify, powered by Weaverse.
+Forward is an open-source Shopify storefront theme built with Next.js App Router, Hydrogen and [Weaverse](https://weaverse.io). Build your storefront in React and let your team compose pages, customize theme settings and manage translations visually in Weaverse Studio.
 
-## Status
+[Live storefront](https://forward-sandy.vercel.app) · [Try the editor](https://weaverse.io/demo?theme=forward) · [Next.js documentation](https://weaverse.io/docs/nextjs/overview)
 
-Forward always runs against a real Shopify store. Products, collections,
-pages, articles, policies and the `main-menu` / `footer` menus are read from
-the Storefront API with the server-only credentials; the cart is the Shopify
-Cart API. Without a complete Shopify environment the app refuses to start.
-Theme copy comes from Weaverse theme settings. Locale/market routing remains
-deferred.
+## Features
 
-## Setup
+- Visual page composition with reusable sections, resource pickers and theme settings in Weaverse Studio.
+- Product pages, collection browsing with filters, sorting and pagination, a collection list, and search.
+- Shopify Cart API integration and checkout handoff.
+- Customer Account sign-in, profile, order history and addresses when configured.
+- Shopify Markets routing, localized prices and dates, and translation authoring in Studio.
+- Custom pages, blogs, articles and store policies, with page metadata, robots and sitemap support.
+- Next.js App Router, React, TypeScript and Tailwind CSS, with unit, DOM and browser tests.
 
-Requires [Bun](https://bun.sh) (package manager and script runner) and
-Node.js >= 22.18.0 (the route tooling executes TypeScript directly with
-Node's built-in type stripping; the app itself stays Node-compatible — Bun is
-a tooling decision, not a production runtime).
+Forward runs against a real Shopify store. There is no static demo mode or fallback catalog.
+
+## Requirements
+
+- **Node.js 22.18 or later.**
+- **[Bun](https://bun.sh)** for dependencies and scripts. Use the version pinned in `package.json`.
+- **A Shopify store** with the [Headless sales channel](https://apps.shopify.com/headless), Storefront API access and products published to that storefront.
+- **A Weaverse project created from Forward** in the Weaverse app for your Shopify store.
+
+## Getting started
+
+### 1. Create your storefront
+
+Create a Forward project in Weaverse and copy its Project ID. Then run:
 
 ```bash
-bun install
+npx @weaverse/cli@latest create --template forward --project-id YOUR_PROJECT_ID --project-name my-storefront
+cd my-storefront
+```
+
+The CLI downloads the theme, writes your project ID to `.env` and installs dependencies with Bun.
+
+### 2. Configure Shopify
+
+Fill in the Storefront API credentials from your store's Headless channel in the generated `.env`:
+
+```dotenv
+PUBLIC_STORE_DOMAIN=your-shop.myshopify.com
+PRIVATE_STOREFRONT_API_TOKEN=your-private-storefront-token
+PUBLIC_STOREFRONT_API_TOKEN=your-public-storefront-token
+WEAVERSE_PROJECT_ID=your-weaverse-project-id
+```
+
+The private token is used only on the server. The public token lets Studio resolve your store's products, collections and pages. Never commit `.env` or expose the private token to browser code.
+
+See [`.env.example`](.env.example) for the full configuration. Customer Account is optional: to enable it, configure all four account variables together and register the appropriate callback and logout URLs in Shopify. Leave the entire account group empty if you do not need it.
+
+### 3. Start developing
+
+```bash
 bun run dev
 ```
 
-Open [http://localhost:3333](http://localhost:3333). The development script
-uses port `3333` by default.
+Open [http://localhost:3333](http://localhost:3333). In your Weaverse project's settings, set the preview URL to `http://localhost:3333`, then open Studio to customize your pages and theme settings. Publish your changes when they are ready for the live storefront.
 
-The Hydrogen baseline was initialized in this existing Next.js app with:
+For a guided walkthrough, see the [Next.js quickstart](https://weaverse.io/docs/nextjs/quickstart).
 
-```bash
-npx @shopify/hydrogen@preview setup
+## Customizing your store
+
+- **Shopify** owns your products, collections, menus, pages, blog content, policies and checkout. Configure the `main-menu` and `footer` menus for navigation; the header menu handle can be changed with `PUBLIC_MAIN_MENU_HANDLE`.
+- **Weaverse Studio** owns page composition, section settings, theme settings and translations. Header and footer settings are available through theme settings; Cart and Account behavior stays in the theme code.
+- **Your code** defines the available sections and their schemas in `src/sections/`, registered in `src/lib/weaverse/components.ts`.
+
+Markets are declared in `src/lib/i18n/locales.ts`. Keep them aligned with your Shopify Markets configuration and author localized content in Studio. The default market uses unprefixed URLs; other markets use a locale prefix, such as `/de-de/shop`.
+
+See [Studio integration](https://weaverse.io/docs/nextjs/studio) and [Markets and translations](https://weaverse.io/docs/nextjs/markets-translations) for more.
+
+## Project structure
+
+```text
+src/
+  app/                  Next.js routes, layouts and API handlers
+    [locale]/           Market-aware storefront pages
+  components/           Shared UI and commerce components
+  sections/             Composable storefront sections and schemas
+  lib/
+    weaverse/           Component registry, theme settings and Studio integration
+    storefront/         Shopify data access and storefront models
+    i18n/               Market configuration and translation helpers
+    cart/               Shopify cart integration
+    account/            Customer Account integration
+public/                 Static assets
+scripts/                Build and verification tools
+tests/                  Unit, DOM and browser coverage
 ```
-
-That deterministic command installs the preview package and copies Shopify's
-Hydrogen implementation skills into `.agents/skills/`. The server-owned
-Storefront read client is wired; cart mutations, request-specific buyer
-context, checkout, and Customer Account remain explicit future work.
 
 ## Commands
 
-| Command | What it does |
+| Command | Description |
 | --- | --- |
-| `bun run dev` | Start the development server on `http://localhost:3333`. |
-| `bun run build` | Create the production build. |
-| `bun run start` | Serve the production build. |
-| `bun run typecheck` | Strict TypeScript check (`tsc --noEmit`). |
-| `bun run lint` | Biome lint (`biome lint .`). |
-| `bun run format` | Format the repository and sort imports with Biome (writes). |
-| `bun run format:check` | Verify formatting and import order without writing. |
-| `bun run test` | Unit and DOM tests via Bun's test runner; they use the test fixtures in `tests/fixtures/`, never a network. |
-| `bun run check:routes` | Verify the route contract against actual build output (`.next` manifests). Requires a prior `bun run build`. |
-| `bun run smoke:routes` | Start the production server, verify every contract path and redirect over HTTP, then stop the server. Requires a prior `bun run build`. |
-| `bun run check` | Composed gates: typecheck → lint → format:check → test → check:graphql → build → check:theme → check:routes. The build needs the Shopify environment. Leaves no server running. |
+| `bun run dev` | Start the development server on port 3333. |
+| `bun run build` | Create a production build; requires your Shopify and Weaverse configuration. |
+| `bun run start` | Serve an existing production build. |
+| `bun run typecheck` | Check TypeScript types. |
+| `bun run lint` | Run Biome lint. |
+| `bun run format` | Format files and organize imports. |
+| `bun run format:check` | Check formatting without changing files. |
+| `bun run test` | Run unit and DOM tests. |
+| `bun run test:browser` | Run the live Playwright matrices; requires the corresponding credentials. |
+| `bun run check` | Run types, lint, formatting, tests, GraphQL validation, build, theme and route checks. |
 
-## Storefront data architecture
+## Deploying to Vercel
 
-Storefront data flows through a single replaceable seam:
+1. Push your storefront to your own Git repository and import it into Vercel with the **Next.js** preset.
+2. Use Bun for installation (`bun install --frozen-lockfile`) and `bun run build` for the build command. Select a supported Node.js version that meets the requirement above.
+3. Add your Shopify and Weaverse environment variables in Vercel before building. Configure Preview and Production separately; do not commit an environment file.
+4. If Customer Account is enabled, set `PUBLIC_STOREFRONT_ORIGIN` to that environment's storefront origin and register its callback and logout URLs in Shopify.
+5. Deploy, add the deployed URL to your Weaverse project's preview URLs, and verify published pages, product selection, cart and checkout on your own store.
 
-```text
-server-only Shopify Storefront API reads
-  -> ShopifyCatalogDataSource
-  -> normalized storefront view models (src/lib/storefront/types.ts)
-  -> route loaders / page composition (src/app/**)
-  -> visual components (src/components/**)
-```
+Follow the [Vercel deployment guide](https://weaverse.io/docs/guides/deployment/vercel) for the full setup.
 
-Pages and components never read Shopify directly — everything goes through
-the exported `storefront` instance. Unknown dynamic handles resolve to `null`
-and routes answer with real `notFound()` 404s. Fixtures under
-`tests/fixtures/storefront/` are test data only.
+## Documentation
 
-The cart is the server-owned Shopify Cart API; checkout is handed off to
-Shopify.
+- [Next.js overview](https://weaverse.io/docs/nextjs/overview)
+- [Getting started](https://weaverse.io/docs/nextjs/quickstart)
+- [Rendering pages](https://weaverse.io/docs/nextjs/rendering-pages)
+- [Section data fetching](https://weaverse.io/docs/nextjs/data-fetching)
+- [Studio integration](https://weaverse.io/docs/nextjs/studio)
+- [Markets and translations](https://weaverse.io/docs/nextjs/markets-translations)
+- [Report an issue](https://github.com/Weaverse/forward/issues)
 
-## Route contract
+## License
 
-The single source of truth is [`src/lib/routes/route-contract.ts`](src/lib/routes/route-contract.ts). Shell UI, `next.config.ts` redirects, the build checker, the HTTP smoke, and the tests all read from it.
-
-### Markets
-
-Every rendered route lives under `src/app/[locale]/`, with markets listed in [`src/lib/i18n/locales.ts`](src/lib/i18n/locales.ts). The default market (`en-us`) is never in the URL: the proxy redirects `/en-us/shop` to `/shop` (308) and rewrites `/shop` to `/en-us/shop` internally. Other markets keep their prefix (`/de-de/shop`); an unknown prefix is a 404. The routes below are the default-market paths.
-
-The markets are also declared to Weaverse (`themeSchema.i18n`), so Studio can author a localized page per market and translate the theme's own copy (`src/lib/i18n/static-content.ts`) in the Translation Manager. Pages carry a self-canonical, and market-invariant paths (`/`, `/shop`, `/journal`) list every market as `hreflang` alternates.
-
-### Canonical routes
-
-| Route | Surface |
-| --- | --- |
-| `/` | Home |
-| `/shop` | Full catalog |
-| `/shop/[collectionHandle]` | Collection |
-| `/products/[productHandle]` | Product |
-| `/search` | Search |
-| `/cart` | Cart |
-| `/journal` | Journal index |
-| `/journal/[articleHandle]` | Journal article |
-| `/pages/[pageHandle]` | Store page |
-| `/policies/[policyHandle]` | Store policy |
-| `/account` | Account overview |
-| `/account/orders` | Order history |
-| `/account/orders/[orderId]` | Order detail |
-| `/account/addresses` | Addresses |
-| `/account/login` | Sign in |
-
-### Account protocol surfaces
-
-`/account/authorize` and `/account/logout` are explicit placeholders that answer `501 Not Implemented`. These handlers do not pretend otherwise. Account records come only from the Customer Account API; a deployment without account configuration renders no account data.
-
-### Metadata/resource routes
-
-`/robots.txt` and `/sitemap.xml` are generated by App Router metadata routes against a placeholder origin (`https://forward.example`); the production domain is a deferred deployment decision.
-
-### Compatibility redirects (permanent, 308)
-
-| From | To |
-| --- | --- |
-| `/collections/all` | `/shop` |
-| `/collections/[collectionHandle]` | `/shop/[collectionHandle]` |
-| `/blogs/journal` | `/journal` |
-| `/blogs/journal/[articleHandle]` | `/journal/[articleHandle]` |
-
-### Smoke handles
-
-Dynamic routes are smoke-tested with approved handles only
-(`weatherline-shell`, `ridge-30-field-pack`, `talus-trail-shoe` for products,
-plus one handle per other resource class). They live in
-`src/lib/routes/route-contract.ts` and resolve against the live store;
-unknown handles return real 404s.
-
-## Route checking vs. `shopify hydrogen check routes`
-
-Shopify's `shopify hydrogen check routes` inspects the file-based routes of Shopify's React Router Hydrogen skeleton. Forward uses the Hydrogen preview package inside Next.js App Router, so that framework-specific route checker is not authoritative here. The equivalent is `bun run check:routes`, which validates generated App Router manifests in `.next/` (not source filenames) against this repo's own route contract, plus `bun run smoke:routes`, which verifies live HTTP behavior — including permanent redirects — against a production server.
-
-## Deferred by design
-
-- No locale/market routing (markets are TBD in the shared contract).
-- Vercel Production deployment is configured separately from repository data
-  adapters; credentials remain outside Git and browser bundles.
+[MIT](LICENSE.md) — Copyright Weaverse JSC.
