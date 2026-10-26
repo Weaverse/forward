@@ -6,7 +6,8 @@ import { cache } from "react";
 import { loadWeaverseThemeSettings } from "@/lib/weaverse/server";
 import { marketAlternates } from "./alternates";
 import { DEFAULT_LOCALE, type LocaleId, parseLocale } from "./locales";
-import { STATIC_CONTENT, type TranslationKey } from "./static-content";
+import type { TranslationKey } from "./static-content";
+import { themeContent } from "./theme-content";
 import { createTranslator } from "./translate";
 
 /**
@@ -20,7 +21,7 @@ export const getTranslator = cache(async (locale: LocaleId) => {
   const response = await loadWeaverseThemeSettings(locale);
   return createTranslator<TranslationKey>({
     overrides: response?.merchantOverrides,
-    staticContent: STATIC_CONTENT,
+    staticContent: themeContent(locale),
   });
 });
 

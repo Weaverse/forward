@@ -1,12 +1,34 @@
 "use client";
 
 import { useTranslation } from "@weaverse/next";
-import { useSyncExternalStore } from "react";
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useSyncExternalStore,
+} from "react";
 
 import { STATIC_CONTENT, type TranslationKey } from "./static-content";
 import { createTranslator, type TranslationVariables } from "./translate";
 
 const NO_EDITS: Readonly<Record<string, string>> = {};
+
+const ThemeContentContext =
+  createContext<Readonly<Record<string, unknown>>>(STATIC_CONTENT);
+
+/**
+ * The market's theme copy (English plus its language bundle), resolved on the
+ * server so the browser receives one language, not every bundle.
+ */
+export function ThemeContentProvider({
+  value,
+  children,
+}: {
+  value: Readonly<Record<string, unknown>>;
+  children: ReactNode;
+}) {
+  return <ThemeContentContext value={value}>{children}</ThemeContentContext>;
+}
 
 function noEdits() {
   return NO_EDITS;
@@ -30,10 +52,11 @@ export function useT() {
     translationStore?.getSnapshot ?? noEdits,
     translationStore?.getServerSnapshot ?? noEdits,
   );
+  const staticContent = useContext(ThemeContentContext);
   return createTranslator<TranslationKey>({
     designOverrides,
     overrides: merchantOverrides,
-    staticContent: STATIC_CONTENT,
+    staticContent,
   });
 }
 

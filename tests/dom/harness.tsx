@@ -17,6 +17,7 @@ import { ShopifyCartProvider } from "@/lib/cart/shopify-cart-react";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
 import { DEFAULT_LOCALE, type LocaleId } from "@/lib/i18n/locales";
 import { STATIC_CONTENT, type TranslationKey } from "@/lib/i18n/static-content";
+import { themeContent } from "@/lib/i18n/theme-content";
 import { createTranslator } from "@/lib/i18n/translate";
 import type { NavItem, Product } from "@/lib/storefront/types";
 import { WeaverseRoot } from "@/lib/weaverse/root";
@@ -96,7 +97,10 @@ export function shell(
 ) {
   return (
     <LocaleProvider locale={locale}>
-      <WeaverseRoot merchantOverrides={merchantOverrides}>
+      <WeaverseRoot
+        merchantOverrides={merchantOverrides}
+        staticContent={themeContent(locale)}
+      >
         <ShopifyCartProvider initialData={data}>{ui}</ShopifyCartProvider>
       </WeaverseRoot>
     </LocaleProvider>

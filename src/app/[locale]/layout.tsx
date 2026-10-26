@@ -25,6 +25,7 @@ import {
 
 import "../globals.css";
 import { T } from "@/lib/i18n/t";
+import { themeContent } from "@/lib/i18n/theme-content";
 import { getTranslator } from "@/lib/i18n/translator";
 
 /* Premium type contract: Archivo for display, Manrope for body/UI, and
@@ -111,6 +112,7 @@ export default async function RootLayout({
           <WeaverseRoot
             merchantOverrides={themeResponse?.merchantOverrides}
             publicEnv={weaversePublicEnv(process.env)}
+            staticContent={themeContent(locale)}
             theme={themeResponse?.theme}
           >
             <ShopifyCartRuntime>
