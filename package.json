@@ -47,7 +47,7 @@
     "react-svg-credit-card-payment-icons": "6.0.4"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.7",
+    "@biomejs/biome": "2.6.3",
     "@happy-dom/global-registrator": "21.0.4",
     "@playwright/test": "1.64.1",
     "@tailwindcss/postcss": "^4.1.0",

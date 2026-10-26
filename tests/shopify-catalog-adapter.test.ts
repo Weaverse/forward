@@ -25,7 +25,6 @@ import {
   safeErrorLabel,
 } from "../src/lib/storefront/shopify/errors.ts";
 import { mapCatalogResult } from "../src/lib/storefront/shopify/mapper.ts";
-import type { Product } from "../src/lib/storefront/types.ts";
 import {
   type CatalogResponse,
   catalogResponse,

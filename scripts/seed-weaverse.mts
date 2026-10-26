@@ -301,7 +301,7 @@ async function seedPage(
   console.log(`  wrote ${pageRef(page)} (${items.length} items)`);
 }
 
-function describe(page: SeedPage): void {
+function describePage(page: SeedPage): void {
   const items = buildItems(page, "root");
   console.log(`  ${pageRef(page)}: ${items.length} items`);
   const byId = new Map(items.map((item) => [item.id, item]));
@@ -341,7 +341,7 @@ async function main(): Promise<void> {
   console.log(
     `seed:weaverse: ${apply ? "APPLYING to" : "dry run against"} project ${projectId}`,
   );
-  for (const page of pages) describe(page);
+  for (const page of pages) describePage(page);
 
   if (!apply) {
     console.log(
