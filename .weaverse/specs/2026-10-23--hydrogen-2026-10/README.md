@@ -2,12 +2,12 @@
 
 | Field            | Value                                                                    |
 | ---------------- | ------------------------------------------------------------------------ |
-| **Status**       | draft                                                                    |
+| **Status**       | in-progress                                                              |
 | **Owner**        | @hta218                                                                  |
 | **Issue**        | [#109](https://github.com/Weaverse/forward/issues/109), part of [Weaverse/weaverse#543](https://github.com/Weaverse/weaverse/issues/543) |
 | **Branch**       | `update/hydrogen-2026-10`                                                |
 | **Created**      | 2026-10-23                                                               |
-| **Last Updated** | 2026-10-23                                                               |
+| **Last Updated** | 2026-10-26                                                               |
 
 ## Original Prompt
 
@@ -19,4 +19,4 @@
 
 ## Summary
 
-Forward still pins a July 2026 Hydrogen preview snapshot. The framework-agnostic SDK is now stable as `@shopify/hydrogen@2026.10.2`, and Vercel Shop already runs it with Next 16.4 and React 19.3. This spec records the compatibility check and plans the upgrade, with one required code change: migrating customer addresses from `territoryCode` to `countryCode`.
+Forward still pins a July 2026 Hydrogen preview snapshot. The framework-agnostic SDK is now stable as `@shopify/hydrogen@2026.10.2`, and Vercel Shop already runs it with Next 16.4 and React 19.3. This spec records the compatibility check and the upgrade. Two code changes were needed: customer addresses move from `territoryCode` to `countryCode`, and the private Storefront client takes `buyerIp` only from the request context.
