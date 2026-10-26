@@ -1,4 +1,4 @@
-# Feature: Upgrade to Hydrogen 2026.10 and bump low-risk dependencies
+# Feature: Upgrade to Hydrogen 2026.10 and bring dependencies up to date
 
 | Field            | Value                                                                    |
 | ---------------- | ------------------------------------------------------------------------ |
@@ -19,4 +19,4 @@
 
 ## Summary
 
-Forward still pins a July 2026 Hydrogen preview snapshot. The framework-agnostic SDK is now stable as `@shopify/hydrogen@2026.10.2`, and Vercel Shop already runs it with Next 16.4 and React 19.3. This spec records the compatibility check and the upgrade. Two code changes were needed: customer addresses move from `territoryCode` to `countryCode`, and the private Storefront client takes `buyerIp` only from the request context.
+Forward still pins a July 2026 Hydrogen preview snapshot. The framework-agnostic SDK is now stable as `@shopify/hydrogen@2026.10.2`, and Vercel Shop already runs it with Next 16.4 and React 19.3. This spec records the compatibility check and the upgrade. Two code changes were needed: customer addresses move from `territoryCode` to `countryCode`, and the private Storefront client takes `buyerIp` only from the request context. happy-dom 21, `@types/node` 26 and Biome 2.6 are included too; TypeScript 7 waits on `gql.tada`.

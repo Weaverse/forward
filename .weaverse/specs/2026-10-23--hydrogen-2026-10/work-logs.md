@@ -11,3 +11,4 @@
 - Tried Biome 2.6.2 and deferred it: Markdown formatting churn and mostly false-positive new rules (details in `plan.md`).
 - Force-synced the Hydrogen agent skills (4 added, 16 updated, including `migrate-to-hydrogen-2026-10` and `hydrogen-customer-account`).
 - Self-review: a well-formed but unassigned code (such as `XX`) fails enum coercion as a top-level GraphQL error and shows the `failed` message instead of `invalid`. Accepted for now; a country `<select>` would remove it.
+- Took the deferred majors after a scratch-worktree trial: happy-dom 21.0.4 needs no changes, `@types/node` moves to 26, Next to 16.4.3. TypeScript 7.0.2 passes `typecheck` and `build` but breaks `check:graphql` (`gql.tada` needs the TypeScript JS API), even with `gql.tada@1.11.4`, so it stays on 5.9. Biome 2.6.3 needed `markdown.formatter` off, two dead-code removals, one rename and two scoped rule overrides (details in `plan.md`).
