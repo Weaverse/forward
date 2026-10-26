@@ -72,7 +72,7 @@ export const ACCOUNT_ADDRESSES_QUERY = gql(`#graphql
           city
           zoneCode
           zip
-          territoryCode
+          countryCode
           phoneNumber
           formatted(withName: true)
         }

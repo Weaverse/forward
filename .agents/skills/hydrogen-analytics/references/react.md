@@ -14,10 +14,7 @@ Server root/layout resolves safe `shop` and `i18n` data and passes it to Shopify
     myshopifyDomain: env.PUBLIC_STORE_DOMAIN,
   }}
   i18n={{ country: market.country, language: market.language, currency: market.currencyCode }}
-  consent={{
-    mode: "default-banner",
-    publicStorefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
-  }}
+  consent={{ mode: "default-banner" }}
 />
 ```
 
@@ -41,6 +38,8 @@ export function AnalyticsTracker() {
 Add `"use client"` only when this component lives in a Next.js App Router client component file.
 
 For real route tracking, include the framework location in the effect dependency. In React Router, read `useLocation()` and key the effect by `location.pathname + location.search`. In Next App Router, read `usePathname()` and `useSearchParams()` in a client component wrapped in `Suspense`, then key the effect by both values. View events infer `url` from `window.location.href`; pass `url` only for an explicit override.
+
+Cart analytics should publish from the confirmed cart state. If a component reads cart state directly, wait while `cart.revalidating === true || cart.pending.cost === true || cart.pending.note` is true so optimistic or revalidating cart changes do not publish as settled analytics.
 
 ```tsx
 // app/layout.tsx
@@ -148,14 +147,13 @@ if (term) {
 
 ## Cart Updates
 
-Subscribe to cart store changes and call `trackCartAnalytics(cart)` when server-confirmed cart data changes. Do not manually publish `product_added_to_cart`; the utility derives it from cart deltas and uses the global analytics bus created by ShopifyScripts.
+Use the `useCartAnalytics()` hook from the React binding — rendered inside the `CartProvider` returned by `createCartComponents()` (the React entry exports no standalone `CartProvider`), it calls `trackCartAnalytics(store)` in an effect and cleans up on unmount. Outside the binding, call `trackCartAnalytics(store)` once with the cart store from a client-only effect (`useEffect`) — never at cart-store creation time, since it throws when `window.Shopify.analytics` is missing during SSR. It subscribes itself, skips pending/revalidating/note updates, derives cart delta events from confirmed cart changes, returns an unsubscribe function, and uses the global analytics bus created by ShopifyScripts. Do not manually publish `product_added_to_cart`.
 
 Publish `CART_VIEWED` when the cart page or drawer is viewed. The cart payload is `AnalyticsCart | null`: when a compatible cart is available, include `id`, `updatedAt`, and connection-shaped `lines`; otherwise pass `cart: null` instead of a partial cart.
 
 ```tsx
 analytics.publish(AnalyticsEvent.CART_VIEWED, {
   cart: analyticsCart ?? null,
-  prevCart: null,
 });
 ```
 

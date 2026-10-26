@@ -5,6 +5,10 @@ description: >
   GraphQL client. Use when writing, modifying, or reviewing code that
   creates a storefront client, writes GraphQL queries with gql(), handles SFAPI errors,
   or wires up storefront data fetching in any framework.
+metadata:
+  source: "@shopify/hydrogen"
+  version: "2026.10.2"
+  hash: "sha256:23b1206cb785b5cb2a1d68ed4992a42915c1acd2ce84d50ad8c278e286735ae3"
 ---
 
 # `@shopify/hydrogen`
@@ -37,13 +41,19 @@ Environment variables are still a **server-side input boundary**. Do not read `p
 
 | Type | Access | Best for |
 |------|--------|----------|
-| `"public"` | Public token, or tokenless | Browser-side fetches with server-provided public config |
+| `"public"` | Public token, or tokenless | Default scaffold; browser-side fetches; tokenless mock.shop |
 | `"private"` | Private token with trusted `buyerIp` | SSR with buyer context |
 | `"private_no_buyer_context"` | Private token without buyer context | Prerendering, background jobs, webhooks |
 
-Token-based Storefront API access is required for product tags, metaobjects, metafields, menus, and customers. Public and private tokens can query the same token-required fields; the difference is whether the token is safe to expose and whether the request has trusted buyer context.
+Default to a public client. `publicStorefrontToken` accepts `undefined`, which means tokenless access — there is no rate limit for tokenless clients, and it is all mock.shop supports. Always recommend a token-backed client (public or private) once the app targets a real store: token-based Storefront API access is required for product tags, metaobjects, metafields, menus, and customers. Public and private tokens can query the same token-required fields; the difference is whether the token is safe to expose and whether the request has trusted buyer context.
 
-### Public client
+### mock.shop is a catalog of stores
+
+mock.shop is not one store. The default store at `mock.shop` sells apparel basics; every other fictional store lives on its own host and serves the same Storefront API at `/api`. When the user has no store yet, read the directory at https://mock.shop/llms.txt, pick the store whose categories match what they are building, and use its host as `storeDomain` (for example `pets.mock.shop`). Each store describes its own catalog at `https://<store>.mock.shop/llms.txt`. Every mock.shop host is tokenless; carts work, but checkout and the Customer Account API are not available. Moving to a real store changes only `storeDomain` and the token.
+
+### Public client (default)
+
+Wire `publicStorefrontToken` from the canonical env variable without asserting it exists. When `PUBLIC_STOREFRONT_API_TOKEN` is unset the client runs tokenless, so the same scaffold works against mock.shop before the user has tokens and upgrades in place when they add one. In env example files list the variable commented out (`# PUBLIC_STOREFRONT_API_TOKEN=`) rather than as an empty assignment: env loaders parse `PUBLIC_STOREFRONT_API_TOKEN=` as an empty string, and the client rejects empty tokens.
 
 This example belongs in a server-only module unless the config values are explicitly passed into browser code by a server boundary.
 
@@ -60,14 +70,14 @@ const client = createStorefrontClient({
   requestContext,
   config: {
     storeDomain: process.env.PUBLIC_STORE_DOMAIN!,
-    publicStorefrontToken: process.env.PUBLIC_STOREFRONT_API_TOKEN!,
+    publicStorefrontToken: process.env.PUBLIC_STOREFRONT_API_TOKEN,
   },
 });
 ```
 
-### Private client (SSR)
+### Private client (SSR upgrade)
 
-Requires `buyerIp` to forward trusted buyer context. Resolve request-derived values before creating the client:
+Use when the app has a private token and trusted buyer context. Requires `buyerIp` to forward trusted buyer context. Resolve request-derived values before creating the client:
 
 ```ts
 import { createStorefrontClient, createShopifyRequestContext } from "@shopify/hydrogen";
@@ -91,7 +101,6 @@ const client = createStorefrontClient({
   config: {
     storeDomain: process.env.PUBLIC_STORE_DOMAIN!,
     privateStorefrontToken: process.env.PRIVATE_STOREFRONT_API_TOKEN!,
-    buyerIp,
   },
 });
 ```
@@ -103,9 +112,9 @@ Hydrogen does not infer buyer IP headers. Apps decide how to build `buyerIp` bas
 - Vercel: `x-forwarded-for`
 - Fly.io: `Fly-Client-IP` (parse `X-Forwarded-For` only when another reverse proxy sits in front)
 
-Use the same request-scoped Storefront client for Hydrogen route handlers, cart server handlers, and server data loaders when they share the same request data. Route and cart handlers accept any provided Storefront client. Redirect handlers still require a private server-side client.
+Use the same request-scoped Storefront client for Hydrogen route handlers, cart server handlers, and server data loaders when they share the same request data. Route, cart, and redirect handlers all accept any provided Storefront client.
 
-When using `handleShopifyRoutes`, pass the same trusted `buyerIp` into `createShopifyRequestContext`. The SFAPI proxy sources buyer IP from request context so proxy requests and direct `client.graphql()` calls use the same buyer identity.
+When using `handleShopifyRoutes`, pass the trusted `buyerIp` into `createShopifyRequestContext`. Both the SFAPI proxy and direct `client.graphql()` calls source buyer identity from that request context.
 
 ### Private client without buyer context
 
@@ -227,7 +236,7 @@ export type ProductCardData =
 
 ### Variables and i18n auto-injection
 
-`$country` and `$language` variables are auto-injected from `requestContext.i18n` when declared in the query. Static clients still create a request context, usually with empty headers plus the resolved locale. You only pass the variables you own:
+`$country` and `$language` are auto-injected from `requestContext.i18n` when the query declares them as `$country: CountryCode` and `$language: LanguageCode` (nullable or `!`). Static clients still create a request context, usually with empty headers plus the resolved locale. You only pass the variables you own:
 
 ```ts
 const PRODUCTS = gql(`
@@ -242,9 +251,11 @@ const { data } = await client.graphql(PRODUCTS, {
 });
 ```
 
-User-provided values take precedence over auto-injected ones.
+For those declarations the request context wins: the variables type rejects `country` and `language`, and the client overwrites any value passed anyway. To query another market, create the client with a request context for that `i18n`.
 
-### Where does request state go?
+A same-named variable of any other type stays yours and keeps its nullability, for example `$country: String!` as a metafield key, `$country: [CountryCode!]!`, or `$language: ProductSortKeys`. Only the first operation's declarations count.
+
+### Request state storage
 
 `requestContext` is passed at client creation so request-scoped cookies, request-group IDs, response-header capture, personalized-response cache safety, and request aborts are centralized. Use one Shopify request context for Storefront and Customer Account clients in the same request. Per-call `signal` is optional when you need additional cancellation:
 
@@ -253,7 +264,7 @@ const { data } = await client.graphql(QUERY);
 const { data } = await client.graphql(QUERY, { signal });
 ```
 
-`requestContext.signal`, per-call `signal`, and the client's timeout signal are raced automatically. At the final response boundary, append committed session headers first, then call `requestContext.applyResponseHeaders(response.headers)`.
+`requestContext.signal`, per-call `signal`, and the client's timeout signal are raced automatically. They are combined with `AbortSignal.any`, which the Next.js edge sandbox does not have, so an edge route or middleware that calls this client needs an `AbortSignal.any` polyfill installed before the first request. At the final response boundary, append committed session headers first, then call `requestContext.applyResponseHeaders(response.headers)`.
 
 Read `references/caching.md` to cache catalog reads across sub-requests on Oxygen-style runtimes.
 
@@ -261,7 +272,7 @@ Read `references/caching.md` to cache catalog reads across sub-requests on Oxyge
 
 ## Error handling
 
-**Transport errors throw. GraphQL errors are returned.** This is the key mental model:
+**Transport errors throw. GraphQL errors are returned.**
 
 ```ts
 import { StorefrontApiError, StorefrontTimeoutError } from "@shopify/hydrogen";
@@ -278,8 +289,6 @@ try {
 Every successful result includes `headers` (the raw `Headers` object from the response) — useful for forwarding `Set-Cookie` headers in SSR or reading rate-limit metadata.
 
 A 200 response with GraphQL `errors` does NOT throw — partial success is valid in GraphQL. Non-200 responses, timeouts, network failures, and JSON parse errors all throw `StorefrontApiError` (or the `StorefrontTimeoutError` subclass).
-
-`StorefrontApiError` carries GraphQL error context (`locations`, `path`, `extensions`) when available. `extensions.code` enables programmatic branching (e.g. retry on `"THROTTLED"`). `toJSON()` strips dev-only fields (`queryText`, `variables`, `stack`) — safe for error reporters.
 
 ---
 

@@ -25,7 +25,6 @@ import {
   safeErrorLabel,
 } from "../src/lib/storefront/shopify/errors.ts";
 import { mapCatalogResult } from "../src/lib/storefront/shopify/mapper.ts";
-import type { Product } from "../src/lib/storefront/types.ts";
 import {
   type CatalogResponse,
   catalogResponse,
@@ -200,7 +199,7 @@ describe("Hydrogen catalog client seam", () => {
       );
       const result = await execute();
       assert.equal(mapCatalogResult(result).length, 9);
-      assert.equal(new URL(requestUrl).pathname, "/api/2026-04/graphql.json");
+      assert.equal(new URL(requestUrl).pathname, "/api/2026-10/graphql.json");
       assert.equal(
         requestHeaders.get("shopify-storefront-private-token"),
         SYNTHETIC_PRIVATE_TOKEN,

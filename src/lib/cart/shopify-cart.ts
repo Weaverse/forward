@@ -73,7 +73,6 @@ function createCartRequestContext(request: Request, source: EnvSource) {
     config: {
       storeDomain: config.storeDomain,
       privateStorefrontToken: config.privateStorefrontToken,
-      buyerIp,
     },
   });
   return { config, environment, i18n, requestContext, storefrontClient };

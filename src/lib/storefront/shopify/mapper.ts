@@ -662,23 +662,6 @@ interface MappedVariants {
   variants: readonly ProductVariant[];
 }
 
-type VariantSelectedOption = ProductVariant["selectedOptions"][number];
-
-function optionCombinations(
-  options: readonly ProductOption[],
-): readonly (readonly VariantSelectedOption[])[] {
-  return options.reduce<readonly (readonly VariantSelectedOption[])[]>(
-    (combinations, option) =>
-      combinations.flatMap((combination) =>
-        option.values.map((value) => [
-          ...combination,
-          { name: option.name, value },
-        ]),
-      ),
-    [[]],
-  );
-}
-
 function mapVariants(
   value: unknown,
   handle: string,

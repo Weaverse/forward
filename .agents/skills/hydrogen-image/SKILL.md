@@ -4,6 +4,10 @@ description: >
   Helper-only sizing of Shopify CDN image URLs. Use when rendering Storefront
   API images in product/collection cards, PDP galleries, PLP heroes, cart
   thumbnails, or other img element surfaces.
+metadata:
+  source: "@shopify/hydrogen"
+  version: "2026.10.2"
+  hash: "sha256:0a6157a4b1cd59669419c0c262ec269223407605f0097927ca0a5d8dacd5960a"
 ---
 
 # Hydrogen Image Sizing

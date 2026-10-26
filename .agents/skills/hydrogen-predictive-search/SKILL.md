@@ -5,6 +5,10 @@ description: >
   modifying, or reviewing autocomplete/search-as-you-type UI, predictive search
   route handlers, tracking URLs, custom predictive search fragments, or framework
   predictive search bindings.
+metadata:
+  source: "@shopify/hydrogen"
+  version: "2026.10.2"
+  hash: "sha256:0fc0870745982e0964fc4875ae12d16b9956e2cf7ba584340d9b0a9bbbaa88b5"
 ---
 
 # Hydrogen Predictive Search
@@ -44,10 +48,12 @@ Use `getPredictiveSearchItemUrl()` for predictive result links. It infers Hydrog
 import { getPredictiveSearchItemUrl } from "@shopify/hydrogen";
 
 const productHref = getPredictiveSearchItemUrl(product, { routes: routeTemplates, term });
-const querySuggestionHref = getPredictiveSearchItemUrl(querySuggestion);
+const querySuggestionHref = getPredictiveSearchItemUrl(querySuggestion, {
+  routes: routeTemplates,
+});
 ```
 
-Pass `{term}` for resource items such as products, collections, pages, and articles. These items do not contain the shopper's typed search text, but the destination URL needs it for attribution. Do not pass `{term}` for `SearchQuerySuggestion` items; the helper uses `querySuggestion.text` automatically. Pass `{searchPath}` for query suggestions only when the full search page is not `/search`.
+Pass `{term}` for resource items such as products, collections, pages, and articles. These items do not contain the shopper's typed search text, but the destination URL needs it for attribution. Do not pass `{term}` for `SearchQuerySuggestion` items; the helper uses `querySuggestion.text` automatically. Pass `{routes: routeTemplates}` so query suggestions honor a custom `search` route. Pass `{searchPath}` only when the suggestion link intentionally differs from the shared search route; it takes precedence when provided.
 
 If the storefront uses custom Shopify resource paths, use the local `hydrogen-routing` skill before wiring predictive search result URLs. Do not create predictive-search-only URL callbacks.
 
@@ -104,7 +110,7 @@ Use the route-handler form for browser-backed autocomplete. Use `makePredictiveS
 - Keep debounce in the client store; do not add ad-hoc debounce in components unless there is a separate UX reason.
 - Prefer additive fragments over full query overrides.
 - Return empty UI for blank terms rather than querying Storefront API.
-- The modal is a native `<dialog>` opened with `showModal()`. For backdrop-dismiss and `closedby`, follow `hydrogen-cart-drawer`'s `references/accessibility.md` — do not reimplement (use the pointerdown guard from that reference, not a bare click handler).
+- The modal is a native `<dialog>` opened with `showModal()`. For backdrop-dismiss, use `closedby="any"` where supported. For browsers without `closedby` support, use a pointerdown-plus-click guard: record whether `pointerdown` started on the dialog backdrop, then close only when the following `click` also targets the dialog. Do not close on a plain `click.self` alone — a drag that starts inside and ends on the backdrop can produce an accidental close.
 
 ## Verify
 

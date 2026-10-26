@@ -5,6 +5,10 @@ description: >
   server-capable Hydrogen project Oxygen-compatible, add or repair its Worker server entrypoint, configure MiniOxygen,
   remove Node runtime assumptions, wire Worker environment, cache, and waitUntil, or verify dev, preview, and deploy
   behavior.
+metadata:
+  source: "@shopify/hydrogen"
+  version: "2026.10.2"
+  hash: "sha256:d93a69671cbf09bd1c5e9edd38a265d01b5123f34a648c94e9971b36322ca963"
 ---
 
 # Making A Hydrogen App Oxygen-Compatible
