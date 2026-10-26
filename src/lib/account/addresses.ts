@@ -19,6 +19,7 @@
  *   GraphQL extensions, tokens, and address PII never leave this file.
  */
 
+import type { CountryCode } from "@shopify/hydrogen/customer-account-api-types";
 import { type LocaleId, localizePath } from "@/lib/i18n/locales";
 import type { AccountSession } from "./account-view";
 import { CustomerAccountRequestError } from "./account-view";
@@ -72,7 +73,7 @@ const ADDRESS_FIELDS = [
   "city",
   "zoneCode",
   "zip",
-  "territoryCode",
+  "countryCode",
   "phoneNumber",
 ] as const;
 export type AddressField = (typeof ADDRESS_FIELDS)[number];
@@ -88,7 +89,7 @@ export interface AddressInput {
   city: string;
   zoneCode: string | null;
   zip: string | null;
-  territoryCode: string;
+  countryCode: CountryCode;
   phoneNumber: string | null;
 }
 
@@ -114,22 +115,22 @@ const REQUIRED_FIELDS = [
   "lastName",
   "address1",
   "city",
-  "territoryCode",
+  "countryCode",
 ] as const;
 
 const DEFAULT_MAX_FIELD_LENGTH = 255;
 const MAX_FIELD_LENGTHS: Partial<Record<AddressField, number>> = {
   zip: 32,
   phoneNumber: 32,
-  territoryCode: 2,
+  countryCode: 2,
 };
 
 // biome-ignore lint/suspicious/noControlCharactersInRegex: control characters are exactly what is being rejected.
 const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/;
 const ADDRESS_ID_PATTERN =
   /^gid:\/\/shopify\/CustomerAddress\/\d{1,20}(\?[\w=&-]{1,80})?$/;
-/** ISO 3166-1 alpha-2 only. The schema also takes alpha-3/numeric; we do not. */
-const TERRITORY_CODE_PATTERN = /^[A-Z]{2}$/;
+/** ISO 3166-1 alpha-2, the format of the `CountryCode` enum. */
+const COUNTRY_CODE_PATTERN = /^[A-Z]{2}$/;
 const ZONE_CODE_PATTERN = /^[A-Z0-9-]{1,12}$/;
 const PHONE_NUMBER_PATTERN = /^\+[1-9]\d{1,14}$/;
 
@@ -167,10 +168,10 @@ function readAddressInput(values: Map<string, string>): AddressInput | null {
   const lastName = values.get("lastName") ?? "";
   const address1 = values.get("address1") ?? "";
   const city = values.get("city") ?? "";
-  const territoryCode = (values.get("territoryCode") ?? "").toUpperCase();
+  const countryCode = (values.get("countryCode") ?? "").toUpperCase();
   const submittedZoneCode = (values.get("zoneCode") ?? "").toUpperCase();
   // Shopify's country metadata exposes no province codes for Vietnam.
-  const zoneCode = territoryCode === "VN" ? "" : submittedZoneCode;
+  const zoneCode = countryCode === "VN" ? "" : submittedZoneCode;
   const zip = values.get("zip") ?? "";
   const phoneNumber = values.get("phoneNumber") ?? "";
 
@@ -179,14 +180,14 @@ function readAddressInput(values: Map<string, string>): AddressInput | null {
     lastName,
     address1,
     city,
-    territoryCode,
+    countryCode,
   };
   for (const field of REQUIRED_FIELDS) {
     if (required[field] === "") {
       return null;
     }
   }
-  if (!TERRITORY_CODE_PATTERN.test(territoryCode)) {
+  if (!COUNTRY_CODE_PATTERN.test(countryCode)) {
     return null;
   }
   if (zoneCode !== "" && !ZONE_CODE_PATTERN.test(zoneCode)) {
@@ -205,7 +206,9 @@ function readAddressInput(values: Map<string, string>): AddressInput | null {
     city,
     zoneCode: emptyToNull(zoneCode),
     zip: emptyToNull(zip),
-    territoryCode,
+    // Shape-checked above. An unassigned code fails enum coercion as a GraphQL
+    // error, so it surfaces as ADDRESS_ERROR_FAILED, not ADDRESS_ERROR_INVALID.
+    countryCode: countryCode as CountryCode,
     phoneNumber: emptyToNull(phoneNumber),
   };
 }
@@ -444,7 +447,7 @@ export async function readAccountAddresses(
       city: address.city ?? "",
       zoneCode: address.zoneCode ?? "",
       zip: address.zip ?? "",
-      territoryCode: address.territoryCode ?? "",
+      countryCode: address.countryCode ?? "",
       phoneNumber: address.phoneNumber ?? "",
     },
   }));

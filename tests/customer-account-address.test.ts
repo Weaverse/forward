@@ -100,7 +100,7 @@ const VALID_ADDRESS = {
   city: "Keswick",
   zoneCode: "cu",
   zip: "CA12 5AB",
-  territoryCode: "gb",
+  countryCode: "gb",
   phoneNumber: "+441234567890",
 } as const;
 
@@ -259,7 +259,7 @@ describe("address schema validation", () => {
         city: "Ha Noi",
         zoneCode: "Ha Noi",
         zip: "100000",
-        territoryCode: "VN",
+        countryCode: "VN",
         phoneNumber: "+84900000000",
       }),
     );
@@ -289,7 +289,7 @@ describe("address schema validation", () => {
     "newline injection": createForm({ city: "Keswick\nSet-Cookie: x=1" }),
     "oversized field": createForm({ address1: "x".repeat(256) }),
     "oversized zip": createForm({ zip: "9".repeat(33) }),
-    "malformed territory code": createForm({ territoryCode: "GBR" }),
+    "malformed country code": createForm({ countryCode: "GBR" }),
     "malformed zone code": createForm({ zoneCode: "not a zone" }),
     "malformed phone": createForm({ phoneNumber: "0800 555 111" }),
     "addressId on create": createForm({ addressId: ADDRESS_ID }),
@@ -376,7 +376,7 @@ describe("address mutations", () => {
         city: "Keswick",
         zoneCode: "CU",
         zip: "CA12 5AB",
-        territoryCode: "GB",
+        countryCode: "GB",
         phoneNumber: "+441234567890",
       },
       defaultAddress: true,
@@ -610,7 +610,7 @@ describe("readAccountAddresses", () => {
             city: "Keswick",
             zoneCode: "CU",
             zip: "CA12 5AB",
-            territoryCode: "GB",
+            countryCode: "GB",
             phoneNumber: null,
             formatted: ["Rowan Hale", "14 Fell Road", "Keswick CA12 5AB"],
           },
@@ -624,7 +624,7 @@ describe("readAccountAddresses", () => {
             city: "Kendal",
             zoneCode: null,
             zip: null,
-            territoryCode: "GB",
+            countryCode: "GB",
             phoneNumber: null,
             formatted: ["Rowan Hale", "Unit 6, Long Light Works"],
           },
@@ -654,7 +654,7 @@ describe("readAccountAddresses", () => {
       city: "Keswick",
       zoneCode: "CU",
       zip: "CA12 5AB",
-      territoryCode: "GB",
+      countryCode: "GB",
       phoneNumber: "",
     });
     assert.equal(JSON.stringify(addresses).includes(ACCESS_TOKEN), false);

@@ -39,7 +39,7 @@ const EMPTY_ADDRESS: AddressFormValues = {
   city: "",
   zoneCode: "",
   zip: "",
-  territoryCode: "",
+  countryCode: "",
   phoneNumber: "",
 };
 
@@ -182,14 +182,14 @@ function AddressFields({ idPrefix, t, values }: AddressFieldsProps) {
         />
       </div>
       <div className={FIELD_CLASS}>
-        <label className={LABEL_CLASS} htmlFor={field("territoryCode")}>
+        <label className={LABEL_CLASS} htmlFor={field("countryCode")}>
           {t("account.fields.territoryCode")}
         </label>
         <input
           className={INPUT_CLASS}
-          id={field("territoryCode")}
-          name="territoryCode"
-          defaultValue={values.territoryCode}
+          id={field("countryCode")}
+          name="countryCode"
+          defaultValue={values.countryCode}
           maxLength={2}
           pattern="[A-Za-z]{2}"
           placeholder="US"
