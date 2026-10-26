@@ -117,8 +117,14 @@ from scaffolded copies).
 - The theme schema's `i18n` (markets, `staticContent`, `translation: true`) is
   derived from `LOCALES`, so Studio's market selector and Translation Manager
   see exactly the markets the storefront serves.
-- Theme-owned copy lives in `src/lib/i18n/static-content.ts` (English) and is
-  never hardcoded in markup: client components use `useT()`, Server
+- Theme-owned copy lives in `src/translations/`: `en.json` is the source
+  (`STATIC_CONTENT`, re-exported with `TranslationKey` from
+  `src/lib/i18n/static-content.ts`), and `de.json` / `fr.json` / `ja.json`
+  translate it. `themeContent(locale)` (`src/lib/i18n/theme-content.ts`,
+  server-only by convention so browsers get one language) merges the market's
+  language over English and passes it as `staticContent`; a Studio translation
+  still wins. A new English key needs the same key in every bundle (a test
+  checks keys and `{{placeholders}}`). Copy is never hardcoded in markup: client components use `useT()`, Server
   Components render text through `<T k>` (so Studio's live edits reach it) and
   use `getTranslator(locale)` only for attributes and metadata. Server
   components that DOM tests render take the page's `t` as a prop. Every path
