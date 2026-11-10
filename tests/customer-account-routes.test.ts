@@ -27,7 +27,7 @@ const CONFIG: CustomerAccountConfig = {
   shopId: "97847574828",
   clientId: "shp_00000000-0000-4000-8000-000000000000",
   sessionSecret: "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
-  storefrontOrigin: "https://forward-sandy.vercel.app",
+  storefrontOrigin: "https://forward-shopify-hydrogen.vercel.app",
 };
 
 const RUNTIME = createCustomerAccountRuntime(CONFIG);

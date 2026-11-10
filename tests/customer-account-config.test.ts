@@ -18,7 +18,7 @@ const VALID_ENV = {
   // Canonical unpadded base64url encoding of a 32-byte test fixture.
   [CUSTOMER_ACCOUNT_SESSION_SECRET_ENV_KEY]:
     "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
-  [STOREFRONT_ORIGIN_ENV_KEY]: "https://forward-sandy.vercel.app",
+  [STOREFRONT_ORIGIN_ENV_KEY]: "https://forward-shopify-hydrogen.vercel.app",
 } as const;
 
 describe("readCustomerAccountConfig", () => {
@@ -38,7 +38,10 @@ describe("readCustomerAccountConfig", () => {
       config.clientId,
       VALID_ENV[CUSTOMER_ACCOUNT_CLIENT_ID_ENV_KEY],
     );
-    assert.equal(config.storefrontOrigin, "https://forward-sandy.vercel.app");
+    assert.equal(
+      config.storefrontOrigin,
+      "https://forward-shopify-hydrogen.vercel.app",
+    );
   });
 
   it("throws for every partial tuple and names only the missing keys", () => {
@@ -139,14 +142,14 @@ describe("readCustomerAccountConfig", () => {
 
   it("rejects every non-canonical storefront origin", () => {
     for (const origin of [
-      "http://forward-sandy.vercel.app",
-      "https://forward-sandy.vercel.app/",
-      "https://forward-sandy.vercel.app/account",
-      "https://forward-sandy.vercel.app:8443",
-      "https://user:pass@forward-sandy.vercel.app",
-      "https://forward-sandy.vercel.app?x=1",
-      "https://forward-sandy.vercel.app#x",
-      "forward-sandy.vercel.app",
+      "http://forward-shopify-hydrogen.vercel.app",
+      "https://forward-shopify-hydrogen.vercel.app/",
+      "https://forward-shopify-hydrogen.vercel.app/account",
+      "https://forward-shopify-hydrogen.vercel.app:8443",
+      "https://user:pass@forward-shopify-hydrogen.vercel.app",
+      "https://forward-shopify-hydrogen.vercel.app?x=1",
+      "https://forward-shopify-hydrogen.vercel.app#x",
+      "forward-shopify-hydrogen.vercel.app",
       "*.vercel.app",
     ]) {
       assert.throws(
