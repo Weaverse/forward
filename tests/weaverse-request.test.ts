@@ -86,13 +86,16 @@ describe("buildRequestContext", () => {
     const context = buildRequestContext({
       headers: new Headers({
         host: "internal:3000",
-        "x-forwarded-host": "forward-sandy.vercel.app",
+        "x-forwarded-host": "forward-shopify-hydrogen.vercel.app",
         "x-forwarded-proto": "https",
       }),
       pathname: "/materials",
     });
 
-    assert.equal(context.url, "https://forward-sandy.vercel.app/materials");
+    assert.equal(
+      context.url,
+      "https://forward-shopify-hydrogen.vercel.app/materials",
+    );
   });
 
   it("keeps the search string on the url and in searchParams", () => {

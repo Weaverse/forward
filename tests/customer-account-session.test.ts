@@ -20,7 +20,7 @@ const CONFIG: CustomerAccountConfig = {
   clientId: "shp_00000000-0000-4000-8000-000000000000",
   sessionSecret:
     "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-  storefrontOrigin: "https://forward-sandy.vercel.app",
+  storefrontOrigin: "https://forward-shopify-hydrogen.vercel.app",
 };
 
 const ACCESS_TOKEN = "shcat_live_access_token_value";

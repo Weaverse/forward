@@ -2,7 +2,7 @@
 
 Forward is an open-source Shopify storefront theme built with Next.js App Router, Hydrogen and [Weaverse](https://weaverse.io). Build your storefront in React and let your team compose pages, customize theme settings and manage translations visually in Weaverse Studio.
 
-[Live storefront](https://forward-sandy.vercel.app) · [Try the editor](https://weaverse.io/demo?theme=forward) · [Next.js documentation](https://weaverse.io/docs/nextjs/overview)
+[Live storefront](https://forward-shopify-hydrogen.vercel.app) · [Try the editor](https://weaverse.io/demo?theme=forward) · [Next.js documentation](https://weaverse.io/docs/nextjs/overview)
 
 ## Features
 

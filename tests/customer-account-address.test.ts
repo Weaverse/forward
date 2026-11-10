@@ -21,7 +21,7 @@ import {
 } from "../src/lib/account/queries.ts";
 import { STATIC_CONTENT } from "../src/lib/i18n/static-content.ts";
 
-const ORIGIN = "https://forward-sandy.vercel.app";
+const ORIGIN = "https://forward-shopify-hydrogen.vercel.app";
 const ACCESS_TOKEN = "shcat_live_access_token_value";
 const ADDRESS_ID = "gid://shopify/CustomerAddress/2?model_name=CustomerAddress";
 
@@ -174,10 +174,10 @@ describe("address CSRF boundary", () => {
 
   it("never treats Host or forwarded headers as an origin claim", () => {
     const forged = new Headers({
-      host: "forward-sandy.vercel.app",
-      "x-forwarded-host": "forward-sandy.vercel.app",
+      host: "forward-shopify-hydrogen.vercel.app",
+      "x-forwarded-host": "forward-shopify-hydrogen.vercel.app",
       "x-forwarded-proto": "https",
-      forwarded: `host=forward-sandy.vercel.app;proto=https`,
+      forwarded: `host=forward-shopify-hydrogen.vercel.app;proto=https`,
     });
     assert.equal(isConfiguredOrigin(forged, ORIGIN), false);
   });
