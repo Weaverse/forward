@@ -1,6 +1,9 @@
 "use client";
 
-import { useThemeSettings, WeaverseNextRootProvider } from "@weaverse/next";
+import {
+  useThemeSettings,
+  WeaverseNextRootProvider,
+} from "@weaverse/hydrogen/next";
 import type { ReactNode } from "react";
 
 import { STATIC_CONTENT } from "@/lib/i18n/static-content";

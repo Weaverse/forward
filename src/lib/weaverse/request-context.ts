@@ -1,7 +1,7 @@
 import type {
   WeaverseNextLoaderData,
   WeaverseNextRequestContext,
-} from "@weaverse/next";
+} from "@weaverse/hydrogen/next";
 
 interface SerializedRequestInfo {
   handle?: string;

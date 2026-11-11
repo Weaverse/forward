@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@shopify/hydrogen": "2026.10.2",
-    "@weaverse/next": "1.0.1",
+    "@weaverse/hydrogen": "6.1.2",
     "class-variance-authority": "0.7.1",
     "next": "16.4.3",
     "parse5": "8.0.1",

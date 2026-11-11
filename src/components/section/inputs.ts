@@ -7,7 +7,7 @@
  * outside Next.
  */
 
-import type { InspectorGroup } from "@weaverse/next";
+import type { InspectorGroup } from "@weaverse/hydrogen/next";
 
 type SectionInputs = InspectorGroup["inputs"];
 

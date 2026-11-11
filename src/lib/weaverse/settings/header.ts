@@ -1,4 +1,4 @@
-import type { WeaverseNextThemeSchemaGroup } from "@weaverse/next";
+import type { WeaverseNextThemeSchemaGroup } from "@weaverse/hydrogen/next";
 
 /**
  * Header theme settings.

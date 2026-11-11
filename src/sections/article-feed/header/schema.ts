@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/next";
+import { createSchema } from "@weaverse/hydrogen/next";
 
 import { contentWidthInput } from "@/components/section/inputs";
 

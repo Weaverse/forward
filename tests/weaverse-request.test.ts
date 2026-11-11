@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { buildWeaverseNextRequestInfo } from "@weaverse/next";
+import { buildWeaverseNextRequestInfo } from "@weaverse/hydrogen/next";
 
 import { LOCALE_IDS } from "../src/lib/i18n/locales.ts";
 import {

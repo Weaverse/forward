@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/next";
+import { createSchema } from "@weaverse/hydrogen/next";
 
 import { layoutInputs } from "@/components/section/inputs";
 import type { RepairAndJournalProps } from ".";

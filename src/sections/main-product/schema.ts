@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/next";
+import { createSchema } from "@weaverse/hydrogen/next";
 
 import { PRODUCT_INFO_CHILD_TYPES } from "./info/schema";
 

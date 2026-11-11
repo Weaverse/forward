@@ -37,7 +37,8 @@ export const STORE_DOMAIN_ENV_KEY = "PUBLIC_STORE_DOMAIN";
 export const PUBLIC_STOREFRONT_TOKEN_ENV_KEY = "PUBLIC_STOREFRONT_API_TOKEN";
 
 /**
- * Every key `@weaverse/next` reads from the environment.
+ * Every key the Weaverse SDK (`@weaverse/hydrogen/next`) reads from the
+ * environment.
  *
  * The list goes stale silently in both directions — a key the SDK gains falls
  * through to `process.env`, and a key it drops leaves a value here that means

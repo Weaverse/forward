@@ -10,7 +10,10 @@
  * instead of in the component registry.
  */
 
-import type { WeaverseNextI18n, WeaverseNextThemeSchema } from "@weaverse/next";
+import type {
+  WeaverseNextI18n,
+  WeaverseNextThemeSchema,
+} from "@weaverse/hydrogen/next";
 
 import {
   DEFAULT_LOCALE,

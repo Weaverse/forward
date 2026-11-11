@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/next";
+import { createSchema } from "@weaverse/hydrogen/next";
 
 export const schema = createSchema({
   type: "mp--title",

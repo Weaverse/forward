@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/next";
+import { createSchema } from "@weaverse/hydrogen/next";
 
 /** The info column's elements, in their default order. */
 export const PRODUCT_INFO_CHILD_TYPES = [

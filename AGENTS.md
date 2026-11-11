@@ -187,16 +187,21 @@ from scaffolded copies).
 - The public Storefront token reaches the browser through Weaverse's
   `publicEnv`, because Studio needs it to resolve default resources; it has no
   other browser use.
-- Install only an exact registry-verified `@weaverse/next` version, never a
+- Install only an exact registry-verified `@weaverse/hydrogen` version, never a
   dist-tag or range, so every upgrade is a reviewed change. Keep the Shopify data
   seam and the Weaverse composition seam separate: no Shopify credential,
   private token, or raw API payload may reach a Studio payload. Analytics
   pageview transport and deduplication are owned by the SDK; the theme must
   not reimplement them.
-- `@weaverse/next` is the only Weaverse dependency. Import every Weaverse API
-  from it (it re-exports `@weaverse/schema`), never from `@weaverse/schema`,
-  `@weaverse/react` or `@weaverse/core`: those resolve only because the
-  installer hoists the SDK's own dependencies (Biome enforces this).
+- `@weaverse/hydrogen` is the only Weaverse dependency; it pins its own
+  `@weaverse/next`, `@weaverse/react` and `@weaverse/schema`. Import every
+  Weaverse API from its Next.js entries: `@weaverse/hydrogen/next` (it
+  re-exports `@weaverse/schema`) and, for server-only code,
+  `@weaverse/hydrogen/next/server`. Never import from `@weaverse/next`,
+  `@weaverse/schema`, `@weaverse/react`, `@weaverse/core` or
+  `@weaverse/hydrogen/react-router`: the first four resolve only because the
+  installer hoists the SDK's own dependencies, and the last is the React Router
+  adapter (Biome enforces this).
 
 ## Required verification
 

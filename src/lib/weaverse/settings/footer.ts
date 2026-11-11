@@ -1,4 +1,4 @@
-import type { WeaverseNextThemeSchemaGroup } from "@weaverse/next";
+import type { WeaverseNextThemeSchemaGroup } from "@weaverse/hydrogen/next";
 
 /**
  * Footer theme settings. The tagline is a translation key (`footer.tagline`),

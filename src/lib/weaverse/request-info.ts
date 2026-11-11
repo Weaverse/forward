@@ -1,4 +1,4 @@
-import type { WeaverseNextRequestContext } from "@weaverse/next";
+import type { WeaverseNextRequestContext } from "@weaverse/hydrogen/next";
 
 import {
   DEFAULT_LOCALE,

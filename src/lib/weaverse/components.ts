@@ -3,12 +3,13 @@
 /**
  * The client component registry — what Builder actually renders.
  *
- * `@weaverse/next`'s renderer is a Client Component (it holds context and
- * subscribes to a store), and a Client Component cannot import a Server
- * Component. So every composable section is a Client Component and lives here,
- * while `./server-components.ts` carries the same schemas plus the server-only
- * loaders. That split is forced by Next's RSC model, not by Weaverse: Pilot on
- * React Router needs only one registry because it has no such boundary.
+ * The `@weaverse/hydrogen/next` renderer is a Client Component (it holds
+ * context and subscribes to a store), and a Client Component cannot import a
+ * Server Component. So every composable section is a Client Component and
+ * lives here, while `./server-components.ts` carries the same schemas plus the
+ * server-only loaders. That split is forced by Next's RSC model, not by
+ * Weaverse: Pilot on React Router needs only one registry because it has no
+ * such boundary.
  *
  * Deliberately absent, and argued in the spec rather than forgotten:
  *
@@ -20,7 +21,7 @@
  *   for code organization only.
  */
 
-import type { WeaverseNextComponent } from "@weaverse/next";
+import type { WeaverseNextComponent } from "@weaverse/hydrogen/next";
 
 import * as Button from "@/components/button";
 import * as Buttons from "@/components/buttons";
