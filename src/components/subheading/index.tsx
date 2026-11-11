@@ -12,8 +12,7 @@ import {
 type SubheadingTone = "strong" | "signal" | "warm";
 
 export interface SubheadingProps
-  extends VariantProps<typeof blockSpacing>,
-    WeaverseElementProps {
+  extends VariantProps<typeof blockSpacing>, WeaverseElementProps {
   content: string;
   tone?: SubheadingTone;
   color?: string;

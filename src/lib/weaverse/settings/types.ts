@@ -53,9 +53,9 @@ type InputValue<T> = T extends { type: "switch" }
  * distributing independently instead of collapsing into one.
  */
 type SettingsFromInputs<T extends readonly unknown[]> = {
-  [K in T[number] as K extends { name: infer N extends string }
-    ? N
-    : never]: K extends unknown ? InputValue<K> : never;
+  [
+    K in T[number] as K extends { name: infer N extends string } ? N : never
+  ]: K extends unknown ? InputValue<K> : never;
 };
 
 /** Extracts the typed settings of one `as const satisfies` group. */

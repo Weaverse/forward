@@ -33,8 +33,7 @@ const variants = cva("relative", {
 });
 
 export interface SectionProps
-  extends VariantProps<typeof variants>,
-    WeaverseElementProps {
+  extends VariantProps<typeof variants>, WeaverseElementProps {
   /** Space between direct children, in px. */
   gap?: number;
   containerClassName?: string;

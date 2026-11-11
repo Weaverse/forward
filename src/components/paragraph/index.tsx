@@ -18,8 +18,7 @@ const WIDTH_CLASS: Record<ParagraphWidth, string> = {
 };
 
 export interface ParagraphProps
-  extends VariantProps<typeof blockSpacing>,
-    WeaverseElementProps {
+  extends VariantProps<typeof blockSpacing>, WeaverseElementProps {
   content: string;
   width?: ParagraphWidth;
   color?: string;

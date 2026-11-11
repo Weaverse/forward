@@ -24,8 +24,7 @@ type HeadingSize =
 type HeadingTag = "h1" | "h2" | "h3" | "h4";
 
 export interface HeadingProps
-  extends VariantProps<typeof blockSpacing>,
-    WeaverseElementProps {
+  extends VariantProps<typeof blockSpacing>, WeaverseElementProps {
   content: string;
   size?: HeadingSize;
   as?: HeadingTag;
