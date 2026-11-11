@@ -105,10 +105,10 @@ from scaffolded copies).
   `getStorefront(locale)`; Weaverse loaders read it with `loaderLocale`.
   Prices carry their own currency and are never derived from the locale.
 - `next/link` is imported only by `src/components/link.tsx`; everything else
-  uses that `Link`, which prefixes the current market (Biome enforces this).
+  uses that `Link`, which prefixes the current market (Oxlint enforces this).
 - Client code reads the path through `usePathname` from
   `src/lib/i18n/locale-context.tsx`, never `next/navigation`'s: during server
-  rendering Next reports the proxy's `/en-us/*` rewrite target (Biome enforces
+  rendering Next reports the proxy's `/en-us/*` rewrite target (Oxlint enforces
   this too).
 - A market has three identities, never interchanged: the URL id (`de-de`),
   BCP-47 (`de-DE`, `localeTag`), and Shopify's enums (`{ language: "DE",
@@ -124,7 +124,7 @@ from scaffolded copies).
   components that DOM tests render take the page's `t` as a prop. Every path
   resolves through `createTranslator`, which checks own properties and keeps
   an empty translation; the SDK's `useTranslation` is restricted to
-  `src/lib/i18n/t.tsx` (Biome). Merchant-authored settings and Shopify
+  `src/lib/i18n/t.tsx` (Oxlint). Merchant-authored settings and Shopify
   content are not theme copy.
 - Money and dates format with the market (`formatMoney(money, locale)`,
   `formatDate(iso, locale)`); there is no default.
@@ -173,10 +173,13 @@ from scaffolded copies).
 
 - Package manager and script runner: **Bun**, pinned by `packageManager` in
   `package.json` (`bun.lock` is committed; there is no `package-lock.json`).
-  Match that version. An older Bun silently ignores the node suite's
-  `--path-ignore-patterns`, so DOM tests run without their preload and report
-  failures the pinned version does not have.
-- Lint + format: **Biome 2.5.7** (`biome.json`). ESLint has been removed.
+  Match that version.
+- Lint, format and tests: **Vite+** (`vite-plus`, the `vp` CLI), configured in
+  `vite.config.ts`: `vp lint` (Oxlint), `vp fmt` (Oxfmt, also sorts imports)
+  and `vp test` (Vitest, `node` and `dom` projects; DOM tests load
+  `tests/dom/preload.ts`). The file is tooling-only: Next.js does not read it,
+  and `vp dev` / `vp build` are never used — `next dev` / `next build` are.
+  Biome and ESLint have been removed.
 - Framework: Next.js App Router with strict TypeScript. Bun is a tooling
   decision only; the application stays Node-compatible.
 - Shopify runtime: the preview-tagged `@shopify/hydrogen` package bootstrapped
@@ -201,7 +204,7 @@ from scaffolded copies).
   `@weaverse/schema`, `@weaverse/react`, `@weaverse/core` or
   `@weaverse/hydrogen/react-router`: the first four resolve only because the
   installer hoists the SDK's own dependencies, and the last is the React Router
-  adapter (Biome enforces this).
+  adapter (Oxlint enforces this).
 
 ## Required verification
 

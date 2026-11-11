@@ -98,10 +98,10 @@ tests/                  Unit, DOM and browser coverage
 | `bun run build` | Create a production build; requires your Shopify and Weaverse configuration. |
 | `bun run start` | Serve an existing production build. |
 | `bun run typecheck` | Check TypeScript types. |
-| `bun run lint` | Run Biome lint. |
-| `bun run format` | Format files and organize imports. |
+| `bun run lint` | Lint with Oxlint (`vp lint`). |
+| `bun run format` | Format files and sort imports with Oxfmt (`vp fmt`). |
 | `bun run format:check` | Check formatting without changing files. |
-| `bun run test` | Run unit and DOM tests. |
+| `bun run test` | Run unit and DOM tests with Vitest (`vp test`). |
 | `bun run test:browser` | Run the live Playwright matrices; requires the corresponding credentials. |
 | `bun run check` | Run types, lint, formatting, tests, GraphQL validation, build, theme and route checks. |
 
