@@ -496,7 +496,7 @@ export interface CatalogResponse {
   data: {
     products: {
       pageInfo: { hasNextPage: boolean };
-      // biome-ignore lint/suspicious/noExplicitAny: synthetic GraphQL payload
+      // oxlint-disable-next-line typescript/no-explicit-any -- synthetic GraphQL payload
       nodes: any[];
     };
   };
@@ -517,7 +517,7 @@ export function catalogResponse(): CatalogResponse {
 /** Returns a catalog response with one product node patched in place. */
 export function catalogResponseWith(
   handle: string,
-  // biome-ignore lint/suspicious/noExplicitAny: synthetic GraphQL payload
+  // oxlint-disable-next-line typescript/no-explicit-any -- synthetic GraphQL payload
   patch: (product: any) => void,
 ): CatalogResponse {
   const response = catalogResponse();

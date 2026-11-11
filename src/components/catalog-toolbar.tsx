@@ -23,8 +23,7 @@ export interface CatalogToolbarSettings {
 }
 
 interface CatalogToolbarProps
-  extends CatalogToolbarSettings,
-    WeaverseElementProps {
+  extends CatalogToolbarSettings, WeaverseElementProps {
   count: number;
   sort: ProductSort;
   sortId: string;

@@ -67,7 +67,7 @@ function policy(
 
 interface Connection {
   pageInfo: { hasNextPage: boolean };
-  // biome-ignore lint/suspicious/noExplicitAny: synthetic GraphQL payload
+  // oxlint-disable-next-line typescript/no-explicit-any -- synthetic GraphQL payload
   nodes: any[];
 }
 

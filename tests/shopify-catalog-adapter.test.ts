@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
-import { describe, it } from "node:test";
+import { describe, it } from "vite-plus/test";
 
 import { isShopifyProductImageUrl } from "../src/lib/storefront/image-source.ts";
 import {

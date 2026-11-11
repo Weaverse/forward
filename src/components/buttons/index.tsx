@@ -18,7 +18,8 @@ const variants = cva("flex flex-wrap items-center gap-6", {
 });
 
 interface ButtonsProps
-  extends VariantProps<typeof variants>,
+  extends
+    VariantProps<typeof variants>,
     VariantProps<typeof blockSpacing>,
     WeaverseElementProps {
   children?: ReactNode;

@@ -1,5 +1,5 @@
-import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
+import { describe, it } from "vite-plus/test";
 import { resolveProductSelection } from "@/lib/storefront/product-state";
 import type { Product } from "@/lib/storefront/types";
 import { WEAVERSE_COMPONENTS } from "@/lib/weaverse/components";

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { describe, it } from "node:test";
+import { describe, it } from "vite-plus/test";
 
 import type { AccountSession } from "../src/lib/account/account-view.ts";
 import { CustomerAccountRequestError } from "../src/lib/account/account-view.ts";

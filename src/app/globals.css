@@ -376,7 +376,6 @@
 
 /* Browser-wide reduced motion must beat route styles and inline utilities. */
 @media (prefers-reduced-motion: reduce) {
-  /* biome-ignore-start lint/complexity/noImportantStyles: global accessibility override */
   *,
   *::before,
   *::after {
@@ -384,5 +383,4 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  /* biome-ignore-end lint/complexity/noImportantStyles: global accessibility override */
 }

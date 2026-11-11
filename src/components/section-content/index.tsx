@@ -26,8 +26,7 @@ const variants = cva("flex min-w-0 flex-col", {
 });
 
 interface SectionContentProps
-  extends VariantProps<typeof variants>,
-    WeaverseElementProps {
+  extends VariantProps<typeof variants>, WeaverseElementProps {
   children?: ReactNode;
 }
 

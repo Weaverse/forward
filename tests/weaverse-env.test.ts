@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
-import { describe, it } from "node:test";
+import { describe, it } from "vite-plus/test";
 
 import {
   buildSdkEnv,

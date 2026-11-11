@@ -9,7 +9,7 @@
 
 import assert from "node:assert/strict";
 import { access, readdir, readFile } from "node:fs/promises";
-import { describe, it } from "node:test";
+import { describe, it } from "vite-plus/test";
 
 const read = (path: string) => readFile(path, "utf8");
 

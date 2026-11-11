@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import path from "node:path";
-import { describe, it } from "node:test";
+import { describe, it } from "vite-plus/test";
 
 import { createShopifyRequestContext } from "@shopify/hydrogen";
 import {

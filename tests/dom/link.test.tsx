@@ -1,6 +1,6 @@
-import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { screen } from "@testing-library/react";
+import { describe, it } from "vite-plus/test";
 
 import { Link } from "@/components/link";
 import { renderWithCart } from "./harness";

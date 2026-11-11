@@ -1,18 +1,18 @@
 /**
- * DOM test preload (`bun run test:dom` only).
+ * DOM test setup file (the `dom` project in `vite.config.ts` only).
  *
  * Registers Happy DOM and replaces the Next.js modules that need a Next
  * server runtime with small doubles, so client components can be rendered and
- * driven with real user interaction. This preload is deliberately *not* a
- * global `bunfig.toml` preload: `bun run test:node` must keep running with no
+ * driven with real user interaction. It is deliberately scoped to the `dom`
+ * Vitest project: the `node` project must keep running with no
  * `document`/`window`, because `src/lib/storefront/shopify/env.ts` and
  * `src/lib/account/env.ts` intentionally refuse to read credentials whenever a
  * browser global exists.
  */
 
-import { afterEach, mock } from "bun:test";
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { createElement, type ReactNode } from "react";
+import { afterEach, vi } from "vite-plus/test";
 
 GlobalRegistrator.register({ url: "http://localhost/" });
 
@@ -20,6 +20,15 @@ GlobalRegistrator.register({ url: "http://localhost/" });
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
 ).IS_REACT_ACT_ENVIRONMENT = true;
+
+/*
+ * Testing Library only advances fake timers inside its async helpers when a
+ * global `jest` exists (Bun provided one). Without it, `vi.useFakeTimers()`
+ * leaves `act()`/user-event waiting on a timer that never fires.
+ */
+(globalThis as { jest?: unknown }).jest = {
+  advanceTimersByTime: (ms: number) => vi.advanceTimersByTime(ms),
+};
 
 /* ---------------------------------------------------------------- routing */
 
@@ -50,7 +59,7 @@ export function currentRoute(): RouteState {
   return route;
 }
 
-mock.module("next/navigation", () => ({
+vi.mock("next/navigation", () => ({
   usePathname: () => route.pathname,
   useSearchParams: () => route.searchParams,
   useRouter: () => ({
@@ -77,7 +86,7 @@ interface LinkProps {
   [key: string]: unknown;
 }
 
-mock.module("next/link", () => ({
+vi.mock("next/link", () => ({
   __esModule: true,
   default: ({
     href,
@@ -109,7 +118,7 @@ interface ImageProps {
  * image runtime. `fill` becomes an explicit attribute so layout-mode intent
  * stays assertable; geometry itself is proven in the Playwright suite.
  */
-mock.module("next/image", () => ({
+vi.mock("next/image", () => ({
   __esModule: true,
   default: ({
     src,
@@ -137,7 +146,7 @@ mock.module("next/image", () => ({
 
 /* ---------------------------------------------------------------- fonts */
 
-mock.module("next/font/google", () => ({
+vi.mock("next/font/google", () => ({
   Archivo: () => ({ variable: "--font-archivo", className: "font-archivo" }),
   Manrope: () => ({ variable: "--font-manrope", className: "font-manrope" }),
   IBM_Plex_Mono: () => ({

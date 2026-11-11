@@ -1,7 +1,7 @@
-import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { act, render, screen } from "@testing-library/react";
 import { TranslationProvider, TranslationStore } from "@weaverse/hydrogen/next";
+import { describe, it } from "vite-plus/test";
 
 import { SortForm } from "@/components/sort-form";
 import { STATIC_CONTENT } from "@/lib/i18n/static-content";

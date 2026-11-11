@@ -7,10 +7,10 @@
  * `tests/browser/`, not here.
  */
 
-import { afterEach, describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { afterEach, describe, it } from "vite-plus/test";
 
 import { ICON_PATHS } from "@/components/icon";
 import { FieldIndexHeader } from "@/components/site-header/field-index-header";
