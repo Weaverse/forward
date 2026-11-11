@@ -50,14 +50,26 @@ Next.js app.
 - [x] `vp test`: 38 files, 590 tests (= Bun's 372 node + 218 DOM)
 - [x] `tsc --noEmit`
 - [x] `bun run check` (typecheck → lint → format → test → GraphQL → `next build` → theme → routes)
-- [ ] Editor setup: Oxc VS Code extension instead of Biome (not in repo)
+- [x] Editor setup: shared `.vscode/settings.json` + `extensions.json` (#121)
 
-## Not done / follow-ups
+## Trials (measured, not adopted)
 
-- `vp check` with type-aware lint (tsgolint, TS 7) — not adopted while
-  `tsc` + Next's TS plugin is the type gate.
-- `vp staged` / pre-commit hooks — Forward has none today.
-- `vp run` tasks for the `check` chain — the Bun script chain works as is.
+- **Oxlint default categories**: `correctness` adds 16 warnings, none a real
+  bug (`<td>` flagged as a control, `type="module"` script flagged as sync,
+  intentional latest-handler ref, route-change state resets, a Next rule in a
+  test). `suspicious` is dominated by `react-in-jsx-scope` (1118, wrong for
+  the automatic JSX runtime); `perf` by `no-await-in-loop` (65). Categories
+  stay off.
+- **`vp check` type-aware** (`lint.options.typeAware` + `typeCheck`,
+  tsgolint on TS 7): no errors on 349 files in 2.1s vs `tsc` 4.5s; a probe
+  file's TS2307/TS2322 were reported. Not adopted yet: TS 7 vs the pinned
+  TS 5.8 and Next/Hydrogen TS plugins; revisit when Builder settles its type
+  gate.
+- **`vp run`**: runs package scripts, but script caching is off by default,
+  so it adds nothing over `bun run` for the `check` chain.
+- **`vp staged`** with `staged: { "*.{js,mjs,ts,tsx,json}": "vp check --fix" }`:
+  formatted and re-staged a probe file. Not adopted: Forward has no
+  pre-commit hooks today; installing one is a team decision.
 
 ## Files touched
 
@@ -68,4 +80,5 @@ Next.js app.
   `src/lib/weaverse/{components,section-schemas,settings/types}.ts`
 - `tests/**/*.test.ts(x)`, `tests/dom/preload.ts`, `tests/dom/bun-test.d.ts` (removed)
 - `AGENTS.md`, `README.md`
+- `.vscode/settings.json`, `.vscode/extensions.json`, `.gitignore`
 - `.weaverse/specs/2026-11-11--vite-plus-tooling/`
