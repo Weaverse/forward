@@ -1,3 +1,4 @@
+import { getWeaverseNextSeoMetadata } from "@weaverse/hydrogen/next/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { marketAlternates } from "@/lib/i18n/alternates";
@@ -59,12 +60,14 @@ export async function generateMetadata(
     type: "CUSTOM",
   });
 
-  const seo = page?.page?.seo as
-    | { title?: string; description?: string }
-    | undefined;
+  const seo = getWeaverseNextSeoMetadata(page);
+  /* The market alternates stay; a canonical URL the merchant set in Studio
+   * replaces the self-canonical. */
   return {
-    ...(seo?.title === undefined ? {} : { title: seo.title }),
-    ...(seo?.description === undefined ? {} : { description: seo.description }),
-    alternates: marketAlternates(`/${slug.join("/")}`, locale),
+    ...seo,
+    alternates: {
+      ...marketAlternates(`/${slug.join("/")}`, locale),
+      ...seo.alternates,
+    },
   };
 }
