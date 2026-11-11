@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { SITE_BASE_URL } from "@/lib/routes/site";
+import { siteBaseUrl } from "@/lib/routes/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -11,6 +11,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/account", "/cart", "/search"],
       },
     ],
-    sitemap: `${SITE_BASE_URL}/sitemap.xml`,
+    sitemap: `${siteBaseUrl()}/sitemap.xml`,
   };
 }

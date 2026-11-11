@@ -12,12 +12,10 @@ import {
   weaversePublicEnv,
 } from "../src/lib/weaverse/env.ts";
 
-/* `@weaverse/hydrogen/next/server` re-exports `@weaverse/next/server`, a
- * dependency of `@weaverse/hydrogen` rather than of this theme, so resolve the
- * bundle from there instead of assuming it is hoisted. */
-const SDK_SERVER_BUNDLE = createRequire(
-  createRequire(import.meta.url).resolve("@weaverse/hydrogen/package.json"),
-).resolve("@weaverse/next/server");
+/* The SDK's server entry, where it reads its environment keys. */
+const SDK_SERVER_BUNDLE = createRequire(import.meta.url).resolve(
+  "@weaverse/hydrogen/next/server",
+);
 
 /** Every environment key the installed SDK bundle names. */
 async function sdkEnvKeysFromBundle(): Promise<Set<string>> {

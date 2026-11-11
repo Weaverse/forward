@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { CANONICAL_ROUTES } from "@/lib/routes/route-contract";
-import { SITE_BASE_URL } from "@/lib/routes/site";
+import { siteBaseUrl } from "@/lib/routes/site";
 import { getStorefront } from "@/lib/storefront/data-source";
 
 const INDEXABLE_CATEGORIES = new Set([
@@ -12,7 +12,7 @@ const INDEXABLE_CATEGORIES = new Set([
 ]);
 
 function toUrl(path: string): string {
-  return `${SITE_BASE_URL}${path === "/" ? "" : path}`;
+  return `${siteBaseUrl()}${path === "/" ? "" : path}`;
 }
 
 /**
