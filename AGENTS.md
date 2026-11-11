@@ -122,8 +122,9 @@ from scaffolded copies).
   Components render text through `<T k>` (so Studio's live edits reach it) and
   use `getTranslator(locale)` only for attributes and metadata. Server
   components that DOM tests render take the page's `t` as a prop. Every path
-  resolves through `createTranslator`, which checks own properties and keeps
-  an empty translation; the SDK's `useTranslation` is restricted to
+  resolves through the SDK's `createTranslate` (typed by `createTranslator`
+  on the server, the root provider's `t` in the browser), which never resolves
+  inherited keys and keeps an empty translation; the SDK's `useTranslation` is restricted to
   `src/lib/i18n/t.tsx` (Oxlint). Merchant-authored settings and Shopify
   content are not theme copy.
 - Money and dates format with the market (`formatMoney(money, locale)`,
