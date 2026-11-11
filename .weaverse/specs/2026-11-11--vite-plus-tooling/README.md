@@ -2,7 +2,7 @@
 
 | Field            | Value                                                  |
 | ---------------- | ------------------------------------------------------ |
-| **Status**       | in-progress                                            |
+| **Status**       | completed                                              |
 | **Owner**        | @hta218                                                |
 | **Issue**        | [#119](https://github.com/Weaverse/forward/issues/119) |
 | **Branch**       | `update/119-vite-plus-tooling`                         |
