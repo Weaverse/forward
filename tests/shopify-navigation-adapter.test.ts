@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { describe, it } from "node:test";
+import { describe, it } from "vite-plus/test";
 
 import { fieldIndexCollections } from "../src/components/site-header/header-navigation.ts";
 import { createNavigationQueryExecutor } from "../src/lib/storefront/shopify/client.ts";

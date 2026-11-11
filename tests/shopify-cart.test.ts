@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vite-plus/test";
 
 import {
   dynamic as cartRouteDynamic,
@@ -8,7 +8,6 @@ import {
   POST as cartRoutePost,
   runtime as cartRouteRuntime,
 } from "../src/app/api/cart/route.ts";
-import { handleShopifyCartRequest } from "../src/lib/cart/shopify-cart.ts";
 import { toHydrogenProductInput } from "../src/lib/cart/shopify-cart-react.tsx";
 import {
   hardenCartResponseHeaders,
@@ -16,6 +15,7 @@ import {
   sanitizeCartHandlerResult,
   validateCheckoutUrl,
 } from "../src/lib/cart/shopify-cart-server.ts";
+import { handleShopifyCartRequest } from "../src/lib/cart/shopify-cart.ts";
 import {
   PRIVATE_STOREFRONT_TOKEN_ENV_KEY,
   STORE_DOMAIN_ENV_KEY,

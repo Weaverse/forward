@@ -7,10 +7,10 @@
  * in `tests/browser/`.
  */
 
-import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { describe, it } from "vite-plus/test";
 
 import {
   DEFAULT_LOCALE,

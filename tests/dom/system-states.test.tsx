@@ -1,7 +1,7 @@
-import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { describe, it } from "vite-plus/test";
 
 import ErrorPage from "@/app/[locale]/error";
 import { renderWithCart as render } from "./harness";

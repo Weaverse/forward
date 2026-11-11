@@ -3,10 +3,10 @@
  * wordmarks, and the announced cart count, proved by rendering them.
  */
 
-import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { describe, it } from "vite-plus/test";
 
 import { ICON_PATHS, Icon } from "@/components/icon";
 import { PaymentMarks } from "@/components/payment-marks";

@@ -8,10 +8,10 @@
  * the dismissal contract is asserted exactly rather than waited out.
  */
 
-import { afterEach, beforeEach, describe, it, jest } from "bun:test";
 import assert from "node:assert/strict";
 import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { afterEach, beforeEach, describe, it, vi } from "vite-plus/test";
 
 import { MiniCart } from "@/components/site-header/mini-cart";
 import { announceCartAdd } from "@/lib/cart/mini-cart-signal";
@@ -37,7 +37,7 @@ let miniCartRoot: HTMLElement;
 
 function setup() {
   const user = userEvent.setup({
-    advanceTimers: jest.advanceTimersByTime,
+    advanceTimers: vi.advanceTimersByTime,
     delay: null,
   });
   miniCartRoot = renderWithCart(
@@ -61,11 +61,11 @@ function status(): string {
 }
 
 beforeEach(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 });
 
 afterEach(() => {
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 describe("mini-cart open signal", () => {
@@ -114,7 +114,7 @@ describe("mini-cart repeated adds", () => {
     assert.equal(status(), "Added to cart.");
 
     act(() => {
-      jest.advanceTimersByTime(AUTO_DISMISS_MS - 2000);
+      vi.advanceTimersByTime(AUTO_DISMISS_MS - 2000);
     });
     assert.ok(panel() !== null);
 
@@ -135,7 +135,7 @@ describe("mini-cart repeated adds", () => {
 
     /* The dismissal timer restarted from the repeat add. */
     act(() => {
-      jest.advanceTimersByTime(2001);
+      vi.advanceTimersByTime(2001);
     });
     assert.ok(panel() !== null);
 
@@ -163,12 +163,12 @@ describe("mini-cart dismissal", () => {
     await user.click(add);
 
     act(() => {
-      jest.advanceTimersByTime(AUTO_DISMISS_MS - 2000);
+      vi.advanceTimersByTime(AUTO_DISMISS_MS - 2000);
     });
     assert.ok(panel() !== null, "the panel must not vanish before its window");
 
     act(() => {
-      jest.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(2000);
     });
     assert.equal(panel(), null);
     assert.equal(status(), "");
@@ -183,7 +183,7 @@ describe("mini-cart dismissal", () => {
     within(open).getByRole("link", { name: "View cart" }).focus();
 
     act(() => {
-      jest.advanceTimersByTime(AUTO_DISMISS_MS * 3);
+      vi.advanceTimersByTime(AUTO_DISMISS_MS * 3);
     });
     assert.ok(panel() !== null, "focus inside the panel must hold it open");
 
@@ -191,7 +191,7 @@ describe("mini-cart dismissal", () => {
       add.focus();
     });
     act(() => {
-      jest.advanceTimersByTime(AUTO_DISMISS_MS);
+      vi.advanceTimersByTime(AUTO_DISMISS_MS);
     });
     assert.equal(panel(), null);
   });

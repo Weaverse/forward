@@ -9,7 +9,7 @@
  */
 
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vite-plus/test";
 
 import { ICON_PATHS } from "../src/components/icon.tsx";
 import { createHeaderNavigationHref } from "../src/components/site-header/header-navigation.ts";

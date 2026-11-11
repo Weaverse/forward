@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { it } from "node:test";
+import { it } from "vite-plus/test";
 
 import { cta, textLink } from "@/lib/presentation/variants";
 

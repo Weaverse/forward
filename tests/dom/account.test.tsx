@@ -1,8 +1,8 @@
 /** Account affordances rendered without crossing an OAuth or mutation boundary. */
 
-import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { screen, within } from "@testing-library/react";
+import { describe, it } from "vite-plus/test";
 
 import { AccountAccessPanel } from "@/components/account-access";
 import { AccountShell } from "@/components/account-shell";
