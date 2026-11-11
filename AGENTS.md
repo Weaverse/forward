@@ -196,15 +196,16 @@ from scaffolded copies).
   private token, or raw API payload may reach a Studio payload. Analytics
   pageview transport and deduplication are owned by the SDK; the theme must
   not reimplement them.
-- `@weaverse/hydrogen` is the only Weaverse dependency; it pins its own
-  `@weaverse/next`, `@weaverse/react` and `@weaverse/schema`. Import every
-  Weaverse API from its Next.js entries: `@weaverse/hydrogen/next` (it
-  re-exports `@weaverse/schema`) and, for server-only code,
+- `@weaverse/hydrogen` is the only Weaverse dependency; it ships the Next.js
+  adapter itself and pins its own `@weaverse/react` and `@weaverse/schema`.
+  Import every Weaverse API from its Next.js entries: `@weaverse/hydrogen/next`
+  (it re-exports `@weaverse/schema`) and, for server-only code,
   `@weaverse/hydrogen/next/server`. Never import from `@weaverse/next`,
   `@weaverse/schema`, `@weaverse/react`, `@weaverse/core` or
-  `@weaverse/hydrogen/react-router`: the first four resolve only because the
-  installer hoists the SDK's own dependencies, and the last is the React Router
-  adapter (Oxlint enforces this).
+  `@weaverse/hydrogen/react-router`: `@weaverse/next` is deprecated and not
+  installed, the next three resolve only because the installer hoists the SDK's
+  own dependencies, and the last is the React Router adapter (Oxlint enforces
+  this).
 
 ## Required verification
 
