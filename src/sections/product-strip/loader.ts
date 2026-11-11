@@ -1,4 +1,4 @@
-import type { WeaverseNextComponent } from "@weaverse/next";
+import type { WeaverseNextComponent } from "@weaverse/hydrogen/next";
 
 import { loaderLocale } from "@/lib/weaverse/request-info";
 import { resolveProducts } from "@/lib/weaverse/resource";

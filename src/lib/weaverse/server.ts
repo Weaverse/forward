@@ -17,12 +17,12 @@ import "server-only";
 import type {
   WeaverseNextLoaderData,
   WeaverseNextRequestContext,
-} from "@weaverse/next";
+} from "@weaverse/hydrogen/next";
 import type {
   WeaverseNextServerClient,
   WeaverseNextThemeSettingsResponse,
-} from "@weaverse/next/server";
-import { createWeaverseNextServerClient } from "@weaverse/next/server";
+} from "@weaverse/hydrogen/next/server";
+import { createWeaverseNextServerClient } from "@weaverse/hydrogen/next/server";
 import { headers } from "next/headers";
 import { cache } from "react";
 import { DEFAULT_LOCALE, type LocaleId } from "@/lib/i18n/locales";

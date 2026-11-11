@@ -14,7 +14,7 @@ import "server-only";
  * which sections resolve data server-side.
  */
 
-import type { WeaverseNextComponent } from "@weaverse/next";
+import type { WeaverseNextComponent } from "@weaverse/hydrogen/next";
 
 import { loader as allArticlesLoader } from "@/sections/all-articles/loader";
 import { loader as collectionIndexLoader } from "@/sections/collection-index/loader";

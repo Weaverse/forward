@@ -1,5 +1,5 @@
-import type { WeaverseNextRequestContext } from "@weaverse/next";
-import { createWeaverseNextRevalidateHandler } from "@weaverse/next/server";
+import type { WeaverseNextRequestContext } from "@weaverse/hydrogen/next";
+import { createWeaverseNextRevalidateHandler } from "@weaverse/hydrogen/next/server";
 
 import { revalidateServerClient } from "@/lib/weaverse/server";
 

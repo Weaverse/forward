@@ -12,12 +12,12 @@
  * registry to the browser, so it stays obvious what the composition costs.
  */
 
-import type { WeaverseNextLoaderData } from "@weaverse/next";
+import type { WeaverseNextLoaderData } from "@weaverse/hydrogen/next";
 import {
   createWeaverseNextClient,
   WeaverseNextProvider,
   WeaverseNextRenderer,
-} from "@weaverse/next";
+} from "@weaverse/hydrogen/next";
 
 import { WEAVERSE_COMPONENTS } from "./components";
 import {

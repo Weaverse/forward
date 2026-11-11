@@ -1,6 +1,6 @@
 "use client";
 
-import { IMAGES_PLACEHOLDERS } from "@weaverse/next";
+import { IMAGES_PLACEHOLDERS } from "@weaverse/hydrogen/next";
 import { cva } from "class-variance-authority";
 import Image from "next/image";
 import { type ReactNode, useContext } from "react";

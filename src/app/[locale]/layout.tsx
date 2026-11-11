@@ -1,4 +1,4 @@
-import { WeaverseNextStudioConnect } from "@weaverse/next";
+import { WeaverseNextStudioConnect } from "@weaverse/hydrogen/next";
 import type { Metadata, Viewport } from "next";
 import { Archivo, IBM_Plex_Mono, Manrope } from "next/font/google";
 import { notFound } from "next/navigation";

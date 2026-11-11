@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslation } from "@weaverse/next";
+import { useTranslation } from "@weaverse/hydrogen/next";
 import { useSyncExternalStore } from "react";
 
 import { STATIC_CONTENT, type TranslationKey } from "./static-content";

@@ -1,4 +1,4 @@
-import type { WeaverseNextComponent } from "@weaverse/next";
+import type { WeaverseNextComponent } from "@weaverse/hydrogen/next";
 
 import type { Product, StorefrontImage } from "@/lib/storefront/types";
 import { loaderLocale } from "@/lib/weaverse/request-info";

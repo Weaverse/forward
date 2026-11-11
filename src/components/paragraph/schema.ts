@@ -1,4 +1,4 @@
-import { createSchema } from "@weaverse/next";
+import { createSchema } from "@weaverse/hydrogen/next";
 
 import { blockSpacingInputs } from "@/components/section/inputs";
 import type { ParagraphProps } from ".";

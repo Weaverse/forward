@@ -20,7 +20,7 @@
  *   for code organization only.
  */
 
-import type { WeaverseNextComponent } from "@weaverse/next";
+import type { WeaverseNextComponent } from "@weaverse/hydrogen/next";
 
 import * as Button from "@/components/button";
 import * as Buttons from "@/components/buttons";
