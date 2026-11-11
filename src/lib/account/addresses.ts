@@ -125,7 +125,7 @@ const MAX_FIELD_LENGTHS: Partial<Record<AddressField, number>> = {
   countryCode: 2,
 };
 
-// biome-ignore lint/suspicious/noControlCharactersInRegex: control characters are exactly what is being rejected.
+// oxlint-disable-next-line no-control-regex -- control characters are exactly what is being rejected.
 const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/;
 const ADDRESS_ID_PATTERN =
   /^gid:\/\/shopify\/CustomerAddress\/\d{1,20}(\?[\w=&-]{1,80})?$/;
