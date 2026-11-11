@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { describe, it } from "node:test";
 
 import {
@@ -11,7 +12,12 @@ import {
   weaversePublicEnv,
 } from "../src/lib/weaverse/env.ts";
 
-const SDK_SERVER_BUNDLE = "node_modules/@weaverse/next/dist/server.mjs";
+/* `@weaverse/hydrogen/next/server` re-exports `@weaverse/next/server`, a
+ * dependency of `@weaverse/hydrogen` rather than of this theme, so resolve the
+ * bundle from there instead of assuming it is hoisted. */
+const SDK_SERVER_BUNDLE = createRequire(
+  createRequire(import.meta.url).resolve("@weaverse/hydrogen/package.json"),
+).resolve("@weaverse/next/server");
 
 /** Every environment key the installed SDK bundle names. */
 async function sdkEnvKeysFromBundle(): Promise<Set<string>> {
