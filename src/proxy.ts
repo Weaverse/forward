@@ -38,6 +38,7 @@ import {
   localeI18n,
   splitLocale,
 } from "@/lib/i18n/locales";
+import { SHOPIFY_I18N } from "@/lib/i18n/shopify-i18n";
 
 const CUSTOMER_ACCOUNT_PROTOCOL_METHODS = new Map<string, string>([
   [CUSTOMER_ACCOUNT_LOGIN_PATH, "GET"],
@@ -167,7 +168,8 @@ function personalizedAccountPageResponse(
 ): Response {
   const requestContext = createShopifyRequestContext({
     request,
-    i18n: localeI18n(route.locale),
+    i18n: SHOPIFY_I18N,
+    locale: localeI18n(route.locale),
   });
   requestContext.markResponseAsPersonalized("customer-account-page");
   /* `/account/status` is a root route handler, never a localized page. */
@@ -230,8 +232,9 @@ export async function proxy(request: NextRequest): Promise<Response> {
     );
     const requestContext = createShopifyRequestContext({
       request: protocolRequest,
+      i18n: SHOPIFY_I18N,
       /* The market of the page the shopper signed in from. */
-      i18n: localeI18n(localeFromCookieHeader(request.headers.get("cookie"))),
+      locale: localeI18n(localeFromCookieHeader(request.headers.get("cookie"))),
     });
     const storefrontClient = createAccountRouteContextClient(requestContext);
     const sessionManager = await createCustomerAccountSessionManager({

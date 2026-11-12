@@ -26,6 +26,7 @@ import {
   type LocaleI18n,
   localeI18n,
 } from "../../i18n/locales";
+import { SHOPIFY_I18N } from "../../i18n/shopify-i18n";
 import {
   ALL_PRODUCTS_CACHE_KEY,
   CATALOG_CACHE_KEY,
@@ -173,7 +174,8 @@ export function createStorefrontReadClient(
 ) {
   const requestContext = createShopifyRequestContext({
     request: { headers: new Headers() },
-    i18n,
+    i18n: SHOPIFY_I18N,
+    locale: i18n,
   });
 
   return createStorefrontClient({

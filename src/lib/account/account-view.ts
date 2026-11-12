@@ -21,6 +21,7 @@ import {
   localeI18n,
   localizePath,
 } from "@/lib/i18n/locales";
+import { SHOPIFY_I18N } from "@/lib/i18n/shopify-i18n";
 import type { TranslationKey } from "@/lib/i18n/static-content";
 import { formatMoney } from "@/lib/storefront/format";
 import {
@@ -200,7 +201,8 @@ export async function readAccountSession(options: {
       // The configured origin, never a Host/Forwarded header.
       url: `${runtime.config.storefrontOrigin}${options.path}`,
     },
-    i18n: localeI18n(options.locale ?? DEFAULT_LOCALE),
+    i18n: SHOPIFY_I18N,
+    locale: localeI18n(options.locale ?? DEFAULT_LOCALE),
   });
   const sessionManager = await createCustomerAccountSessionManager({
     config: runtime.config,
