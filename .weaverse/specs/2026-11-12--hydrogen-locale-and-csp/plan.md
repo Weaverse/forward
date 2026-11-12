@@ -17,15 +17,27 @@
 - `src/proxy.ts` applies it to page responses (ordinary pages and personalized account pages), and drops incoming CSP request headers so a shopper-supplied policy can't hand Next a nonce.
 - No report endpoint; stores add `reportTo` to `THEME_DIRECTIVES` if they need one.
 
+## Cart market after switching markets (#129, #130)
+
+Found while testing: production showed the previous market's totals after a switch until reload (#129), and sometimes a third market's currency, such as yen (#130).
+
+- #130: the cart read its market from the `forward_locale` cookie, which the proxy wrote on every page request, prefetches included. Opening the country selector prefetches every market, so the last prefetch (often `ja-jp`) won. The cart page's server render also read the previous request's cookie.
+  - `localeFromReferer(request)` in `locales.ts`: the market of the same-origin page that sent the request.
+  - Cart market order: the route locale (the cart page passes its `[locale]` param), then the `Referer`, then the cookie (for requests without one, such as a return from Shopify's login). Pilot resolves its cart market from the `Referer` the same way.
+  - The proxy skips the cookie on prefetches (`next-router-prefetch`, `sec-purpose`/`purpose: prefetch`).
+- #129: switching market is a client navigation, and the client cart kept its data. `CartMarketSync` in `shopify-cart-react.tsx` calls Hydrogen's `refresh()` when the locale changes; the market it last showed lives at module scope so a layout remount can't hide a switch.
+
 ## Verification
 
 - `bun run check`
+- Browser check on the Vercel preview: switch markets with items in the cart, with the country selector opened (prefetches) in between.
 - Manual (by the user): page and cart flows per market, account login from a prefixed market, the CSP header in each mode, and Studio editing with `CSP_MODE=enforce`.
 
 ## Files touched
 
 - `src/lib/i18n/shopify-i18n.ts` (new), `src/proxy.ts`, `src/lib/account/account-view.ts`, `src/lib/storefront/shopify/client.ts`, `src/lib/cart/shopify-cart.ts`
 - `src/lib/security/content-security-policy.ts` (new)
-- `tests/shopify-i18n.test.ts` (new), `tests/content-security-policy.test.ts` (new), `tests/customer-account-routes.test.ts`
+- `src/lib/i18n/locales.ts`, `src/lib/cart/shopify-cart-react.tsx`, `src/app/[locale]/cart/page.tsx`
+- `tests/shopify-i18n.test.ts` (new), `tests/content-security-policy.test.ts` (new), `tests/customer-account-routes.test.ts`, `tests/shopify-cart.test.ts`, `tests/locale-route.test.ts`
 - `package.json`, `bun.lock`, `.env.example`, `README.md`
 - `.weaverse/specs/2026-11-12--hydrogen-locale-and-csp/`
