@@ -1,40 +1,20 @@
 "use client";
 
 import { useTranslation } from "@weaverse/hydrogen/next";
-import { useSyncExternalStore } from "react";
 
-import { STATIC_CONTENT, type TranslationKey } from "./static-content";
-import { createTranslator, type TranslationVariables } from "./translate";
-
-const NO_EDITS: Readonly<Record<string, string>> = {};
-
-function noEdits() {
-  return NO_EDITS;
-}
-
-function noSubscription() {
-  return () => {};
-}
+import type { TranslationKey } from "./static-content";
+import type { Translate, TranslationVariables } from "./translate";
 
 /**
  * Theme copy for client components.
  *
- * Reads the market's published overrides and Studio's live edits from the
- * Weaverse root provider, then resolves through the same translator the
- * server uses, so both sides agree on precedence and empty values.
+ * The Weaverse root provider's `t` already resolves the market's published
+ * overrides and Studio's live edits through the SDK's `createTranslate`, the
+ * resolver the server uses too, so both sides agree on precedence and empty
+ * values.
  */
-export function useT() {
-  const { merchantOverrides, translationStore } = useTranslation();
-  const designOverrides = useSyncExternalStore(
-    translationStore?.subscribe ?? noSubscription,
-    translationStore?.getSnapshot ?? noEdits,
-    translationStore?.getServerSnapshot ?? noEdits,
-  );
-  return createTranslator<TranslationKey>({
-    designOverrides,
-    overrides: merchantOverrides,
-    staticContent: STATIC_CONTENT,
-  });
+export function useT(): Translate<TranslationKey> {
+  return useTranslation().t;
 }
 
 /**

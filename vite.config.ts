@@ -208,7 +208,7 @@ const LINT_CONFIGURED: DummyRuleMap = {
 export default defineConfig({
   resolve: { tsconfigPaths: true },
   test: {
-    // `@weaverse/next` imports extensionless `next/navigation`, which Node's
+    // `@weaverse/hydrogen/next` imports extensionless `next/navigation`, which Node's
     // strict ESM loader cannot resolve (`next` has no exports map). Inlining
     // routes it through Vite's resolver. Bun's loader was lenient here.
     server: { deps: { inline: [/@weaverse\//] } },
