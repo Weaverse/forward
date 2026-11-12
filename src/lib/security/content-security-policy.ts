@@ -49,6 +49,19 @@ export function mergeCspDirectives(
   return merged;
 }
 
+/**
+ * A store with its own domain gets Shopify-hosted video files on that domain
+ * (`https://<checkout domain>/cdn/shop/videos/...`), not on cdn.shopify.com,
+ * so the checkout domain is a media source too.
+ */
+function storeDomainDirectives(
+  checkoutDomain: string | undefined,
+): ContentSecurityPolicyDirectives {
+  return checkoutDomain
+    ? { mediaSrc: [`https://${checkoutDomain.replace(/^https?:\/\//, "")}`] }
+    : {};
+}
+
 export function readCspMode(value = process.env.CSP_MODE): CspMode {
   return value === "off" || value === "enforce" ? value : "report-only";
 }
@@ -58,15 +71,20 @@ export function applyContentSecurityPolicy(
   request: Request,
   headers: Headers,
   mode: CspMode = readCspMode(),
+  checkoutDomain: string | undefined = process.env.PUBLIC_CHECKOUT_DOMAIN ||
+    undefined,
 ): void {
   if (mode === "off") {
     return;
   }
   const csp = createContentSecurityPolicy({
-    shop: { storeDomain: process.env.PUBLIC_STORE_DOMAIN },
+    shop: { storeDomain: process.env.PUBLIC_STORE_DOMAIN, checkoutDomain },
     nonce: false,
     directives: mergeCspDirectives(
-      THEME_DIRECTIVES,
+      mergeCspDirectives(
+        THEME_DIRECTIVES,
+        storeDomainDirectives(checkoutDomain),
+      ),
       getWeaverseStudioCspDirectives(request),
     ),
   });

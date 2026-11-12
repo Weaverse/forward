@@ -73,7 +73,7 @@ See [Studio integration](https://weaverse.io/docs/nextjs/studio) and [Markets an
 
 ### Content Security Policy
 
-Forward sends a report-only Content Security Policy: browsers log violations and block nothing. Set `CSP_MODE=enforce` to block anything the policy does not allow, or `CSP_MODE=off` to send no policy. Before enforcing, add the origins of any third-party scripts, embeds or fonts your store loads to `THEME_DIRECTIVES` in `src/lib/security/content-security-policy.ts`, and check the browser console for violations. Weaverse Studio's sources are added automatically while it edits the page.
+Forward sends a report-only Content Security Policy: browsers log violations and block nothing. Set `CSP_MODE=enforce` to block anything the policy does not allow, or `CSP_MODE=off` to send no policy. Before enforcing, add the origins of any third-party scripts, embeds or fonts your store loads to `THEME_DIRECTIVES` in `src/lib/security/content-security-policy.ts`, and check the browser console for violations. Weaverse Studio's sources are added automatically while it edits the page. If your store has its own domain, set `PUBLIC_CHECKOUT_DOMAIN` to it: Shopify serves uploaded videos from that domain.
 
 ## Project structure
 

@@ -61,6 +61,21 @@ describe("content security policy", () => {
     assert.match(header, /script-src [^;]*'unsafe-inline'/);
   });
 
+  it("allows Shopify videos on the store's own domain", () => {
+    const headers = new Headers();
+    applyContentSecurityPolicy(
+      new Request(PAGE),
+      headers,
+      "enforce",
+      "checkout.example.com",
+    );
+
+    assert.match(
+      headers.get("content-security-policy") ?? "",
+      /media-src [^;]*https:\/\/checkout\.example\.com/,
+    );
+  });
+
   it("keeps every theme directive and adds Studio's sources to it", () => {
     const merged = mergeCspDirectives(
       {
