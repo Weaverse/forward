@@ -37,6 +37,10 @@ describe("content security policy", () => {
       headers.get("content-security-policy-report-only") ?? "",
       /script-src [^;]*'unsafe-inline'/,
     );
+    assert.match(
+      headers.get("content-security-policy-report-only") ?? "",
+      /img-src [^;]*https:\/\/cdn\.jsdelivr\.net/,
+    );
   });
 
   it("enforces when asked", () => {

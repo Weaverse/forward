@@ -22,6 +22,8 @@ export type CspMode = "off" | "report-only" | "enforce";
 
 /** Sources this theme needs beyond Hydrogen's defaults. */
 const THEME_DIRECTIVES = {
+  /* The country selector's flags (`react-country-flag` with `svg`). */
+  imgSrc: ["https://cdn.jsdelivr.net"],
   scriptSrc: [
     "'unsafe-inline'",
     /* Next's development runtime evaluates code; production never does. */
