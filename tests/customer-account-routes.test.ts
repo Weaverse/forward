@@ -363,12 +363,42 @@ describe("logout route", () => {
       cookie,
     );
     assert.ok(result.type === "redirect");
-    assert.equal(result.location, `${CONFIG.storefrontOrigin}/`);
+    assert.equal(
+      result.location,
+      `${CONFIG.storefrontOrigin}/account/signed-out`,
+    );
     assert.equal(await manager.getSessionItem("customerAccount"), undefined);
     const setCookie = new Headers(result.headers).get("set-cookie");
     assert.ok(setCookie);
     assert.match(setCookie, /^forward_customer_account=;/);
     assert.match(setCookie, /Max-Age=0/);
+  });
+});
+
+describe("signed-out landing", () => {
+  it("returns the shopper to their market's home, without a page", async () => {
+    configureProxyAccountEnvWithoutCatalog();
+    const cases: [string | null, string][] = [
+      ["forward_locale=de-de", "/de-de"],
+      ["forward_locale=en-us", "/"],
+      [null, "/"],
+    ];
+    for (const [cookie, home] of cases) {
+      const response = await proxy(
+        new NextRequest(`${CONFIG.storefrontOrigin}/account/signed-out`, {
+          headers: cookie === null ? {} : { cookie },
+        }),
+      );
+      assert.equal(response.status, 303);
+      assert.equal(
+        response.headers.get("location"),
+        `${CONFIG.storefrontOrigin}${home}`,
+      );
+      assert.equal(
+        response.headers.get("cache-control"),
+        "private, no-store, max-age=0, must-revalidate",
+      );
+    }
   });
 });
 

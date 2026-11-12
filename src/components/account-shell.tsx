@@ -3,7 +3,6 @@ import { Link } from "@/components/link";
 
 import { CUSTOMER_ACCOUNT_LOGOUT_PATH } from "@/lib/account/customer-account";
 import { cn } from "@/lib/cn";
-import { type LocaleId, localizePath } from "@/lib/i18n/locales";
 import type { ThemeTranslate, TranslationKey } from "@/lib/i18n/static-content";
 import { eyebrow as eyebrowClass, textLink } from "@/lib/presentation/variants";
 
@@ -16,8 +15,6 @@ const ACCOUNT_NAV: readonly { href: string; labelKey: TranslationKey }[] = [
 interface AccountShellProps {
   /** Current canonical path, used to mark the active nav item. */
   activePath: string;
-  /** The page's market: signing out returns the shopper to its home. */
-  locale: LocaleId;
   /** The page's translator, so this frame renders in the page's market. */
   t: ThemeTranslate;
   /** Mono report line above the title, e.g. "Field account / Order". */
@@ -37,10 +34,11 @@ interface AccountShellProps {
  *
  * Sign-out is a same-origin POST form, never a link: the pinned logout handler
  * requires POST plus an Origin/Referer match against the configured origin.
+ * It carries no return target: Shopify sends every sign-out to the one
+ * registered `/account/signed-out`, which returns the shopper to their market.
  */
 export function AccountShell({
   activePath,
-  locale,
   t,
   eyebrow,
   title,
@@ -90,12 +88,7 @@ export function AccountShell({
             );
           })}
           {signedIn ? (
-            <form
-              method="post"
-              action={`${CUSTOMER_ACCOUNT_LOGOUT_PATH}?${new URLSearchParams({
-                return_to: localizePath("/", locale),
-              })}`}
-            >
+            <form method="post" action={CUSTOMER_ACCOUNT_LOGOUT_PATH}>
               <button type="submit" className={textLink()}>
                 {t("account.signOut")}
               </button>

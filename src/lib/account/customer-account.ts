@@ -39,7 +39,12 @@ export const CUSTOMER_ACCOUNT_PROTOCOL_PATHS = [
 
 export const ACCOUNT_PATH = "/account";
 export const LOGIN_FAILED_PATH = "/account?login=failed";
-export const POST_LOGOUT_REDIRECT_URI = "/";
+/**
+ * Where Shopify returns every sign-out. The proxy redirects it on to the home
+ * page of the shopper's market, so the store registers this one logout URI in
+ * the Customer Account API settings instead of one per market.
+ */
+export const POST_LOGOUT_REDIRECT_URI = "/account/signed-out";
 
 /**
  * Forward's own return-target cap, well below Hydrogen's 2,048-byte package
