@@ -29,6 +29,24 @@ const THEME_DIRECTIVES = {
   ],
 } satisfies ContentSecurityPolicyDirectives;
 
+/**
+ * Theme directives with Studio's sources appended. Every theme directive is
+ * kept, so origins a store adds to `THEME_DIRECTIVES` always reach the policy.
+ */
+export function mergeCspDirectives(
+  theme: ContentSecurityPolicyDirectives,
+  studio: ContentSecurityPolicyDirectives,
+): ContentSecurityPolicyDirectives {
+  const merged: ContentSecurityPolicyDirectives = { ...theme };
+  for (const key of Object.keys(studio) as (keyof typeof studio)[]) {
+    if (key === "upgradeInsecureRequests") {
+      continue;
+    }
+    merged[key] = [...(theme[key] ?? []), ...(studio[key] ?? [])];
+  }
+  return merged;
+}
+
 export function readCspMode(value = process.env.CSP_MODE): CspMode {
   return value === "off" || value === "enforce" ? value : "report-only";
 }
@@ -42,14 +60,13 @@ export function applyContentSecurityPolicy(
   if (mode === "off") {
     return;
   }
-  const studio = getWeaverseStudioCspDirectives(request);
   const csp = createContentSecurityPolicy({
     shop: { storeDomain: process.env.PUBLIC_STORE_DOMAIN },
     nonce: false,
-    directives: {
-      ...studio,
-      scriptSrc: [...THEME_DIRECTIVES.scriptSrc, ...(studio.scriptSrc ?? [])],
-    },
+    directives: mergeCspDirectives(
+      THEME_DIRECTIVES,
+      getWeaverseStudioCspDirectives(request),
+    ),
   });
   if (mode === "enforce") {
     csp.applyResponseHeaders(headers);

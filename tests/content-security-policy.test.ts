@@ -3,6 +3,7 @@ import { describe, it } from "vite-plus/test";
 
 import {
   applyContentSecurityPolicy,
+  mergeCspDirectives,
   readCspMode,
 } from "../src/lib/security/content-security-policy.ts";
 
@@ -54,5 +55,20 @@ describe("content security policy", () => {
 
     assert.match(header, /frame-ancestors https:\/\/studio\.weaverse\.io/);
     assert.match(header, /script-src [^;]*'unsafe-inline'/);
+  });
+
+  it("keeps every theme directive and adds Studio's sources to it", () => {
+    const merged = mergeCspDirectives(
+      {
+        connectSrc: ["https://api.example"],
+        fontSrc: ["https://fonts.example"],
+      },
+      { connectSrc: ["https://studio.weaverse.io"] },
+    );
+
+    assert.deepEqual(merged, {
+      connectSrc: ["https://api.example", "https://studio.weaverse.io"],
+      fontSrc: ["https://fonts.example"],
+    });
   });
 });
