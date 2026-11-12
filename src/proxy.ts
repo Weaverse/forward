@@ -28,6 +28,7 @@ import {
   CUSTOMER_ACCOUNT_LOGOUT_PATH,
   CUSTOMER_ACCOUNT_REFRESH_PATH,
   getCustomerAccountRuntime,
+  POST_LOGOUT_REDIRECT_URI,
 } from "@/lib/account/customer-account";
 import { createCustomerAccountSessionManager } from "@/lib/account/session-manager";
 import { type LocaleRoute, resolveLocaleRoute } from "@/lib/i18n/locale-route";
@@ -36,6 +37,7 @@ import {
   type LocaleId,
   localeFromCookieHeader,
   localeI18n,
+  localizePath,
   splitLocale,
 } from "@/lib/i18n/locales";
 import { SHOPIFY_I18N } from "@/lib/i18n/shopify-i18n";
@@ -201,6 +203,27 @@ function personalizedAccountPageResponse(
   return response;
 }
 
+/**
+ * Where Shopify lands every sign-out: on to the home page of the market the
+ * shopper last browsed. Answered here, so the shopper never sees this page.
+ */
+function signedOutResponse(
+  request: NextRequest,
+  storefrontOrigin: string,
+): Response {
+  const home = localizePath(
+    "/",
+    localeFromCookieHeader(request.headers.get("cookie")),
+  );
+  return new Response(null, {
+    status: 303,
+    headers: {
+      location: new URL(home, storefrontOrigin).toString(),
+      "cache-control": ACCOUNT_PRIVATE_NO_STORE,
+    },
+  });
+}
+
 function isAccountPath(path: string): boolean {
   return path === "/account" || path.startsWith("/account/");
 }
@@ -238,6 +261,9 @@ export async function proxy(request: NextRequest): Promise<Response> {
     const runtime = getCustomerAccountRuntime();
     if (runtime === null) {
       return accountDisabledResponse();
+    }
+    if (route.kind === "rewrite" && route.path === POST_LOGOUT_REDIRECT_URI) {
+      return signedOutResponse(request, runtime.config.storefrontOrigin);
     }
     /* Protocol paths are answered only where Shopify redirects to them:
      * unprefixed. A prefixed copy is an ordinary (missing) account page. */

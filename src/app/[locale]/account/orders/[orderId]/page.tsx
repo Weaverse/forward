@@ -64,7 +64,6 @@ export default async function OrderPage({
   if (session.status !== "authenticated") {
     return (
       <AccountShell
-        locale={locale}
         activePath="/account/orders"
         t={t}
         eyebrow={t("account.orderEyebrow")}
@@ -86,7 +85,6 @@ export default async function OrderPage({
 
   return (
     <AccountShell
-      locale={locale}
       activePath="/account/orders"
       t={t}
       eyebrow={t("account.orderEyebrow")}

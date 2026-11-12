@@ -49,7 +49,7 @@ WEAVERSE_PROJECT_ID=your-weaverse-project-id
 
 The private token is used only on the server. The public token lets Studio resolve your store's products, collections and pages. Never commit `.env` or expose the private token to browser code.
 
-See [`.env.example`](.env.example) for the full configuration. Customer Account is optional: to enable it, configure all four account variables together and register the appropriate callback and logout URLs in Shopify. Leave the entire account group empty if you do not need it.
+See [`.env.example`](.env.example) for the full configuration. Customer Account is optional: to enable it, configure all four account variables together and register `<origin>/account/authorize` as the callback URI and `<origin>/account/signed-out` as the logout URI in Shopify. Sign-out always lands on that one logout URI, which returns the shopper to their market's home page. Leave the entire account group empty if you do not need it.
 
 ### 3. Start developing
 
@@ -114,7 +114,7 @@ tests/                  Unit, DOM and browser coverage
 1. Push your storefront to your own Git repository and import it into Vercel with the **Next.js** preset.
 2. Use Bun for installation (`bun install --frozen-lockfile`) and `bun run build` for the build command. Select a supported Node.js version that meets the requirement above.
 3. Add your Shopify and Weaverse environment variables in Vercel before building. Configure Preview and Production separately; do not commit an environment file.
-4. If Customer Account is enabled, set `PUBLIC_STOREFRONT_ORIGIN` to that environment's storefront origin and register its callback and logout URLs in Shopify.
+4. If Customer Account is enabled, set `PUBLIC_STOREFRONT_ORIGIN` to that environment's storefront origin and register its `/account/authorize` callback and `/account/signed-out` logout URIs in Shopify.
 5. Deploy, add the deployed URL to your Weaverse project's preview URLs, and verify published pages, product selection, cart and checkout on your own store.
 
 Follow the [Vercel deployment guide](https://weaverse.io/docs/guides/deployment/vercel) for the full setup.

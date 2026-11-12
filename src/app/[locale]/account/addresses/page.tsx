@@ -244,7 +244,6 @@ export default async function AddressesPage({
   if (session.status !== "authenticated") {
     return (
       <AccountShell
-        locale={locale}
         activePath={ADDRESSES_PATH}
         t={t}
         eyebrow={t("account.addressesEyebrow")}
@@ -263,7 +262,6 @@ export default async function AddressesPage({
 
   return (
     <AccountShell
-      locale={locale}
       activePath={ADDRESSES_PATH}
       t={t}
       eyebrow={t("account.addressesEyebrow")}

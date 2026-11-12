@@ -62,7 +62,6 @@ export default async function AccountPage({
   if (session.status !== "authenticated") {
     return (
       <AccountShell
-        locale={locale}
         activePath={ACCOUNT_PATH}
         t={t}
         title={t("account.overviewTitle")}
@@ -83,7 +82,6 @@ export default async function AccountPage({
 
   return (
     <AccountShell
-      locale={locale}
       activePath={ACCOUNT_PATH}
       t={t}
       title={t("account.overviewTitle")}
