@@ -38,6 +38,8 @@ import {
   localeI18n,
   splitLocale,
 } from "@/lib/i18n/locales";
+import { SHOPIFY_I18N } from "@/lib/i18n/shopify-i18n";
+import { applyContentSecurityPolicy } from "@/lib/security/content-security-policy";
 
 const CUSTOMER_ACCOUNT_PROTOCOL_METHODS = new Map<string, string>([
   [CUSTOMER_ACCOUNT_LOGIN_PATH, "GET"],
@@ -132,16 +134,31 @@ function routeResponse(
   request: NextRequest,
   route: Exclude<LocaleRoute, { kind: "redirect" }>,
 ): NextResponse {
+  const headers = new Headers(request.headers);
+  /* A policy the shopper sends must never supply the nonce Next renders with. */
+  headers.delete("content-security-policy");
+  headers.delete("content-security-policy-report-only");
   if (route.kind === "serve") {
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers } });
   }
   const url = request.nextUrl.clone();
   url.pathname = route.target;
   /* Next can hand the rewritten request back through the proxy. The marker
    * tells that pass the `/en-us` prefix is ours, not the shopper's. */
-  const headers = new Headers(request.headers);
   headers.set(LOCALE_REWRITE_HEADER, route.locale);
   return NextResponse.rewrite(url, { request: { headers } });
+}
+
+/**
+ * A request for a page the shopper has not opened: Next prefetching a link
+ * (the country selector prefetches every market), or a browser prefetch.
+ */
+function isPrefetch(request: NextRequest): boolean {
+  return (
+    request.headers.has("next-router-prefetch") ||
+    request.headers.get("sec-purpose")?.includes("prefetch") === true ||
+    request.headers.get("purpose") === "prefetch"
+  );
 }
 
 /** Records the page's market for handlers that serve no page of their own. */
@@ -150,7 +167,10 @@ function rememberLocale(
   response: NextResponse,
   locale: LocaleId,
 ): NextResponse {
-  if (request.cookies.get(LOCALE_COOKIE)?.value !== locale) {
+  if (
+    !isPrefetch(request) &&
+    request.cookies.get(LOCALE_COOKIE)?.value !== locale
+  ) {
     response.cookies.set(LOCALE_COOKIE, locale, {
       httpOnly: true,
       path: "/",
@@ -167,7 +187,8 @@ function personalizedAccountPageResponse(
 ): Response {
   const requestContext = createShopifyRequestContext({
     request,
-    i18n: localeI18n(route.locale),
+    i18n: SHOPIFY_I18N,
+    locale: localeI18n(route.locale),
   });
   requestContext.markResponseAsPersonalized("customer-account-page");
   /* `/account/status` is a root route handler, never a localized page. */
@@ -176,6 +197,7 @@ function personalizedAccountPageResponse(
       ? NextResponse.next()
       : rememberLocale(request, routeResponse(request, route), route.locale);
   requestContext.applyResponseHeaders(response.headers);
+  applyContentSecurityPolicy(request, response.headers);
   return response;
 }
 
@@ -203,7 +225,13 @@ export async function proxy(request: NextRequest): Promise<Response> {
     return NextResponse.redirect(url, 308);
   }
   if (!isAccountPath(route.path)) {
-    return rememberLocale(request, routeResponse(request, route), route.locale);
+    const response = rememberLocale(
+      request,
+      routeResponse(request, route),
+      route.locale,
+    );
+    applyContentSecurityPolicy(request, response.headers);
+    return response;
   }
 
   try {
@@ -230,8 +258,9 @@ export async function proxy(request: NextRequest): Promise<Response> {
     );
     const requestContext = createShopifyRequestContext({
       request: protocolRequest,
+      i18n: SHOPIFY_I18N,
       /* The market of the page the shopper signed in from. */
-      i18n: localeI18n(localeFromCookieHeader(request.headers.get("cookie"))),
+      locale: localeI18n(localeFromCookieHeader(request.headers.get("cookie"))),
     });
     const storefrontClient = createAccountRouteContextClient(requestContext);
     const sessionManager = await createCustomerAccountSessionManager({

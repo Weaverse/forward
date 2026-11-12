@@ -20,6 +20,7 @@ import {
 } from "../src/lib/account/customer-account.ts";
 import type { CustomerAccountConfig } from "../src/lib/account/env.ts";
 import { createCustomerAccountSessionManager } from "../src/lib/account/session-manager.ts";
+import { SHOPIFY_I18N } from "../src/lib/i18n/shopify-i18n.ts";
 import { ACCOUNT_PROTOCOL_PATHS } from "../src/lib/routes/route-contract.ts";
 import { proxy } from "../src/proxy.ts";
 
@@ -31,7 +32,7 @@ const CONFIG: CustomerAccountConfig = {
 };
 
 const RUNTIME = createCustomerAccountRuntime(CONFIG);
-const I18N = { country: "US", language: "EN" } as const;
+const LOCALE = { country: "US", language: "EN" } as const;
 
 function configureProxyAccountEnvWithoutCatalog(): void {
   process.env.SHOP_ID = CONFIG.shopId;
@@ -44,7 +45,11 @@ function configureProxyAccountEnvWithoutCatalog(): void {
 }
 
 function requestContext(request: Request) {
-  return createShopifyRequestContext({ request, i18n: I18N });
+  return createShopifyRequestContext({
+    request,
+    i18n: SHOPIFY_I18N,
+    locale: LOCALE,
+  });
 }
 
 async function sessionManager(cookieHeader: string | null = null) {

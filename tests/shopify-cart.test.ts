@@ -386,4 +386,67 @@ describe("pinned Hydrogen cart handler integration", () => {
       globalThis.fetch = originalFetch;
     }
   });
+
+  it("follows the page that sent the request over a stale locale cookie", async () => {
+    const originalFetch = globalThis.fetch;
+    let cartCountry = "US";
+    globalThis.fetch = async (_input, init) => {
+      const request = JSON.parse(String(init?.body)) as {
+        query?: string;
+        variables?: { countryCode?: string };
+      };
+      if (request.query?.includes("ForwardCartCountryUpdate")) {
+        cartCountry = request.variables?.countryCode ?? cartCountry;
+        return Response.json({
+          data: { cartBuyerIdentityUpdate: { userErrors: [] } },
+        });
+      }
+      return Response.json({
+        data: {
+          cart: {
+            id: "gid://shopify/Cart/synthetic?key=secret",
+            checkoutUrl: `https://${STORE_DOMAIN}/cart/c/synthetic`,
+            totalQuantity: 0,
+            note: null,
+            buyerIdentity: { countryCode: cartCountry },
+            lines: { nodes: [] },
+            discountCodes: [],
+          },
+        },
+      });
+    };
+    const env = {
+      NODE_ENV: "production",
+      [STORE_DOMAIN_ENV_KEY]: STORE_DOMAIN,
+      [PRIVATE_STOREFRONT_TOKEN_ENV_KEY]: "synthetic-private-token",
+    };
+    function get(referer: string) {
+      return handleShopifyCartRequest(
+        new Request("https://forward.example/api/cart", {
+          headers: {
+            "x-forwarded-for": "203.0.113.9",
+            cookie: "cart=synthetic%3Fkey%3Dsecret; forward_locale=ja-jp",
+            referer,
+          },
+        }),
+        env,
+      );
+    }
+
+    try {
+      assert.equal(
+        (await get("https://forward.example/de-de/shop")).status,
+        200,
+      );
+      assert.equal(cartCountry, "DE");
+
+      assert.equal((await get("https://forward.example/shop")).status, 200);
+      assert.equal(cartCountry, "US");
+
+      assert.equal((await get("https://elsewhere.example/de-de")).status, 200);
+      assert.equal(cartCountry, "JP");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
 });

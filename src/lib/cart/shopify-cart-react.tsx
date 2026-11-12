@@ -10,7 +10,8 @@ import {
   createCartComponents,
   createProductComponents,
 } from "@shopify/hydrogen/react";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
+import { useLocale } from "@/lib/i18n/locale-context";
 import type { LocaleId } from "@/lib/i18n/locales";
 import { formatMoney } from "@/lib/storefront/format";
 import type { Product } from "@/lib/storefront/types";
@@ -23,6 +24,7 @@ export type ShopifyMoney = MoneyV2;
 export const {
   CartProvider: ShopifyCartProvider,
   useCart: useShopifyCart,
+  useCartActions: useShopifyCartActions,
   useCartForm: useShopifyCartForm,
 } = createCartComponents<CartHandlers>();
 
@@ -34,8 +36,34 @@ export const {
 /** The most of one variant a single add or line may hold. */
 export const MAX_LINE_QUANTITY = 9;
 
+/* Module scope, so it survives Next remounting the locale layout. */
+let shownMarket: LocaleId | null = null;
+
+/**
+ * Reloads the cart when the shopper switches market. Switching is a client
+ * navigation, so without this the cart keeps the previous market's totals
+ * until a reload. The reload asks the server again from the new page, which
+ * moves the cart into the new market.
+ */
+function CartMarketSync() {
+  const locale = useLocale();
+  const { refresh } = useShopifyCartActions();
+  useEffect(() => {
+    if (shownMarket !== null && shownMarket !== locale) {
+      refresh();
+    }
+    shownMarket = locale;
+  }, [locale, refresh]);
+  return null;
+}
+
 export function ShopifyCartRuntime({ children }: { children: ReactNode }) {
-  return <ShopifyCartProvider>{children}</ShopifyCartProvider>;
+  return (
+    <ShopifyCartProvider>
+      <CartMarketSync />
+      {children}
+    </ShopifyCartProvider>
+  );
 }
 
 /** Renders Shopify cart money, or an em dash when it is absent or off-currency. */

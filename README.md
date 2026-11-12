@@ -71,6 +71,10 @@ Markets are declared in `src/lib/i18n/locales.ts`. Keep them aligned with your S
 
 See [Studio integration](https://weaverse.io/docs/nextjs/studio) and [Markets and translations](https://weaverse.io/docs/nextjs/markets-translations) for more.
 
+### Content Security Policy
+
+Forward sends a report-only Content Security Policy: browsers log violations and block nothing. Set `CSP_MODE=enforce` to block anything the policy does not allow, or `CSP_MODE=off` to send no policy. Before enforcing, add the origins of any third-party scripts, embeds or fonts your store loads to `THEME_DIRECTIVES` in `src/lib/security/content-security-policy.ts`, and check the browser console for violations. Weaverse Studio's sources are added automatically while it edits the page.
+
 ## Project structure
 
 ```text

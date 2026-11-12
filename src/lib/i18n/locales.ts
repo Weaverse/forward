@@ -148,6 +148,28 @@ export function localeFromCookieHeader(header: string | null): LocaleId {
   return DEFAULT_LOCALE;
 }
 
+/**
+ * The market of the page that sent a request, read from its `Referer`. Only a
+ * same-origin page counts; anything else is `null`, so the caller falls back.
+ * Unlike the locale cookie, which any prefetch or other tab can overwrite,
+ * this is always the page the shopper is on.
+ */
+export function localeFromReferer(request: Request): LocaleId | null {
+  const referer = request.headers.get("referer");
+  if (referer === null) {
+    return null;
+  }
+  try {
+    const page = new URL(referer);
+    if (page.origin !== new URL(request.url).origin) {
+      return null;
+    }
+    return splitLocale(page.pathname).locale ?? DEFAULT_LOCALE;
+  } catch {
+    return null;
+  }
+}
+
 /** The URL prefix a market's paths carry: none for the default market. */
 export function localePathPrefix(locale: LocaleId): string {
   return locale === DEFAULT_LOCALE ? "" : `/${locale}`;

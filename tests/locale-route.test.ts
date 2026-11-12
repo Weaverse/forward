@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "vite-plus/test";
 
+import { NextRequest } from "next/server";
+
 import { resolveLocaleRoute } from "../src/lib/i18n/locale-route.ts";
+import { proxy } from "../src/proxy.ts";
 
 describe("locale routing", () => {
   it("redirects an explicit default locale to the unprefixed path", () => {
@@ -39,5 +42,33 @@ describe("locale routing", () => {
     /* An unknown prefix is not a locale: it is an ordinary (missing) path. */
     assert.equal(resolveLocaleRoute("/xx-yy/shop").kind, "rewrite");
     assert.equal(resolveLocaleRoute("/xx-yy/shop").path, "/xx-yy/shop");
+  });
+});
+
+describe("locale cookie", () => {
+  function page(path: string, headers: Record<string, string> = {}) {
+    return new NextRequest(`https://forward.example${path}`, { headers });
+  }
+
+  it("records the market of a page the shopper loads", async () => {
+    const response = await proxy(page("/de-de/shop"));
+
+    assert.match(
+      response.headers.get("set-cookie") ?? "",
+      /forward_locale=de-de/,
+    );
+  });
+
+  it("leaves the market alone on prefetches", async () => {
+    const prefetches: Record<string, string>[] = [
+      { "next-router-prefetch": "1", rsc: "1" },
+      { "sec-purpose": "prefetch" },
+      { purpose: "prefetch" },
+    ];
+    for (const headers of prefetches) {
+      const response = await proxy(page("/ja-jp/shop", headers));
+
+      assert.equal(response.headers.get("set-cookie"), null);
+    }
   });
 });
