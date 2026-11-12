@@ -39,6 +39,7 @@ import {
   splitLocale,
 } from "@/lib/i18n/locales";
 import { SHOPIFY_I18N } from "@/lib/i18n/shopify-i18n";
+import { applyContentSecurityPolicy } from "@/lib/security/content-security-policy";
 
 const CUSTOMER_ACCOUNT_PROTOCOL_METHODS = new Map<string, string>([
   [CUSTOMER_ACCOUNT_LOGIN_PATH, "GET"],
@@ -133,14 +134,17 @@ function routeResponse(
   request: NextRequest,
   route: Exclude<LocaleRoute, { kind: "redirect" }>,
 ): NextResponse {
+  const headers = new Headers(request.headers);
+  /* A policy the shopper sends must never supply the nonce Next renders with. */
+  headers.delete("content-security-policy");
+  headers.delete("content-security-policy-report-only");
   if (route.kind === "serve") {
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers } });
   }
   const url = request.nextUrl.clone();
   url.pathname = route.target;
   /* Next can hand the rewritten request back through the proxy. The marker
    * tells that pass the `/en-us` prefix is ours, not the shopper's. */
-  const headers = new Headers(request.headers);
   headers.set(LOCALE_REWRITE_HEADER, route.locale);
   return NextResponse.rewrite(url, { request: { headers } });
 }
@@ -178,6 +182,7 @@ function personalizedAccountPageResponse(
       ? NextResponse.next()
       : rememberLocale(request, routeResponse(request, route), route.locale);
   requestContext.applyResponseHeaders(response.headers);
+  applyContentSecurityPolicy(request, response.headers);
   return response;
 }
 
@@ -205,7 +210,13 @@ export async function proxy(request: NextRequest): Promise<Response> {
     return NextResponse.redirect(url, 308);
   }
   if (!isAccountPath(route.path)) {
-    return rememberLocale(request, routeResponse(request, route), route.locale);
+    const response = rememberLocale(
+      request,
+      routeResponse(request, route),
+      route.locale,
+    );
+    applyContentSecurityPolicy(request, response.headers);
+    return response;
   }
 
   try {
