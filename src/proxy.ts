@@ -149,13 +149,28 @@ function routeResponse(
   return NextResponse.rewrite(url, { request: { headers } });
 }
 
+/**
+ * A request for a page the shopper has not opened: Next prefetching a link
+ * (the country selector prefetches every market), or a browser prefetch.
+ */
+function isPrefetch(request: NextRequest): boolean {
+  return (
+    request.headers.has("next-router-prefetch") ||
+    request.headers.get("sec-purpose")?.includes("prefetch") === true ||
+    request.headers.get("purpose") === "prefetch"
+  );
+}
+
 /** Records the page's market for handlers that serve no page of their own. */
 function rememberLocale(
   request: NextRequest,
   response: NextResponse,
   locale: LocaleId,
 ): NextResponse {
-  if (request.cookies.get(LOCALE_COOKIE)?.value !== locale) {
+  if (
+    !isPrefetch(request) &&
+    request.cookies.get(LOCALE_COOKIE)?.value !== locale
+  ) {
     response.cookies.set(LOCALE_COOKIE, locale, {
       httpOnly: true,
       path: "/",

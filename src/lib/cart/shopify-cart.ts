@@ -5,7 +5,12 @@ import {
   getCartId,
   gql,
 } from "@shopify/hydrogen";
-import { localeFromCookieHeader, localeI18n } from "@/lib/i18n/locales";
+import {
+  type LocaleId,
+  localeFromCookieHeader,
+  localeFromReferer,
+  localeI18n,
+} from "@/lib/i18n/locales";
 import { SHOPIFY_I18N } from "@/lib/i18n/shopify-i18n";
 
 import {
@@ -55,15 +60,31 @@ const CART_COUNTRY_UPDATE_MUTATION = gql(`
   }
 `);
 
-function createCartRequestContext(request: Request, source: EnvSource) {
+/**
+ * The market a cart request runs in: the route's locale when the caller knows
+ * it, else the page that sent the request, else the locale cookie (requests
+ * with no same-origin `Referer`, such as a return from Shopify's login).
+ */
+function cartMarket(request: Request, locale: LocaleId | undefined): LocaleId {
+  return (
+    locale ??
+    localeFromReferer(request) ??
+    localeFromCookieHeader(request.headers.get("cookie"))
+  );
+}
+
+function createCartRequestContext(
+  request: Request,
+  source: EnvSource,
+  locale?: LocaleId,
+) {
   const config = readShopifyCatalogConfig(source);
   const environment = runtimeEnvironment(source.NODE_ENV);
   const buyerIp = readTrustedBuyerIp(request.headers, environment);
-  /* The market of the page that posted: the proxy records it per request. */
   const requestContext = createShopifyRequestContext({
     request,
     i18n: SHOPIFY_I18N,
-    locale: localeI18n(localeFromCookieHeader(request.headers.get("cookie"))),
+    locale: localeI18n(cartMarket(request, locale)),
     buyerIp,
   });
   const storefrontClient = createStorefrontClient({
@@ -134,11 +155,13 @@ function cartResultResponse(
   );
 }
 
+/** Reads the cart for a page render; `locale` is the page's route locale. */
 export async function readShopifyCart(
   request: Request,
+  locale: LocaleId,
   source: EnvSource = process.env,
 ): Promise<ShopifyCartData> {
-  const context = createCartRequestContext(request, source);
+  const context = createCartRequestContext(request, source, locale);
   await syncCartCountry(request, context);
   const result = await shopifyCartHandlers.get({
     request,
