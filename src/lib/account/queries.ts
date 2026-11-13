@@ -17,8 +17,13 @@ export const ACCOUNT_ORDER_LIMIT = 20;
 export const ACCOUNT_RECENT_ORDER_LIMIT = 5;
 export const ACCOUNT_ADDRESS_LIMIT = 10;
 export const ORDER_LINE_LIMIT = 50;
-/** An order row shows its first item's image and a "+N" count. */
-export const ORDER_PREVIEW_IMAGE_LIMIT = 1;
+/**
+ * An order row shows its first item's image and a "+N" count summed from the
+ * lines read here. The live API has no order-level quantity total.
+ * ponytail: an order with more lines than this undercounts; page the lines if
+ * that matters.
+ */
+export const ORDER_PREVIEW_LINE_LIMIT = 10;
 export const ORDER_FULFILLMENT_LIMIT = 10;
 
 export const ACCOUNT_PROFILE_QUERY = gql(`#graphql
@@ -53,12 +58,10 @@ export const ACCOUNT_PROFILE_QUERY = gql(`#graphql
             amount
             currencyCode
           }
-          lineItemsSummary {
-            totalQuantityOfLineItems
-          }
           lineItems(first: $previewCount) {
             nodes {
               title
+              quantity
               image {
                 url
                 altText

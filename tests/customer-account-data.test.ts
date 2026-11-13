@@ -75,11 +75,11 @@ const PROFILE_DATA = {
           fulfillmentStatus: "PARTIALLY_FULFILLED",
           financialStatus: "PAID",
           totalPrice: { amount: "390.0", currencyCode: "USD" },
-          lineItemsSummary: { totalQuantityOfLineItems: 2 },
           lineItems: {
             nodes: [
               {
                 title: "Weatherline Shell",
+                quantity: 1,
                 image: {
                   url: "https://cdn.shopify.com/s/files/1/0978/4757/4828/files/weatherline-charcoal-primary.webp",
                   altText: null,
@@ -88,6 +88,7 @@ const PROFILE_DATA = {
               /* A foreign host is dropped, never rendered. */
               {
                 title: "Ridge 30",
+                quantity: 1,
                 image: { url: "https://evil.example/x.webp", altText: "x" },
               },
             ],

@@ -38,7 +38,7 @@ import {
   ACCOUNT_PROFILE_QUERY,
   ORDER_FULFILLMENT_LIMIT,
   ORDER_LINE_LIMIT,
-  ORDER_PREVIEW_IMAGE_LIMIT,
+  ORDER_PREVIEW_LINE_LIMIT,
 } from "./queries";
 import { createCustomerAccountSessionManager } from "./session-manager";
 
@@ -131,7 +131,7 @@ export interface AccountOrderSummary {
   total: string;
   /** Total quantity across the order's lines. */
   itemCount: number;
-  /** Up to `ORDER_PREVIEW_IMAGE_LIMIT` line images. */
+  /** Up to `ORDER_PREVIEW_LINE_LIMIT` line images. */
   images: readonly AccountImage[];
 }
 
@@ -406,10 +406,10 @@ function mapOrderSummary(
     fulfillmentStatus: string;
     financialStatus?: string | null;
     totalPrice: AccountMoney;
-    lineItemsSummary?: { totalQuantityOfLineItems: number } | null;
     lineItems: {
       nodes: readonly {
         title: string;
+        quantity: number;
         image?: { url: string; altText?: string | null } | null;
       }[];
     };
@@ -423,7 +423,10 @@ function mapOrderSummary(
     status: fulfillmentStatus(order.fulfillmentStatus),
     payment: paymentStatus(order.financialStatus),
     total: formatAccountMoney(order.totalPrice, locale),
-    itemCount: order.lineItemsSummary?.totalQuantityOfLineItems ?? 0,
+    itemCount: order.lineItems.nodes.reduce(
+      (count, line) => count + line.quantity,
+      0,
+    ),
     images: order.lineItems.nodes.flatMap((line) => {
       const image = accountImage(line.image, line.title);
       return image === null ? [] : [image];
@@ -441,7 +444,7 @@ export async function readAccountProfile(
     variables: {
       orderCount,
       addressCount: ACCOUNT_ADDRESS_LIMIT,
-      previewCount: ORDER_PREVIEW_IMAGE_LIMIT,
+      previewCount: ORDER_PREVIEW_LINE_LIMIT,
     },
   });
   if (result.errors !== undefined || result.data === null) {

@@ -191,12 +191,6 @@ function respond(query: string, variables: Variables): unknown {
           nodes: ORDERS.map((order) => ({
             ...order,
             totalPrice: usd(subtotal(order) + 12),
-            lineItemsSummary: {
-              totalQuantityOfLineItems: order.lines.reduce(
-                (n, item) => n + item.quantity,
-                0,
-              ),
-            },
             lineItems: {
               nodes: order.lines.slice(0, Number(variables.previewCount)),
             },
