@@ -10,11 +10,12 @@ import {
   type AddressFormValues,
   readAccountAddresses,
 } from "@/lib/account/addresses";
+import { cn } from "@/lib/cn";
 import { localizePath } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
 import type { ThemeTranslate } from "@/lib/i18n/static-content";
 import { getTranslator, translatedMetadata } from "@/lib/i18n/translator";
-import { eyebrow, sectionHeading, textLink } from "@/lib/presentation/variants";
+import { eyebrow, sectionHeading } from "@/lib/presentation/variants";
 import { AddressActionForm } from "./address-form";
 
 export const dynamic = "force-dynamic";
@@ -58,9 +59,12 @@ interface AddressFieldsProps {
 const FIELD_CLASS = "my-5.5";
 const LABEL_CLASS = "mb-2 block text-ui font-bold tracking-button uppercase";
 const INPUT_CLASS =
-  "min-h-13 w-full rounded-none border border-border-field bg-transparent p-3 text-text-inverse focus:border-surface-dark focus:outline-3 focus:outline-focus-field";
-const FORM_NOTE_CLASS = "text-caption text-text-dark-muted";
-const ACCOUNT_BLOCK_CLASS = "min-h-70 border border-ink bg-transparent p-7";
+  "min-h-13 w-full rounded-none border border-border-field bg-transparent p-3 text-ink focus:border-surface-dark focus:outline-3 focus:outline-focus-field";
+const FORM_NOTE_CLASS = "mt-1.5 text-caption text-text-muted";
+const CARD_CLASS = "flex flex-col gap-5 border border-ink bg-transparent p-7";
+/* Quiet inline actions, sized to the card's copy rather than as CTAs. */
+const ACTION_CLASS =
+  "inline-flex min-h-touch cursor-pointer list-none items-center font-body text-micro font-bold tracking-control uppercase underline-offset-4 hover:underline [&::-webkit-details-marker]:hidden";
 
 /**
  * The bounded `CustomerAddressInput` subset Forward writes, as plain inputs.
@@ -273,29 +277,32 @@ export default async function AddressesPage({
         <p className={eyebrow()}>{t("account.savedTrailheads")}</p>
         <h2 className={sectionHeading()}>{t("account.addressesHeading")}</h2>
       </div>
-      {addresses.length > 0 ? (
-        <div className="mt-12.5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {addresses.map((address) => (
-            <article key={address.id} className={ACCOUNT_BLOCK_CLASS}>
-              <p className={eyebrow()}>
-                {t(
-                  address.isDefault
-                    ? "account.defaultBadge"
-                    : "account.savedBadge",
-                )}
-              </p>
-              <address>
-                {address.lines.map((line) => (
-                  <span key={line}>
-                    {line}
-                    <br />
-                  </span>
-                ))}
-              </address>
+      {addresses.length === 0 ? (
+        <p className="mb-6 text-text-muted">{t("account.noAddresses")}</p>
+      ) : null}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {addresses.map((address) => (
+          <article key={address.id} className={CARD_CLASS}>
+            <p className={cn(eyebrow(), "mb-0")}>
+              {t(
+                address.isDefault
+                  ? "account.defaultBadge"
+                  : "account.savedBadge",
+              )}
+            </p>
+            <address className="not-italic">
+              {address.lines.map((line) => (
+                <span key={line}>
+                  {line}
+                  <br />
+                </span>
+              ))}
+            </address>
+            <div className="mt-auto flex flex-wrap items-center gap-x-6 border-border-subtle border-t pt-2">
               {address.isDefault ? null : (
                 <AddressActionForm
                   submitLabel={t("account.makeDefault")}
-                  submitClassName={textLink()}
+                  submitClassName={ACTION_CLASS}
                 >
                   <input type="hidden" name="intent" value="default" />
                   <input type="hidden" name="addressId" value={address.id} />
@@ -303,13 +310,17 @@ export default async function AddressesPage({
               )}
               <AddressActionForm
                 submitLabel={t("account.deleteAddress")}
-                submitClassName={textLink()}
+                submitClassName={cn(
+                  ACTION_CLASS,
+                  "text-text-muted hover:text-ink",
+                )}
+                confirmMessage={t("account.deleteConfirm")}
               >
                 <input type="hidden" name="intent" value="delete" />
                 <input type="hidden" name="addressId" value={address.id} />
               </AddressActionForm>
-              <details>
-                <summary className={textLink()}>
+              <details className="open:basis-full">
+                <summary className={ACTION_CLASS}>
                   {t("account.editAddress")}
                 </summary>
                 <AddressActionForm submitLabel={t("account.saveChanges")}>
@@ -322,15 +333,23 @@ export default async function AddressesPage({
                   />
                 </AddressActionForm>
               </details>
-            </article>
-          ))}
-        </div>
-      ) : (
-        <p className="text-text-muted">{t("account.noAddresses")}</p>
-      )}
-      <div className={ACCOUNT_BLOCK_CLASS}>
-        <details>
-          <summary className={textLink()}>{t("account.addAddress")}</summary>
+            </div>
+          </article>
+        ))}
+        <details
+          className={cn(
+            CARD_CLASS,
+            "border-dashed md:col-span-2 open:border-solid",
+          )}
+        >
+          <summary
+            className={cn(
+              ACTION_CLASS,
+              "before:mr-2 before:text-copy before:content-['+']",
+            )}
+          >
+            {t("account.addAddress")}
+          </summary>
           <AddressActionForm submitLabel={t("account.saveAddress")}>
             <input type="hidden" name="intent" value="create" />
             <AddressFields
@@ -338,7 +357,7 @@ export default async function AddressesPage({
               t={t}
               values={EMPTY_ADDRESS}
             />
-            <div className="flex min-h-10 items-center gap-2.5 font-body text-micro text-text-muted">
+            <div className="mb-5 flex min-h-10 items-center gap-2.5 font-body text-micro text-text-muted">
               <input
                 className="size-4.25 accent-signal-strong"
                 id="new-address-default"

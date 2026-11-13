@@ -23,6 +23,8 @@ interface AddressActionFormProps {
   submitLabel: string;
   submitClassName?: string;
   className?: string;
+  /** Asked before submitting; cancelling sends nothing. Needs JavaScript. */
+  confirmMessage?: string;
 }
 
 /**
@@ -39,6 +41,7 @@ export function AddressActionForm({
   submitLabel,
   submitClassName,
   className,
+  confirmMessage,
 }: AddressActionFormProps) {
   const t = useT();
   const [state, formAction, pending] = useActionState<
@@ -47,7 +50,15 @@ export function AddressActionForm({
   >(saveAddress, IDLE_ADDRESS_ACTION_STATE);
 
   return (
-    <form action={formAction} className={className}>
+    <form
+      action={formAction}
+      className={className}
+      onSubmit={(event) => {
+        if (confirmMessage !== undefined && !window.confirm(confirmMessage)) {
+          event.preventDefault();
+        }
+      }}
+    >
       {children}
       <button
         type="submit"
@@ -57,7 +68,7 @@ export function AddressActionForm({
         {submitLabel}
       </button>
       {state.message === null ? null : (
-        <p className="text-caption text-text-dark-muted" role="alert">
+        <p className="mt-2 text-caption text-text-muted" role="alert">
           {t(state.message)}
         </p>
       )}
