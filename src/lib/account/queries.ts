@@ -17,8 +17,8 @@ export const ACCOUNT_ORDER_LIMIT = 20;
 export const ACCOUNT_RECENT_ORDER_LIMIT = 5;
 export const ACCOUNT_ADDRESS_LIMIT = 10;
 export const ORDER_LINE_LIMIT = 50;
-/** Thumbnails an order row shows before "+N". */
-export const ORDER_PREVIEW_IMAGE_LIMIT = 3;
+/** An order row shows its first item's image and a "+N" count. */
+export const ORDER_PREVIEW_IMAGE_LIMIT = 1;
 export const ORDER_FULFILLMENT_LIMIT = 10;
 
 export const ACCOUNT_PROFILE_QUERY = gql(`#graphql

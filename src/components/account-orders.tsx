@@ -76,7 +76,8 @@ interface AccountOrderListProps {
 }
 
 /**
- * Order history as rows a shopper can scan: what was bought (thumbnails),
+ * Order history as rows a shopper can scan: what was bought (first item and a
+ * count of the rest),
  * when, whether it is paid and shipped, and the total. The whole row opens the
  * order.
  */
@@ -91,25 +92,18 @@ export function AccountOrderList({ orders, locale, t }: AccountOrderListProps) {
           <Link
             href={order.href}
             aria-label={t("account.viewOrder", { name: order.name })}
-            className="group grid grid-cols-[auto_1fr] items-center gap-x-5 gap-y-3 py-5 sm:grid-cols-[auto_1fr_auto] sm:gap-x-7"
+            className="group grid grid-cols-[4rem_1fr] items-center gap-x-5 gap-y-3 py-5 sm:grid-cols-[4rem_1fr_auto_8rem] sm:gap-x-7"
           >
-            <span className="flex">
-              {order.images.length === 0 ? (
-                <OrderThumbnail image={null} />
-              ) : (
-                order.images.map((image, index) => (
-                  <OrderThumbnail
-                    key={image.src}
-                    image={image}
-                    className={cn(
-                      index > 0 &&
-                        "-ml-6 shadow-[-4px_0_0_var(--color-canvas)]",
-                    )}
-                  />
-                ))
-              )}
+            {/* One fixed-width thumbnail per row keeps every column aligned. */}
+            <span className="relative row-span-2 sm:row-span-1">
+              <OrderThumbnail image={order.images[0] ?? null} />
+              {order.itemCount > 1 ? (
+                <span className="absolute -top-2 -right-2 grid min-w-6 place-items-center bg-ink px-1.5 py-0.5 font-body text-micro font-bold text-text-inverse">
+                  +{order.itemCount - 1}
+                </span>
+              ) : null}
             </span>
-            <span className="grid gap-1.5">
+            <span className="grid gap-1">
               <span className="font-heading text-card-title font-semibold group-hover:underline">
                 {order.name}
               </span>
@@ -117,12 +111,12 @@ export function AccountOrderList({ orders, locale, t }: AccountOrderListProps) {
                 {formatDate(order.processedAt.slice(0, 10), locale)} ·{" "}
                 {t("account.itemCount", { count: order.itemCount })}
               </span>
-              <span className="flex flex-wrap gap-1.5">
-                <StatusBadge status={order.payment} t={t} />
-                <StatusBadge status={order.status} t={t} />
-              </span>
             </span>
-            <span className="col-start-2 font-bold whitespace-nowrap after:ml-3 after:inline-block after:transition-transform after:duration-200 after:content-['→'] group-hover:after:translate-x-1 sm:col-start-auto">
+            <span className="col-start-2 flex flex-wrap gap-1.5 sm:col-start-auto sm:justify-end">
+              <StatusBadge status={order.payment} t={t} />
+              <StatusBadge status={order.status} t={t} />
+            </span>
+            <span className="col-start-2 font-bold whitespace-nowrap after:ml-3 after:inline-block after:transition-transform after:duration-200 after:content-['→'] group-hover:after:translate-x-1 sm:col-start-auto sm:text-right">
               {order.total}
             </span>
           </Link>
