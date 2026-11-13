@@ -1,9 +1,7 @@
-import type { WeaverseNextComponent } from "@weaverse/hydrogen/next";
+import type { WeaverseNextComponentLoaderArgs } from "@weaverse/hydrogen/next";
 import { getStorefront } from "@/lib/storefront/data-source";
 import type { JournalArticle } from "@/lib/storefront/types";
 import { loaderLocale } from "@/lib/weaverse/request-info";
-
-type LoaderArgs = Parameters<NonNullable<WeaverseNextComponent["loader"]>>[0];
 
 export interface RepairAndJournalLoaderData {
   article: JournalArticle | null;
@@ -19,7 +17,7 @@ export interface RepairAndJournalLoaderData {
  */
 export async function loader({
   context,
-}: LoaderArgs): Promise<RepairAndJournalLoaderData> {
+}: WeaverseNextComponentLoaderArgs): Promise<RepairAndJournalLoaderData> {
   const locale = loaderLocale(context);
   const articles = await getStorefront(locale).listArticles();
   return { article: articles[0] ?? null };

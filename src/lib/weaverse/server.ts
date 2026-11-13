@@ -8,13 +8,16 @@
  * reach into the other.
  *
  * Every read fails soft: an unconfigured project, a network failure, or a
- * missing page yields `null`, and the route answers 404. A page that exists
- * renders exactly as authored — an empty template renders empty.
+ * missing page yields `null`, and the route answers 404 — except in Studio's
+ * design mode, where a missing page loads as the SDK's empty fallback so the
+ * merchant can compose it. A page that exists renders exactly as authored — an
+ * empty template renders empty.
  */
 
 import "server-only";
 
 import type {
+  PageType,
   WeaverseNextLoaderData,
   WeaverseNextRequestContext,
 } from "@weaverse/hydrogen/next";
@@ -30,16 +33,16 @@ import { readWeaverseConfig } from "./env";
 import {
   buildRequestContext,
   type SearchParams,
-  type WeaversePageType,
+  toSearchParams,
 } from "./request-info";
 import { WEAVERSE_SERVER_COMPONENTS } from "./server-components";
 
-export type { SearchParams, WeaversePageType } from "./request-info";
+export type { SearchParams } from "./request-info";
 
 import { type ThemeSettings, themeSchema } from "./theme-schema";
 
 export interface LoadWeaversePageOptions {
-  type: WeaversePageType;
+  type: PageType;
   handle?: string;
   /**
    * The route's own path.
@@ -56,92 +59,16 @@ export interface LoadWeaversePageOptions {
 }
 
 /**
- * Builds the server client, or `null` when Weaverse is not configured.
+ * The one place the SDK server client is configured, or `null` when Weaverse
+ * is not configured.
  *
  * The environment handed to the SDK is the explicit object built by
  * `readWeaverseConfig`, never `process.env` — see the note in `./env.ts` for
  * why that distinction is load-bearing.
  */
-async function createServerClient(
-  pathname: string,
-  searchParams: SearchParams | undefined,
-  page?: { type: WeaversePageType; handle?: string },
-  locale: LocaleId = DEFAULT_LOCALE,
-): Promise<WeaverseNextServerClient | null> {
-  const config = readWeaverseConfig(process.env);
-  if (config === null) {
-    return null;
-  }
-
-  const headerList = await headers();
-
-  return createWeaverseNextServerClient({
-    components: WEAVERSE_SERVER_COMPONENTS,
-    env: config.sdkEnv,
-    projectId: config.projectId,
-    themeSchema,
-    ...(config.weaverseHost === undefined
-      ? {}
-      : { weaverseHost: config.weaverseHost }),
-    requestContext: buildRequestContext({
-      headers: new Headers(Object.fromEntries(headerList.entries())),
-      page,
-      pathname,
-      searchParams,
-      locale,
-    }),
-  });
-}
-
-/**
- * Loads one Weaverse page, or `null` when composition is unavailable.
- *
- * `null` is an ordinary outcome, not an error: the project may be
- * unconfigured, the Builder may hold no page for this route, or the fetch may
- * have failed. Routes answer it with `notFound()`.
- */
-export async function loadWeaversePage({
-  handle,
-  locale,
-  pathname,
-  searchParams,
-  type,
-}: LoadWeaversePageOptions): Promise<WeaverseNextLoaderData | null> {
-  try {
-    const client = await createServerClient(
-      pathname,
-      searchParams,
-      { handle, type },
-      locale,
-    );
-    if (client === null) {
-      return null;
-    }
-    const page = await client.loadPage({ handle, type });
-    if (page === null || page === undefined) {
-      return null;
-    }
-    /* The Builder answers with a placeholder page when a route has no real
-     * composition yet; that is "no page", not content to render. */
-    if (
-      typeof page.page?.id === "string" &&
-      page.page.id.includes("fallback")
-    ) {
-      return null;
-    }
-    return page;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Builds a client for the Studio revalidation handler, re-running the loader
- * with the live page's exact route identity.
- */
-export async function revalidateServerClient(
+function createClient(
   requestContext: WeaverseNextRequestContext,
-): Promise<WeaverseNextServerClient | null> {
+): WeaverseNextServerClient | null {
   const config = readWeaverseConfig(process.env);
   if (config === null) {
     return null;
@@ -156,6 +83,102 @@ export async function revalidateServerClient(
       : { weaverseHost: config.weaverseHost }),
     requestContext,
   });
+}
+
+/** Builds a client for the current request's route identity. */
+async function createServerClient(
+  pathname: string,
+  searchParams: SearchParams | string | undefined,
+  page?: { type: PageType; handle?: string },
+  locale: LocaleId = DEFAULT_LOCALE,
+): Promise<WeaverseNextServerClient | null> {
+  const headerList = await headers();
+  return createClient(
+    buildRequestContext({
+      headers: new Headers(Object.fromEntries(headerList.entries())),
+      page,
+      pathname,
+      searchParams,
+      locale,
+    }),
+  );
+}
+
+/**
+ * Loads one Weaverse page, or `null` when composition is unavailable.
+ *
+ * `null` is an ordinary outcome, not an error: the project may be
+ * unconfigured, the Builder may hold no page for this route, or the fetch may
+ * have failed. Routes answer it with `notFound()`.
+ */
+export function loadWeaversePage({
+  handle,
+  locale = DEFAULT_LOCALE,
+  pathname,
+  searchParams,
+  type,
+}: LoadWeaversePageOptions): Promise<WeaverseNextLoaderData | null> {
+  /* `cache()` matches arguments by identity, so the query travels as its
+   * serialized string: a route's page and `generateMetadata` then share one
+   * Builder call per request. */
+  return loadPageOnce(
+    type,
+    handle,
+    pathname,
+    toSearchParams(searchParams).toString(),
+    locale,
+  );
+}
+
+const loadPageOnce = cache(
+  async (
+    type: PageType,
+    handle: string | undefined,
+    pathname: string,
+    search: string,
+    locale: LocaleId,
+  ): Promise<WeaverseNextLoaderData | null> => {
+    try {
+      const client = await createServerClient(
+        pathname,
+        search,
+        { handle, type },
+        locale,
+      );
+      if (client === null) {
+        return null;
+      }
+      const page = await client.loadPage({ handle, type });
+      if (page === null || page === undefined) {
+        return null;
+      }
+      /* The SDK answers with a placeholder page when a route has no real
+       * composition yet. On the storefront that is "no page"; in Studio it is
+       * the empty canvas the merchant composes into, so it renders there.
+       * ponytail: id sniffing until the SDK exposes a fallback signal
+       * (Weaverse/weaverse#597). */
+      if (
+        page.configs?.isDesignMode !== true &&
+        typeof page.page?.id === "string" &&
+        page.page.id.includes("fallback")
+      ) {
+        return null;
+      }
+      return page;
+    } catch {
+      return null;
+    }
+  },
+);
+
+/**
+ * Builds a client for the Studio revalidation handler, re-running the loader
+ * with the live page's exact route identity.
+ */
+export async function revalidateServerClient(
+  requestContext: WeaverseNextRequestContext,
+): Promise<WeaverseNextServerClient | null> {
+  return createClient(requestContext);
 }
 
 /**
