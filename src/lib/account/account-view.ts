@@ -31,7 +31,6 @@ import {
   REFRESH_MARKER_VALUE,
   refreshHref,
 } from "./customer-account";
-import { ACCOUNT_MOCK, createMockCustomerAccountClient } from "./mock";
 import {
   ACCOUNT_ADDRESS_LIMIT,
   ACCOUNT_ORDER_LOOKUP_QUERY,
@@ -302,17 +301,6 @@ export async function readAccountSession(options: {
   if (runtime === null) {
     notFound();
   }
-  // TEMPORARY local review mock, removed before merge.
-  if (ACCOUNT_MOCK) {
-    return {
-      status: "authenticated",
-      accessToken: "mock",
-      locale: options.locale ?? DEFAULT_LOCALE,
-      client: createMockCustomerAccountClient(),
-      commitSession: async () => ({}),
-    };
-  }
-
   const requestHeaders = await headers();
   const requestContext = createShopifyRequestContext({
     request: {

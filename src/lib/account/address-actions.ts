@@ -22,7 +22,6 @@ import {
   performAddressAction,
 } from "./addresses";
 import { getCustomerAccountRuntime } from "./customer-account";
-import { ACCOUNT_MOCK } from "./mock";
 
 export async function saveAddress(
   _previous: AddressActionState,
@@ -56,12 +55,8 @@ export async function saveAddress(
   const result = await performAddressAction({
     session,
     requestHeaders,
-    // The configured origin, never a Host/Forwarded header. The TEMPORARY
-    // local review mock accepts the dev server's own origin instead.
-    origin:
-      ACCOUNT_MOCK && requestHeaders.get("origin") !== null
-        ? (requestHeaders.get("origin") ?? "")
-        : runtime.config.storefrontOrigin,
+    // The configured origin, never a Host/Forwarded header.
+    origin: runtime.config.storefrontOrigin,
     formData,
     locale,
   });
