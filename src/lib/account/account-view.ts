@@ -69,21 +69,24 @@ async function fetchReportingRejections(
       Array.isArray(body.errors)
         ? body.errors
         : [];
-    console.error("Customer Account API rejected a request", {
-      status: response.status,
-      requestId: response.headers.get("x-request-id"),
-      errors: errors.map(
-        (error: {
-          extensions?: { code?: unknown };
-          locations?: unknown;
-          path?: unknown;
-        }) => ({
-          code: error.extensions?.code,
-          locations: error.locations,
-          path: error.path,
-        }),
-      ),
-    });
+    console.error(
+      "Customer Account API rejected a request",
+      JSON.stringify({
+        status: response.status,
+        requestId: response.headers.get("x-request-id"),
+        errors: errors.map(
+          (error: {
+            extensions?: { code?: unknown };
+            locations?: unknown;
+            path?: unknown;
+          }) => ({
+            code: error.extensions?.code,
+            locations: error.locations,
+            path: error.path,
+          }),
+        ),
+      }),
+    );
   }
   return response;
 }
