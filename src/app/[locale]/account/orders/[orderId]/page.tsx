@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AccountAccessPanel } from "@/components/account-access";
+import { OrderThumbnail, StatusBadge } from "@/components/account-orders";
 import { AccountShell } from "@/components/account-shell";
 import { Link } from "@/components/link";
 import {
@@ -37,11 +38,24 @@ interface OrderPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-const CART_LINE_CLASS =
-  "grid grid-cols-line-item-compact gap-3.5 border-border-subtle border-b py-5.5 sm:grid-cols-line-item sm:gap-6";
-const ACCOUNT_BLOCK_CLASS = "min-h-70 border border-ink bg-transparent p-7";
+const ACCOUNT_BLOCK_CLASS = "border border-ink bg-transparent p-7";
 const SUMMARY_ROW_CLASS =
   "flex justify-between gap-5 border-border-subtle border-b py-2.5";
+const BACK_LINK_CLASS =
+  "mb-8 inline-flex min-h-touch items-center gap-2 font-body text-micro font-bold tracking-control text-text-muted uppercase before:text-copy before:transition-transform before:duration-200 before:content-['←'] hover:text-ink hover:before:-translate-x-1";
+
+function AddressLines({ lines }: { lines: readonly string[] }) {
+  return (
+    <address className="not-italic">
+      {lines.map((line) => (
+        <span key={line}>
+          {line}
+          <br />
+        </span>
+      ))}
+    </address>
+  );
+}
 
 /**
  * Order detail. A malformed order number, an order belonging to another
@@ -83,6 +97,8 @@ export default async function OrderPage({
     notFound();
   }
 
+  const placed = formatDate(order.processedAt.slice(0, 10), locale);
+
   return (
     <AccountShell
       activePath="/account/orders"
@@ -91,55 +107,144 @@ export default async function OrderPage({
       title={order.name}
       signedIn
       heroAside={
-        <div>
-          <span className="font-bold text-signal-strong">
-            {order.statusKey === null ? order.status : t(order.statusKey)}
-          </span>
-          <p className="m-0 max-w-full justify-self-start text-lede leading-lede text-text-dark-lede md:max-w-lede md:justify-self-end">
-            {t("account.placed", {
-              date: formatDate(order.processedAt.slice(0, 10), locale),
-            })}
+        <div className="grid gap-3 md:justify-items-end">
+          <div className="flex flex-wrap gap-1.5">
+            <StatusBadge status={order.payment} t={t} />
+            <StatusBadge status={order.status} t={t} />
+          </div>
+          <p className="m-0 text-lede leading-lede text-text-dark-lede">
+            {t("account.placed", { date: placed })}
           </p>
         </div>
       }
     >
-      <Link className={textLink()} href="/account/orders">
-        {t("account.backToOrders")}
-      </Link>
-
-      <div className="border-border-subtle border-t py-section-block-compact">
-        {order.lines.map((line) => (
-          <article key={line.id} className={CART_LINE_CLASS}>
-            <div>
-              <h2 className="m-0 mb-1 text-balance font-heading text-heading-3-fixed font-medium">
-                {line.title}
-              </h2>
-              <p className="text-text-muted">
-                {line.variantTitle === null ? "" : `${line.variantTitle} · `}
-                {t("account.quantity", { quantity: line.quantity })}
-              </p>
-            </div>
-            <div className="col-start-2 font-bold whitespace-nowrap sm:col-start-auto">
-              {line.total}
-            </div>
-          </article>
-        ))}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <Link className={BACK_LINK_CLASS} href="/account/orders">
+          {t("account.backToOrders")}
+        </Link>
+        {order.statusPageUrl === null ? null : (
+          <a
+            className={cn(textLink({ showBorder: false }), "mb-8")}
+            href={order.statusPageUrl}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {t("account.statusPage")}
+          </a>
+        )}
       </div>
 
-      <div className="mt-12.5 grid grid-cols-1 gap-3 py-section-block-compact sm:grid-cols-2">
+      <section className={ACCOUNT_BLOCK_CLASS} aria-labelledby="order-items">
+        <p id="order-items" className={eyebrow()}>
+          {t("account.items")}
+        </p>
+        <ul className="m-0 list-none p-0">
+          {order.lines.map((line) => (
+            <li
+              key={line.id}
+              className="grid grid-cols-[auto_1fr] items-center gap-x-5 gap-y-2 border-border-subtle border-b py-5 last:border-b-0 last:pb-0 sm:grid-cols-[auto_1fr_auto_auto] sm:gap-x-7"
+            >
+              <OrderThumbnail image={line.image} />
+              <div className="grid gap-1.5">
+                <h2 className="m-0 font-heading text-card-title font-semibold">
+                  {line.title}
+                </h2>
+                <div className="flex flex-wrap items-center gap-2 text-caption text-text-muted">
+                  {line.variantTitle === null ? null : (
+                    <span className="bg-surface-subtle px-2 py-0.5 text-ink">
+                      {line.variantTitle}
+                    </span>
+                  )}
+                  {line.sku === null ? null : (
+                    <span>{t("account.sku", { sku: line.sku })}</span>
+                  )}
+                </div>
+              </div>
+              <div className="col-start-2 text-caption text-text-muted whitespace-nowrap sm:col-start-auto sm:text-copy-sm">
+                {line.unitPrice === null
+                  ? t("account.quantity", { quantity: line.quantity })
+                  : t("account.unitPrice", {
+                      price: line.unitPrice,
+                      quantity: line.quantity,
+                    })}
+              </div>
+              <div className="col-start-2 font-bold whitespace-nowrap sm:col-start-auto sm:text-right">
+                {line.total}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {order.shipments.length === 0 ? null : (
+        <section
+          className={cn(ACCOUNT_BLOCK_CLASS, "mt-6")}
+          aria-labelledby="order-shipments"
+        >
+          <p id="order-shipments" className={eyebrow()}>
+            {t("account.shipments")}
+          </p>
+          <ul className="m-0 grid list-none gap-4 p-0">
+            {order.shipments.map((shipment) => (
+              <li
+                key={shipment.id}
+                className="flex flex-wrap items-center justify-between gap-3 border-border-subtle border-b pb-4 last:border-b-0 last:pb-0"
+              >
+                <div className="grid gap-1">
+                  <strong>
+                    {t("account.shippedOn", {
+                      date: formatDate(shipment.shippedAt.slice(0, 10), locale),
+                    })}
+                  </strong>
+                  {shipment.estimatedDeliveryAt === null ? null : (
+                    <span className="text-caption text-text-muted">
+                      {t("account.estimatedDelivery", {
+                        date: formatDate(
+                          shipment.estimatedDeliveryAt.slice(0, 10),
+                          locale,
+                        ),
+                      })}
+                    </span>
+                  )}
+                  {shipment.trackingNumber === null ? null : (
+                    <span className="text-caption text-text-muted">
+                      {[shipment.carrier, shipment.trackingNumber]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </span>
+                  )}
+                </div>
+                {shipment.trackingUrl === null ? null : (
+                  <a
+                    className={textLink({ showBorder: false })}
+                    href={shipment.trackingUrl}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    {t("account.trackShipment")}
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
         <article className={ACCOUNT_BLOCK_CLASS}>
           <p className={eyebrow()}>{t("account.deliveryAddress")}</p>
           {order.shippingAddress === null ? (
             <p className="text-text-muted">{t("account.noDeliveryAddress")}</p>
           ) : (
-            <address>
-              {order.shippingAddress.map((line) => (
-                <span key={line}>
-                  {line}
-                  <br />
-                </span>
-              ))}
-            </address>
+            <AddressLines lines={order.shippingAddress} />
+          )}
+          {order.billingAddress === null ? null : (
+            <>
+              <p className={cn(eyebrow(), "mt-7")}>
+                {t("account.billingAddress")}
+              </p>
+              <AddressLines lines={order.billingAddress} />
+            </>
           )}
         </article>
         <article className={ACCOUNT_BLOCK_CLASS}>
@@ -165,7 +270,7 @@ export default async function OrderPage({
           <div
             className={cn(
               SUMMARY_ROW_CLASS,
-              "py-5 font-heading text-heading-4",
+              "border-b-0 pt-5 pb-0 font-heading text-heading-4",
             )}
           >
             <span>{t("account.columns.total")}</span>

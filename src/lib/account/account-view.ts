@@ -24,6 +24,7 @@ import {
 import { SHOPIFY_I18N } from "@/lib/i18n/shopify-i18n";
 import type { TranslationKey } from "@/lib/i18n/static-content";
 import { formatMoney } from "@/lib/storefront/format";
+import { isShopifyProductImageUrl } from "@/lib/storefront/image-source";
 import {
   getCustomerAccountRuntime,
   REFRESH_MARKER_PARAM,
@@ -35,7 +36,9 @@ import {
   ACCOUNT_ORDER_LOOKUP_QUERY,
   ACCOUNT_ORDER_QUERY,
   ACCOUNT_PROFILE_QUERY,
+  ORDER_FULFILLMENT_LIMIT,
   ORDER_LINE_LIMIT,
+  ORDER_PREVIEW_IMAGE_LIMIT,
 } from "./queries";
 import { createCustomerAccountSessionManager } from "./session-manager";
 
@@ -54,15 +57,33 @@ export interface AccountMoney {
   currencyCode: string;
 }
 
+/** A status Shopify reports, with the theme's key when it has one. */
+export interface AccountStatus {
+  /** English label, the fallback for a status the theme has no key for. */
+  label: string;
+  key: TranslationKey | null;
+}
+
+/** An owned Shopify CDN image; anything else is dropped, never rendered. */
+export interface AccountImage {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+}
+
 export interface AccountOrderSummary {
   number: number;
   name: string;
   href: string;
   processedAt: string;
-  /** English label, the fallback for a status the theme has no key for. */
-  status: string;
-  statusKey: TranslationKey | null;
+  status: AccountStatus;
+  payment: AccountStatus;
   total: string;
+  /** Total quantity across the order's lines. */
+  itemCount: number;
+  /** Up to `ORDER_PREVIEW_IMAGE_LIMIT` line images. */
+  images: readonly AccountImage[];
 }
 
 export interface AccountAddress {
@@ -82,22 +103,38 @@ export interface AccountOrderLine {
   id: string;
   title: string;
   variantTitle: string | null;
+  sku: string | null;
+  image: AccountImage | null;
   quantity: number;
+  unitPrice: string | null;
   total: string;
+}
+
+export interface AccountShipment {
+  id: string;
+  shippedAt: string;
+  estimatedDeliveryAt: string | null;
+  carrier: string | null;
+  trackingNumber: string | null;
+  /** An https tracking page, or `null`. */
+  trackingUrl: string | null;
 }
 
 export interface AccountOrderDetail {
   name: string;
   processedAt: string;
-  /** English label, the fallback for a status the theme has no key for. */
-  status: string;
-  statusKey: TranslationKey | null;
+  status: AccountStatus;
+  payment: AccountStatus;
+  /** Shopify's order status page (https), or `null`. */
+  statusPageUrl: string | null;
   lines: readonly AccountOrderLine[];
+  shipments: readonly AccountShipment[];
   subtotal: string | null;
   shipping: string | null;
   tax: string | null;
   total: string;
   shippingAddress: readonly string[] | null;
+  billingAddress: readonly string[] | null;
 }
 
 export type AccountSession =
@@ -126,6 +163,77 @@ export function formatAccountMoney(
     return "—";
   }
   return formatMoney({ amount, currencyCode: money.currencyCode }, locale);
+}
+
+const PAYMENT_KEYS: Record<string, TranslationKey> = {
+  AUTHORIZED: "account.payment.authorized",
+  EXPIRED: "account.payment.expired",
+  PAID: "account.payment.paid",
+  PARTIALLY_PAID: "account.payment.partiallyPaid",
+  PARTIALLY_REFUNDED: "account.payment.partiallyRefunded",
+  PENDING: "account.payment.pending",
+  REFUNDED: "account.payment.refunded",
+  VOIDED: "account.payment.voided",
+};
+
+/** A payment status; an unknown or missing one is labelled from its value. */
+export function paymentStatus(value: string | null | undefined): AccountStatus {
+  return {
+    label: formatStatusLabel(value ?? "PENDING"),
+    key:
+      value !== null &&
+      value !== undefined &&
+      Object.hasOwn(PAYMENT_KEYS, value)
+        ? (PAYMENT_KEYS[value] ?? null)
+        : null,
+  };
+}
+
+/** A fulfillment status with its translation key. */
+export function fulfillmentStatus(
+  value: string | null | undefined,
+): AccountStatus {
+  return { label: formatStatusLabel(value), key: orderStatusKey(value) };
+}
+
+/** Keeps an image only when it is owned Shopify CDN media. */
+export function accountImage(
+  image:
+    | {
+        url: string;
+        altText?: string | null;
+        width?: number | null;
+        height?: number | null;
+      }
+    | null
+    | undefined,
+  fallbackAlt: string,
+): AccountImage | null {
+  if (
+    image === null ||
+    image === undefined ||
+    !isShopifyProductImageUrl(image.url)
+  ) {
+    return null;
+  }
+  return {
+    src: image.url,
+    alt: image.altText || fallbackAlt,
+    width: image.width ?? 1,
+    height: image.height ?? 1,
+  };
+}
+
+/** An https URL Shopify returned, or `null`. */
+function httpsUrl(value: string | null | undefined): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  try {
+    return new URL(value).protocol === "https:" ? value : null;
+  } catch {
+    return null;
+  }
 }
 
 const STATUS_KEYS: Record<string, TranslationKey> = {
@@ -193,7 +301,6 @@ export async function readAccountSession(options: {
   if (runtime === null) {
     notFound();
   }
-
   const requestHeaders = await headers();
   const requestContext = createShopifyRequestContext({
     request: {
@@ -247,7 +354,15 @@ function mapOrderSummary(
     number: number;
     processedAt: string;
     fulfillmentStatus: string;
+    financialStatus?: string | null;
     totalPrice: AccountMoney;
+    lineItemsSummary?: { totalQuantityOfLineItems: number } | null;
+    lineItems: {
+      nodes: readonly {
+        title: string;
+        image?: { url: string; altText?: string | null } | null;
+      }[];
+    };
   },
 ): AccountOrderSummary {
   return {
@@ -255,9 +370,14 @@ function mapOrderSummary(
     name: order.name,
     href: `/account/orders/${order.number}`,
     processedAt: order.processedAt,
-    status: formatStatusLabel(order.fulfillmentStatus),
-    statusKey: orderStatusKey(order.fulfillmentStatus),
+    status: fulfillmentStatus(order.fulfillmentStatus),
+    payment: paymentStatus(order.financialStatus),
     total: formatAccountMoney(order.totalPrice, locale),
+    itemCount: order.lineItemsSummary?.totalQuantityOfLineItems ?? 0,
+    images: order.lineItems.nodes.flatMap((line) => {
+      const image = accountImage(line.image, line.title);
+      return image === null ? [] : [image];
+    }),
   };
 }
 
@@ -268,7 +388,11 @@ export async function readAccountProfile(
 ): Promise<AccountProfile> {
   const result = await session.client.graphql(ACCOUNT_PROFILE_QUERY, {
     accessToken: session.accessToken,
-    variables: { orderCount, addressCount: ACCOUNT_ADDRESS_LIMIT },
+    variables: {
+      orderCount,
+      addressCount: ACCOUNT_ADDRESS_LIMIT,
+      previewCount: ORDER_PREVIEW_IMAGE_LIMIT,
+    },
   });
   if (result.errors !== undefined || result.data === null) {
     throw new CustomerAccountRequestError();
@@ -327,7 +451,11 @@ export async function readAccountOrder(
 
   const result = await session.client.graphql(ACCOUNT_ORDER_QUERY, {
     accessToken: session.accessToken,
-    variables: { orderId, lineCount: ORDER_LINE_LIMIT },
+    variables: {
+      orderId,
+      lineCount: ORDER_LINE_LIMIT,
+      fulfillmentCount: ORDER_FULFILLMENT_LIMIT,
+    },
   });
   if (result.errors !== undefined || result.data === null) {
     return null;
@@ -340,13 +468,28 @@ export async function readAccountOrder(
   return {
     name: order.name,
     processedAt: order.processedAt,
-    status: formatStatusLabel(order.fulfillmentStatus),
-    statusKey: orderStatusKey(order.fulfillmentStatus),
+    status: fulfillmentStatus(order.fulfillmentStatus),
+    payment: paymentStatus(order.financialStatus),
+    statusPageUrl: httpsUrl(order.statusPageUrl),
+    shipments: order.fulfillments.nodes.map((fulfillment) => ({
+      id: fulfillment.id,
+      shippedAt: fulfillment.createdAt,
+      estimatedDeliveryAt: fulfillment.estimatedDeliveryAt ?? null,
+      carrier: fulfillment.trackingInformation[0]?.company ?? null,
+      trackingNumber: fulfillment.trackingInformation[0]?.number ?? null,
+      trackingUrl: httpsUrl(fulfillment.trackingInformation[0]?.url),
+    })),
     lines: order.lineItems.nodes.map((line) => ({
       id: line.id,
       title: line.title,
       variantTitle: line.variantTitle ?? null,
+      sku: line.sku || null,
+      image: accountImage(line.image, line.title),
       quantity: line.quantity,
+      unitPrice:
+        line.price === null || line.price === undefined
+          ? null
+          : formatAccountMoney(line.price, session.locale),
       total:
         line.totalPrice === null || line.totalPrice === undefined
           ? "—"
@@ -361,5 +504,6 @@ export async function readAccountOrder(
       : null,
     total: formatAccountMoney(order.totalPrice, session.locale),
     shippingAddress: order.shippingAddress?.formatted ?? null,
+    billingAddress: order.billingAddress?.formatted ?? null,
   };
 }

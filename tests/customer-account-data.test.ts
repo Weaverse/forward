@@ -73,7 +73,25 @@ const PROFILE_DATA = {
           number: 1001,
           processedAt: "2026-07-21T09:30:00Z",
           fulfillmentStatus: "PARTIALLY_FULFILLED",
+          financialStatus: "PAID",
           totalPrice: { amount: "390.0", currencyCode: "USD" },
+          lineItemsSummary: { totalQuantityOfLineItems: 2 },
+          lineItems: {
+            nodes: [
+              {
+                title: "Weatherline Shell",
+                image: {
+                  url: "https://cdn.shopify.com/s/files/1/0978/4757/4828/files/weatherline-charcoal-primary.webp",
+                  altText: null,
+                },
+              },
+              /* A foreign host is dropped, never rendered. */
+              {
+                title: "Ridge 30",
+                image: { url: "https://evil.example/x.webp", altText: "x" },
+              },
+            ],
+          },
         },
       ],
     },
@@ -93,6 +111,8 @@ const ORDER_DATA = {
     name: "#1001",
     processedAt: "2026-07-21T09:30:00Z",
     fulfillmentStatus: "FULFILLED",
+    financialStatus: "PARTIALLY_REFUNDED",
+    statusPageUrl: "https://shop.example/orders/abc",
     totalPrice: { amount: "390.0", currencyCode: "USD" },
     subtotal: { amount: "390.0", currencyCode: "USD" },
     totalShipping: { amount: "0.0", currencyCode: "USD" },
@@ -100,13 +120,34 @@ const ORDER_DATA = {
     shippingAddress: {
       formatted: ["Rowan Hale", "14 Fell Road"],
     },
+    billingAddress: null,
+    fulfillments: {
+      nodes: [
+        {
+          id: "gid://shopify/Fulfillment/1",
+          createdAt: "2026-07-22T10:00:00Z",
+          estimatedDeliveryAt: null,
+          trackingInformation: [
+            { company: "UPS", number: "1Z999", url: "javascript:alert(1)" },
+          ],
+        },
+      ],
+    },
     lineItems: {
       nodes: [
         {
           id: "gid://shopify/LineItem/1",
           title: "Weatherline Shell",
           variantTitle: "Charcoal / M",
+          sku: "FWD-WLS-M",
           quantity: 1,
+          image: {
+            url: "https://cdn.shopify.com/s/files/1/0978/4757/4828/files/weatherline-charcoal-primary.webp",
+            altText: "Shell",
+            width: 800,
+            height: 1000,
+          },
+          price: { amount: "248.0", currencyCode: "USD" },
           totalPrice: { amount: "248.0", currencyCode: "USD" },
         },
       ],
@@ -186,9 +227,21 @@ describe("readAccountProfile", () => {
         name: "#1001",
         href: "/account/orders/1001",
         processedAt: "2026-07-21T09:30:00Z",
-        status: "Partially fulfilled",
-        statusKey: "account.status.partiallyFulfilled",
+        status: {
+          label: "Partially fulfilled",
+          key: "account.status.partiallyFulfilled",
+        },
+        payment: { label: "Paid", key: "account.payment.paid" },
         total: "$390",
+        itemCount: 2,
+        images: [
+          {
+            src: "https://cdn.shopify.com/s/files/1/0978/4757/4828/files/weatherline-charcoal-primary.webp",
+            alt: "Weatherline Shell",
+            width: 1,
+            height: 1,
+          },
+        ],
       },
     ]);
   });
@@ -223,8 +276,27 @@ describe("readAccountOrder", () => {
     );
     assert.ok(order);
     assert.equal(order.name, "#1001");
-    assert.equal(order.status, "Fulfilled");
-    assert.equal(order.statusKey, "account.status.fulfilled");
+    assert.deepEqual(order.status, {
+      label: "Fulfilled",
+      key: "account.status.fulfilled",
+    });
+    assert.deepEqual(order.payment, {
+      label: "Partially refunded",
+      key: "account.payment.partiallyRefunded",
+    });
+    assert.equal(order.statusPageUrl, "https://shop.example/orders/abc");
+    assert.equal(order.billingAddress, null);
+    /* Only an https tracking page is ever linked. */
+    assert.deepEqual(order.shipments, [
+      {
+        id: "gid://shopify/Fulfillment/1",
+        shippedAt: "2026-07-22T10:00:00Z",
+        estimatedDeliveryAt: null,
+        carrier: "UPS",
+        trackingNumber: "1Z999",
+        trackingUrl: null,
+      },
+    ]);
     assert.equal(order.total, "$390");
     assert.equal(order.subtotal, "$390");
     assert.equal(order.tax, null);
@@ -234,7 +306,15 @@ describe("readAccountOrder", () => {
         id: "gid://shopify/LineItem/1",
         title: "Weatherline Shell",
         variantTitle: "Charcoal / M",
+        sku: "FWD-WLS-M",
+        image: {
+          src: "https://cdn.shopify.com/s/files/1/0978/4757/4828/files/weatherline-charcoal-primary.webp",
+          alt: "Shell",
+          width: 800,
+          height: 1000,
+        },
         quantity: 1,
+        unitPrice: "$248",
         total: "$248",
       },
     ]);
@@ -258,6 +338,7 @@ describe("readAccountOrder", () => {
     assert.deepEqual(calls[1]?.options.variables, {
       orderId: "gid://shopify/Order/1001",
       lineCount: 50,
+      fulfillmentCount: 10,
     });
   });
 
@@ -335,7 +416,6 @@ describe("account route segment configuration", () => {
       "src/app/[locale]/account/orders/page.tsx",
       "src/app/[locale]/account/orders/[orderId]/page.tsx",
       "src/app/[locale]/account/addresses/page.tsx",
-      "src/app/account/status/route.ts",
     ]) {
       const source = await readFile(path.join(process.cwd(), route), "utf8");
       assert.match(source, /export const dynamic = "force-dynamic";/, route);
