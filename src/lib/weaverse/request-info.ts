@@ -1,4 +1,7 @@
-import type { WeaverseNextRequestContext } from "@weaverse/hydrogen/next";
+import type {
+  PageType,
+  WeaverseNextRequestContext,
+} from "@weaverse/hydrogen/next";
 
 import {
   DEFAULT_LOCALE,
@@ -8,18 +11,6 @@ import {
   localePathPrefix,
   localeTag,
 } from "@/lib/i18n/locales";
-
-/** Weaverse page roles this theme composes. See the contract in the spec. */
-export type WeaversePageType =
-  | "INDEX"
-  | "PRODUCT"
-  | "COLLECTION"
-  | "COLLECTION_LIST"
-  | "ALL_PRODUCTS"
-  | "BLOG"
-  | "ARTICLE"
-  | "PAGE"
-  | "CUSTOM";
 
 export type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -62,9 +53,13 @@ export function loaderLocale(context: unknown): LocaleId {
   );
 }
 
+/** A serialized query string passes through as-is. */
 export function toSearchParams(
-  input: SearchParams | undefined,
+  input: SearchParams | string | undefined,
 ): URLSearchParams {
+  if (typeof input === "string") {
+    return new URLSearchParams(input);
+  }
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(input ?? {})) {
     if (Array.isArray(value)) {
@@ -79,8 +74,8 @@ export function toSearchParams(
 export interface RequestContextInput {
   headers: Headers;
   pathname: string;
-  searchParams?: SearchParams;
-  page?: { type: WeaversePageType; handle?: string };
+  searchParams?: SearchParams | string;
+  page?: { type: PageType; handle?: string };
   /**
    * The request's market. `pathname` is the unprefixed route path; the SDK
    * puts `i18n.pathPrefix` on it, so Studio sees the URL the browser shows.

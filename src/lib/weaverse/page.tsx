@@ -36,7 +36,8 @@ export interface WeaversePageProps {
    * Resource-backed templates — product, collection, page, article — are
    * shared across every resource of their kind, so the one being rendered is
    * decided by the route rather than by a merchant's picker. This is how it
-   * reaches the sections.
+   * reaches the sections, and, under `current`, Studio's Data Connectors
+   * (`{{current.product.title}}`).
    */
   dataContext?: StorefrontDataContext;
 }
@@ -61,10 +62,15 @@ export function WeaversePage({
     requestContext: clientRequestContext(data),
   });
 
+  const storefrontData = dataContext ?? {};
+
   return (
     <WeaverseNextProvider client={client}>
-      <StorefrontDataProvider value={dataContext ?? {}}>
-        <WeaverseNextRenderer data={data} />
+      <StorefrontDataProvider value={storefrontData}>
+        <WeaverseNextRenderer
+          data={data}
+          dataContext={{ current: storefrontData }}
+        />
       </StorefrontDataProvider>
     </WeaverseNextProvider>
   );

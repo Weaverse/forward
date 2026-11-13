@@ -1,10 +1,8 @@
-import type { WeaverseNextComponent } from "@weaverse/hydrogen/next";
+import type { WeaverseNextComponentLoaderArgs } from "@weaverse/hydrogen/next";
 
 import type { Product } from "@/lib/storefront/types";
 import { loaderLocale } from "@/lib/weaverse/request-info";
 import { resolveProduct } from "@/lib/weaverse/resource";
-
-type LoaderArgs = Parameters<NonNullable<WeaverseNextComponent["loader"]>>[0];
 
 export type ProductSpotlightLoaderData = { product: Product } | null;
 
@@ -19,7 +17,7 @@ export type ProductSpotlightLoaderData = { product: Product } | null;
 export async function loader({
   data,
   context,
-}: LoaderArgs): Promise<ProductSpotlightLoaderData> {
+}: WeaverseNextComponentLoaderArgs): Promise<ProductSpotlightLoaderData> {
   const locale = loaderLocale(context);
   const product = await resolveProduct(
     (data as { product?: unknown } | undefined)?.product,
