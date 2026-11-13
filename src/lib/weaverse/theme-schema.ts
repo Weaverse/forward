@@ -47,7 +47,7 @@ function shopLocale(locale: LocaleId): WeaverseNextI18n {
 export const themeSchema: WeaverseNextThemeSchema = {
   info: {
     name: "Forward",
-    version: "1.0.0",
+    version: process.env.THEME_VERSION ?? "0.0.0",
   },
   settings: [
     layoutSettings,
