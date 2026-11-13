@@ -48,7 +48,7 @@ export function AccountAccessPanel({
         )}
       </p>
       {loginFailed ? (
-        <p className="text-caption text-text-dark-muted">
+        <p className="text-caption text-text-muted">
           {t("account.access.loginFailed")}
         </p>
       ) : null}

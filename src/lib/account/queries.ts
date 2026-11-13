@@ -17,9 +17,16 @@ export const ACCOUNT_ORDER_LIMIT = 20;
 export const ACCOUNT_RECENT_ORDER_LIMIT = 5;
 export const ACCOUNT_ADDRESS_LIMIT = 10;
 export const ORDER_LINE_LIMIT = 50;
+/** An order row shows its first item's image and a "+N" count. */
+export const ORDER_PREVIEW_IMAGE_LIMIT = 1;
+export const ORDER_FULFILLMENT_LIMIT = 10;
 
 export const ACCOUNT_PROFILE_QUERY = gql(`#graphql
-  query ForwardAccountProfile($orderCount: Int!, $addressCount: Int!) {
+  query ForwardAccountProfile(
+    $orderCount: Int!
+    $addressCount: Int!
+    $previewCount: Int!
+  ) {
     customer {
       displayName
       emailAddress {
@@ -41,9 +48,22 @@ export const ACCOUNT_PROFILE_QUERY = gql(`#graphql
           number
           processedAt
           fulfillmentStatus
+          financialStatus
           totalPrice {
             amount
             currencyCode
+          }
+          lineItemsSummary {
+            totalQuantityOfLineItems
+          }
+          lineItems(first: $previewCount) {
+            nodes {
+              title
+              image {
+                url
+                altText
+              }
+            }
           }
         }
       }
@@ -139,11 +159,17 @@ export const ACCOUNT_ORDER_LOOKUP_QUERY = gql(`#graphql
 `);
 
 export const ACCOUNT_ORDER_QUERY = gql(`#graphql
-  query ForwardAccountOrder($orderId: ID!, $lineCount: Int!) {
+  query ForwardAccountOrder(
+    $orderId: ID!
+    $lineCount: Int!
+    $fulfillmentCount: Int!
+  ) {
     order(id: $orderId) {
       name
       processedAt
       fulfillmentStatus
+      financialStatus
+      statusPageUrl
       totalPrice {
         amount
         currencyCode
@@ -163,12 +189,38 @@ export const ACCOUNT_ORDER_QUERY = gql(`#graphql
       shippingAddress {
         formatted(withName: true)
       }
+      billingAddress {
+        formatted(withName: true)
+      }
+      fulfillments(first: $fulfillmentCount) {
+        nodes {
+          id
+          createdAt
+          estimatedDeliveryAt
+          trackingInformation {
+            company
+            number
+            url
+          }
+        }
+      }
       lineItems(first: $lineCount) {
         nodes {
           id
           title
           variantTitle
+          sku
           quantity
+          image {
+            url
+            altText
+            width
+            height
+          }
+          price {
+            amount
+            currencyCode
+          }
           totalPrice {
             amount
             currencyCode

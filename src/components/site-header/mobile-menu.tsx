@@ -73,7 +73,6 @@ function MobileFieldIndex({
 }
 
 interface MobileMenuProps {
-  accountSignedIn: boolean;
   collections: readonly FieldIndexCollection[] | null;
   id: string;
   onClose: () => void;
@@ -89,7 +88,6 @@ interface MobileMenuProps {
  * rather than being toggled around a permanently mounted panel.
  */
 export function MobileMenu({
-  accountSignedIn,
   collections,
   id,
   onClose,
@@ -222,7 +220,7 @@ export function MobileMenu({
             <span className="font-body text-nano text-text-dark-muted">
               {String(index + 4).padStart(2, "0")}
             </span>
-            {navigationLabel(item, accountSignedIn, t)}
+            {navigationLabel(item, t)}
             <i
               className="font-body text-nano text-text-dark-muted not-italic"
               aria-hidden="true"

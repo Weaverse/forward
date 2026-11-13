@@ -10,7 +10,7 @@
 import assert from "node:assert/strict";
 import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, it } from "vite-plus/test";
+import { describe, it } from "vite-plus/test";
 
 import { ICON_PATHS } from "@/components/icon";
 import { FieldIndexHeader } from "@/components/site-header/field-index-header";
@@ -18,10 +18,8 @@ import { fieldIndexCollections } from "@/components/site-header/header-navigatio
 import type { NavItem } from "@/lib/storefront/types";
 import { COLLECTION_FIXTURES } from "../fixtures/storefront/collections";
 import {
-  type AccountStatusStub,
   PRIMARY_NAV,
   renderWithCart,
-  stubAccountStatus,
   UTILITY_NAV_NO_ACCOUNT,
   UTILITY_NAV_WITH_ACCOUNT,
   visibleText,
@@ -44,19 +42,11 @@ const ABOUT_CHILDREN = [
   { label: "Contact", href: "/pages/contact" },
 ] as const;
 
-let account: AccountStatusStub | null = null;
-
-afterEach(() => {
-  account?.restore();
-  account = null;
-});
-
 interface MountOptions {
   overrides?: Record<string, unknown>;
   pathname?: string;
   primary?: readonly NavItem[];
   queryString?: string;
-  signedIn?: boolean | null;
   withAccount?: boolean;
 }
 
@@ -67,11 +57,9 @@ function mountHeader({
   pathname = "/",
   primary = PRIMARY_NAV,
   queryString = "",
-  signedIn = false,
   withAccount = true,
 }: MountOptions = {}) {
   setRoute(pathname, queryString);
-  account = stubAccountStatus(signedIn);
   return renderWithCart(
     <FieldIndexHeader
       collections={COLLECTION_FIXTURES}
@@ -133,29 +121,18 @@ describe("header shell", () => {
     );
   });
 
-  it("drops the Account affordance and session probe when accounts are disabled", () => {
+  it("drops the Account affordance when accounts are disabled", () => {
     mountHeader({ withAccount: false });
 
     assert.equal(screen.queryByRole("link", { name: /^Account/ }), null);
-    assert.deepEqual(account?.calls, []);
     for (const link of screen.getAllByRole("link")) {
       assert.notEqual(link.getAttribute("href"), "/account");
     }
   });
 
-  it("labels the account control from the boolean no-store session probe", async () => {
-    mountHeader({ signedIn: true });
+  it("labels the account control Account without probing the session", () => {
+    mountHeader();
 
-    await screen.findByRole("link", { name: /^Signed in/ });
-    assert.deepEqual(account?.calls, [
-      { url: "/account/status", cache: "no-store" },
-    ]);
-  });
-
-  it("keeps the plain label when the session probe fails", async () => {
-    mountHeader({ signedIn: null });
-
-    await Promise.resolve();
     assert.ok(screen.getByRole("link", { name: /^Account/ }));
   });
 

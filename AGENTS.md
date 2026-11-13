@@ -207,6 +207,9 @@ from scaffolded copies).
   installed, the next three resolve only because the installer hoists the SDK's
   own dependencies, and the last is the React Router adapter (Oxlint enforces
   this).
+- To preview the account pages locally without signing in, follow
+  `.guides/cookbooks/customer-account-local-mock.md`. The mock bypasses
+  authentication: remove it before committing.
 
 ## Required verification
 

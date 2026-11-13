@@ -4,6 +4,7 @@ import { Archivo, IBM_Plex_Mono, Manrope } from "next/font/google";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { NavigationProgress } from "@/components/navigation-progress";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header/site-header";
 import { ShopifyCartRuntime } from "@/lib/cart/shopify-cart-react";
@@ -114,6 +115,7 @@ export default async function RootLayout({
             theme={themeResponse?.theme}
           >
             <ShopifyCartRuntime>
+              <NavigationProgress />
               <a
                 className="fixed top-2.5 left-2.5 z-1000 -translate-y-3/2 bg-ink px-4 py-2.75 text-text-inverse focus:translate-y-0"
                 data-shell-background

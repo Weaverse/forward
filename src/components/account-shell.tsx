@@ -4,13 +4,17 @@ import { Link } from "@/components/link";
 import { CUSTOMER_ACCOUNT_LOGOUT_PATH } from "@/lib/account/customer-account";
 import { cn } from "@/lib/cn";
 import type { ThemeTranslate, TranslationKey } from "@/lib/i18n/static-content";
-import { eyebrow as eyebrowClass, textLink } from "@/lib/presentation/variants";
+import { eyebrow as eyebrowClass } from "@/lib/presentation/variants";
 
 const ACCOUNT_NAV: readonly { href: string; labelKey: TranslationKey }[] = [
   { href: "/account", labelKey: "account.nav.overview" },
   { href: "/account/orders", labelKey: "account.nav.orders" },
   { href: "/account/addresses", labelKey: "account.nav.addresses" },
 ];
+
+/* One row style for every account page in the rail. */
+const NAV_ITEM_CLASS =
+  "flex min-h-12.5 min-w-30 items-center border-border-subtle border-b pr-5 text-micro font-bold uppercase md:min-w-auto md:pr-0";
 
 interface AccountShellProps {
   /** Current canonical path, used to mark the active nav item. */
@@ -78,18 +82,24 @@ export function AccountShell({
                 key={item.href}
                 href={item.href}
                 aria-current={selected ? "page" : undefined}
-                className={cn(
-                  "flex min-h-12.5 min-w-30 items-center border-border-subtle border-b pr-5 text-micro font-bold uppercase md:min-w-auto md:pr-0",
-                  selected && "text-signal-strong",
-                )}
+                className={cn(NAV_ITEM_CLASS, selected && "text-signal-strong")}
               >
                 {t(item.labelKey)}
               </Link>
             );
           })}
           {signedIn ? (
-            <form method="post" action={CUSTOMER_ACCOUNT_LOGOUT_PATH}>
-              <button type="submit" className={textLink()}>
+            <form
+              method="post"
+              action={CUSTOMER_ACCOUNT_LOGOUT_PATH}
+              className="flex shrink-0 items-center pl-5 md:block md:pt-8 md:pl-0"
+            >
+              {/* A bordered button, apart from the list, so it reads as an
+               * action rather than another account page. */}
+              <button
+                type="submit"
+                className="inline-flex min-h-10 cursor-pointer items-center gap-2 border border-ink px-4 font-body text-micro font-bold tracking-control whitespace-nowrap uppercase after:content-['↗'] hover:bg-ink hover:text-text-inverse focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-ink"
+              >
                 {t("account.signOut")}
               </button>
             </form>
