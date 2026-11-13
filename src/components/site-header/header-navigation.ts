@@ -176,16 +176,10 @@ export function fieldIndexCollections(
 }
 
 /**
- * Account entry reports session state, a theme destination reads its key, and
- * a merchant's menu item keeps its own label.
+ * A theme destination reads its key, and a merchant's menu item keeps its own
+ * label. The account entry always reads "Account": the page itself says
+ * whether the shopper is signed in.
  */
-export function navigationLabel(
-  item: ThemeNavItem,
-  signedIn: boolean,
-  t: ThemeTranslate,
-): string {
-  if (item.href === "/account" && signedIn) {
-    return t("header.signedIn");
-  }
+export function navigationLabel(item: ThemeNavItem, t: ThemeTranslate): string {
   return item.labelKey === undefined ? item.label : t(item.labelKey);
 }

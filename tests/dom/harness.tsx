@@ -2,7 +2,7 @@
  * Shared helpers for the Happy DOM behavior suite.
  *
  * These deliberately stay small: the doubles here replace only the runtime a
- * Next server would provide (routing, images, `/account/status`), never the
+ * Next server would provide (routing, images), never the
  * component under test. Nothing in this file may import
  * `src/lib/storefront/data-source.ts` — that module reads the server-only
  * environment boundary, which refuses to run once `document` exists.
@@ -119,40 +119,6 @@ export function productByHandle(handle: string): Product {
     throw new Error(`missing product fixture: ${handle}`);
   }
   return product;
-}
-
-export interface AccountStatusStub {
-  calls: { url: string; cache: string | undefined }[];
-  restore: () => void;
-}
-
-/**
- * Answers the header's boolean-only `/account/status` probe. Every other
- * request fails loudly so a test can never pass on an unnoticed network call.
- */
-export function stubAccountStatus(signedIn: boolean | null): AccountStatusStub {
-  const calls: AccountStatusStub["calls"] = [];
-  const original = globalThis.fetch;
-  globalThis.fetch = (async (
-    input: RequestInfo | URL,
-    init?: RequestInit,
-  ): Promise<Response> => {
-    const url = String(input);
-    calls.push({ url, cache: init?.cache });
-    if (!url.includes("/account/status")) {
-      throw new Error(`unexpected fetch in a DOM test: ${url}`);
-    }
-    if (signedIn === null) {
-      return new Response("", { status: 503 });
-    }
-    return Response.json({ signedIn });
-  }) as typeof globalThis.fetch;
-  return {
-    calls,
-    restore: () => {
-      globalThis.fetch = original;
-    },
-  };
 }
 
 /** Text content of an element with runs collapsed to single spaces. */

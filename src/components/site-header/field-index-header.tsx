@@ -71,7 +71,6 @@ export function FieldIndexHeader({
   const [desktopOpen, setDesktopOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [accountSignedIn, setAccountSignedIn] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeIndex, setActiveIndex] = useState(() =>
     activeCollectionIndex(pathname, collections ?? []),
@@ -91,9 +90,6 @@ export function FieldIndexHeader({
     (item) => item !== shopItem && item.href !== "/search",
   );
   const utilityLinks = utility.filter((item) => item.href !== "/cart");
-  const accountAvailable = utilityLinks.some(
-    (item) => item.href === "/account",
-  );
   /* Only Home leads with a full-bleed dark hero, so it is the one route whose
    * content is drawn behind the header and can carry a transparent bar. */
   const overlay = pathname === "/";
@@ -110,31 +106,6 @@ export function FieldIndexHeader({
     window.addEventListener("scroll", readScroll, { passive: true });
     return () => window.removeEventListener("scroll", readScroll);
   }, [overlay]);
-
-  useEffect(() => {
-    if (!accountAvailable) {
-      setAccountSignedIn(false);
-      return;
-    }
-    const controller = new AbortController();
-    fetch("/account/status", {
-      cache: "no-store",
-      signal: controller.signal,
-    })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((status: unknown) => {
-        if (
-          typeof status === "object" &&
-          status !== null &&
-          "signedIn" in status &&
-          typeof status.signedIn === "boolean"
-        ) {
-          setAccountSignedIn(status.signedIn);
-        }
-      })
-      .catch(() => undefined);
-    return () => controller.abort();
-  }, [accountAvailable]);
 
   useEffect(() => {
     if (mobileOpenRef.current) {
@@ -360,7 +331,7 @@ export function FieldIndexHeader({
                 }
               >
                 {icon === undefined ? null : <Icon name={icon} />}
-                <span>{navigationLabel(item, accountSignedIn, t)}</span>
+                <span>{navigationLabel(item, t)}</span>
               </Link>
             );
           })}
@@ -409,7 +380,6 @@ export function FieldIndexHeader({
       </header>
       {mobileOpen ? (
         <MobileMenu
-          accountSignedIn={accountSignedIn}
           collections={collections}
           id={mobilePanelId}
           onClose={closeMobile}

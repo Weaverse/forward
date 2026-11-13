@@ -66,27 +66,6 @@ test.describe("route health", () => {
 });
 
 test.describe("account state probe", () => {
-  test("answers the mode-appropriate uncacheable session boundary", async ({
-    request,
-  }) => {
-    const response = await request.get("/account/status");
-    if (!ACCOUNT_ENABLED) {
-      expect(response.status()).toBe(404);
-      return;
-    }
-
-    expect(response.status()).toBe(200);
-    expect(response.headers()["cache-control"]).toContain("private");
-    expect(response.headers()["cache-control"]).toContain("no-store");
-    expect(response.headers()["cdn-cache-control"]).toBeUndefined();
-    expect(response.headers()["surrogate-control"]).toBeUndefined();
-
-    const body = (await response.json()) as Record<string, unknown>;
-    expect(Object.keys(body)).toEqual(["signedIn"]);
-    expect(typeof body.signedIn).toBe("boolean");
-    expect(body.signedIn).toBe(false);
-  });
-
   test("matches the deployment's configured account mode", async ({ page }) => {
     await gotoReady(page, "/");
     const links = page.locator('a[href="/account"]');

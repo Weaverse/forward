@@ -49,7 +49,6 @@ const CUSTOMER_ACCOUNT_PROTOCOL_METHODS = new Map<string, string>([
   [CUSTOMER_ACCOUNT_REFRESH_PATH, "GET"],
   [CUSTOMER_ACCOUNT_LOGOUT_PATH, "POST"],
 ]);
-const ACCOUNT_STATUS_PATH = "/account/status";
 const LOCALE_REWRITE_HEADER = "x-forward-locale-rewrite";
 const ACCOUNT_PRIVATE_NO_STORE =
   "private, no-store, max-age=0, must-revalidate";
@@ -193,11 +192,11 @@ function personalizedAccountPageResponse(
     locale: localeI18n(route.locale),
   });
   requestContext.markResponseAsPersonalized("customer-account-page");
-  /* `/account/status` is a root route handler, never a localized page. */
-  const response =
-    route.path === ACCOUNT_STATUS_PATH && route.kind === "rewrite"
-      ? NextResponse.next()
-      : rememberLocale(request, routeResponse(request, route), route.locale);
+  const response = rememberLocale(
+    request,
+    routeResponse(request, route),
+    route.locale,
+  );
   requestContext.applyResponseHeaders(response.headers);
   applyContentSecurityPolicy(request, response.headers);
   return response;
@@ -313,7 +312,7 @@ export async function proxy(request: NextRequest): Promise<Response> {
 /**
  * Every page path. Build assets, route handlers under `/api`, and files with an
  * extension (`robots.txt`, `sitemap.xml`, `icon.svg`, images) never pass
- * through; `/account/status` does, so the account boundary still guards it.
+ * through.
  */
 export const config = {
   matcher: ["/((?!_next/|api/|.*\\.[^/]+$).*)"],
