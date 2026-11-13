@@ -42,6 +42,52 @@ import {
 } from "./queries";
 import { createCustomerAccountSessionManager } from "./session-manager";
 
+/**
+ * Hydrogen discards the body of a rejected Customer Account request, so a
+ * 4xx would surface as a bare status. Log only the error codes and the
+ * line:column each points at in the query: enough to name the failing field,
+ * and never a provider message or customer data.
+ */
+async function fetchReportingRejections(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+): Promise<Response> {
+  const response = await fetch(input, init);
+  if (
+    response.status >= 400 &&
+    response.status < 500 &&
+    response.status !== 401
+  ) {
+    const body: unknown = await response
+      .clone()
+      .json()
+      .catch(() => null);
+    const errors =
+      body !== null &&
+      typeof body === "object" &&
+      "errors" in body &&
+      Array.isArray(body.errors)
+        ? body.errors
+        : [];
+    console.error("Customer Account API rejected a request", {
+      status: response.status,
+      requestId: response.headers.get("x-request-id"),
+      errors: errors.map(
+        (error: {
+          extensions?: { code?: unknown };
+          locations?: unknown;
+          path?: unknown;
+        }) => ({
+          code: error.extensions?.code,
+          locations: error.locations,
+          path: error.path,
+        }),
+      ),
+    });
+  }
+  return response;
+}
+
 const ORDER_NUMBER_PATTERN = /^\d+$/;
 
 /** Generic account failure. Carries no provider, GraphQL, or session detail. */
@@ -329,6 +375,7 @@ export async function readAccountSession(options: {
       client: createCustomerAccountClient({
         shopId: runtime.config.shopId,
         requestContext,
+        fetch: fetchReportingRejections,
       }),
       commitSession: () => sessionManager.commit(),
     };
