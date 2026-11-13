@@ -24,4 +24,4 @@
 
 ## Summary
 
-Brings Forward's account routes closer to Shopify's own order view (product images, variants, SKUs, payment and fulfillment status, tracking), tidies the account navigation, back link and address cards, asks before deleting an address, and adds a top progress bar for client-side page navigation. A temporary, dev-only mock (`FORWARD_ACCOUNT_MOCK=1`) lets the pages be reviewed without signing in; it is removed before merge.
+Brings Forward's account routes closer to Shopify's own order view (product images, variants, SKUs, payment and fulfillment status, tracking), tidies the account navigation, back link and address cards, asks before deleting an address, and adds a top progress bar for client-side page navigation. Local review uses a dev-only mock (`FORWARD_ACCOUNT_MOCK=1`), which is not committed: `.guides/cookbooks/customer-account-local-mock.md` describes how to add and remove it.

@@ -10,12 +10,13 @@
 4. **Back link**: small "← Orders" link instead of the full-width text link.
 5. **Addresses**: cards with a gap between them, compact text actions, the add-address card in the same grid, and a `confirm()` before delete (the form still posts without JavaScript).
 6. **Navigation progress**: `NavigationProgress` in the locale layout. The theme `Link` starts it from `onNavigate` when the target path or query differs; it completes when the pathname or search params change, with a 10s safety stop.
-7. **Mock (temporary)**: `src/lib/account/mock.ts`, enabled only when `NODE_ENV !== "production"` and `FORWARD_ACCOUNT_MOCK=1`. Hooks in `proxy.ts`, `readAccountSession`, the profile, order and address reads, and the address action. Removed before merge.
+7. **Local mock**: not committed. `.guides/cookbooks/customer-account-local-mock.md` adds `src/lib/account/mock.ts` (enabled only when `NODE_ENV !== "production"` and `FORWARD_ACCOUNT_MOCK=1`) with hooks in `readAccountSession` and `saveAddress`, and lists the removal steps. The root `AGENTS.md` points to it.
 
 ## Files
 
 - `src/components/site-header/{field-index-header,mobile-menu,header-navigation}.ts(x)`, `src/app/account/status/route.ts` (deleted), `src/proxy.ts`
 - `src/components/account-shell.tsx`, `src/components/account-orders.tsx` (new), `src/components/navigation-progress.tsx` (new), `src/components/link.tsx`
 - `src/app/[locale]/layout.tsx`, `src/app/[locale]/account/**`
-- `src/lib/account/{queries,account-view,addresses,address-actions,mock}.ts`
+- `src/lib/account/{queries,account-view}.ts`
+- `.guides/cookbooks/customer-account-local-mock.md` (new), `AGENTS.md`
 - `src/translations/*.json`, tests touching the removed route
