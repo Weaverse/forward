@@ -22,7 +22,6 @@ import type {
   WeaverseNextRequestContext,
 } from "@weaverse/hydrogen/next";
 import type {
-  WeaverseNextCustomPageEntry,
   WeaverseNextServerClient,
   WeaverseNextThemeSettingsResponse,
 } from "@weaverse/hydrogen/next/server";
@@ -194,24 +193,6 @@ export async function readThemeSettings(
    * defaults. There is no `themeSettings` key on the response. */
   const response = await loadWeaverseThemeSettings(locale);
   return (response?.theme ?? {}) as Partial<ThemeSettings>;
-}
-
-/**
- * The project's custom pages, for the sitemap; empty when Weaverse is not
- * configured or the list cannot be read.
- *
- * The public endpoint lists page assignments, not publication state, so an
- * entry here is not proof the page is published (pending the API contract,
- * Weaverse/docs#151).
- */
-export async function fetchWeaverseCustomPages(): Promise<
-  WeaverseNextCustomPageEntry[]
-> {
-  try {
-    return (await createClient({ pathname: "/" })?.fetchCustomPages()) ?? [];
-  } catch {
-    return [];
-  }
 }
 
 /** The configured project id, or `null` when Weaverse is not configured. */
