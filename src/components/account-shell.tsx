@@ -4,13 +4,18 @@ import { Link } from "@/components/link";
 import { CUSTOMER_ACCOUNT_LOGOUT_PATH } from "@/lib/account/customer-account";
 import { cn } from "@/lib/cn";
 import type { ThemeTranslate, TranslationKey } from "@/lib/i18n/static-content";
-import { eyebrow as eyebrowClass, textLink } from "@/lib/presentation/variants";
+import { eyebrow as eyebrowClass } from "@/lib/presentation/variants";
 
 const ACCOUNT_NAV: readonly { href: string; labelKey: TranslationKey }[] = [
   { href: "/account", labelKey: "account.nav.overview" },
   { href: "/account/orders", labelKey: "account.nav.orders" },
   { href: "/account/addresses", labelKey: "account.nav.addresses" },
 ];
+
+/* One row style for every nav entry, sign-out included, so the rail reads as a
+ * single list. */
+const NAV_ITEM_CLASS =
+  "flex min-h-12.5 min-w-30 items-center border-border-subtle border-b pr-5 text-micro font-bold uppercase md:w-full md:min-w-auto md:pr-0";
 
 interface AccountShellProps {
   /** Current canonical path, used to mark the active nav item. */
@@ -78,10 +83,7 @@ export function AccountShell({
                 key={item.href}
                 href={item.href}
                 aria-current={selected ? "page" : undefined}
-                className={cn(
-                  "flex min-h-12.5 min-w-30 items-center border-border-subtle border-b pr-5 text-micro font-bold uppercase md:min-w-auto md:pr-0",
-                  selected && "text-signal-strong",
-                )}
+                className={cn(NAV_ITEM_CLASS, selected && "text-signal-strong")}
               >
                 {t(item.labelKey)}
               </Link>
@@ -89,7 +91,13 @@ export function AccountShell({
           })}
           {signedIn ? (
             <form method="post" action={CUSTOMER_ACCOUNT_LOGOUT_PATH}>
-              <button type="submit" className={textLink()}>
+              <button
+                type="submit"
+                className={cn(
+                  NAV_ITEM_CLASS,
+                  "cursor-pointer text-text-muted hover:text-ink",
+                )}
+              >
                 {t("account.signOut")}
               </button>
             </form>
