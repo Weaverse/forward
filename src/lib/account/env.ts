@@ -36,7 +36,10 @@ export const MIN_SESSION_SECRET_BYTES = 32;
 export interface CustomerAccountConfig {
   /** Numeric Shopify shop ID, e.g. `97847574828`. */
   shopId: string;
-  /** Headless Customer Account API client ID. */
+  /**
+   * Customer Account API client ID from the store's Headless or Hydrogen
+   * storefront, with no whitespace.
+   */
   clientId: string;
   /** Caller-owned session encryption secret. Never leaves the server. */
   sessionSecret: string;
@@ -159,7 +162,7 @@ export function readCustomerAccountConfig(
   }
   if (WHITESPACE_PATTERN.test(clientId)) {
     throw new ShopifyConfigurationError(
-      `${CUSTOMER_ACCOUNT_CLIENT_ID_ENV_KEY} must be the authoritative Headless client ID with no whitespace.`,
+      `${CUSTOMER_ACCOUNT_CLIENT_ID_ENV_KEY} must be the Customer Account API client ID from your store's Headless or Hydrogen storefront, with no whitespace.`,
     );
   }
   if (
