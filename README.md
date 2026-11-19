@@ -20,7 +20,7 @@ Forward runs against a real Shopify store. There is no static demo mode or fallb
 
 - **Node.js 22.18 or later.**
 - **[Bun](https://bun.sh)** for dependencies and scripts. Use the version pinned in `package.json`.
-- **A Shopify store** with the [Headless sales channel](https://apps.shopify.com/headless), Storefront API access and products published to that storefront.
+- **A Shopify store** with Storefront API access and products published to your storefront. Use the [Headless sales channel](https://apps.shopify.com/headless) or, on a paid Shopify plan, the [Hydrogen sales channel](https://apps.shopify.com/hydrogen).
 - **A Weaverse project created from Forward** in the Weaverse app for your Shopify store.
 
 ## Getting started
@@ -38,6 +38,23 @@ The CLI downloads the theme, writes your project ID to `.env` and installs depen
 
 ### 2. Configure Shopify
 
+#### Hydrogen sales channel (paid Shopify plan)
+
+Create a storefront in the [Hydrogen app](https://apps.shopify.com/hydrogen) and choose **Set up CI/CD or manual deployments later**.
+
+Back up your existing `.env` somewhere private before pulling. From your project folder, link to the storefront you created, then pull its variables. Don't use `-f` or `--force`.
+
+```bash
+npx @shopify/cli@latest hydrogen link
+npx @shopify/cli@latest hydrogen env pull
+```
+
+Keep your `WEAVERSE_PROJECT_ID` in `.env`. Fill in any secrets the pull leaves empty. If `PUBLIC_STOREFRONT_API_TOKEN` is missing or empty, add a public Storefront API token for the same store. You can get one from the [Headless channel](https://shopify.dev/docs/storefronts/headless/building-with-the-storefront-api/getting-started#step-1-enable-storefront-api-access).
+
+The pull sets `SHOP_ID` and `PUBLIC_CUSTOMER_ACCOUNT_API_CLIENT_ID`. Complete all four Customer Account variables as described below, or clear the two pulled values and leave the entire group empty.
+
+#### Headless sales channel
+
 Fill in the Storefront API credentials from your store's Headless channel in the generated `.env`:
 
 ```dotenv
@@ -46,6 +63,8 @@ PRIVATE_STOREFRONT_API_TOKEN=your-private-storefront-token
 PUBLIC_STOREFRONT_API_TOKEN=your-public-storefront-token
 WEAVERSE_PROJECT_ID=your-weaverse-project-id
 ```
+
+#### For either channel
 
 The private token is used only on the server. The public token lets Studio resolve your store's products, collections and pages. Never commit `.env` or expose the private token to browser code.
 
