@@ -18,10 +18,8 @@ import { type ThemeSettings, themeSchema } from "./theme-schema";
  * Studio's live edits. Route-level providers adopt these stores rather than
  * creating their own.
  *
- * The SDK bundles this provider without a client directive, which is why the
- * boundary lives here. The schema and static copy are imported rather than
- * passed in, because a schema can hold functions that cannot cross from server
- * to client.
+ * The schema and static copy are imported rather than passed in, because a
+ * schema can hold functions that cannot cross from server to client.
  */
 export function WeaverseRoot({
   children,
