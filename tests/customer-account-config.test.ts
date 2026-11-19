@@ -98,7 +98,14 @@ describe("readCustomerAccountConfig", () => {
             ...VALID_ENV,
             [CUSTOMER_ACCOUNT_CLIENT_ID_ENV_KEY]: clientId,
           }),
-        ShopifyConfigurationError,
+        (error: unknown) => {
+          assert.ok(error instanceof ShopifyConfigurationError);
+          assert.equal(
+            error.message,
+            "PUBLIC_CUSTOMER_ACCOUNT_API_CLIENT_ID must be the Customer Account API client ID from your store's Headless or Hydrogen storefront, with no whitespace.",
+          );
+          return true;
+        },
       );
     }
   });
