@@ -9,6 +9,8 @@ describe("isDefaultMarketCustomPage", () => {
     [{ scope: "locale", locale: "de-de", market: null }, false],
     [{ scope: "market", locale: null, market: "us" }, true],
     [{ scope: "market", locale: null, market: "de" }, false],
+    [{ locale: "en-us" }, true],
+    [{ locale: "de-de" }, false],
     [{ locale: null }, false],
   ] as const)("%j → %s", (page, expected) => {
     expect(isDefaultMarketCustomPage(page)).toBe(expected);
