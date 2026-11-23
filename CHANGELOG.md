@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026.11.23
+
+- [feature] Account pages closer to Shopify's own order view: order rows with a thumbnail, item count, payment and fulfillment badges; order pages with each line's image, variant, SKU and price, shipments with tracking links, billing address and a link to Shopify's order status page; spaced address cards with a confirmation before deleting; sign-out set apart as a bordered button (#134)
+- [feature] A progress bar at the top of the page shows that a clicked link is loading (#134)
+- [feature] Weaverse custom pages for the default market are listed in `sitemap.xml` (#140)
+- [fix] When Weaverse is unreachable or refuses a request, pages answer with the error page and a 5xx instead of a 404, so crawlers and caches don't treat them as gone. An unconfigured project or a route with no page still answers 404 (#140)
+- [fix] Each Weaverse page loads once per request, Studio can compose an empty page from its fallback placeholder, and Data Connectors such as `{{current.product.title}}` resolve (#137)
+- [fix] Order item counts come from line quantities; the live Customer Account API has no `lineItemsSummary`
+- [fix] Rejected Customer Account requests log their error codes, locations and paths in full
+- [fix] The Customer Account client ID error names both the Headless and the Hydrogen channel (#139)
+- Upgrade `@weaverse/hydrogen` to 6.5.1, and Vite+ to 1.7.0 with other dev dependencies
+- [docs] Document Hydrogen channel env sync alongside the Headless setup in the README and `.env.example` (#138)
+
 ## 2026.11.13
 
 - [feature] Switch versioning from semver to date-based (`YYYY.M.D`), like Pilot and the other Weaverse themes. The previous release was `1.0.0`
