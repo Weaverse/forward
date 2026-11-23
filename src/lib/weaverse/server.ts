@@ -7,11 +7,13 @@
  * only here. A section receives both as ordinary props, so neither seam can
  * reach into the other.
  *
- * Every read fails soft: an unconfigured project, a network failure, or a
- * missing page yields `null`, and the route answers 404 — except in Studio's
- * design mode, where a missing page loads as the SDK's empty fallback so the
- * merchant can compose it. A page that exists renders exactly as authored — an
- * empty template renders empty.
+ * An unconfigured project or a route with no page yields `null`, and the
+ * route answers 404 — except in Studio's design mode, where a missing page
+ * loads as the SDK's empty fallback so the merchant can compose it. A page
+ * load that fails upstream (Weaverse unreachable, a bad response, a refused
+ * request) throws instead, so the route renders its error boundary with a 5xx
+ * rather than telling crawlers the page is gone. A page that exists renders
+ * exactly as authored — an empty template renders empty.
  */
 
 import "server-only";
@@ -22,6 +24,7 @@ import type {
   WeaverseNextRequestContext,
 } from "@weaverse/hydrogen/next";
 import type {
+  WeaverseNextCustomPageEntry,
   WeaverseNextServerClient,
   WeaverseNextThemeSettingsResponse,
 } from "@weaverse/hydrogen/next/server";
@@ -82,6 +85,10 @@ function createClient(
       ? {}
       : { weaverseHost: config.weaverseHost }),
     requestContext,
+    /* `loadPage` rejects with `WeaverseLoadError` on upstream failures
+     * instead of resolving to `null`; an unknown project still resolves to
+     * `null`. */
+    throwPageLoadFailures: true,
   });
 }
 
@@ -105,11 +112,11 @@ async function createServerClient(
 }
 
 /**
- * Loads one Weaverse page, or `null` when composition is unavailable.
+ * Loads one Weaverse page, or `null` when there is no page to render.
  *
  * `null` is an ordinary outcome, not an error: the project may be
- * unconfigured, the Builder may hold no page for this route, or the fetch may
- * have failed. Routes answer it with `notFound()`.
+ * unconfigured or the Builder may hold no page for this route. Routes answer
+ * it with `notFound()`. An upstream failure rejects (see the module note).
  */
 export function loadWeaversePage({
   handle,
@@ -138,36 +145,26 @@ const loadPageOnce = cache(
     search: string,
     locale: LocaleId,
   ): Promise<WeaverseNextLoaderData | null> => {
-    try {
-      const client = await createServerClient(
-        pathname,
-        search,
-        { handle, type },
-        locale,
-      );
-      if (client === null) {
-        return null;
-      }
-      const page = await client.loadPage({ handle, type });
-      if (page === null || page === undefined) {
-        return null;
-      }
-      /* The SDK answers with a placeholder page when a route has no real
-       * composition yet. On the storefront that is "no page"; in Studio it is
-       * the empty canvas the merchant composes into, so it renders there.
-       * ponytail: id sniffing until the SDK exposes a fallback signal
-       * (Weaverse/weaverse#597). */
-      if (
-        page.configs?.isDesignMode !== true &&
-        typeof page.page?.id === "string" &&
-        page.page.id.includes("fallback")
-      ) {
-        return null;
-      }
-      return page;
-    } catch {
+    const client = await createServerClient(
+      pathname,
+      search,
+      { handle, type },
+      locale,
+    );
+    if (client === null) {
       return null;
     }
+    const page = await client.loadPage({ handle, type });
+    if (page === null || page === undefined) {
+      return null;
+    }
+    /* The SDK answers with a placeholder page when a route has no real
+     * composition yet. On the storefront that is "no page"; in Studio it is
+     * the empty canvas the merchant composes into, so it renders there. */
+    if (page.isFallback === true && page.configs?.isDesignMode !== true) {
+      return null;
+    }
+    return page;
   },
 );
 
@@ -179,6 +176,23 @@ export async function revalidateServerClient(
   requestContext: WeaverseNextRequestContext,
 ): Promise<WeaverseNextServerClient | null> {
   return createClient(requestContext);
+}
+
+/**
+ * The project's custom pages, for the sitemap; empty when Weaverse is not
+ * configured or the list cannot be read.
+ *
+ * The public endpoint lists page assignments, not publication state, so an
+ * entry here is not proof the page is published.
+ */
+export async function fetchWeaverseCustomPages(): Promise<
+  WeaverseNextCustomPageEntry[]
+> {
+  try {
+    return (await createClient({ pathname: "/" })?.fetchCustomPages()) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 /**

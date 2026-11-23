@@ -3,6 +3,8 @@ import type { MetadataRoute } from "next";
 import { CANONICAL_ROUTES } from "@/lib/routes/route-contract";
 import { siteBaseUrl } from "@/lib/routes/site";
 import { getStorefront } from "@/lib/storefront/data-source";
+import { isDefaultMarketCustomPage } from "@/lib/weaverse/custom-pages";
+import { fetchWeaverseCustomPages } from "@/lib/weaverse/server";
 
 const INDEXABLE_CATEGORIES = new Set([
   "storefront",
@@ -24,7 +26,7 @@ function toUrl(path: string): string {
  * is market-invariant, their `hreflang` alternates.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [products, collections, blogs, articles, pages, policies] =
+  const [products, collections, blogs, articles, pages, policies, customPages] =
     await Promise.all([
       getStorefront().listProducts(),
       getStorefront().listCollections(),
@@ -32,6 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       getStorefront().listArticles(),
       getStorefront().listPages(),
       getStorefront().listPolicies(),
+      fetchWeaverseCustomPages(),
     ]);
 
   const staticEntries = CANONICAL_ROUTES.filter(
@@ -62,5 +65,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticEntries, ...dynamicEntries];
+  /* Weaverse custom pages the default market serves. It is unprefixed, so
+   * the path is the bare handle. A page a route above already lists
+   * (`/journal`) is not repeated. The endpoint lists assignments, not
+   * publication state, so a draft assignment can appear here. */
+  const listed = new Set(
+    [...staticEntries, ...dynamicEntries].map((entry) => entry.url),
+  );
+  const customEntries = customPages
+    .filter(isDefaultMarketCustomPage)
+    .map((page) => ({
+      url: toUrl(`/${page.handle}`),
+      lastModified: page.lastModified,
+      changeFrequency: page.changeFrequency ?? ("weekly" as const),
+      priority: page.priority ?? 0.7,
+    }))
+    .filter((entry) => {
+      if (listed.has(entry.url)) {
+        return false;
+      }
+      listed.add(entry.url);
+      return true;
+    });
+
+  return [...staticEntries, ...dynamicEntries, ...customEntries];
 }
