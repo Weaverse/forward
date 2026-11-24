@@ -370,6 +370,8 @@ export const STATIC_CONTENT = {
     siteDescription:
       "Forward is an outdoor gear storefront theme built on Next.js and powered by Weaverse.",
     shopTitle: "Shop",
+    /** The first step of every breadcrumb in search results. */
+    breadcrumbHome: "Home",
     shopDescription: "Every product this store publishes.",
     categoriesTitle: "Categories",
     categoriesDescription: "Every collection this store publishes.",

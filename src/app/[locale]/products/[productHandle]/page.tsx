@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { JsonLdScript } from "@/components/json-ld";
 import { marketAlternates } from "@/lib/i18n/alternates";
 import { DEFAULT_LOCALE, type LocaleId, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
 import { getTranslator } from "@/lib/i18n/translator";
 import { shopifyRedirectOrNotFound } from "@/lib/routes/not-found";
+import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo/structured-data";
 import { getStorefront } from "@/lib/storefront/data-source";
 import type { Product } from "@/lib/storefront/types";
 import { WeaversePage } from "@/lib/weaverse/page";
@@ -36,10 +38,27 @@ export async function generateMetadata({
     const t = await getTranslator(locale);
     return { title: t("meta.productNotFound") };
   }
+  const image = product.colorways[0]?.images.primary;
   return {
     title: product.title,
     description: product.subtitle,
     alternates: marketAlternates(`/products/${productHandle}`, locale),
+    openGraph: {
+      title: product.title,
+      description: product.subtitle,
+      ...(image === undefined
+        ? {}
+        : {
+            images: [
+              {
+                url: image.src,
+                width: image.width,
+                height: image.height,
+                alt: image.alt,
+              },
+            ],
+          }),
+    },
   };
 }
 
@@ -69,13 +88,31 @@ export default async function ProductPage(props: ProductPageProps) {
   if (product === null || page === null || projectId === null) {
     return shopifyRedirectOrNotFound();
   }
-  const related = await relatedProducts(product, locale);
+  const [related, t] = await Promise.all([
+    relatedProducts(product, locale),
+    getTranslator(locale),
+  ]);
 
   return (
-    <WeaversePage
-      data={page}
-      dataContext={{ product, products: related }}
-      projectId={projectId}
-    />
+    <>
+      <JsonLdScript
+        data={[
+          productJsonLd(product, locale),
+          breadcrumbJsonLd(
+            [
+              [t("meta.breadcrumbHome"), "/"],
+              [t("meta.shopTitle"), "/shop"],
+              [product.title, `/products/${product.handle}`],
+            ],
+            locale,
+          ),
+        ]}
+      />
+      <WeaversePage
+        data={page}
+        dataContext={{ product, products: related }}
+        projectId={projectId}
+      />
+    </>
   );
 }
