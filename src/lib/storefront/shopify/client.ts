@@ -2,9 +2,8 @@
  * Hydrogen Storefront client wiring for the server-owned catalog adapter.
  *
  * The catalog is identical for every visitor, so this uses a request-independent
- * `private_no_buyer_context` client with a static request context. Catalog
- * routes therefore never call `headers()`/`cookies()` and stay statically
- * renderable with `generateStaticParams()` and `dynamicParams = false`.
+ * `private_no_buyer_context` client with a static request context, and every
+ * read is shared through the Next Data Cache for the catalog window.
  *
  * The data source consumes a plain `CatalogQueryExecutor` function so unit
  * tests can inject mocked GraphQL response objects instead of reaching into
@@ -33,6 +32,7 @@ import {
   CATALOG_REVALIDATE_SECONDS,
   COLLECTION_CACHE_KEY,
   NAVIGATION_CACHE_KEY,
+  PRODUCT_CACHE_KEY,
 } from "./cache-policy";
 import {
   ALL_PRODUCTS_QUERY,
@@ -42,8 +42,10 @@ import type { ShopifyCatalogConfig } from "./env";
 import { ShopifyCatalogError, safeErrorLabel } from "./errors";
 import {
   mapAllProductsResult,
-  mapCatalogResult,
+  mapCatalogPage,
   mapCollectionProductsResult,
+  mapProductResult,
+  RELATED_PRODUCT_CANDIDATES,
 } from "./mapper";
 import {
   FOOTER_MENU_HANDLE,
@@ -57,6 +59,8 @@ import {
   CATALOG_PRODUCT_LIMIT,
   CATALOG_QUERY,
   CATALOG_VARIANT_LIMIT,
+  PRODUCT_QUERY,
+  RELATED_PRODUCTS_QUERY,
 } from "./queries";
 
 /**
@@ -68,7 +72,15 @@ export interface CatalogQueryResult {
   errors?: unknown;
 }
 
-export type CatalogQueryExecutor = () => Promise<CatalogQueryResult>;
+/** Reads one page of the whole catalog, from `after` or from the start. */
+export type CatalogQueryExecutor = (
+  after?: string | null,
+) => Promise<CatalogQueryResult>;
+
+/** Reads one product by handle, with its related candidates. */
+export type ProductQueryExecutor = (
+  handle: string,
+) => Promise<CatalogQueryResult>;
 
 /** What a route asked Shopify for: facets, order, and a cursor. */
 export interface CollectionQueryVariables {
@@ -203,11 +215,12 @@ export function createCatalogQueryExecutor(
   const market = executorMarket(options);
   const client = createStorefrontReadClient(config, market.i18n);
 
-  const execute = async () => {
+  const execute = async (after: string | null = null) => {
     try {
       const { data, errors } = await client.graphql(CATALOG_QUERY, {
         variables: {
           first: CATALOG_PRODUCT_LIMIT,
+          after,
           variantFirst: CATALOG_VARIANT_LIMIT,
           mediaFirst: CATALOG_MEDIA_LIMIT,
           query: CATALOG_PRODUCT_FILTER,
@@ -232,7 +245,7 @@ export function createCatalogQueryExecutor(
       // Validate the complete raw-to-normalized contract before this callback
       // can resolve into Next's persistent cache. A malformed-but-present data
       // payload must be a thrown execution, not a cached success.
-      mapCatalogResult(result);
+      mapCatalogPage(result);
       return result;
     } catch (error) {
       if (error instanceof ShopifyCatalogError) {
@@ -248,12 +261,62 @@ export function createCatalogQueryExecutor(
     return execute;
   }
 
+  /* `unstable_cache` keys each page by its cursor argument too. */
   return unstable_cache(
     execute,
     [CATALOG_CACHE_KEY, config.storeDomain, market.key],
     {
       revalidate: CATALOG_REVALIDATE_SECONDS,
     },
+  );
+}
+
+/**
+ * Shopify search syntax for the store's other catalog products of a type.
+ * The type is store data, quoted and escaped, never shopper input.
+ */
+export function relatedProductsQuery(productType: string): string {
+  const quoted = productType.replace(/["\\]/g, "\\$&");
+  return `${CATALOG_PRODUCT_FILTER} AND product_type:"${quoted}"`;
+}
+
+/**
+ * Builds the by-handle product executor. The related candidates are read in
+ * the same execution, so one cache entry holds everything a PDP needs.
+ */
+export function createProductQueryExecutor(
+  config: ShopifyCatalogConfig,
+  options: CatalogQueryExecutorOptions = {},
+): ProductQueryExecutor {
+  return createPagedExecutor(
+    config,
+    options,
+    "product",
+    PRODUCT_CACHE_KEY,
+    async (client, handle: string) => {
+      const product = await client.graphql(PRODUCT_QUERY, {
+        variables: {
+          handle,
+          variantFirst: CATALOG_VARIANT_LIMIT,
+          mediaFirst: CATALOG_MEDIA_LIMIT,
+        },
+      });
+      const productType = product.data?.product?.productType;
+      if (product.errors !== undefined || typeof productType !== "string") {
+        return product;
+      }
+      const related = await client.graphql(RELATED_PRODUCTS_QUERY, {
+        variables: {
+          first: RELATED_PRODUCT_CANDIDATES,
+          query: relatedProductsQuery(productType),
+        },
+      });
+      return {
+        data: { ...product.data, related: related.data?.products ?? null },
+        errors: related.errors,
+      };
+    },
+    mapProductResult,
   );
 }
 

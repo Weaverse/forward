@@ -15,7 +15,7 @@ import {
   resolveProductSelection,
   saleCompareAtPrice,
 } from "../src/lib/storefront/product-state.ts";
-import { mapCatalogResult } from "../src/lib/storefront/shopify/mapper.ts";
+import { mapCatalogPage } from "../src/lib/storefront/shopify/mapper.ts";
 import type { Money, Product } from "../src/lib/storefront/types.ts";
 import {
   type CatalogResponse,
@@ -27,7 +27,7 @@ import { PRODUCT_FIXTURES } from "./fixtures/storefront/products.ts";
 const USD = (amount: number): Money => ({ amount, currencyCode: "USD" });
 
 function mappedShell(response: CatalogResponse = catalogResponse()): Product {
-  const product = mapCatalogResult(response).find(
+  const product = mapCatalogPage(response).products.find(
     (entry) => entry.handle === "weatherline-shell",
   );
   assert.ok(product !== undefined);
@@ -90,7 +90,7 @@ describe("compare-at money contract", () => {
     ]) {
       assert.throws(
         () =>
-          mapCatalogResult(
+          mapCatalogPage(
             catalogResponseWith("weatherline-shell", (product) => {
               product.variants.nodes[0].compareAtPrice = compareAtPrice;
             }),

@@ -12,17 +12,9 @@ interface PolicyPageProps {
   params: Promise<{ locale: string; policyHandle: string }>;
 }
 
-export const dynamicParams = false;
-
-export async function generateStaticParams({
-  params,
-}: {
-  params: { locale: string };
-}) {
-  const locale = parseLocale(params.locale) ?? DEFAULT_LOCALE;
-  const policies = await getStorefront(locale).listPolicies();
-  return policies.map((policy) => ({ policyHandle: policy.handle }));
-}
+/* Rendered on first request and refreshed on the catalog window, so a policy
+ * the store adds, edits or removes shows without a rebuild. */
+export const revalidate = 3600;
 
 export async function generateMetadata({
   params,

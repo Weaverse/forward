@@ -21,12 +21,11 @@ interface CustomPageProps {
  * Merchants create custom pages at paths this repository cannot know ahead of
  * time, so there is no route file per page.
  *
- * Sitting at the app root, this also catches what other routes decline: a
- * dynamic route with `dynamicParams = false` does not match an unknown handle,
- * and routing then falls through to here. A path Shopify redirects (`/admin`,
- * the store's URL redirects) is redirected; anything else is a real 404. Both
- * only hold while no `loading.tsx` wraps the route in a Suspense boundary,
- * because a streamed shell commits the response to 200 before the check runs.
+ * Sitting at the app root, this also catches every path no other route
+ * matches. A path Shopify redirects (`/admin`, the store's URL redirects) is
+ * redirected; anything else is a real 404. Both only hold while no
+ * `loading.tsx` wraps the route in a Suspense boundary, because a streamed
+ * shell commits the response to 200 before the check runs.
  */
 export default async function WeaverseCustomPage(props: CustomPageProps) {
   const { slug } = await props.params;

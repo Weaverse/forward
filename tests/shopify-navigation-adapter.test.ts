@@ -159,7 +159,7 @@ describe("Hydrogen navigation client seam", () => {
         false,
       );
       assert.deepEqual(requestBody.variables, {
-        collectionFirst: 10,
+        collectionFirst: 250,
         collectionProductFirst: 10,
         country: "US",
         footerMenuHandle: "footer",

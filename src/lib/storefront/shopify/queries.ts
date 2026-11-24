@@ -5,8 +5,10 @@
  * module is imported exclusively by `./client.ts`, which is imported only by
  * the server-side data source.
  *
- * Bounds are explicit and small because this catalog is small. The mapper fails
- * loudly on `hasNextPage` rather than silently serving a truncated catalog.
+ * The whole-catalog read pages through the store with a cursor, so a catalog
+ * of any size is read in full; a product page reads its own product by handle.
+ * Variants and media keep a per-product bound, and the mapper fails loudly on
+ * `hasNextPage` there rather than serve a truncated product.
  */
 
 import { gql } from "@shopify/hydrogen";
@@ -20,8 +22,9 @@ export const CATALOG_OWNERSHIP_TAG = "forward";
  */
 export const CATALOG_PRODUCT_FILTER = `tag:${CATALOG_OWNERSHIP_TAG}`;
 
-/** Bounded page sizes; exceeding any of these is a hard adapter failure. */
-export const CATALOG_PRODUCT_LIMIT = 10;
+/** Products per page of the whole-catalog read. */
+export const CATALOG_PRODUCT_LIMIT = 50;
+/** Per-product bounds; exceeding either is a hard adapter failure. */
 export const CATALOG_VARIANT_LIMIT = 50;
 export const CATALOG_MEDIA_LIMIT = 50;
 
@@ -115,6 +118,7 @@ export const PRODUCT_FIELDS_FRAGMENT = `#graphql
 export const CATALOG_QUERY = gql(`
   query ForwardCatalog(
     $first: Int!
+    $after: String
     $variantFirst: Int!
     $mediaFirst: Int!
     $query: String!
@@ -125,12 +129,14 @@ export const CATALOG_QUERY = gql(`
   ) @inContext(country: $country, language: $language) {
     products(
       first: $first
+      after: $after
       query: $query
       sortKey: $sortKey
       reverse: $reverse
     ) {
       pageInfo {
         hasNextPage
+        endCursor
       }
       nodes {
         ...ForwardProductFields
@@ -138,6 +144,42 @@ export const CATALOG_QUERY = gql(`
     }
   }
   ${PRODUCT_FIELDS_FRAGMENT}
+`);
+
+/**
+ * One product by handle, and the handles of the store's other products of its
+ * type, which a PDP offers as related. `$relatedQuery` is built by the data
+ * source from the product's own `productType`, never from shopper input.
+ */
+export const PRODUCT_QUERY = gql(`
+  query ForwardProduct(
+    $handle: String!
+    $variantFirst: Int!
+    $mediaFirst: Int!
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    product(handle: $handle) {
+      ...ForwardProductFields
+    }
+  }
+  ${PRODUCT_FIELDS_FRAGMENT}
+`);
+
+export const RELATED_PRODUCTS_QUERY = gql(`
+  query ForwardRelatedProducts(
+    $first: Int!
+    $query: String!
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    products(first: $first, query: $query) {
+      nodes {
+        handle
+        productType
+      }
+    }
+  }
 `);
 
 /** Credential-validity probe used only by the opt-in live verification script. */

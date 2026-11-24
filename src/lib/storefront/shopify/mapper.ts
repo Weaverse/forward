@@ -906,54 +906,116 @@ function mapProduct(node: unknown, index: number): Product {
   };
 }
 
-/**
- * Validates a catalog GraphQL result and returns normalized products in the
- * canonical presentation order.
- *
- * Returned GraphQL `errors`, truncated pages, unknown products, and missing
- * canonical products are all hard failures — never a partial catalog.
- */
-export function mapCatalogResult(
-  result: CatalogQueryResult,
-): readonly Product[] {
+function failOnGraphQLErrors(result: CatalogQueryResult, query: string): void {
   if (Array.isArray(result.errors) && result.errors.length > 0) {
     fail(
-      `Storefront API returned ${result.errors.length} GraphQL error(s) for the catalog query.`,
+      `Storefront API returned ${result.errors.length} GraphQL error(s) for the ${query} query.`,
     );
   }
+}
 
+export interface CatalogPage {
+  products: readonly Product[];
+  /** Where the next page starts, or `null` on the last page. */
+  endCursor: string | null;
+}
+
+/**
+ * Validates one page of the whole-catalog read. `relatedHandles` stay empty:
+ * they are a rule over the complete catalog, applied once every page is in.
+ */
+export function mapCatalogPage(result: CatalogQueryResult): CatalogPage {
+  failOnGraphQLErrors(result, "catalog");
   const data = asRecord(result.data, "catalog response data");
   const products = asRecord(data.products, "catalog products connection");
   const pageInfo = asRecord(products.pageInfo, "catalog products pageInfo");
-  if (pageInfo.hasNextPage === true) {
-    fail("The catalog has more products than the configured bound allows.");
-  }
-
   const nodes = asArray(products.nodes, "catalog product nodes");
+  return {
+    products: nodes.map((node, index) => mapProduct(node, index)),
+    endCursor:
+      pageInfo.hasNextPage === true
+        ? asText(pageInfo.endCursor, "catalog products endCursor")
+        : null,
+  };
+}
+
+/**
+ * Related products are the store's other items of the same product type, in
+ * the order the store returned them. It is a rule over live data rather than
+ * a per-handle list the theme keeps, so a product added in Shopify is related
+ * to its siblings immediately.
+ */
+function relatedHandles(
+  product: Product,
+  candidates: readonly { handle: string; category: string }[],
+): readonly string[] {
+  return candidates
+    .filter(
+      (entry) =>
+        entry.handle !== product.handle && entry.category === product.category,
+    )
+    .map((entry) => entry.handle)
+    .slice(0, RELATED_PRODUCT_LIMIT);
+}
+
+/**
+ * The complete catalog from its pages. A handle seen twice is a broken read,
+ * never a product to show twice.
+ */
+export function assembleCatalog(
+  pages: readonly CatalogPage[],
+): readonly Product[] {
   const mapped = new Map<string, Product>();
-  for (const [index, node] of nodes.entries()) {
-    const product = mapProduct(node, index);
+  for (const product of pages.flatMap((page) => page.products)) {
     if (mapped.has(product.handle)) {
       fail(`The catalog returned duplicate product handle ${product.handle}.`);
     }
     mapped.set(product.handle, product);
   }
-
-  /* Related products are the store's other items of the same product type.
-   * It is a rule over live data rather than a per-handle list the theme keeps,
-   * so a product added in Shopify is related to its siblings immediately. */
   const catalog = [...mapped.values()];
   return catalog.map((product) => ({
     ...product,
-    relatedHandles: catalog
-      .filter(
-        (entry) =>
-          entry.handle !== product.handle &&
-          entry.category === product.category,
-      )
-      .map((entry) => entry.handle)
-      .slice(0, RELATED_PRODUCT_LIMIT),
+    relatedHandles: relatedHandles(product, catalog),
   }));
+}
+
+/** How many same-type candidates a related read asks for. */
+export const RELATED_PRODUCT_CANDIDATES = RELATED_PRODUCT_LIMIT * 3;
+
+/**
+ * Validates a by-handle product read, with its related candidates under
+ * `related`. `null` means the store has no such product in Forward's catalog,
+ * which the route turns into a 404.
+ */
+export function mapProductResult(result: CatalogQueryResult): Product | null {
+  failOnGraphQLErrors(result, "product");
+  const data = asRecord(result.data, "product response data");
+  if (data.product === null || data.product === undefined) {
+    return null;
+  }
+  const tags = asRecord(data.product, "product").tags;
+  /* Outside the catalog the whole-catalog read sees, so not a page. */
+  if (!Array.isArray(tags) || !tags.includes(CATALOG_OWNERSHIP_TAG)) {
+    return null;
+  }
+  const product = mapProduct(data.product, 0);
+  const related =
+    data.related === null || data.related === undefined
+      ? []
+      : asArray(
+          asRecord(data.related, "related products").nodes,
+          "related product nodes",
+        ).map((node, index) => {
+          const record = asRecord(node, `related product ${index}`);
+          return {
+            handle: asText(record.handle, `related product ${index} handle`),
+            category: asText(
+              record.productType,
+              `related product ${index} productType`,
+            ),
+          };
+        });
+  return { ...product, relatedHandles: relatedHandles(product, related) };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1014,11 +1076,7 @@ function optionalCursor(value: unknown, context: string): string | null {
 export function mapCollectionProductsResult(
   result: CatalogQueryResult,
 ): CollectionProductsPage | null {
-  if (Array.isArray(result.errors) && result.errors.length > 0) {
-    fail(
-      `Storefront API returned ${result.errors.length} GraphQL error(s) for the collection query.`,
-    );
-  }
+  failOnGraphQLErrors(result, "collection");
   const data = asRecord(result.data, "collection response data");
   if (data.collection === null || data.collection === undefined) {
     return null;
@@ -1031,11 +1089,7 @@ export function mapCollectionProductsResult(
 export function mapAllProductsResult(
   result: CatalogQueryResult,
 ): CollectionProductsPage {
-  if (Array.isArray(result.errors) && result.errors.length > 0) {
-    fail(
-      `Storefront API returned ${result.errors.length} GraphQL error(s) for the products query.`,
-    );
-  }
+  failOnGraphQLErrors(result, "products");
   const data = asRecord(result.data, "products response data");
   return mapProductsConnection(data.products);
 }

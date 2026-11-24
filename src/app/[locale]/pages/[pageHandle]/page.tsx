@@ -17,18 +17,6 @@ interface StorePageProps {
   searchParams: Promise<SearchParams>;
 }
 
-export const dynamicParams = false;
-
-export async function generateStaticParams({
-  params,
-}: {
-  params: { locale: string };
-}) {
-  const locale = parseLocale(params.locale) ?? DEFAULT_LOCALE;
-  const pages = await getStorefront(locale).listPages();
-  return pages.map((page) => ({ pageHandle: page.handle }));
-}
-
 export async function generateMetadata({
   params,
 }: StorePageProps): Promise<Metadata> {

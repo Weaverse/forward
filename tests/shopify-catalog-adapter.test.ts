@@ -7,6 +7,7 @@ import { isShopifyProductImageUrl } from "../src/lib/storefront/image-source.ts"
 import {
   type CatalogQueryResult,
   createCatalogQueryExecutor,
+  relatedProductsQuery,
 } from "../src/lib/storefront/shopify/client.ts";
 import {
   CATALOG_REVALIDATE_SECONDS,
@@ -24,11 +25,16 @@ import {
   ShopifyConfigurationError,
   safeErrorLabel,
 } from "../src/lib/storefront/shopify/errors.ts";
-import { mapCatalogResult } from "../src/lib/storefront/shopify/mapper.ts";
+import {
+  assembleCatalog,
+  mapCatalogPage,
+  mapProductResult,
+} from "../src/lib/storefront/shopify/mapper.ts";
 import {
   type CatalogResponse,
   catalogResponse,
   catalogResponseWith,
+  productExecutorFor,
   syntheticMediaIds,
   UNREAD_EXECUTORS,
 } from "./fixtures/shopify-catalog-response.ts";
@@ -42,12 +48,18 @@ const COMPLETE_ENV = {
   [PRIVATE_STOREFRONT_TOKEN_ENV_KEY]: SYNTHETIC_PRIVATE_TOKEN,
 } as const;
 
+/** One complete catalog page, mapped the way the data source assembles it. */
+function mapCatalogResult(result: CatalogQueryResult) {
+  return assembleCatalog([mapCatalogPage(result)]);
+}
+
 function shopifySource(
-  response: CatalogQueryResult = catalogResponse(),
+  response: CatalogResponse = catalogResponse(),
 ): ShopifyCatalogDataSource {
   return new ShopifyCatalogDataSource({
     ...UNREAD_EXECUTORS,
     execute: async () => response,
+    executeProduct: productExecutorFor(response),
     executeNavigation: async () => navigationResponse(),
     storeDomain: SYNTHETIC_STORE_DOMAIN,
     mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
@@ -209,8 +221,9 @@ describe("Hydrogen catalog client seam", () => {
         false,
       );
       assert.deepEqual(requestBody.variables, {
+        after: null,
         country: "US",
-        first: 10,
+        first: 50,
         language: "EN",
         mediaFirst: 50,
         query: "tag:forward",
@@ -1078,9 +1091,10 @@ describe("catalog mapping failures", () => {
       ShopifyCatalogError,
     );
 
+    /* A next page must say where it starts. */
     const truncatedCatalog = catalogResponse();
     truncatedCatalog.data.products.pageInfo.hasNextPage = true;
-    await assertRejectsCatalog(truncatedCatalog, "more products");
+    await assertRejectsCatalog(truncatedCatalog, "endCursor");
 
     await assertRejectsCatalog(
       catalogResponseWith("weatherline-shell", (product) => {
@@ -1108,6 +1122,85 @@ describe("catalog mapping failures", () => {
 /* -------------------------------------------------------------------------- */
 
 describe("ShopifyCatalogDataSource", () => {
+  it("reads every page of a catalog larger than one page", async () => {
+    const full = catalogResponse();
+    const cursors: (string | null | undefined)[] = [];
+    const source = new ShopifyCatalogDataSource({
+      ...UNREAD_EXECUTORS,
+      execute: async (after) => {
+        cursors.push(after);
+        const page = catalogResponse();
+        const split = after === null ? [0, 4] : [4, undefined];
+        page.data.products.nodes = full.data.products.nodes.slice(...split);
+        page.data.products.pageInfo =
+          after === null
+            ? { hasNextPage: true, endCursor: "cursor-1" }
+            : { hasNextPage: false, endCursor: null };
+        return page;
+      },
+      executeNavigation: async () => navigationResponse(),
+      storeDomain: SYNTHETIC_STORE_DOMAIN,
+      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
+    });
+
+    const products = await source.listProducts();
+    assert.deepEqual(cursors, [null, "cursor-1"]);
+    assert.deepEqual(
+      products.map((product) => product.handle),
+      full.data.products.nodes.map((node) => node.handle),
+    );
+    /* Related products span pages: the rule runs over the whole catalog. */
+    assert.deepEqual(
+      products.find((product) => product.handle === "weatherline-shell")
+        ?.relatedHandles,
+      mapCatalogResult(full).find(
+        (product) => product.handle === "weatherline-shell",
+      )?.relatedHandles,
+    );
+  });
+
+  it("reads a product by handle without the catalog", async () => {
+    const response = catalogResponse();
+    const source = new ShopifyCatalogDataSource({
+      ...UNREAD_EXECUTORS,
+      execute: async () => {
+        throw new Error("a product page must not read the whole catalog");
+      },
+      executeProduct: productExecutorFor(response),
+      executeNavigation: async () => navigationResponse(),
+      storeDomain: SYNTHETIC_STORE_DOMAIN,
+      mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
+    });
+
+    const shell = await source.getProduct("weatherline-shell");
+    assert.equal(shell?.handle, "weatherline-shell");
+    assert.deepEqual(
+      shell?.relatedHandles,
+      mapCatalogResult(response).find(
+        (product) => product.handle === "weatherline-shell",
+      )?.relatedHandles,
+    );
+    assert.equal(await source.getProduct("does-not-exist"), null);
+  });
+
+  it("quotes a product type into Shopify search syntax", () => {
+    assert.equal(
+      relatedProductsQuery('Shell "Pro" \\ X'),
+      'tag:forward AND product_type:"Shell \\"Pro\\" \\\\ X"',
+    );
+  });
+
+  it("treats a product outside the catalog's tag as missing", () => {
+    const response = catalogResponseWith("weatherline-shell", (product) => {
+      product.tags = product.tags.filter((tag: string) => tag !== "forward");
+    });
+    const node = response.data.products.nodes.find(
+      (entry) => entry.handle === "weatherline-shell",
+    );
+    assert.equal(mapProductResult({ data: { product: node } }), null);
+    assert.equal(mapProductResult({ data: { product: null } }), null);
+  });
+
   it("returns null for unknown product handles", async () => {
     const source = shopifySource();
     assert.equal(await source.getProduct("does-not-exist"), null);
@@ -1204,6 +1297,9 @@ describe("ShopifyCatalogDataSource", () => {
       execute: async () => {
         throw new ShopifyCatalogError("Storefront API catalog request failed.");
       },
+      executeProduct: async () => {
+        throw new ShopifyCatalogError("Storefront API product request failed.");
+      },
       executeNavigation: async () => navigationResponse(),
       storeDomain: SYNTHETIC_STORE_DOMAIN,
       mainMenuHandle: DEFAULT_MAIN_MENU_HANDLE,
@@ -1246,7 +1342,6 @@ describe("catalog revalidation window", () => {
     });
 
     await source.listProducts();
-    await source.getProduct("weatherline-shell");
     await source.searchProducts("trail");
     assert.equal(calls, 1);
 
@@ -1273,7 +1368,7 @@ describe("catalog revalidation window", () => {
     });
     await Promise.all([
       source.listProducts(),
-      source.getProduct("talus-trail-shoe"),
+      source.searchProducts("trail"),
       source.getCollectionProducts("outerwear"),
     ]);
     assert.equal(calls, 1);
@@ -1293,7 +1388,7 @@ describe("catalog revalidation window", () => {
       useProcessCache: false,
     });
     await source.listProducts();
-    await source.getProduct("talus-trail-shoe");
+    await source.searchProducts("trail");
     assert.equal(calls, 2);
   });
 

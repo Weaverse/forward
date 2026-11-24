@@ -26,15 +26,19 @@ import type {
   CatalogQueryExecutor,
   CollectionQueryExecutor,
   NavigationQueryExecutor,
+  ProductQueryExecutor,
 } from "./client";
 import { COLLECTION_PAGE_SIZE } from "./collection-query";
 import type { ContentQueryExecutor } from "./content-client";
 import type { MappedContentResult } from "./content-mapper";
 import { ShopifyCatalogError } from "./errors";
 import {
+  assembleCatalog,
+  type CatalogPage,
   mapAllProductsResult,
-  mapCatalogResult,
+  mapCatalogPage,
   mapCollectionProductsResult,
+  mapProductResult,
 } from "./mapper";
 import {
   mapCollectionsResult,
@@ -48,6 +52,7 @@ const MILLISECONDS_PER_SECOND = 1000;
 
 export interface ShopifyCatalogDataSourceOptions {
   execute: CatalogQueryExecutor;
+  executeProduct: ProductQueryExecutor;
   executeCollection: CollectionQueryExecutor;
   executeAllProducts: AllProductsQueryExecutor;
   executeContent: ContentQueryExecutor;
@@ -79,6 +84,7 @@ interface ContentCacheEntry {
 
 export class ShopifyCatalogDataSource implements StorefrontDataSource {
   readonly #execute: CatalogQueryExecutor;
+  readonly #executeProduct: ProductQueryExecutor;
   readonly #executeCollection: CollectionQueryExecutor;
   readonly #executeAllProducts: AllProductsQueryExecutor;
   readonly #executeContent: ContentQueryExecutor;
@@ -96,6 +102,7 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
 
   constructor(options: ShopifyCatalogDataSourceOptions) {
     this.#execute = options.execute;
+    this.#executeProduct = options.executeProduct;
     this.#executeCollection = options.executeCollection;
     this.#executeAllProducts = options.executeAllProducts;
     this.#executeContent = options.executeContent;
@@ -108,9 +115,23 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     this.#now = options.now ?? Date.now;
   }
 
+  /* ponytail: reads every page in sequence; a catalog of thousands of products
+   * would want a handles-only read for the sitemap and Shopify search for the
+   * search page instead. */
+  async #readCatalog(): Promise<readonly Product[]> {
+    const pages: CatalogPage[] = [];
+    let after: string | null = null;
+    do {
+      const page = mapCatalogPage(await this.#execute(after));
+      pages.push(page);
+      after = page.endCursor;
+    } while (after !== null);
+    return assembleCatalog(pages);
+  }
+
   async #loadCatalog(): Promise<readonly Product[]> {
     if (!this.#useProcessCache) {
-      return mapCatalogResult(await this.#execute());
+      return this.#readCatalog();
     }
     const cached = this.#cached;
     if (cached !== null && this.#now() - cached.loadedAt < this.#ttlMs) {
@@ -120,9 +141,8 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
       return this.#inFlight;
     }
 
-    const request = this.#execute()
-      .then((result) => {
-        const products = mapCatalogResult(result);
+    const request = this.#readCatalog()
+      .then((products) => {
         this.#cached = { products, loadedAt: this.#now() };
         return products;
       })
@@ -169,9 +189,12 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
     return this.#loadCatalog();
   }
 
+  /** One product, read by its handle: a product page never waits on the catalog. */
   async getProduct(handle: string): Promise<Product | null> {
-    const catalog = await this.#loadCatalog();
-    return catalog.find((product) => product.handle === handle) ?? null;
+    if (handle.trim().length === 0) {
+      return null;
+    }
+    return mapProductResult(await this.#executeProduct(handle));
   }
 
   async searchProducts(query: string): Promise<readonly Product[]> {

@@ -22,6 +22,7 @@ import {
   createCatalogQueryExecutor,
   createCollectionQueryExecutor,
   createNavigationQueryExecutor,
+  createProductQueryExecutor,
 } from "./shopify/client";
 import { createContentQueryExecutor } from "./shopify/content-client";
 import { ShopifyCatalogDataSource } from "./shopify/data-source";
@@ -95,6 +96,7 @@ export function createStorefrontDataSource(
   const useNextCache = options.useNextCache ?? true;
   return new ShopifyCatalogDataSource({
     execute: createCatalogQueryExecutor(config, options),
+    executeProduct: createProductQueryExecutor(config, options),
     executeCollection: createCollectionQueryExecutor(config, options),
     executeAllProducts: createAllProductsQueryExecutor(config, options),
     executeContent: createContentQueryExecutor(config, options),
