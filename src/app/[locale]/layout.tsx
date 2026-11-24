@@ -15,9 +15,13 @@ import {
   LOCALE_IDS,
   LOCALES,
   localeTag,
+  localizePath,
   parseLocale,
 } from "@/lib/i18n/locales";
+import { ROUTE_TEMPLATES } from "@/lib/routes/shopify-routes";
 import { siteBaseUrl } from "@/lib/routes/site";
+import { ShopifyScripts } from "@/lib/shopify-scripts";
+import { getStorefront } from "@/lib/storefront/data-source";
 import { weaversePublicEnv } from "@/lib/weaverse/env";
 import { WeaverseRoot } from "@/lib/weaverse/root";
 import {
@@ -89,7 +93,14 @@ export default async function RootLayout({
     notFound();
   }
   const weaverseEnabled = weaverseProjectId() !== null;
-  const themeResponse = await loadWeaverseThemeSettings(locale);
+  const [themeResponse, shop] = await Promise.all([
+    loadWeaverseThemeSettings(locale),
+    getStorefront(locale).getShop(),
+  ]);
+  const market = LOCALES[locale];
+  /* A Hydrogen-channel storefront attributes analytics to its storefront;
+   * any other is a Headless storefront, which Shopify identifies as `0`. */
+  const storefrontId = process.env.PUBLIC_STOREFRONT_ID?.trim() || null;
   return (
     <html
       lang={localeTag(locale)}
@@ -103,11 +114,23 @@ export default async function RootLayout({
       )}
     >
       <head>
-        <script
-          crossOrigin="anonymous"
-          id="shopify-standard-actions"
-          src="https://cdn.shopify.com/storefront/standard-actions.js"
-          type="module"
+        <ShopifyScripts
+          cartPath={localizePath("/cart", locale)}
+          analytics={{
+            channel: storefrontId === null ? "headless" : "hydrogen",
+          }}
+          i18n={{
+            country: market.country,
+            language: market.language,
+            currency: market.currency,
+            pathPrefix: locale === DEFAULT_LOCALE ? "" : `/${locale}`,
+          }}
+          routes={ROUTE_TEMPLATES}
+          shop={{
+            shopId: shop.id,
+            storefrontId: storefrontId ?? "0",
+            myshopifyDomain: shop.myshopifyDomain,
+          }}
         />
       </head>
       <body className="m-0 max-w-full overflow-x-clip bg-canvas font-body text-copy-sm leading-body text-ink antialiased">

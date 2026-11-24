@@ -187,6 +187,13 @@ export interface SiteNavigation {
   footerColumns: readonly FooterColumn[];
 }
 
+export interface ShopIdentity {
+  /** The shop's GID, `gid://shopify/Shop/<id>`. */
+  id: string;
+  /** The permanent `*.myshopify.com` domain. */
+  myshopifyDomain: string;
+}
+
 /**
  * One value of a storefront facet.
  *
