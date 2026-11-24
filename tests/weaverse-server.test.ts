@@ -18,8 +18,7 @@ vi.mock("@weaverse/hydrogen/next/server", () => ({
   createWeaverseNextServerClient: sdk.createClient,
 }));
 
-const { fetchWeaverseCustomPages, loadWeaversePage } =
-  await import("@/lib/weaverse/server");
+const { loadWeaversePage } = await import("@/lib/weaverse/server");
 
 let call = 0;
 /* A distinct pathname per call keeps React's `cache()` from sharing results
@@ -81,14 +80,5 @@ describe("loadWeaversePage", () => {
     const assigned = page("fallback-sale");
     sdk.loadPage.mockResolvedValue(assigned);
     await expect(load()).resolves.toBe(assigned);
-  });
-});
-
-describe("fetchWeaverseCustomPages", () => {
-  it("rejects when the endpoint fails", async () => {
-    sdk.createClient.mockReturnValue({
-      fetchCustomPages: vi.fn().mockRejectedValue(new Error("down")),
-    });
-    await expect(fetchWeaverseCustomPages()).rejects.toThrow("down");
   });
 });

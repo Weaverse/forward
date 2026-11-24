@@ -6,7 +6,7 @@
       "name": "forward",
       "dependencies": {
         "@shopify/hydrogen": "2026.10.3",
-        "@weaverse/hydrogen": "6.5.1",
+        "@weaverse/hydrogen": "6.6.0",
         "class-variance-authority": "0.7.1",
         "next": "16.4.6",
         "parse5": "8.1.1",
@@ -332,11 +332,11 @@
 
     "@voidzero-dev/vite-plus-win32-x64-msvc": ["@voidzero-dev/vite-plus-win32-x64-msvc@1.7.0", "", { "os": "win32", "cpu": "x64" }, "sha512-eA/Lg7eQTLwTiNhGBav9Lik6qiTSv8IPAETIziGgjNjEiTviCcFHNFlUyDOIFTY7uIWraGgMl8THY3zPnikoRg=="],
 
-    "@weaverse/core": ["@weaverse/core@6.5.1", "", {}, "sha512-WRDp7U6m4NB0vmNC7d79xRaU3SymtRsQoHzLTzyB3OALwOE+HCbUhgiO4zt6v4JXID2lvEe6A5RoJIN+6Zg92g=="],
+    "@weaverse/core": ["@weaverse/core@6.6.0", "", {}, "sha512-C9VPc/O9pcCv3j7KYzBmpgSrhBQxvxDv1/v9ort4jdGxzShtyZOrHy174m3uKytUK4N/SPgJNzt5tMUf4F21mw=="],
 
-    "@weaverse/hydrogen": ["@weaverse/hydrogen@6.5.1", "", { "dependencies": { "@weaverse/react": "6.5.1", "@weaverse/schema": "0.20.1", "react-error-boundary": "^6" }, "peerDependencies": { "@shopify/hydrogen": ">=2026.10.3", "next": ">=14", "react": ">=19", "react-dom": ">=19", "react-router": "^7 || ^8" }, "optionalPeers": ["@shopify/hydrogen", "next", "react-router"] }, "sha512-BE3ZC+uiOKNkd4KmATGn0+3S9qoNvaDQ7ijhTigk1wOgd9in8CcE+6qo1aBGj8Pj2Lt9uFW6abFDC2Ar++Q5Rg=="],
+    "@weaverse/hydrogen": ["@weaverse/hydrogen@6.6.0", "", { "dependencies": { "@weaverse/react": "6.6.0", "@weaverse/schema": "0.20.1", "react-error-boundary": "^6" }, "peerDependencies": { "@shopify/hydrogen": ">=2026.10.3", "next": ">=14", "react": ">=19", "react-dom": ">=19", "react-router": "^7 || ^8" }, "optionalPeers": ["@shopify/hydrogen", "next", "react-router"] }, "sha512-cYaWRqZjvjAXTAvKcSlTYYmjAK1elH+e/TH8gS2yTpp66Pvldpc+7UsbgJoKUrOjbbQN5bmea3AjK0gifMK2uQ=="],
 
-    "@weaverse/react": ["@weaverse/react@6.5.1", "", { "dependencies": { "@weaverse/core": "6.5.1", "clsx": "^2.1.1" }, "peerDependencies": { "react": ">=19", "react-dom": ">=19" } }, "sha512-5OVNH5SCZyUUdIjQQq+tzkj4QB1Q7hLRiip6Taoj/vIK/4h06VzpXgic4BXmbbsBiD9GdTZCg3j+1JY29C0wwA=="],
+    "@weaverse/react": ["@weaverse/react@6.6.0", "", { "dependencies": { "@weaverse/core": "6.6.0", "clsx": "^2.1.1" }, "peerDependencies": { "react": ">=19", "react-dom": ">=19" } }, "sha512-KZArmc4rbel+Oc8InqtzF4fPLyBwHHLs2UymkCeG6FIH87Xh+p3i2+vz8bRRvotOdwFnw/IoZRiiP6cFZ/2auQ=="],
 
     "@weaverse/schema": ["@weaverse/schema@0.20.1", "", { "dependencies": { "zod": "^4.4.0" } }, "sha512-TxgbVT/p9ywik5iL1o7ThXfBtfa+MZKu4qPefdIeBi03tJ1rNMYciFpMSGYoZVCDIMCo8cOwDwDlPyvPCiR7ZQ=="],
 
