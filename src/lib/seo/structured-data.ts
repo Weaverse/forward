@@ -37,7 +37,8 @@ export function productJsonLd(product: Product, locale: LocaleId): JsonLd {
     ...(product.category === "" ? {} : { category: product.category }),
     offers: product.variants.map((variant) => ({
       "@type": "Offer",
-      price: variant.price.amount.toFixed(2),
+      /* As Shopify returned it: a fixed scale would round KWD/BHD/JOD. */
+      price: String(variant.price.amount),
       priceCurrency: variant.price.currencyCode,
       availability: variant.availableForSale
         ? "https://schema.org/InStock"

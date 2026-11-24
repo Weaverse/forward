@@ -43,7 +43,7 @@ describe("structured data", () => {
     const [first, second] = offers;
     const variant = product.variants[0];
     assert.ok(first && second && variant);
-    assert.equal(first.price, variant.price.amount.toFixed(2));
+    assert.equal(first.price, String(variant.price.amount));
     assert.equal(first.priceCurrency, variant.price.currencyCode);
     assert.equal(first.availability, "https://schema.org/InStock");
     assert.equal(second.availability, "https://schema.org/OutOfStock");
@@ -53,6 +53,25 @@ describe("structured data", () => {
         `^https://shop\\.example\\.com/de-de/products/weatherline-shell\\?colorway=${variant.colorwayId}&size=`,
       ),
     );
+  });
+
+  it("keeps a three-decimal price as Shopify returned it", () => {
+    const product = PRODUCT_FIXTURES[0];
+    assert.ok(product);
+    const [variant] = product.variants;
+    assert.ok(variant);
+    const data = productJsonLd(
+      {
+        ...product,
+        variants: [
+          { ...variant, price: { amount: 1.234, currencyCode: "KWD" } },
+        ],
+      },
+      "en-us",
+    );
+    const [offer] = data.offers as Record<string, string>[];
+    assert.equal(offer?.price, "1.234");
+    assert.equal(offer?.priceCurrency, "KWD");
   });
 
   it("numbers a breadcrumb trail from home", () => {
