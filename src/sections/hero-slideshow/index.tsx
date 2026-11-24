@@ -7,6 +7,8 @@ import {
   useEffect,
   useState,
 } from "react";
+import { Icon } from "@/components/icon";
+import { cn } from "@/lib/cn";
 import { useT } from "@/lib/i18n/t";
 import { parseRows } from "../parse";
 import {
@@ -36,13 +38,15 @@ interface HeroSlideshowProps extends WeaverseElementProps {
  * The active progress fill is the autoplay timer: it grows through a
  * `@starting-style` transition and its `transitionend` advances the slide, so
  * bar and slide cannot drift. Under reduced motion the fill has no transition,
- * so nothing advances on its own.
+ * so nothing advances on its own. The pause control (WCAG 2.2.2) stops the
+ * same way: a paused fill has no transition, and playing remounts it.
  */
 function HeroSlideshow({ children, stats, ...rest }: HeroSlideshowProps) {
   const t = useT();
   const slides = Children.toArray(children).filter(isValidElement);
   const [active, setActive] = useState(0);
   const [shown, setShown] = useState(0);
+  const [paused, setPaused] = useState(false);
   const rows = parseRows(stats, 2);
 
   useEffect(() => {
@@ -66,7 +70,7 @@ function HeroSlideshow({ children, stats, ...rest }: HeroSlideshowProps) {
         {slides.map((slide, index) => (
           <SlideshowContext.Provider
             key={slide.key}
-            value={{ index, active, shown }}
+            value={{ index, count: slides.length, active, shown }}
           >
             {slide}
           </SlideshowContext.Provider>
@@ -101,16 +105,32 @@ function HeroSlideshow({ children, stats, ...rest }: HeroSlideshowProps) {
                 <span className="relative block h-0.5 w-14 overflow-hidden bg-text-inverse/25">
                   {index === active ? (
                     <span
-                      onTransitionEnd={() =>
-                        setActive((active + 1) % slides.length)
+                      key={paused ? "paused" : "playing"}
+                      onTransitionEnd={
+                        paused
+                          ? undefined
+                          : () => setActive((active + 1) % slides.length)
                       }
                       style={{ transitionDuration: `${SLIDE_INTERVAL_MS}ms` }}
-                      className="absolute inset-0 origin-left scale-x-100 bg-signal transition-[scale] ease-linear starting:scale-x-0 motion-reduce:transition-none"
+                      className={cn(
+                        "absolute inset-0 origin-left scale-x-100 bg-signal transition-[scale] ease-linear starting:scale-x-0 motion-reduce:transition-none",
+                        paused && "transition-none",
+                      )}
                     />
                   ) : null}
                 </span>
               </button>
             ))}
+            <button
+              type="button"
+              onClick={() => setPaused(!paused)}
+              className="ml-auto inline-grid min-h-touch min-w-touch cursor-pointer place-items-center text-text-dark-meta transition-colors hover:text-text-inverse motion-reduce:hidden"
+            >
+              <Icon name={paused ? "play" : "pause"} size={16} />
+              <span className="sr-only">
+                {t(paused ? "sections.playSlides" : "sections.pauseSlides")}
+              </span>
+            </button>
           </fieldset>
         ) : null}
       </div>
