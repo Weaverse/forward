@@ -133,7 +133,7 @@ export function toHydrogenProductInput(
     }
   }
   return {
-    id: product.handle,
+    id: product.id,
     handle: product.handle,
     title: product.title,
     options,

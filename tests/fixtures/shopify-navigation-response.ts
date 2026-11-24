@@ -6,6 +6,7 @@ export interface ShopifyMenuItemFixture {
 }
 
 export interface ShopifyCollectionFixture {
+  id: string;
   handle: string;
   title: string;
   description: string;
@@ -232,6 +233,7 @@ export function navigationResponse(): NavigationResponse {
         pageInfo: { hasNextPage: false },
         nodes: [
           {
+            id: "gid://shopify/Collection/1",
             handle: "forward",
             title: "Forward",
             description: "The complete Forward catalog.",
@@ -251,6 +253,7 @@ export function navigationResponse(): NavigationResponse {
             },
           },
           {
+            id: "gid://shopify/Collection/2",
             handle: "outerwear",
             title: "Outerwear",
             description: "Weather protection for exposed ground.",
@@ -264,6 +267,7 @@ export function navigationResponse(): NavigationResponse {
             },
           },
           {
+            id: "gid://shopify/Collection/3",
             handle: "packs",
             title: "Packs",
             description: "Carry systems for long field days.",
@@ -277,6 +281,7 @@ export function navigationResponse(): NavigationResponse {
             },
           },
           {
+            id: "gid://shopify/Collection/4",
             handle: "footwear",
             title: "Footwear",
             description: "Trail footwear for changing terrain.",

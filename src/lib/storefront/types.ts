@@ -72,6 +72,8 @@ export interface SpecRow {
 export type ProductCategory = string;
 
 export interface Product {
+  /** Exact Shopify product GID, for cart, analytics and structured data. */
+  id: string;
   handle: string;
   title: string;
   subtitle: string;
@@ -90,6 +92,8 @@ export interface Product {
 }
 
 export interface Collection {
+  /** Exact Shopify collection GID. */
+  id: string;
   handle: string;
   title: string;
   /**

@@ -393,6 +393,16 @@ describe("Shopify navigation mapping", () => {
     }
   });
 
+  it("keeps each collection's Shopify GID", () => {
+    assert.equal(mapped().collections[0]?.id, "gid://shopify/Collection/1");
+    const handleAsId = navigationResponseWith((draft) => {
+      const first = draft.data.collections.nodes[0];
+      assert.ok(first !== undefined);
+      first.id = "forward";
+    });
+    assert.throws(() => mapped(handleAsId), ShopifyCatalogError);
+  });
+
   it("exposes every collection the store publishes, in its order", () => {
     /* A theme that only surfaced four approved handles could not run on
      * another store. Whatever the merchant published is what ships. */

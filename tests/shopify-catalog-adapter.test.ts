@@ -594,6 +594,18 @@ describe("catalog mapping", () => {
 /* -------------------------------------------------------------------------- */
 
 describe("catalog mapping failures", () => {
+  it("keeps the Shopify product GID and rejects anything else", async () => {
+    const shell = mapped().find(({ handle }) => handle === "weatherline-shell");
+    assert.match(shell?.id ?? "", /^gid:\/\/shopify\/Product\/\d+$/);
+
+    await assertRejectsCatalog(
+      catalogResponseWith("weatherline-shell", (product) => {
+        product.id = "weatherline-shell";
+      }),
+      "Product GID",
+    );
+  });
+
   it("rejects a colorway map entry with the wrong number of media ids", async () => {
     await assertRejectsCatalog(
       catalogResponseWith("weatherline-shell", (product) => {

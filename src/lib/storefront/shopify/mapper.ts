@@ -809,7 +809,10 @@ function mapProduct(node: unknown, index: number): Product {
     fail(`${handle} is missing the "${CATALOG_OWNERSHIP_TAG}" ownership tag.`);
   }
 
-  asText(record.id, `${handle} id`);
+  const id = asText(record.id, `${handle} id`);
+  if (!id.startsWith("gid://shopify/Product/")) {
+    fail(`${handle} id is not a Shopify Product GID.`);
+  }
   const productType = asText(record.productType, `${handle} productType`);
   const title = asText(record.title, `${handle} title`);
   // Validate both Storefront fields. `descriptionHtml` preserves paragraph
@@ -883,6 +886,7 @@ function mapProduct(node: unknown, index: number): Product {
   );
 
   return {
+    id,
     handle,
     title,
     /* The store's own lead highlight. There is no `subtitle` field in the

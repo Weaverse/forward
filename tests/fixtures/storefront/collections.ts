@@ -8,6 +8,7 @@ import { PRODUCT_FIXTURES } from "./products";
 
 export const COLLECTION_FIXTURES: readonly Collection[] = [
   {
+    id: "gid://shopify/Collection/1",
     handle: "forward",
     title: "Forward",
     fieldCode: "FW-00",
@@ -23,6 +24,7 @@ export const COLLECTION_FIXTURES: readonly Collection[] = [
     productHandles: PRODUCT_FIXTURES.map((product) => product.handle),
   },
   {
+    id: "gid://shopify/Collection/2",
     handle: "outerwear",
     title: "Outerwear",
     fieldCode: "OW-01",
@@ -41,6 +43,7 @@ export const COLLECTION_FIXTURES: readonly Collection[] = [
     ],
   },
   {
+    id: "gid://shopify/Collection/3",
     handle: "packs",
     title: "Packs",
     fieldCode: "PK-02",
@@ -59,6 +62,7 @@ export const COLLECTION_FIXTURES: readonly Collection[] = [
     ],
   },
   {
+    id: "gid://shopify/Collection/4",
     handle: "footwear",
     title: "Footwear",
     fieldCode: "FT-03",

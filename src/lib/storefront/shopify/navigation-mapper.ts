@@ -199,6 +199,10 @@ function mapCollection(value: unknown, index: number): Collection {
   const context = `Shopify collection ${index}`;
   const record = asRecord(value, context);
   const handle = asText(record.handle, `${context} handle`);
+  const id = asText(record.id, `${context} id`);
+  if (!id.startsWith("gid://shopify/Collection/")) {
+    fail(`${context} id is not a Shopify Collection GID.`);
+  }
   const title = asText(record.title, `Shopify collection "${handle}" title`);
   const products = asRecord(record.products, `${context} products`);
   const productHandles = asArray(
@@ -221,6 +225,7 @@ function mapCollection(value: unknown, index: number): Collection {
         );
 
   return {
+    id,
     handle,
     title,
     description: typeof description === "string" ? description : "",
