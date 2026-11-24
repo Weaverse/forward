@@ -145,34 +145,33 @@ function ProductVariantSelector({
               };
               const exact = findExactVariant(product, colorway.id, nextOptions);
               const selected = selection.selectedOptions[option.name] === value;
-              if (exact === undefined || !exact.availableForSale) {
+              /* No variant has this combination: there is nothing to show. */
+              if (exact === undefined) {
                 return (
                   <span
                     key={value}
                     className={optionChip({
                       interactive: false,
                       selected,
-                      soldOut: true,
+                      soldOut: false,
                     })}
                     aria-disabled="true"
-                    aria-current={selected ? "true" : undefined}
                     title={t("product.unavailable", { value })}
                   >
                     {value}
-                    <span className="sr-only">
-                      {" "}
-                      {t("product.soldOutSuffix")}
-                    </span>
                   </span>
                 );
               }
+              /* A sold-out variant stays selectable, so a shopper can see it;
+               * the add-to-cart button is what says it cannot be bought. */
+              const soldOut = !exact.availableForSale;
               return (
                 <Link
                   key={value}
                   className={optionChip({
                     interactive: true,
                     selected,
-                    soldOut: false,
+                    soldOut,
                   })}
                   href={productSelectionHref(
                     product,
@@ -184,6 +183,12 @@ function ProductVariantSelector({
                   aria-current={selected ? "true" : undefined}
                 >
                   {value}
+                  {soldOut ? (
+                    <span className="sr-only">
+                      {" "}
+                      {t("product.soldOutSuffix")}
+                    </span>
+                  ) : null}
                 </Link>
               );
             })}
