@@ -16,6 +16,7 @@ import type {
   JournalBlog,
   Policy,
   Product,
+  ShopIdentity,
   SiteNavigation,
   StorePage,
 } from "../types";
@@ -289,6 +290,18 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
       ),
       footerColumns: mapFooterMenuResult(result, this.#storeDomain),
     };
+  }
+
+  /** Read with the menus, which every page already loads. */
+  async getShop(): Promise<ShopIdentity> {
+    const { data } = await this.#executeNavigation();
+    const id = (data as { shop?: { id?: unknown } } | undefined)?.shop?.id;
+    if (typeof id !== "string" || !id.startsWith("gid://shopify/Shop/")) {
+      throw new ShopifyCatalogError(
+        "Storefront API navigation response did not contain the shop id.",
+      );
+    }
+    return { id, myshopifyDomain: this.#storeDomain };
   }
 
   /* ---- Shopify-owned content reads ------------------------------------- */

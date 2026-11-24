@@ -7,9 +7,8 @@ import { useLocale, usePathname } from "@/lib/i18n/locale-context";
 import { localizePath } from "@/lib/i18n/locales";
 
 import {
-  COLORWAY_PARAM,
-  optionParamKey,
   productSelectionHref,
+  requestedSelection,
   resolveProductSelection,
 } from "@/lib/storefront/product-state";
 import type { Product } from "@/lib/storefront/types";
@@ -101,18 +100,6 @@ function MainProduct({
   );
 }
 
-function requestedOptions(
-  product: Product,
-  params: URLSearchParams,
-): Readonly<Record<string, string | undefined>> {
-  return Object.fromEntries(
-    product.options.map((option) => [
-      option.name,
-      params.get(optionParamKey(option.name)) ?? undefined,
-    ]),
-  );
-}
-
 /**
  * Resolves the selection from the URL and rewrites an incomplete or invalid
  * one to its canonical form, keeping unrelated query params.
@@ -130,10 +117,11 @@ function UrlSelection({
   const locale = useLocale();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const requested = requestedSelection(product, searchParams);
   const selection = resolveProductSelection(
     product,
-    searchParams.get(COLORWAY_PARAM) ?? undefined,
-    requestedOptions(product, searchParams),
+    requested.colorwayId,
+    requested.options,
   );
   /* `router.replace` bypasses the theme `Link`, so the market goes on here. */
   const canonicalHref = localizePath(

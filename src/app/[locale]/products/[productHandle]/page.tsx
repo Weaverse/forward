@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { marketAlternates } from "@/lib/i18n/alternates";
 import { DEFAULT_LOCALE, type LocaleId, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
 import { getTranslator } from "@/lib/i18n/translator";
+import { shopifyRedirectOrNotFound } from "@/lib/routes/not-found";
 import { getStorefront } from "@/lib/storefront/data-source";
 import type { Product } from "@/lib/storefront/types";
 import { WeaversePage } from "@/lib/weaverse/page";
@@ -67,7 +67,7 @@ export default async function ProductPage(props: ProductPageProps) {
     Promise.resolve(weaverseProjectId()),
   ]);
   if (product === null || page === null || projectId === null) {
-    notFound();
+    return shopifyRedirectOrNotFound();
   }
   const related = await relatedProducts(product, locale);
 

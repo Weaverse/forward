@@ -1,8 +1,8 @@
 import { getWeaverseNextSeoMetadata } from "@weaverse/hydrogen/next/server";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { marketAlternates } from "@/lib/i18n/alternates";
 import { routeLocale } from "@/lib/i18n/route-locale";
+import { shopifyRedirectOrNotFound } from "@/lib/routes/not-found";
 import { WeaversePage } from "@/lib/weaverse/page";
 import {
   loadWeaversePage,
@@ -22,9 +22,10 @@ interface CustomPageProps {
  * time, so there is no route file per page.
  *
  * Sitting at the app root, this also catches every path no other route
- * matches. `notFound()` answers an unknown path with a real 404 — which only
- * holds while no `loading.tsx` wraps the route in a Suspense boundary, because
- * a streamed shell commits the response to 200 before the check runs.
+ * matches. A path Shopify redirects (`/admin`, the store's URL redirects) is
+ * redirected; anything else is a real 404. Both only hold while no
+ * `loading.tsx` wraps the route in a Suspense boundary, because a streamed
+ * shell commits the response to 200 before the check runs.
  */
 export default async function WeaverseCustomPage(props: CustomPageProps) {
   const { slug } = await props.params;
@@ -40,7 +41,7 @@ export default async function WeaverseCustomPage(props: CustomPageProps) {
   const projectId = weaverseProjectId();
 
   if (page === null || projectId === null) {
-    notFound();
+    return shopifyRedirectOrNotFound();
   }
 
   return <WeaversePage data={page} projectId={projectId} />;

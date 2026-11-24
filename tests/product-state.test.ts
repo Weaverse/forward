@@ -7,6 +7,7 @@ import {
   optionParamKey,
   productColorwayHref,
   productSelectionHref,
+  requestedSelection,
   resolveColorway,
   resolveProductSelection,
 } from "../src/lib/storefront/product-state.ts";
@@ -167,5 +168,37 @@ describe("productSelectionHref", () => {
       ),
       `/products/${product.handle}?utm_source=field&colorway=claystone&size=M`,
     );
+  });
+});
+
+describe("requestedSelection", () => {
+  it("reads the option params Shopify's ?variant= redirect writes", () => {
+    const product = firstProduct();
+    const second = product.colorways[1];
+    assert.ok(second !== undefined);
+    const params = new URLSearchParams(
+      `Color=${encodeURIComponent(second.name)}&Size=L&ref=mail`,
+    );
+
+    assert.deepEqual(requestedSelection(product, params), {
+      colorwayId: second.id,
+      options: { Size: "L" },
+    });
+    /* The canonical URL keeps Forward's params only. */
+    assert.equal(
+      productSelectionHref(product, second.id, { Size: "L" }, params),
+      `/products/${product.handle}?ref=mail&colorway=${second.id}&size=L`,
+    );
+  });
+
+  it("prefers Forward's own params", () => {
+    const product = firstProduct();
+    const params = new URLSearchParams(
+      `colorway=${product.colorways[0]?.id}&size=M&Color=nope&Size=L`,
+    );
+    assert.deepEqual(requestedSelection(product, params), {
+      colorwayId: product.colorways[0]?.id,
+      options: { Size: "M" },
+    });
   });
 });

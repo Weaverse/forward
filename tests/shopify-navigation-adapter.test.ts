@@ -425,6 +425,19 @@ describe("Shopify navigation mapping", () => {
 });
 
 describe("Shopify navigation data source", () => {
+  it("reads the shop's identity with the menus", async () => {
+    assert.deepEqual(await shopifySource().getShop(), {
+      id: "gid://shopify/Shop/1234567",
+      myshopifyDomain: SYNTHETIC_STORE_DOMAIN,
+    });
+    const noShop = shopifySource(async () =>
+      navigationResponseWith((draft) => {
+        draft.data.shop = { id: "" };
+      }),
+    );
+    await assert.rejects(() => noShop.getShop(), ShopifyCatalogError);
+  });
+
   it("maps the live primary menu and every Footer column", async () => {
     const source = shopifySource();
     assert.deepEqual(await source.getNavigation(), {
