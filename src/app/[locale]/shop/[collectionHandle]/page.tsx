@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { marketAlternates } from "@/lib/i18n/alternates";
 import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
 import { getTranslator } from "@/lib/i18n/translator";
+import { shopifyRedirectOrNotFound } from "@/lib/routes/not-found";
 import { getStorefront } from "@/lib/storefront/data-source";
 import {
   AFTER_PARAM,
@@ -107,7 +107,7 @@ export default async function CollectionPage(props: CollectionPageProps) {
     weaversePage === null ||
     projectId === null
   ) {
-    notFound();
+    return shopifyRedirectOrNotFound();
   }
 
   return (
