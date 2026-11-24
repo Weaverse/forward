@@ -67,8 +67,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   /* Weaverse custom pages the default market serves. It is unprefixed, so
    * the path is the bare handle. A page a route above already lists
-   * (`/journal`) is not repeated. The endpoint lists assignments, not
-   * publication state, so a draft assignment can appear here. */
+   * (`/journal`) is not repeated. */
   const listed = new Set(
     [...staticEntries, ...dynamicEntries].map((entry) => entry.url),
   );
