@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { JsonLdScript } from "@/components/json-ld";
 import { marketAlternates } from "@/lib/i18n/alternates";
 import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
 import { getTranslator } from "@/lib/i18n/translator";
+import { shopifyRedirectOrNotFound } from "@/lib/routes/not-found";
 import { breadcrumbJsonLd } from "@/lib/seo/structured-data";
 import { getStorefront } from "@/lib/storefront/data-source";
 import {
@@ -126,7 +126,7 @@ export default async function CollectionPage(props: CollectionPageProps) {
     weaversePage === null ||
     projectId === null
   ) {
-    notFound();
+    return shopifyRedirectOrNotFound();
   }
   const t = await getTranslator(locale);
 

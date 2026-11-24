@@ -1,6 +1,6 @@
 /**
- * The storefront's public origin, for the absolute URLs in `sitemap.xml` and
- * `robots.txt`.
+ * The storefront's public origin, for the absolute URLs in `sitemap.xml`,
+ * `robots.txt` and page metadata (`metadataBase`).
  *
  * `PUBLIC_SITE_URL` wins. On Vercel, the project's production domain
  * (`VERCEL_PROJECT_PRODUCTION_URL`, set at build and run time) is used, so
