@@ -346,6 +346,8 @@ export const STATIC_CONTENT = {
     viewProduct: "View product →",
     inspectProduct: "Inspect product →",
     heroSlides: "Hero slides",
+    pauseSlides: "Pause slideshow",
+    playSlides: "Play slideshow",
     viewDetails: "View full details",
     /** Shown until the merchant picks a product, so a section keeps its layout. */
     placeholder: {

@@ -3,7 +3,7 @@
 import { IMAGES_PLACEHOLDERS } from "@weaverse/hydrogen/next";
 import { cva } from "class-variance-authority";
 import Image from "next/image";
-import { type ReactNode, useContext } from "react";
+import { type ReactNode, useContext, useState } from "react";
 import { Link } from "@/components/link";
 
 import { cn } from "@/lib/cn";
@@ -58,6 +58,11 @@ export interface HeroSlideProps extends WeaverseElementProps {
  *
  * The slide root is deliberately unpositioned: the image, tag and badge are
  * placed against the slideshow section, not against this column.
+ *
+ * A slide's image mounts one slide ahead of its turn, so the initial page
+ * carries only the first image (prioritized) and the second (lazy), and each
+ * later one has loaded by the time it crossfades in without competing with
+ * the first for the hero's paint.
  */
 function HeroSlide({
   children,
@@ -67,8 +72,12 @@ function HeroSlide({
   loaderData,
   ...rest
 }: HeroSlideProps) {
-  const { index, active, shown } = useContext(SlideshowContext);
+  const { index, count, active, shown } = useContext(SlideshowContext);
   const isActive = index === active;
+  const [imageMounted, setImageMounted] = useState(index === 0);
+  if (!imageMounted && (isActive || index === (active + 1) % count)) {
+    setImageMounted(true);
+  }
   const isShown = index === shown;
   const leaving = isShown && active !== shown;
   const phase = isShown ? "shown" : "hidden";
@@ -81,7 +90,7 @@ function HeroSlide({
       {...elementAttributes(rest)}
       className="flex min-w-0 max-w-6xl flex-col justify-end px-page-gutter pt-28 pb-10 [grid-area:1/1] md:pb-14"
     >
-      {resolvedImage === null ? null : (
+      {resolvedImage === null || !imageMounted ? null : (
         <div
           aria-hidden={!isActive}
           className={cn(
@@ -95,7 +104,7 @@ function HeroSlide({
             alt={resolvedImage.alt}
             fill
             sizes="100vw"
-            {...(index === 0 ? { priority: true } : { loading: "eager" })}
+            {...(index === 0 ? { priority: true } : { loading: "lazy" })}
           />
         </div>
       )}
