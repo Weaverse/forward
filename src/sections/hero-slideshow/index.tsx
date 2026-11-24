@@ -90,7 +90,7 @@ function HeroSlideshow({ children, stats, ...rest }: HeroSlideshowProps) {
           ))}
         </dl>
         {slides.length > 1 ? (
-          <fieldset className="m-0 flex min-w-0 items-center gap-5 border-0 px-page-gutter pt-0 pb-6 md:pt-6">
+          <fieldset className="m-0 flex min-w-0 flex-wrap items-center gap-5 border-0 px-page-gutter pt-0 pb-6 md:pt-6">
             <legend className="sr-only">{t("sections.heroSlides")}</legend>
             {slides.map((slide, index) => (
               <button
