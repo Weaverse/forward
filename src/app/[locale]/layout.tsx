@@ -15,6 +15,7 @@ import {
   LOCALE_IDS,
   LOCALES,
   localeTag,
+  localizePath,
   parseLocale,
 } from "@/lib/i18n/locales";
 import { ROUTE_TEMPLATES } from "@/lib/routes/shopify-routes";
@@ -114,6 +115,7 @@ export default async function RootLayout({
     >
       <head>
         <ShopifyScripts
+          cartPath={localizePath("/cart", locale)}
           analytics={{
             channel: storefrontId === null ? "headless" : "hydrogen",
           }}

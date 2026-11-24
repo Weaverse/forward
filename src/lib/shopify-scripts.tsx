@@ -4,8 +4,6 @@ import type { ShopifyRouteTemplates } from "@shopify/hydrogen";
 import { ShopifyScripts as HydrogenShopifyScripts } from "@shopify/hydrogen/react";
 import { useRouter } from "next/navigation";
 import { type ComponentProps, useEffect } from "react";
-import { useLocale } from "@/lib/i18n/locale-context";
-import { localizePath } from "@/lib/i18n/locales";
 
 type HydrogenProps = ComponentProps<typeof HydrogenShopifyScripts>;
 
@@ -14,25 +12,27 @@ interface ShopifyScriptsProps {
   i18n: NonNullable<HydrogenProps["i18n"]>;
   analytics: HydrogenProps["analytics"];
   routes: ShopifyRouteTemplates;
+  /** The market's cart page. Passed in: this renders in `<head>`, outside the
+   * `LocaleProvider`. */
+  cartPath: string;
 }
 
 /**
  * Points Standard Actions' `openCart` at the cart page, Forward's only full
- * cart view. Standard Actions is a module script, so it has run by
- * `DOMContentLoaded` at the latest.
+ * cart view. Standard Actions is a module script: hydration can run before it
+ * (`readyState` is already `interactive` then), but never after `load`.
  */
 function configureOpenCart(openCart: () => void): () => void {
-  function configure() {
-    window.Shopify?.actions?.openCart?.configure({
-      handler: async () => openCart(),
-    });
+  function configure(): boolean {
+    const action = window.Shopify?.actions?.openCart;
+    action?.configure({ handler: async () => openCart() });
+    return action !== undefined;
   }
-  if (document.readyState !== "loading") {
-    configure();
+  if (configure() || document.readyState === "complete") {
     return () => {};
   }
-  document.addEventListener("DOMContentLoaded", configure, { once: true });
-  return () => document.removeEventListener("DOMContentLoaded", configure);
+  window.addEventListener("load", configure, { once: true });
+  return () => window.removeEventListener("load", configure);
 }
 
 /**
@@ -45,13 +45,13 @@ export function ShopifyScripts({
   i18n,
   analytics,
   routes,
+  cartPath,
 }: ShopifyScriptsProps) {
   const router = useRouter();
-  const locale = useLocale();
 
   useEffect(
-    () => configureOpenCart(() => router.push(localizePath("/cart", locale))),
-    [router, locale],
+    () => configureOpenCart(() => router.push(cartPath)),
+    [router, cartPath],
   );
 
   return (
