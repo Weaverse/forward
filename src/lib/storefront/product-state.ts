@@ -15,6 +15,8 @@ import type {
 } from "./types";
 
 export const COLORWAY_PARAM = "colorway";
+/** Shopify's name for the option Forward presents as colorways. */
+const COLOR_OPTION_NAME = "Color";
 
 export interface ProductSelection {
   colorway: ProductColorway;
@@ -29,6 +31,37 @@ export function optionParamKey(optionName: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+export interface RequestedSelection {
+  colorwayId: string | undefined;
+  options: Readonly<Record<string, string | undefined>>;
+}
+
+/**
+ * The selection a product URL asks for. Forward writes `colorway` and one
+ * kebab-case param per option; Shopify's `?variant=` redirect writes every
+ * option under its own name (`?Color=Red&Size=M`), which is read whenever
+ * Forward's own param is absent.
+ */
+export function requestedSelection(
+  product: Product,
+  params: URLSearchParams,
+): RequestedSelection {
+  const color = params.get(COLOR_OPTION_NAME);
+  return {
+    colorwayId:
+      params.get(COLORWAY_PARAM) ??
+      product.colorways.find((entry) => entry.name === color)?.id,
+    options: Object.fromEntries(
+      product.options.map((option) => [
+        option.name,
+        params.get(optionParamKey(option.name)) ??
+          params.get(option.name) ??
+          undefined,
+      ]),
+    ),
+  };
 }
 
 /**
@@ -164,7 +197,9 @@ export function productSelectionHref(
 ): string {
   const params = new URLSearchParams(currentParams?.toString());
   params.set(COLORWAY_PARAM, colorwayId);
+  params.delete(COLOR_OPTION_NAME);
   for (const option of product.options) {
+    params.delete(option.name);
     const key = optionParamKey(option.name);
     const value = selectedOptions[option.name];
     if (value === undefined) params.delete(key);

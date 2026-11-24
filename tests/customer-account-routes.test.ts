@@ -124,11 +124,15 @@ describe("customer account route ownership", () => {
       path.join(process.cwd(), "src/proxy.ts"),
       "utf8",
     );
-    assert.equal(source.match(/handleShopifyRoutes\(/g)?.length, 1);
-    /* The matcher covers every page path, so the account boundary is always
-     * reached; the proxy branches on the locale-free account path. */
+    /* One call for Shopify's own routes, one for the account protocol. */
+    assert.equal(source.match(/handleShopifyRoutes\(/g)?.length, 2);
+    /* The matcher covers every request but Next's build output, so the
+     * account boundary is always reached; the proxy branches on the
+     * locale-free account path. */
     const matcher = source.slice(source.indexOf("matcher: ["));
-    assert.ok(matcher.includes('"/((?!_next/|api/|.*\\\\.[^/]+$).*)"'));
+    assert.ok(
+      matcher.includes('"/((?!_next/static|_next/image|_next/data).*)"'),
+    );
     assert.ok(source.includes("isAccountPath(route.path)"));
     assert.ok(source.includes("CUSTOMER_ACCOUNT_PROTOCOL_METHODS.get"));
   });

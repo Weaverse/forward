@@ -1,5 +1,11 @@
 /**
- * The single route gate for Forward: markets first, then the account boundary.
+ * The single route gate for Forward: Shopify's own routes first, then markets,
+ * then the account boundary.
+ *
+ * `handleShopifyRoutes` answers the routes Hydrogen owns (`/.well-known/ucp`,
+ * `/checkout`, `/cart.js`, the Storefront API proxy under `/api`, `?variant=`
+ * product links…) before Next routes anything, and passes every other request
+ * through. Route handlers under `/api` and files are never localized.
  *
  * Next runs `proxy.ts` before App Router routing. Every rendered route lives in
  * `app/[locale]/`, and the default locale never appears in a URL:
@@ -41,6 +47,11 @@ import {
   splitLocale,
 } from "@/lib/i18n/locales";
 import { SHOPIFY_I18N } from "@/lib/i18n/shopify-i18n";
+import {
+  createShopifyRouteContext,
+  ROUTE_TEMPLATES,
+  STOREFRONT_URL_HEADER,
+} from "@/lib/routes/shopify-routes";
 import { applyContentSecurityPolicy } from "@/lib/security/content-security-policy";
 
 const CUSTOMER_ACCOUNT_PROTOCOL_METHODS = new Map<string, string>([
@@ -119,7 +130,8 @@ function hardenAccountProtocolResponse(response: Response): Response {
 /**
  * `handleShopifyRoutes` requires its Storefront client to carry the exact same
  * request context even though the matched Customer Account handlers never call
- * Storefront API. The matcher is account-only, so this inert carrier keeps the
+ * Storefront API. That call only ever sees the four protocol paths, so this
+ * inert carrier keeps the
  * four-key account boundary independent from catalog credentials. Any future
  * package access beyond `requestContext` fails closed instead of inventing or
  * reusing a Storefront token.
@@ -139,6 +151,13 @@ function routeResponse(
   /* A policy the shopper sends must never supply the nonce Next renders with. */
   headers.delete("content-security-policy");
   headers.delete("content-security-policy-report-only");
+  /* The URL the shopper asked for, for `not-found`'s Shopify redirects. A
+   * request this proxy rewrote comes back without its `/en-us` prefix. */
+  const storefrontUrl = request.nextUrl.clone();
+  if (request.headers.has(LOCALE_REWRITE_HEADER)) {
+    storefrontUrl.pathname = route.path;
+  }
+  headers.set(STOREFRONT_URL_HEADER, storefrontUrl.toString());
   if (route.kind === "serve") {
     return NextResponse.next({ request: { headers } });
   }
@@ -239,7 +258,43 @@ function requestRoute(request: NextRequest): LocaleRoute {
   return resolveLocaleRoute(pathname);
 }
 
+/** A page, as opposed to a build asset, a route handler or a file. */
+function isPagePath(pathname: string): boolean {
+  return !/^\/(?:_next|api)\/|\.[^/]+$/.test(pathname);
+}
+
+/**
+ * Shopify's response for a route Hydrogen owns, or `null`. A request this
+ * proxy already rewrote has been through here once, and the account paths
+ * belong to the account boundary below.
+ */
+function shopifyRoute(request: NextRequest): Promise<Response> | null {
+  if (
+    request.headers.has(LOCALE_REWRITE_HEADER) ||
+    isAccountPath(splitLocale(request.nextUrl.pathname).path)
+  ) {
+    return null;
+  }
+  const context = createShopifyRouteContext(request);
+  if (context === null) {
+    return null;
+  }
+  return handleShopifyRoutes({
+    request,
+    requestContext: context.requestContext,
+    storefrontClient: context.storefrontClient,
+    routeTemplates: ROUTE_TEMPLATES,
+  });
+}
+
 export async function proxy(request: NextRequest): Promise<Response> {
+  const shopify = shopifyRoute(request);
+  if (shopify !== null) {
+    return shopify;
+  }
+  if (!isPagePath(request.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
   const route = requestRoute(request);
   if (route.kind === "redirect") {
     const url = request.nextUrl.clone();
@@ -310,10 +365,10 @@ export async function proxy(request: NextRequest): Promise<Response> {
 }
 
 /**
- * Every page path. Build assets, route handlers under `/api`, and files with an
- * extension (`robots.txt`, `sitemap.xml`, `icon.svg`, images) never pass
- * through.
+ * Every request but Next's own build output, as Shopify's Next.js guide asks:
+ * Hydrogen's routes include `/api/{version}/graphql.json` and `/cart.js`.
+ * Only page paths are localized.
  */
 export const config = {
-  matcher: ["/((?!_next/|api/|.*\\.[^/]+$).*)"],
+  matcher: ["/((?!_next/static|_next/image|_next/data).*)"],
 };

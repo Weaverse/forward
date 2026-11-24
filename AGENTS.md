@@ -101,6 +101,13 @@ from scaffolded copies).
   appears in a URL: `src/proxy.ts` 308-redirects `/en-us/*` to the unprefixed
   path and rewrites unprefixed paths to `/en-us/*`. Route handlers, `robots`
   and `sitemap` stay outside the segment.
+- Before markets, `src/proxy.ts` runs Hydrogen's `handleShopifyRoutes` on
+  every request but Next's build output (`/.well-known/ucp`, `/checkout`,
+  `/cart.js`, the Storefront API proxy, `?variant=` links). Never narrow its
+  matcher or whitelist Hydrogen paths. A route that would 404 calls
+  `shopifyRedirectOrNotFound()` instead of `notFound()`, so `/admin` and the
+  store's URL redirects still redirect. `ROUTE_TEMPLATES` in
+  `src/lib/routes/shopify-routes.ts` maps Shopify's paths to Forward's.
 - Every read is scoped to the request's market through
   `getStorefront(locale)`; Weaverse loaders read it with `loaderLocale`.
   Prices carry their own currency and are never derived from the locale.
