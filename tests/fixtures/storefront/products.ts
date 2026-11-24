@@ -412,6 +412,7 @@ function buildProduct(
       : [{ name: "Size", values: definition.sizes }];
   const price: Money = { amount: definition.price, currencyCode: "USD" };
   return {
+    id: `gid://shopify/Product/${handle}`,
     handle,
     title: definition.title,
     /* The live mapper uses the store's first `forward.highlights` line; the

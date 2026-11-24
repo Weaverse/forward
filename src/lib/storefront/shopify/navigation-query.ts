@@ -53,6 +53,7 @@ export const NAVIGATION_QUERY = gql(`
         hasNextPage
       }
       nodes {
+        id
         handle
         title
         description

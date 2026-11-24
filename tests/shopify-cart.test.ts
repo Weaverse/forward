@@ -54,6 +54,8 @@ describe("Shopify cart request boundary", () => {
       throw new Error("missing product variant fixture");
     }
     const input = toHydrogenProductInput(product, colorway.id);
+    /* Hydrogen's product state and analytics key on the GID, not the handle. */
+    assert.equal(input.id, product.id);
     assert.deepEqual(
       input.options.map(({ name }) => name),
       ["Color"],
