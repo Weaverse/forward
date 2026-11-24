@@ -34,6 +34,7 @@ import type {
   JournalBlog,
   Policy,
   Product,
+  ShopIdentity,
   SiteNavigation,
   StorePage,
 } from "./types";
@@ -74,6 +75,8 @@ export interface StorefrontDataSource {
   listPolicies(): Promise<readonly Policy[]>;
   getPolicy(handle: string): Promise<Policy | null>;
   getNavigation(): Promise<SiteNavigation>;
+  /** The shop's GID and permanent domain, for Shopify's browser scripts. */
+  getShop(): Promise<ShopIdentity>;
 }
 
 export type StorefrontDataSourceOptions = CatalogQueryExecutorOptions;

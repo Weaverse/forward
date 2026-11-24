@@ -16,6 +16,9 @@ export const NAVIGATION_QUERY = gql(`
     $country: CountryCode
     $language: LanguageCode
   ) @inContext(country: $country, language: $language) {
+    shop {
+      id
+    }
     menu(handle: $menuHandle) {
       handle
       items {
