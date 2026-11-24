@@ -208,17 +208,33 @@ describe("sold-out truth", () => {
     mountPdp(product, "colorway=charcoal-moss&size=L");
 
     const sizes = optionRowFor("Size");
-    const soldOut = within(sizes).getByTitle("L is unavailable");
-    assert.equal(soldOut.getAttribute("aria-disabled"), "true");
+    /* Sold out is still a variant a shopper can look at. */
+    const soldOut = within(sizes).getByRole("link", { name: "L (sold out)" });
     assert.equal(soldOut.getAttribute("aria-current"), "true");
-    assert.equal(soldOut.tagName, "SPAN", "an unbuyable value is not a link");
-    assert.match(visibleText(soldOut), /L \(sold out\)/);
+    assert.match(soldOut.getAttribute("href") ?? "", /size=L/);
     assert.equal(
       screen
         .getByRole("button", { name: /^Sold out/ })
         .hasAttribute("disabled"),
       true,
     );
+  });
+
+  it("keeps a combination no variant has apart from a sold-out one", () => {
+    const missing = SHELL.variants[3];
+    assert.ok(missing);
+    const product = {
+      ...SHELL,
+      variants: SHELL.variants.filter((variant) => variant !== missing),
+    };
+    mountPdp(product, "colorway=charcoal-moss&size=XS");
+
+    const sizes = optionRowFor("Size");
+    const value = missing.selectedOptions[0]?.value ?? "";
+    const chip = within(sizes).getByTitle(`${value} is unavailable`);
+    assert.equal(chip.tagName, "SPAN", "a missing combination is not a link");
+    assert.equal(chip.getAttribute("aria-disabled"), "true");
+    assert.doesNotMatch(visibleText(chip), /sold out/);
   });
 
   it("marks a fully sold-out colorway while keeping it a working deep link", () => {
