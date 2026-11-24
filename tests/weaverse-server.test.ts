@@ -85,10 +85,10 @@ describe("loadWeaversePage", () => {
 });
 
 describe("fetchWeaverseCustomPages", () => {
-  it("answers an empty list when the endpoint fails", async () => {
+  it("rejects when the endpoint fails", async () => {
     sdk.createClient.mockReturnValue({
       fetchCustomPages: vi.fn().mockRejectedValue(new Error("down")),
     });
-    await expect(fetchWeaverseCustomPages()).resolves.toEqual([]);
+    await expect(fetchWeaverseCustomPages()).rejects.toThrow("down");
   });
 });

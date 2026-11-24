@@ -180,19 +180,14 @@ export async function revalidateServerClient(
 
 /**
  * The project's custom pages, for the sitemap; empty when Weaverse is not
- * configured or the list cannot be read.
- *
- * The public endpoint lists page assignments, not publication state, so an
- * entry here is not proof the page is published.
+ * configured. A failed read rejects (`WeaverseLoadError` from the SDK) so the
+ * sitemap answers 5xx instead of a 200 that drops every custom page: crawlers
+ * keep the last good sitemap and retry.
  */
 export async function fetchWeaverseCustomPages(): Promise<
   WeaverseNextCustomPageEntry[]
 > {
-  try {
-    return (await createClient({ pathname: "/" })?.fetchCustomPages()) ?? [];
-  } catch {
-    return [];
-  }
+  return (await createClient({ pathname: "/" })?.fetchCustomPages()) ?? [];
 }
 
 /**
