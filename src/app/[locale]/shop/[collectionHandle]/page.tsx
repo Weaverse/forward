@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { JsonLdScript } from "@/components/json-ld";
 import { marketAlternates } from "@/lib/i18n/alternates";
 import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
 import { getTranslator } from "@/lib/i18n/translator";
+import { breadcrumbJsonLd } from "@/lib/seo/structured-data";
 import { getStorefront } from "@/lib/storefront/data-source";
 import {
   AFTER_PARAM,
@@ -53,10 +55,27 @@ export async function generateMetadata({
   if (collection === null) {
     return { title: t("meta.collectionNotFound") };
   }
+  const image = collection.heroImage;
   return {
     title: t("meta.collectionTitle", { title: collection.title }),
     description: collection.description,
     alternates: marketAlternates(`/shop/${collectionHandle}`, locale),
+    openGraph: {
+      title: collection.title,
+      description: collection.description,
+      ...(image === null
+        ? {}
+        : {
+            images: [
+              {
+                url: image.src,
+                width: image.width,
+                height: image.height,
+                alt: image.alt,
+              },
+            ],
+          }),
+    },
   };
 }
 
@@ -109,16 +128,29 @@ export default async function CollectionPage(props: CollectionPageProps) {
   ) {
     notFound();
   }
+  const t = await getTranslator(locale);
 
   return (
-    <WeaversePage
-      data={weaversePage}
-      dataContext={{
-        collection,
-        collectionProducts: page.products,
-        browse: { filters: page.filters, sort, pageInfo: page.pageInfo },
-      }}
-      projectId={projectId}
-    />
+    <>
+      <JsonLdScript
+        data={breadcrumbJsonLd(
+          [
+            [t("meta.breadcrumbHome"), "/"],
+            [t("meta.shopTitle"), "/shop"],
+            [collection.title, pathname],
+          ],
+          locale,
+        )}
+      />
+      <WeaversePage
+        data={weaversePage}
+        dataContext={{
+          collection,
+          collectionProducts: page.products,
+          browse: { filters: page.filters, sort, pageInfo: page.pageInfo },
+        }}
+        projectId={projectId}
+      />
+    </>
   );
 }

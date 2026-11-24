@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { JsonLdScript } from "@/components/json-ld";
 import { marketAlternates } from "@/lib/i18n/alternates";
 import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
+import { getTranslator } from "@/lib/i18n/translator";
+import { websiteJsonLd } from "@/lib/seo/structured-data";
 import { WeaversePage } from "@/lib/weaverse/page";
 import {
   loadWeaversePage,
@@ -32,7 +35,7 @@ export async function generateMetadata({
  */
 export default async function HomePage(props: HomePageProps) {
   const locale = await routeLocale(props.params);
-  const [page, projectId] = await Promise.all([
+  const [page, projectId, t] = await Promise.all([
     loadWeaversePage({
       locale,
       pathname: "/",
@@ -40,6 +43,7 @@ export default async function HomePage(props: HomePageProps) {
       type: "INDEX",
     }),
     Promise.resolve(weaverseProjectId()),
+    getTranslator(locale),
   ]);
 
   if (page === null || projectId === null) {
@@ -48,6 +52,7 @@ export default async function HomePage(props: HomePageProps) {
 
   return (
     <div className="-mt-header-compact [--header-inset:var(--spacing-header-compact)] bg-text-inverse md:-mt-header md:[--header-inset:var(--spacing-header)]">
+      <JsonLdScript data={websiteJsonLd(t("meta.siteTitle"), locale)} />
       <WeaversePage data={page} projectId={projectId} />
     </div>
   );
