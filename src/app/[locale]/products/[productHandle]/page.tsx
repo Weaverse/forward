@@ -18,8 +18,6 @@ interface ProductPageProps {
   searchParams: Promise<SearchParams>;
 }
 
-export const dynamicParams = false;
-
 /*
  * Bounded catalog freshness. Must stay equal to `CATALOG_REVALIDATE_SECONDS`
  * (`src/lib/storefront/shopify/data-source.ts`); the literal is inlined because
@@ -27,16 +25,6 @@ export const dynamicParams = false;
  * the two never drift. The route stays static — no request-time API is called.
  */
 export const revalidate = 3600;
-
-export async function generateStaticParams({
-  params,
-}: {
-  params: { locale: string };
-}) {
-  const locale = parseLocale(params.locale) ?? DEFAULT_LOCALE;
-  const products = await getStorefront(locale).listProducts();
-  return products.map((product) => ({ productHandle: product.handle }));
-}
 
 export async function generateMetadata({
   params,

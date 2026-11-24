@@ -17,18 +17,6 @@ interface ArticlePageProps {
   searchParams: Promise<SearchParams>;
 }
 
-export const dynamicParams = false;
-
-export async function generateStaticParams({
-  params,
-}: {
-  params: { locale: string };
-}) {
-  const locale = parseLocale(params.locale) ?? DEFAULT_LOCALE;
-  const articles = await getStorefront(locale).listArticles();
-  return articles.map((article) => ({ articleHandle: article.handle }));
-}
-
 export async function generateMetadata({
   params,
 }: ArticlePageProps): Promise<Metadata> {

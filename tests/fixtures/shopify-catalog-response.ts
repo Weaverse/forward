@@ -495,7 +495,7 @@ function buildProduct(spec: ProductSpec) {
 export interface CatalogResponse {
   data: {
     products: {
-      pageInfo: { hasNextPage: boolean };
+      pageInfo: { hasNextPage: boolean; endCursor?: string | null };
       // oxlint-disable-next-line typescript/no-explicit-any -- synthetic GraphQL payload
       nodes: any[];
     };
@@ -555,8 +555,36 @@ async function unread(): Promise<never> {
   throw new Error("This test does not exercise that Shopify read.");
 }
 
+/**
+ * A by-handle product read answered from a catalog response, as Shopify
+ * would: the product, and its store's products as related candidates.
+ */
+export function productExecutorFor(
+  response: CatalogResponse = catalogResponse(),
+) {
+  return async (handle: string) => {
+    const { nodes } = response.data.products;
+    const product = nodes.find((node) => node.handle === handle) ?? null;
+    return {
+      data: {
+        product,
+        related:
+          product === null
+            ? null
+            : {
+                nodes: nodes.map((node) => ({
+                  handle: node.handle,
+                  productType: node.productType,
+                })),
+              },
+      },
+    };
+  };
+}
+
 /** The executors a test does not exercise; reading one fails the test. */
 export const UNREAD_EXECUTORS = {
+  executeProduct: unread,
   executeCollection: unread,
   executeAllProducts: unread,
   executeContent: unread,

@@ -17,18 +17,6 @@ interface BlogPageProps {
   searchParams: Promise<SearchParams>;
 }
 
-export const dynamicParams = false;
-
-export async function generateStaticParams({
-  params,
-}: {
-  params: { locale: string };
-}) {
-  const locale = parseLocale(params.locale) ?? DEFAULT_LOCALE;
-  const blogs = await getStorefront(locale).listBlogs();
-  return blogs.map((blog) => ({ blogHandle: blog.handle }));
-}
-
 export async function generateMetadata({
   params,
 }: BlogPageProps): Promise<Metadata> {

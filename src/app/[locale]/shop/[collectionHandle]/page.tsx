@@ -25,22 +25,8 @@ interface CollectionPageProps {
   searchParams: Promise<SearchParams>;
 }
 
-export const dynamicParams = false;
-
 /* Bounded catalog freshness — see the note on the product route. */
 export const revalidate = 3600;
-
-export async function generateStaticParams({
-  params,
-}: {
-  params: { locale: string };
-}) {
-  const locale = parseLocale(params.locale) ?? DEFAULT_LOCALE;
-  const collections = await getStorefront(locale).listCollections();
-  return collections.map((collection) => ({
-    collectionHandle: collection.handle,
-  }));
-}
 
 export async function generateMetadata({
   params,

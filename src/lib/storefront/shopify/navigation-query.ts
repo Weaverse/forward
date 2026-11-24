@@ -2,7 +2,10 @@
 
 import { gql } from "@shopify/hydrogen";
 
-export const NAVIGATION_COLLECTION_LIMIT = 10;
+/* ponytail: one page of Shopify's maximum; a store with more collections
+ * fails closed on `hasNextPage` and would need this read paged like the
+ * catalog. */
+export const NAVIGATION_COLLECTION_LIMIT = 250;
 export const NAVIGATION_COLLECTION_PRODUCT_LIMIT = 10;
 /** Accepted store-owned Footer menu; this slice intentionally has no env override. */
 export const FOOTER_MENU_HANDLE = "footer";
