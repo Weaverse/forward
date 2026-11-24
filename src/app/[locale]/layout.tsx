@@ -17,6 +17,7 @@ import {
   localeTag,
   parseLocale,
 } from "@/lib/i18n/locales";
+import { siteBaseUrl } from "@/lib/routes/site";
 import { weaversePublicEnv } from "@/lib/weaverse/env";
 import { WeaverseRoot } from "@/lib/weaverse/root";
 import {
@@ -60,6 +61,9 @@ export async function generateMetadata({
     parseLocale((await params).locale) ?? DEFAULT_LOCALE,
   );
   return {
+    /* Canonical, hreflang and social image URLs resolve against the public
+     * origin, never the request's `Host`. */
+    metadataBase: new URL(siteBaseUrl()),
     title: { default: t("meta.siteTitle"), template: "%s · Forward" },
     description: t("meta.siteDescription"),
   };
