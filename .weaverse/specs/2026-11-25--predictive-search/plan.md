@@ -30,7 +30,15 @@
   `listbox` of labelled `group`s, each option a `Link` with `role=option`.
   ArrowDown/ArrowUp move (wrapping), Enter opens the active option (or
   submits the form when none is active), Escape closes. Focus never leaves
-  the field. A `role=status` line announces loading, empty and the count.
+  the field. Keys are left alone while an IME composes (`isComposing`, or
+  Safari's `keyCode` 229). The active option belongs to one option list:
+  when results arrive or change, nothing is active, so Enter submits to
+  `/search` rather than opening an option the shopper didn't pick.
+- Hydrogen's store keeps the previous result while loading and after a
+  failure, so results show only when `result.term` matches the current
+  input and the status is not `error`. A `role=status` line announces
+  loading, a failure ("Suggestions are unavailable. Press Enter to search."),
+  the empty state (only after a successful search) and the count.
 - Last option is always "View all results" to `/search?q=`.
 - Thumbnails only for URLs `isShopifyProductImageUrl` accepts; price via
   `formatMoney`. The only transition is a colour change, off under reduced
@@ -52,4 +60,5 @@
 - `src/app/[locale]/search/page.tsx`
 - `src/lib/i18n/static-content.ts`
 - `tests/predictive-search.test.ts` (new)
+- `tests/dom/predictive-search-form.test.tsx` (new)
 - `tests/browser/presentation.pw.ts` (search field role is now `combobox`)

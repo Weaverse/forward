@@ -183,6 +183,8 @@ export const STATIC_CONTENT = {
     suggestions: "Search suggestions",
     suggestionsLoading: "Searching…",
     suggestionsEmpty: "No quick matches for “{{query}}”.",
+    suggestionsUnavailable:
+      "Suggestions are unavailable. Press Enter to search.",
     suggestionsCount: "{{count}} suggestions",
     viewAll: "View all results for “{{query}}”",
     groupQuery: "Suggestions",

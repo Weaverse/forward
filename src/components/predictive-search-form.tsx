@@ -65,7 +65,7 @@ function SearchCombobox({ defaultQuery }: PredictiveSearchFormProps) {
   const { status, result } = usePredictiveSearch();
   const [value, setValue] = useState(defaultQuery);
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(-1);
+  const [selection, setSelection] = useState({ key: "", index: -1 });
   const baseId = useId();
   const inputId = `${baseId}-input`;
   const listboxId = `${baseId}-listbox`;
@@ -73,7 +73,11 @@ function SearchCombobox({ defaultQuery }: PredictiveSearchFormProps) {
 
   const term = value.trim();
   const expanded = open && term !== "";
-  const groups = predictiveSearchGroups(result.items);
+  /* Hydrogen keeps the previous result while a search loads and after one
+   * fails, so only a result for the current term is shown. */
+  const fresh = status !== "error" && result.term === term;
+  const groups = fresh ? predictiveSearchGroups(result.items) : [];
+  const total = fresh ? result.total : 0;
   const viewAll: PredictiveSearchOption = {
     kind: "query",
     title: t("search.viewAll", { query: term }),
@@ -82,13 +86,24 @@ function SearchCombobox({ defaultQuery }: PredictiveSearchFormProps) {
     price: null,
   };
   const options = [...groups.flatMap((group) => group.options), viewAll];
+  /* The active option belongs to one list: when results arrive or change,
+   * nothing is active, so Enter never opens an option the shopper didn't
+   * pick and `aria-activedescendant` never points at a missing id. */
+  const optionsKey = options.map((option) => option.href).join("\n");
+  const active = selection.key === optionsKey ? selection.index : -1;
+
+  function setActive(index: number) {
+    setSelection({ key: optionsKey, index });
+  }
 
   const statusText =
     status === "loading"
       ? t("search.suggestionsLoading")
-      : status !== "idle" && result.total === 0
-        ? t("search.suggestionsEmpty", { query: term })
-        : null;
+      : status === "error"
+        ? t("search.suggestionsUnavailable")
+        : status === "success" && fresh && total === 0
+          ? t("search.suggestionsEmpty", { query: term })
+          : null;
 
   function move(next: number) {
     setOpen(true);
@@ -99,6 +114,9 @@ function SearchCombobox({ defaultQuery }: PredictiveSearchFormProps) {
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    /* Arrow keys and Enter belong to the IME while it composes (Safari
+     * reports composition only through keyCode 229). */
+    if (event.nativeEvent.isComposing || event.keyCode === 229) return;
     if (event.key === "ArrowDown" && term !== "") {
       event.preventDefault();
       move(expanded ? (active + 1) % options.length : 0);
@@ -203,8 +221,7 @@ function SearchCombobox({ defaultQuery }: PredictiveSearchFormProps) {
       </button>
       <p className="sr-only" role="status">
         {expanded
-          ? (statusText ??
-            t("search.suggestionsCount", { count: result.total }))
+          ? (statusText ?? t("search.suggestionsCount", { count: total }))
           : ""}
       </p>
       {expanded ? (
