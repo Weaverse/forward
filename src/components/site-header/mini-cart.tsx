@@ -7,6 +7,7 @@ import { Icon } from "@/components/icon";
 import { Link } from "@/components/link";
 import { subscribeToCartAdd } from "@/lib/cart/mini-cart-signal";
 import {
+  cartLineOptions,
   formatShopifyMoney,
   useShopifyCart,
 } from "@/lib/cart/shopify-cart-react";
@@ -142,10 +143,7 @@ function ShopifyMiniCartBody({ variantId }: { variantId: string }) {
                       width: image.width ?? 64,
                       height: image.height ?? 80,
                     },
-              options:
-                merchandise?.selectedOptions
-                  ?.map(({ value }) => value)
-                  .join(" · ") ?? "",
+              options: cartLineOptions(merchandise?.selectedOptions),
               quantity: node.quantity,
             }
       }

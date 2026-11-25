@@ -34,6 +34,7 @@ import {
   type CatalogResponse,
   catalogResponse,
   catalogResponseWith,
+  plainProductNode,
   productExecutorFor,
   syntheticMediaIds,
   UNREAD_EXECUTORS,
@@ -875,24 +876,9 @@ describe("catalog mapping failures", () => {
       }),
       "is empty",
     );
-
-    for (const key of [
-      "highlights",
-      "materials",
-      "fieldSpecs",
-      "care",
-      "colorwayMediaMap",
-    ]) {
-      await assertRejectsCatalog(
-        catalogResponseWith("weatherline-shell", (product) => {
-          product[key] = null;
-        }),
-        "is missing",
-      );
-    }
   });
 
-  it("rejects media without dimensions, alt text, or a usable URL", async () => {
+  it("rejects media without dimensions or a usable URL", async () => {
     await assertRejectsCatalog(
       catalogResponseWith("weatherline-shell", (product) => {
         product.media.nodes[0].image.width = 0;
@@ -905,14 +891,6 @@ describe("catalog mapping failures", () => {
         product.media.nodes[0].image.height = null;
       }),
       "not a positive integer",
-    );
-
-    await assertRejectsCatalog(
-      catalogResponseWith("weatherline-shell", (product) => {
-        product.media.nodes[0].image.altText = "   ";
-        product.media.nodes[0].alt = "";
-      }),
-      "no meaningful alt text",
     );
 
     await assertRejectsCatalog(
@@ -1052,6 +1030,63 @@ describe("catalog mapping failures", () => {
       }),
       "duplicate merchandise",
     );
+  });
+
+  it("maps a plain Default Title product with no Forward metafields", () => {
+    const response = catalogResponse();
+    response.data.products.nodes.push(plainProductNode("plain-tote"));
+    const product = mapped(response).find(
+      (entry) => entry.handle === "plain-tote",
+    );
+    assert.ok(product !== undefined);
+    assert.equal(product.hasColorOption, false);
+    assert.deepEqual(product.options, []);
+    assert.equal(product.colorways.length, 1);
+    assert.equal(product.colorways[0]?.id, "default");
+    assert.deepEqual(product.variants[0]?.selectedOptions, []);
+    assert.equal(product.variants[0]?.colorwayId, "default");
+    assert.equal(product.variants[0]?.id, "gid://shopify/ProductVariant/7000");
+    assert.equal(product.subtitle, "");
+    assert.equal(product.category, "");
+    assert.deepEqual(product.specs, []);
+    assert.deepEqual(product.care, []);
+    assert.deepEqual(product.detailParagraphs, []);
+    const images = product.colorways[0]?.images;
+    assert.equal(images?.primary.alt, "Plain Tote");
+    assert.match(images?.primary.src ?? "", /plain-tote-1/);
+    assert.match(images?.alternate.src ?? "", /plain-tote-2/);
+  });
+
+  it("maps a Size-only product without a Color option", () => {
+    const response = catalogResponse();
+    response.data.products.nodes.push(
+      plainProductNode("plain-tote", ["S", "M"]),
+    );
+    const product = mapped(response).find(
+      (entry) => entry.handle === "plain-tote",
+    );
+    assert.ok(product !== undefined);
+    assert.equal(product.hasColorOption, false);
+    assert.deepEqual(product.options, [{ name: "Size", values: ["S", "M"] }]);
+    assert.deepEqual(product.variants[1]?.selectedOptions, [
+      { name: "Size", value: "M" },
+    ]);
+  });
+
+  it("still rejects a plain product with a malformed variant id", async () => {
+    const response = catalogResponse();
+    const node = plainProductNode("plain-tote");
+    response.data.products.nodes.push({
+      ...node,
+      variants: {
+        ...node.variants,
+        nodes: node.variants.nodes.map((variant) => ({
+          ...variant,
+          id: "gid://shopify/Product/7000",
+        })),
+      },
+    });
+    await assertRejectsCatalog(response, "not a Shopify ProductVariant GID");
   });
 
   it("rejects a product missing the forward ownership tag", async () => {

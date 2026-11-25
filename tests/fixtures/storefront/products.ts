@@ -427,6 +427,7 @@ function buildProduct(
     specs: definition.specs,
     care: definition.care,
     repair: "",
+    hasColorOption: true,
     colorways,
     options,
     variants: productVariants(

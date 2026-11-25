@@ -66,43 +66,47 @@ export function ProductCard({ product, priority }: ProductCardProps) {
           </span>
         </div>
         <p className="mt-1.25 hidden font-body text-micro font-semibold text-text-muted uppercase sm:block">
-          {product.category} / {product.activities.join(" · ")}
+          {[product.category, product.activities.join(" · ")]
+            .filter((part) => part !== "")
+            .join(" / ")}
         </p>
-        <fieldset className="mt-4 flex min-h-touch items-center gap-3">
-          <legend className="sr-only">
-            {t("catalog.productColorway", { title: product.title })}
-          </legend>
-          {product.colorways.map((entry) => (
-            <label
-              key={entry.id}
-              className="inline-flex flex-none items-center justify-center"
-            >
-              <input
-                className="peer sr-only"
-                type="radio"
-                name={swatchGroupName}
-                value={entry.id}
-                checked={entry.id === activeColorway.id}
-                onChange={() => setActiveColorwayId(entry.id)}
-              />
-              <span className="sr-only">
-                {t("catalog.colorway", { name: entry.name })}
-              </span>
-              <span
-                aria-hidden="true"
-                className="inline-flex size-5.5 items-center justify-center border border-transparent transition-colors duration-fast ease-standard peer-checked:border-ink peer-focus-visible:outline-3 peer-focus-visible:outline-focus peer-focus-visible:outline-offset-2"
+        {product.hasColorOption ? (
+          <fieldset className="mt-4 flex min-h-touch items-center gap-3">
+            <legend className="sr-only">
+              {t("catalog.productColorway", { title: product.title })}
+            </legend>
+            {product.colorways.map((entry) => (
+              <label
+                key={entry.id}
+                className="inline-flex flex-none items-center justify-center"
               >
-                <span
-                  className="size-3 border border-black/25"
-                  style={colorwaySwatchStyle(entry)}
+                <input
+                  className="peer sr-only"
+                  type="radio"
+                  name={swatchGroupName}
+                  value={entry.id}
+                  checked={entry.id === activeColorway.id}
+                  onChange={() => setActiveColorwayId(entry.id)}
                 />
-              </span>
-            </label>
-          ))}
-          <span className="ml-auto pl-2.5 font-body text-nano text-text-muted tracking-label uppercase">
-            {activeColorway.name}
-          </span>
-        </fieldset>
+                <span className="sr-only">
+                  {t("catalog.colorway", { name: entry.name })}
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="inline-flex size-5.5 items-center justify-center border border-transparent transition-colors duration-fast ease-standard peer-checked:border-ink peer-focus-visible:outline-3 peer-focus-visible:outline-focus peer-focus-visible:outline-offset-2"
+                >
+                  <span
+                    className="size-3 border border-black/25"
+                    style={colorwaySwatchStyle(entry)}
+                  />
+                </span>
+              </label>
+            ))}
+            <span className="ml-auto pl-2.5 font-body text-nano text-text-muted tracking-label uppercase">
+              {activeColorway.name}
+            </span>
+          </fieldset>
+        ) : null}
       </div>
     </article>
   );

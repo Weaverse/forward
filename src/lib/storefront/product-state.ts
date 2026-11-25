@@ -173,15 +173,18 @@ export function colorwayIsSoldOut(
   );
 }
 
-/** The complete four-image PDP gallery for a colorway, in display order. */
+/**
+ * The PDP gallery for a colorway, in display order, each image once. A product
+ * with fewer than four images repeats them across the roles.
+ */
 export function galleryImages(
   colorway: ProductColorway,
 ): readonly StorefrontImage[] {
+  const { primary, alternate, detail, context } = colorway.images;
   return [
-    colorway.images.primary,
-    colorway.images.alternate,
-    colorway.images.detail,
-    colorway.images.context,
+    ...new Map(
+      [primary, alternate, detail, context].map((image) => [image.src, image]),
+    ).values(),
   ];
 }
 
@@ -196,7 +199,9 @@ export function productSelectionHref(
   currentParams?: URLSearchParams,
 ): string {
   const params = new URLSearchParams(currentParams?.toString());
-  params.set(COLORWAY_PARAM, colorwayId);
+  /* A product without Color has one implicit colorway: nothing to name. */
+  if (product.hasColorOption) params.set(COLORWAY_PARAM, colorwayId);
+  else params.delete(COLORWAY_PARAM);
   params.delete(COLOR_OPTION_NAME);
   for (const option of product.options) {
     params.delete(option.name);

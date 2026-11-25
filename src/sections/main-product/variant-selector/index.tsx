@@ -75,58 +75,60 @@ function ProductVariantSelector({
 
   return (
     <div {...elementAttributes(rest)}>
-      <fieldset className="my-6">
-        <legend className="sr-only">{label}</legend>
-        <div className={OPTION_HEADER_CLASS}>
-          <span>{label}</span>
-          {showSelectedValue === false ? null : <span>{colorway.name}</span>}
-        </div>
-        <div className="flex flex-wrap gap-1.75">
-          {product.colorways.map((entry) => {
-            const next = resolveProductSelection(
-              product,
-              entry.id,
-              selection.selectedOptions,
-            );
-            const selected = entry.id === colorway.id;
-            const soldOut = colorwayIsSoldOut(product, entry.id);
-            return (
-              <Link
-                key={entry.id}
-                className={optionChip({
-                  interactive: true,
-                  selected,
-                  soldOut,
-                })}
-                href={productSelectionHref(
-                  product,
-                  next.colorway.id,
-                  next.selectedOptions,
-                  currentParams,
-                )}
-                scroll={false}
-                aria-label={[
-                  t("product.colorway", { name: entry.name }),
-                  selected ? t("product.selected") : "",
-                  soldOut ? t("product.soldOutSuffix") : "",
-                ]
-                  .filter((part) => part !== "")
-                  .join(" ")}
-                aria-current={selected ? "true" : undefined}
-              >
-                {showSwatches === false ? null : (
-                  <span
-                    aria-hidden="true"
-                    className="size-3 border border-white/40"
-                    style={colorwaySwatchStyle(entry)}
-                  />
-                )}
-                {entry.name}
-              </Link>
-            );
-          })}
-        </div>
-      </fieldset>
+      {product.hasColorOption ? (
+        <fieldset className="my-6">
+          <legend className="sr-only">{label}</legend>
+          <div className={OPTION_HEADER_CLASS}>
+            <span>{label}</span>
+            {showSelectedValue === false ? null : <span>{colorway.name}</span>}
+          </div>
+          <div className="flex flex-wrap gap-1.75">
+            {product.colorways.map((entry) => {
+              const next = resolveProductSelection(
+                product,
+                entry.id,
+                selection.selectedOptions,
+              );
+              const selected = entry.id === colorway.id;
+              const soldOut = colorwayIsSoldOut(product, entry.id);
+              return (
+                <Link
+                  key={entry.id}
+                  className={optionChip({
+                    interactive: true,
+                    selected,
+                    soldOut,
+                  })}
+                  href={productSelectionHref(
+                    product,
+                    next.colorway.id,
+                    next.selectedOptions,
+                    currentParams,
+                  )}
+                  scroll={false}
+                  aria-label={[
+                    t("product.colorway", { name: entry.name }),
+                    selected ? t("product.selected") : "",
+                    soldOut ? t("product.soldOutSuffix") : "",
+                  ]
+                    .filter((part) => part !== "")
+                    .join(" ")}
+                  aria-current={selected ? "true" : undefined}
+                >
+                  {showSwatches === false ? null : (
+                    <span
+                      aria-hidden="true"
+                      className="size-3 border border-white/40"
+                      style={colorwaySwatchStyle(entry)}
+                    />
+                  )}
+                  {entry.name}
+                </Link>
+              );
+            })}
+          </div>
+        </fieldset>
+      ) : null}
 
       {product.options.map((option) => (
         <fieldset className="my-6" key={option.name}>

@@ -216,38 +216,40 @@ function SpotlightProduct({
         </p>
         <p className="mt-4 mb-0 text-text-muted">{product.subtitle}</p>
 
-        <fieldset className="mt-6 mb-0 border-0 p-0">
-          <legend className="sr-only">{t("product.color")}</legend>
-          <div className={OPTION_LABEL_CLASS}>
-            <span>{t("product.color")}</span>
-            <span>{colorway.name}</span>
-          </div>
-          <div className="flex flex-wrap gap-1.75">
-            {product.colorways.map((entry) => {
-              const soldOut = colorwayIsSoldOut(product, entry.id);
-              return (
-                <button
-                  key={entry.id}
-                  type="button"
-                  className={optionChip({
-                    selected: entry.id === colorway.id,
-                    soldOut,
-                  })}
-                  aria-pressed={entry.id === colorway.id}
-                  aria-label={`${entry.name} colorway${soldOut ? " (sold out)" : ""}`}
-                  onClick={() => setColorwayId(entry.id)}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="size-3 border border-black/25"
-                    style={colorwaySwatchStyle(entry)}
-                  />
-                  {entry.name}
-                </button>
-              );
-            })}
-          </div>
-        </fieldset>
+        {product.hasColorOption ? (
+          <fieldset className="mt-6 mb-0 border-0 p-0">
+            <legend className="sr-only">{t("product.color")}</legend>
+            <div className={OPTION_LABEL_CLASS}>
+              <span>{t("product.color")}</span>
+              <span>{colorway.name}</span>
+            </div>
+            <div className="flex flex-wrap gap-1.75">
+              {product.colorways.map((entry) => {
+                const soldOut = colorwayIsSoldOut(product, entry.id);
+                return (
+                  <button
+                    key={entry.id}
+                    type="button"
+                    className={optionChip({
+                      selected: entry.id === colorway.id,
+                      soldOut,
+                    })}
+                    aria-pressed={entry.id === colorway.id}
+                    aria-label={`${entry.name} colorway${soldOut ? " (sold out)" : ""}`}
+                    onClick={() => setColorwayId(entry.id)}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="size-3 border border-black/25"
+                      style={colorwaySwatchStyle(entry)}
+                    />
+                    {entry.name}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+        ) : null}
 
         {product.options.map((option) => (
           <fieldset className="mt-5 mb-0 border-0 p-0" key={option.name}>

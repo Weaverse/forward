@@ -492,6 +492,60 @@ function buildProduct(spec: ProductSpec) {
   };
 }
 
+/**
+ * A plain merchant product as Shopify returns it with nothing set up for
+ * Forward: no `forward.*` metafields, no product type, no description, images
+ * without alt text, and either Shopify's `Title / Default Title` option or the
+ * given sizes.
+ */
+export function plainProductNode(
+  handle: string,
+  sizes: readonly string[] = [],
+) {
+  const [name, values] =
+    sizes.length === 0 ? ["Title", ["Default Title"]] : ["Size", sizes];
+  return {
+    id: "gid://shopify/Product/7000",
+    handle,
+    title: "Plain Tote",
+    description: "",
+    descriptionHtml: "",
+    productType: "",
+    tags: ["forward"],
+    options: [{ name, optionValues: values.map((value) => ({ name: value })) }],
+    variants: {
+      pageInfo: { hasNextPage: false },
+      nodes: values.map((value, index) => ({
+        id: `gid://shopify/ProductVariant/${7000 + index}`,
+        availableForSale: true,
+        price: { amount: "40.0", currencyCode: "USD" },
+        compareAtPrice: null,
+        selectedOptions: [{ name, value }],
+        image: null,
+      })),
+    },
+    media: {
+      pageInfo: { hasNextPage: false },
+      nodes: [1, 2].map((index) => ({
+        __typename: "MediaImage",
+        id: mediaId(7000 + index),
+        alt: null,
+        image: {
+          url: `${CDN_BASE}-plain-tote-${index}.webp`,
+          width: 1200,
+          height: 1500,
+          altText: null,
+        },
+      })),
+    },
+    highlights: null,
+    materials: null,
+    fieldSpecs: null,
+    care: null,
+    colorwayMediaMap: null,
+  };
+}
+
 export interface CatalogResponse {
   data: {
     products: {
