@@ -3,6 +3,7 @@
  * (Vitest). Next.js never reads this file — `next dev` / `next build` stay the
  * app's dev server and bundler, and `vp dev` / `vp build` are not used.
  */
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite-plus";
 import type { DummyRuleMap } from "vite-plus/lint";
 
@@ -206,7 +207,25 @@ const LINT_CONFIGURED: DummyRuleMap = {
 };
 
 export default defineConfig({
-  resolve: { tsconfigPaths: true },
+  resolve: {
+    tsconfigPaths: true,
+    // Tests load `@shopify/hydrogen`'s production build, the one `next build`
+    // ships. Vitest resolves the `development` condition, and 2026.10.3's
+    // `customer-account` entry has no development build, so the two would
+    // disagree on the cart-sync brand and the Customer Account runtime could
+    // not pass the session-aware cart handlers (see `customer-account.ts`).
+    alias: [
+      {
+        find: /^@shopify\/hydrogen$/,
+        replacement: fileURLToPath(
+          new URL(
+            "./node_modules/@shopify/hydrogen/dist/core/index.mjs",
+            import.meta.url,
+          ),
+        ),
+      },
+    ],
+  },
   test: {
     // `@weaverse/hydrogen/next` imports extensionless `next/navigation`, which Node's
     // strict ESM loader cannot resolve (`next` has no exports map). Inlining

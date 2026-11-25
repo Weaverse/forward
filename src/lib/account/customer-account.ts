@@ -5,14 +5,21 @@
  * expiry, token exchange, and the one-time replacement of a pending login with
  * tokens. Forward owns configuration, the session storage boundary, and the
  * exact redirect targets. There is deliberately no second OAuth implementation.
+ *
+ * The cart follows the session through Hydrogen too: the same session-aware
+ * cart handlers serve `/api/cart` and go to the account handlers, which attach
+ * the customer to the cart on sign-in and refresh and detach them on sign-out
+ * and on a refresh Shopify rejects (expiring the `cart` cookie when that
+ * detach fails).
  */
 
+import { createCartServerHandlers } from "@shopify/hydrogen";
 import {
   CUSTOMER_ACCOUNT_AUTHORIZE_PATH,
   CUSTOMER_ACCOUNT_LOGIN_PATH,
   CUSTOMER_ACCOUNT_LOGOUT_PATH,
   CUSTOMER_ACCOUNT_REFRESH_PATH,
-  type CustomerAccountServerHandlers,
+  type CustomerAccountServerHandlersWithCartSync,
   type CustomerSession,
   createCustomerAccountServerHandlers,
   createCustomerSession,
@@ -59,8 +66,17 @@ export const REFRESH_MARKER_VALUE = "1";
 export interface CustomerAccountRuntime {
   config: CustomerAccountConfig;
   customerSession: CustomerSession;
-  handlers: CustomerAccountServerHandlers;
+  /** `/api/cart`'s handlers: first carts carry the signed-in customer, and
+   * cart reads mark the checkout URL `logged_in=true`. */
+  cartHandlers: CustomerCartHandlers;
+  /** They need a real Storefront client in their context for the cart sync. */
+  handlers: CustomerAccountServerHandlersWithCartSync;
 }
+
+function createCustomerCartHandlers(customerSession: CustomerSession) {
+  return createCartServerHandlers({ customerSession });
+}
+type CustomerCartHandlers = ReturnType<typeof createCustomerCartHandlers>;
 
 export function createCustomerAccountRuntime(
   config: CustomerAccountConfig,
@@ -69,18 +85,36 @@ export function createCustomerAccountRuntime(
     shopId: config.shopId,
     customerAccountApiClientId: config.clientId,
   });
+  const cartHandlers = createCustomerCartHandlers(customerSession);
+  const options = {
+    customerSession,
+    // The configured origin is the only origin source; request headers are
+    // never consulted for callback, refresh, logout, or return targets.
+    origin: config.storefrontOrigin,
+    defaultPostLoginRedirectPathname: ACCOUNT_PATH,
+    loginFailedRedirectPath: LOGIN_FAILED_PATH,
+    postLogoutRedirectUri: POST_LOGOUT_REDIRECT_URI,
+  };
   return {
     config,
     customerSession,
-    handlers: createCustomerAccountServerHandlers({
-      customerSession,
-      // The configured origin is the only origin source; request headers are
-      // never consulted for callback, refresh, logout, or return targets.
-      origin: config.storefrontOrigin,
-      defaultPostLoginRedirectPathname: ACCOUNT_PATH,
-      loginFailedRedirectPath: LOGIN_FAILED_PATH,
-      postLogoutRedirectUri: POST_LOGOUT_REDIRECT_URI,
-    }),
+    cartHandlers,
+    // ponytail: `@shopify/hydrogen/customer-account` 2026.10.3 has no
+    // `development` build while `@shopify/hydrogen` has one, so under
+    // `next dev` the cart handlers carry the dev build's cart-sync brand, the
+    // account handlers look for the production one, and passing
+    // `cartServerHandlers` throws on every account request. `next dev` signs
+    // in and out without touching the cart (the cart handlers still attach
+    // the customer to a first cart); production builds and the tests, which
+    // load the production entries, keep the sync. Drop the branch once that
+    // export gains a `development` condition.
+    handlers:
+      process.env.NODE_ENV === "development"
+        ? createCustomerAccountServerHandlers(options)
+        : createCustomerAccountServerHandlers({
+            ...options,
+            cartServerHandlers: cartHandlers,
+          }),
   };
 }
 

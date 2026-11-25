@@ -40,6 +40,7 @@ import { createCustomerAccountSessionManager } from "@/lib/account/session-manag
 import { type LocaleRoute, resolveLocaleRoute } from "@/lib/i18n/locale-route";
 import {
   LOCALE_COOKIE,
+  type LocaleI18n,
   type LocaleId,
   localeFromCookieHeader,
   localeI18n,
@@ -128,18 +129,35 @@ function hardenAccountProtocolResponse(response: Response): Response {
 }
 
 /**
- * `handleShopifyRoutes` requires its Storefront client to carry the exact same
- * request context even though the matched Customer Account handlers never call
- * Storefront API. That call only ever sees the four protocol paths, so this
- * inert carrier keeps the
- * four-key account boundary independent from catalog credentials. Any future
- * package access beyond `requestContext` fails closed instead of inventing or
- * reusing a Storefront token.
+ * The protocol routes' Storefront client, carrying the exact request context
+ * `handleShopifyRoutes` runs with. Sign-in, refresh and sign-out update the
+ * cart's buyer identity through it. Without catalog credentials there is no
+ * cart to sync: an inert carrier keeps the four-key account boundary working
+ * on its own, and any package access beyond `requestContext` fails (the cart
+ * sync logs it) instead of inventing or reusing a Storefront token.
  */
-function createAccountRouteContextClient(
-  requestContext: ShopifyRequestContext,
-): StorefrontClient {
-  return Object.freeze({ requestContext }) as unknown as StorefrontClient;
+function createAccountStorefrontContext(
+  request: Request,
+  locale: LocaleI18n,
+): {
+  requestContext: ShopifyRequestContext;
+  storefrontClient: StorefrontClient;
+} {
+  const shopify = createShopifyRouteContext(request, process.env, locale);
+  if (shopify !== null) {
+    return shopify;
+  }
+  const requestContext = createShopifyRequestContext({
+    request,
+    i18n: SHOPIFY_I18N,
+    locale,
+  });
+  return {
+    requestContext,
+    storefrontClient: Object.freeze({
+      requestContext,
+    }) as unknown as StorefrontClient,
+  };
 }
 
 /** The response that sends a page request on to its locale's route. */
@@ -336,13 +354,11 @@ export async function proxy(request: NextRequest): Promise<Response> {
       request,
       runtime.config.storefrontOrigin,
     );
-    const requestContext = createShopifyRequestContext({
-      request: protocolRequest,
-      i18n: SHOPIFY_I18N,
+    const { requestContext, storefrontClient } = createAccountStorefrontContext(
+      protocolRequest,
       /* The market of the page the shopper signed in from. */
-      locale: localeI18n(localeFromCookieHeader(request.headers.get("cookie"))),
-    });
-    const storefrontClient = createAccountRouteContextClient(requestContext);
+      localeI18n(localeFromCookieHeader(request.headers.get("cookie"))),
+    );
     const sessionManager = await createCustomerAccountSessionManager({
       config: runtime.config,
       cookieHeader: request.headers.get("cookie"),

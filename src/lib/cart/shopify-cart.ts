@@ -5,6 +5,8 @@ import {
   getCartId,
   gql,
 } from "@shopify/hydrogen";
+import { getCustomerAccountRuntime } from "@/lib/account/customer-account";
+import { createCustomerAccountSessionManager } from "@/lib/account/session-manager";
 import {
   type LocaleId,
   localeFromCookieHeader,
@@ -26,6 +28,7 @@ import {
   withCookieCartIdentity,
 } from "./shopify-cart-server";
 
+/** The cart handlers without a customer, for a store without Customer Accounts. */
 export const shopifyCartHandlers = createCartServerHandlers();
 export type ShopifyCartData = Awaited<
   ReturnType<typeof shopifyCartHandlers.get>
@@ -99,6 +102,43 @@ function createCartRequestContext(
   return { config, environment, requestContext, storefrontClient };
 }
 
+/**
+ * Hydrogen's cart handlers and the context to call them with. With Customer
+ * Accounts they read the customer session, so a first cart is created with
+ * the signed-in customer and a cart read marks the checkout URL
+ * `logged_in=true`.
+ */
+async function cartHandlers(
+  request: Request,
+  source: EnvSource,
+  context: ReturnType<typeof createCartRequestContext>,
+) {
+  const handlerContext = {
+    request,
+    requestContext: context.requestContext,
+    storefrontClient: context.storefrontClient,
+  };
+  const account = getCustomerAccountRuntime(source);
+  if (account === null) {
+    return {
+      get: () => shopifyCartHandlers.get(handlerContext),
+      post: () => shopifyCartHandlers.post(handlerContext),
+    };
+  }
+  const sessionContext = {
+    ...handlerContext,
+    sessionManager: await createCustomerAccountSessionManager({
+      config: account.config,
+      cookieHeader: request.headers.get("cookie"),
+      secure: context.environment === "production",
+    }),
+  };
+  return {
+    get: () => account.cartHandlers.get(sessionContext),
+    post: () => account.cartHandlers.post(sessionContext),
+  };
+}
+
 // ponytail: one extra cart read per request; cache the synced country in a cookie if it shows up in latency.
 /**
  * Moves an existing cart into the shopper's current market.
@@ -164,10 +204,8 @@ export async function readShopifyCart(
 ): Promise<ShopifyCartData> {
   const context = createCartRequestContext(request, source, locale);
   await syncCartCountry(request, context);
-  const result = await shopifyCartHandlers.get({
-    request,
-    storefrontClient: context.storefrontClient,
-  });
+  const cart = await cartHandlers(request, source, context);
+  const result = await cart.get();
   const sanitized = sanitizeCartHandlerResult(
     result,
     context.config.storeDomain,
@@ -189,18 +227,12 @@ export async function handleShopifyCartRequest(
       await syncCartCountry(request, context);
     }
     if (request.method === "GET") {
-      const result = await shopifyCartHandlers.get({
-        request,
-        storefrontClient: context.storefrontClient,
-      });
-      return cartResultResponse(result, context);
+      const cart = await cartHandlers(request, source, context);
+      return cartResultResponse(await cart.get(), context);
     }
     if (request.method === "POST") {
-      const result = await shopifyCartHandlers.post({
-        request,
-        storefrontClient: context.storefrontClient,
-      });
-      return cartResultResponse(result, context);
+      const cart = await cartHandlers(request, source, context);
+      return cartResultResponse(await cart.post(), context);
     }
     return new Response(null, {
       status: 405,
