@@ -18,7 +18,7 @@ export interface ShopifyCollectionFixture {
 
 export interface NavigationResponse {
   data: {
-    shop: { id: string };
+    shop: { id: string; name: string };
     menu: {
       handle: string;
       items: ShopifyMenuItemFixture[];
@@ -39,7 +39,7 @@ const SHOP_ORIGIN = "https://forward-test-shop.myshopify.com";
 export function navigationResponse(): NavigationResponse {
   return {
     data: {
-      shop: { id: "gid://shopify/Shop/1234567" },
+      shop: { id: "gid://shopify/Shop/1234567", name: "Forward Test Shop" },
       menu: {
         handle: "main-menu",
         items: [

@@ -995,6 +995,10 @@ function mapProduct(node: unknown, index: number): Product {
      * have to fill is worse than using the line they already wrote. */
     subtitle: highlights[0] ?? "",
     category: productType,
+    vendor:
+      typeof record.vendor === "string"
+        ? record.vendor
+        : fail(`${handle} vendor is not a string.`),
     activities: tags.filter((tag) => !isInfrastructureTag(tag)),
     price,
     description: descriptionParagraphs.join(" "),

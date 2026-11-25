@@ -295,13 +295,21 @@ export class ShopifyCatalogDataSource implements StorefrontDataSource {
   /** Read with the menus, which every page already loads. */
   async getShop(): Promise<ShopIdentity> {
     const { data } = await this.#executeNavigation();
-    const id = (data as { shop?: { id?: unknown } } | undefined)?.shop?.id;
+    const shop = (
+      data as { shop?: { id?: unknown; name?: unknown } } | undefined
+    )?.shop;
+    const id = shop?.id;
     if (typeof id !== "string" || !id.startsWith("gid://shopify/Shop/")) {
       throw new ShopifyCatalogError(
         "Storefront API navigation response did not contain the shop id.",
       );
     }
-    return { id, myshopifyDomain: this.#storeDomain };
+    if (typeof shop?.name !== "string" || shop.name.trim() === "") {
+      throw new ShopifyCatalogError(
+        "Storefront API navigation response did not contain the shop name.",
+      );
+    }
+    return { id, myshopifyDomain: this.#storeDomain, name: shop.name };
   }
 
   /* ---- Shopify-owned content reads ------------------------------------- */

@@ -477,6 +477,7 @@ function buildProduct(spec: ProductSpec) {
       .map((paragraph) => `<p>${paragraph}</p>`)
       .join(""),
     productType: spec.productType,
+    vendor: "Forward",
     tags: ["forward", ...spec.tags, "managed-by:forward-seed"],
     options,
     variants: { pageInfo: { hasNextPage: false }, nodes: variantNodes },
