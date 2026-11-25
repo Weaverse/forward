@@ -1,11 +1,14 @@
 "use client";
 
 import {
+  type AnalyticsCart,
   AnalyticsEvent,
   type AnalyticsEventMap,
   type AnalyticsEventName,
+  type CartData,
 } from "@shopify/hydrogen";
 import { useEffect, useRef } from "react";
+import { useShopifyCart } from "@/lib/cart/shopify-cart-react";
 import { usePathname } from "@/lib/i18n/locale-context";
 
 /**
@@ -72,21 +75,65 @@ export function ResourceViewed({
   return null;
 }
 
+function text(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
 /**
- * One `cart_viewed` per visit to the cart page.
- *
- * ponytail: the cart travels as `null`, which Hydrogen accepts. Forward
- * redacts the cart id from every browser response (it carries the cart's
- * secret key), and Hydrogen's cart analytics needs that id, so neither this
- * payload nor `useCartAnalytics` (add/remove events) can describe the cart.
- * Both become possible once the browser gets the id without its `?key=`.
+ * The cart in Hydrogen's analytics shape, the fields its cart tracker sends:
+ * id, update time, currencies and lines. The checkout URL stays out, since
+ * it carries the cart's key. The id is already keyless
+ * (`sanitizeCartHandlerResult`).
+ */
+function toAnalyticsCart(cart: CartData): AnalyticsCart | null {
+  if (cart.id === null || cart.id === "") return null;
+  return {
+    id: cart.id,
+    updatedAt: cart.updatedAt ?? new Date().toISOString(),
+    cost: cart.cost,
+    lines: {
+      nodes: cart.lines.nodes.flatMap((line) => {
+        const { merchandise } = line;
+        if (merchandise === undefined) return [];
+        const { product } = merchandise;
+        return [
+          {
+            id: line.id,
+            quantity: line.quantity,
+            merchandise: {
+              id: merchandise.id,
+              title: merchandise.title ?? product.title,
+              price: line.cost.amountPerQuantity,
+              sku: text(merchandise.sku) ?? null,
+              product: {
+                id: text(product.id) ?? "",
+                title: product.title,
+                vendor: text(product.vendor) ?? "",
+                productType: text(product.productType),
+                handle: product.handle,
+              },
+            },
+          },
+        ];
+      }),
+    },
+  };
+}
+
+/**
+ * One `cart_viewed` per visit to the cart page, with the cart the page
+ * rendered (`null` when there is none). Render inside the cart page's
+ * provider.
  */
 export function CartViewed() {
+  const cart = useShopifyCart((state) => state.data);
   const published = useRef(false);
   useEffect(() => {
     if (published.current) return;
     published.current = true;
-    publishAnalytics(AnalyticsEvent.CART_VIEWED, { cart: null });
-  }, []);
+    publishAnalytics(AnalyticsEvent.CART_VIEWED, {
+      cart: toAnalyticsCart(cart),
+    });
+  }, [cart]);
   return null;
 }

@@ -233,6 +233,12 @@ copy remains required before accepting real orders.
   analytics. The pinned `createCartCookie()` omits `HttpOnly` and `Secure`; the
   Next `/api/cart` response boundary must harden the helper's `Set-Cookie` value
   before returning it.
+- The cart's secret is the `?key=` query of its Shopify GID. Browser responses
+  (`/api/cart` and the server-seeded `/cart`) carry the GID with that query
+  cut off, `gid://shopify/Cart/<token>`, which Hydrogen's cart analytics needs
+  to track the cart; the key never leaves the cookie. `/api/cart` drops any
+  `cartId` the browser sends (JSON body or query), so the server acts only on
+  the cookie's cart. (Changed 2026-11-25; until then the id was blanked.)
 - `/cart` is dynamic/no-store and server-seeded. Remove the existing
   `revalidate = 3600` and set `dynamic = "force-dynamic"` (plus no-store where
   needed). No-JS GET/POST flows must render the real cart and commit the cart
