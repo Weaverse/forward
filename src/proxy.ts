@@ -50,6 +50,7 @@ import {
 import { SHOPIFY_I18N } from "@/lib/i18n/shopify-i18n";
 import {
   createShopifyRouteContext,
+  PREDICTIVE_SEARCH_HANDLERS,
   ROUTE_TEMPLATES,
   STOREFRONT_URL_HEADER,
 } from "@/lib/routes/shopify-routes";
@@ -302,6 +303,7 @@ function shopifyRoute(request: NextRequest): Promise<Response> | null {
     requestContext: context.requestContext,
     storefrontClient: context.storefrontClient,
     routeTemplates: ROUTE_TEMPLATES,
+    handlers: [PREDICTIVE_SEARCH_HANDLERS],
   });
 }
 

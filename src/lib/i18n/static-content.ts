@@ -180,6 +180,18 @@ export const STATIC_CONTENT = {
     results: "Search results",
     resultsHeading: "Results for “{{query}}”",
     found: "{{count}} found",
+    suggestions: "Search suggestions",
+    suggestionsLoading: "Searching…",
+    suggestionsEmpty: "No quick matches for “{{query}}”.",
+    suggestionsUnavailable:
+      "Suggestions are unavailable. Press Enter to search.",
+    suggestionsCount: "{{count}} suggestions",
+    viewAll: "View all results for “{{query}}”",
+    groupQuery: "Suggestions",
+    groupProduct: "Products",
+    groupCollection: "Collections",
+    groupPage: "Pages",
+    groupArticle: "Journal",
   },
   errors: {
     eyebrow: "Field report / Error",

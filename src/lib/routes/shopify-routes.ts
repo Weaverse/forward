@@ -7,6 +7,7 @@
  */
 
 import {
+  createPredictiveSearchServerHandlers,
   createShopifyRequestContext,
   defineShopifyRouteTemplates,
   createStorefrontClient,
@@ -17,6 +18,7 @@ import { runtimeEnvironment } from "@/lib/cart/shopify-cart";
 import { readTrustedBuyerIp } from "@/lib/cart/shopify-cart-server";
 import type { LocaleI18n } from "@/lib/i18n/locales";
 import { SHOPIFY_I18N } from "@/lib/i18n/shopify-i18n";
+import { PREDICTIVE_SEARCH_PATH } from "@/lib/storefront/predictive-search";
 import {
   type EnvSource,
   readShopifyCatalogConfig,
@@ -34,6 +36,18 @@ export const ROUTE_TEMPLATES = defineShopifyRouteTemplates({
   collection: "/shop/:collectionHandle",
   collectionList: "/categories",
   blog: "/archive/:blogHandle",
+});
+
+/**
+ * `GET /api/predictive-search?q=…`, Hydrogen's handler with its built-in
+ * query. The browser calls it under the page's locale prefix
+ * (`/de-de/api/predictive-search`), so the request context matches that
+ * market and the results carry its prices and translations; the unprefixed
+ * path is the default market.
+ */
+export const PREDICTIVE_SEARCH_HANDLERS = createPredictiveSearchServerHandlers({
+  path: PREDICTIVE_SEARCH_PATH,
+  limit: 4,
 });
 
 /**

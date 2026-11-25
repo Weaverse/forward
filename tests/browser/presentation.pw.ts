@@ -171,7 +171,7 @@ test.describe("premium presentation behavior", () => {
 
     await gotoReady(page, "/search");
     const searchForm = page.locator('form[action="/search"]');
-    const searchBox = page.getByRole("searchbox", { name: "Search products" });
+    const searchBox = page.getByRole("combobox", { name: "Search products" });
     await expect(searchForm).toHaveAttribute("method", "get");
     await expect(
       page.getByRole("heading", {
@@ -187,7 +187,7 @@ test.describe("premium presentation behavior", () => {
       page.getByRole("heading", { name: "Results for “shell”" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("searchbox", { name: "Search products" }),
+      page.getByRole("combobox", { name: "Search products" }),
     ).toHaveValue(" shell ");
     await expect(page.locator('main [aria-live="polite"]')).toContainText(
       "found",

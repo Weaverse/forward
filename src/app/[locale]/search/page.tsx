@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
+import { PredictiveSearchForm } from "@/components/predictive-search-form";
 import { ResourceViewed } from "@/lib/analytics";
-import { localizePath } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
 import { T } from "@/lib/i18n/t";
 import { getTranslator, translatedMetadata } from "@/lib/i18n/translator";
@@ -57,29 +57,7 @@ export default async function SearchPage({
       <h1 className={sectionHeading({ size: "display" })}>
         <T k="search.heading" />
       </h1>
-      <form
-        className="mt-17.5 mb-15 grid grid-cols-1 border-ink border-b-3 sm:grid-cols-lead-trailing"
-        method="get"
-        action={localizePath("/search", locale)}
-      >
-        <label className="sr-only" htmlFor="search-input">
-          <T k="search.inputLabel" />
-        </label>
-        <input
-          id="search-input"
-          name="q"
-          type="search"
-          className="h-16 min-w-0 border-0 bg-transparent font-heading text-search-display focus:outline-0 sm:h-27.5"
-          defaultValue={rawQuery}
-          placeholder={t("search.placeholder")}
-        />
-        <button
-          className="min-h-12 min-w-25 justify-self-start bg-transparent font-body text-caption font-extrabold tracking-label uppercase sm:min-h-auto sm:justify-self-auto"
-          type="submit"
-        >
-          <T k="search.submit" />
-        </button>
-      </form>
+      <PredictiveSearchForm key={rawQuery} defaultQuery={rawQuery} />
 
       {!hasQuery ? (
         <SearchEmptyState
