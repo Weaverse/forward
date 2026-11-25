@@ -13,6 +13,7 @@ import {
 } from "@/lib/cart/shopify-cart-react";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { useT } from "@/lib/i18n/t";
+import { PRODUCT_PLACEHOLDER_IMAGE } from "@/lib/storefront/image-source";
 
 /** Long enough to read, short enough not to sit over the page. */
 const AUTO_DISMISS_MS = 8000;
@@ -134,9 +135,11 @@ function ShopifyMiniCartBody({ variantId }: { variantId: string }) {
           : {
               title,
               href: handle === undefined ? "/cart" : `/products/${handle}`,
+              /* Shopify falls back to the product image, so none at all
+               * means an image-less product: show the placeholder. */
               image:
                 image === null || image === undefined
-                  ? null
+                  ? { ...PRODUCT_PLACEHOLDER_IMAGE, alt: title }
                   : {
                       src: image.url,
                       alt: image.altText ?? title,

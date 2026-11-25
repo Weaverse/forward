@@ -29,7 +29,7 @@ Preview the account pages locally with fixture orders and addresses, then remove
 - **Issue**: An account page fails with `Unmocked Customer Account query`.
   **Solution**: A query was added or renamed. Add a branch for its operation name in `respond()`.
 - **Issue**: Product images show as empty tiles.
-  **Solution**: Images render only from the store's own CDN path (`SHOPIFY_IMAGE_PATH_PREFIX` in `src/lib/storefront/image-source.ts`). Replace `CDN` and the file names with your store's product image URLs.
+  **Solution**: Images render only from Shopify's CDN (`cdn.shopify.com` under `SHOPIFY_IMAGE_PATH_PREFIX` in `src/lib/storefront/image-source.ts`). Replace `CDN` and the file names with your store's product image URLs.
 - **Issue**: The pages still show the sign-in panel.
   **Solution**: Start the dev server with `FORWARD_ACCOUNT_MOCK=1`; a production build (`next build`/`next start`) never enables the mock.
 </troubleshooting>
@@ -52,8 +52,8 @@ export const ACCOUNT_MOCK =
   process.env.NODE_ENV !== "production" &&
   process.env.FORWARD_ACCOUNT_MOCK === "1";
 
-/* Images render only from the store's own CDN path
- * (`SHOPIFY_IMAGE_PATH_PREFIX`); use your store's product image URLs. */
+/* Images render only from Shopify's CDN (`SHOPIFY_IMAGE_PATH_PREFIX`);
+ * use your store's product image URLs. */
 const CDN = "https://cdn.shopify.com/s/files/1/0978/4757/4828/files";
 
 const usd = (amount: number) => ({

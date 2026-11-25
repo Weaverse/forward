@@ -16,6 +16,10 @@
 const CDN_BASE =
   "https://cdn.shopify.com/s/files/1/0978/4757/4828/files/synthetic";
 
+/** Another shop's CDN folder: the theme reads any store's images. */
+const OTHER_SHOP_CDN_BASE =
+  "https://cdn.shopify.com/s/files/1/0612/3456/7890/files/synthetic";
+
 const MEDIA_ROLES = ["primary", "alternate", "detail", "context"] as const;
 
 interface ColorwaySpec {
@@ -495,9 +499,9 @@ function buildProduct(spec: ProductSpec) {
 
 /**
  * A plain merchant product as Shopify returns it with nothing set up for
- * Forward: no `forward.*` metafields, no product type, no description, images
- * without alt text, and either Shopify's `Title / Default Title` option or the
- * given sizes.
+ * Forward: no tags, no `forward.*` metafields, no product type, no
+ * description, images without alt text on another shop's CDN folder, and
+ * either Shopify's `Title / Default Title` option or the given sizes.
  */
 export function plainProductNode(
   handle: string,
@@ -512,7 +516,7 @@ export function plainProductNode(
     description: "",
     descriptionHtml: "",
     productType: "",
-    tags: ["forward"],
+    tags: [],
     options: [{ name, optionValues: values.map((value) => ({ name: value })) }],
     variants: {
       pageInfo: { hasNextPage: false },
@@ -532,7 +536,7 @@ export function plainProductNode(
         id: mediaId(7000 + index),
         alt: null,
         image: {
-          url: `${CDN_BASE}-plain-tote-${index}.webp`,
+          url: `${OTHER_SHOP_CDN_BASE}-plain-tote-${index}.webp`,
           width: 1200,
           height: 1500,
           altText: null,
@@ -545,6 +549,12 @@ export function plainProductNode(
     care: null,
     colorwayMediaMap: null,
   };
+}
+
+/** A plain product the merchant published without any image. */
+export function imagelessProductNode(handle: string) {
+  const node = plainProductNode(handle);
+  return { ...node, media: { ...node.media, nodes: [] } };
 }
 
 export interface CatalogResponse {

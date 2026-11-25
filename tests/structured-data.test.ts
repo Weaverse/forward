@@ -6,6 +6,7 @@ import {
   productJsonLd,
   serializeJsonLd,
 } from "../src/lib/seo/structured-data.ts";
+import { PRODUCT_PLACEHOLDER_IMAGE } from "../src/lib/storefront/image-source.ts";
 import { PRODUCT_FIXTURES } from "./fixtures/storefront/products.ts";
 
 const SAVED_SITE_URL = process.env.PUBLIC_SITE_URL;
@@ -53,6 +54,29 @@ describe("structured data", () => {
         `^https://shop\\.example\\.com/de-de/products/weatherline-shell\\?colorway=${variant.colorwayId}&size=`,
       ),
     );
+  });
+
+  it("omits image for a product that only has the placeholder", () => {
+    const product = PRODUCT_FIXTURES[0];
+    assert.ok(product);
+    const placeholder = { ...PRODUCT_PLACEHOLDER_IMAGE, alt: product.title };
+    const data = productJsonLd(
+      {
+        ...product,
+        colorways: product.colorways.map((colorway) => ({
+          ...colorway,
+          images: {
+            primary: placeholder,
+            alternate: placeholder,
+            detail: placeholder,
+            context: placeholder,
+          },
+        })),
+      },
+      "en-us",
+    );
+    assert.equal("image" in data, false);
+    assert.ok(Array.isArray(productJsonLd(product, "en-us").image));
   });
 
   it("keeps a three-decimal price as Shopify returned it", () => {

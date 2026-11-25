@@ -15,11 +15,15 @@
  * optional (validated only when set), a product without a Color option gets
  * one implicit colorway, Shopify's `Title / Default Title` option is dropped,
  * media without a `colorway_media_map` comes from the product's own images,
- * and an image without alt text takes the product title. Variant ids and
+ * an image without alt text takes the product title, and a product with no
+ * images at all takes a local placeholder. Variant ids and
  * prices stay strictly validated: the cart depends on them.
  */
 
-import { isShopifyProductImageUrl } from "../image-source";
+import {
+  isShopifyProductImageUrl,
+  PRODUCT_PLACEHOLDER_IMAGE,
+} from "../image-source";
 import type {
   CollectionProductsPage,
   ColorwayImages,
@@ -35,7 +39,6 @@ import type {
 } from "../types";
 import type { CatalogQueryResult } from "./client";
 import { ShopifyCatalogError } from "./errors";
-import { CATALOG_OWNERSHIP_TAG } from "./queries";
 
 /** Shopify option that becomes colorways instead of a normalized option. */
 const COLOR_OPTION_NAME = "Color";
@@ -51,11 +54,18 @@ const DEFAULT_OPTION_VALUE = "Default Title";
 const RELATED_PRODUCT_LIMIT = 4;
 
 /**
- * Tags the storefront never shows a shopper: the ownership marker and any
+ * The tag Forward's demo seeding used to mark its products. It no longer
+ * decides which products are listed, but stays hidden so it never becomes a
+ * card badge.
+ */
+const SEED_MARKER_TAG = "forward";
+
+/**
+ * Tags the storefront never shows a shopper: the seed marker and any
  * `namespace:value` bookkeeping tag a seeding or ops tool wrote.
  */
 function isInfrastructureTag(tag: string): boolean {
-  return tag === CATALOG_OWNERSHIP_TAG || tag.includes(":");
+  return tag === SEED_MARKER_TAG || tag.includes(":");
 }
 
 /**
@@ -310,7 +320,7 @@ function mapImage(
   const image = asRecord(value, context);
   const src = asText(image.url, `${context} url`);
   if (!isShopifyProductImageUrl(src)) {
-    fail(`${context} url is not an owned Shopify CDN media URL.`);
+    fail(`${context} url is not a Shopify CDN media URL.`);
   }
   const width = asPositiveInteger(image.width, `${context} width`);
   const height = asPositiveInteger(image.height, `${context} height`);
@@ -485,22 +495,21 @@ function mapColorways(
 /**
  * The four roles from the product's own images when there is no media map:
  * the colorway's variant image leads, then the product's images in Shopify
- * order. Fewer than four repeat; the gallery shows each image once.
+ * order. Fewer than four repeat; the gallery shows each image once. A product
+ * with no images at all gets the local placeholder, so one unfinished product
+ * never fails a listing page.
  */
 function fallbackColorwayImages(
   lead: StorefrontImage | undefined,
   images: ReadonlyMap<string, StorefrontImage>,
-  handle: string,
+  title: string,
 ): ColorwayImages {
   const ordered = [
     ...(lead === undefined ? [] : [lead]),
     ...[...images.values()].filter((image) => image.src !== lead?.src),
   ];
   const at = (index: number) => ordered[index % ordered.length];
-  const primary = at(0);
-  if (primary === undefined) {
-    fail(`${handle} has no product images.`);
-  }
+  const primary = at(0) ?? { ...PRODUCT_PLACEHOLDER_IMAGE, alt: title };
   return {
     primary,
     alternate: at(1) ?? primary,
@@ -893,10 +902,6 @@ function mapProduct(node: unknown, index: number): Product {
   const tags = asArray(record.tags, `${handle} tags`).map((tag, tagIndex) =>
     asText(tag, `${handle} tag ${tagIndex}`),
   );
-  if (!tags.includes(CATALOG_OWNERSHIP_TAG)) {
-    fail(`${handle} is missing the "${CATALOG_OWNERSHIP_TAG}" ownership tag.`);
-  }
-
   const id = asText(record.id, `${handle} id`);
   if (!id.startsWith("gid://shopify/Product/")) {
     fail(`${handle} id is not a Shopify Product GID.`);
@@ -950,7 +955,7 @@ function mapProduct(node: unknown, index: number): Product {
                 ? undefined
                 : mapImage(lead, title, `${handle} colorway "${label}" image`),
               images,
-              handle,
+              title,
             ),
           };
         });
@@ -1094,18 +1099,13 @@ export const RELATED_PRODUCT_CANDIDATES = RELATED_PRODUCT_LIMIT * 3;
 
 /**
  * Validates a by-handle product read, with its related candidates under
- * `related`. `null` means the store has no such product in Forward's catalog,
- * which the route turns into a 404.
+ * `related`. `null` means the store has no such product, which the route
+ * turns into a 404.
  */
 export function mapProductResult(result: CatalogQueryResult): Product | null {
   failOnGraphQLErrors(result, "product");
   const data = asRecord(result.data, "product response data");
   if (data.product === null || data.product === undefined) {
-    return null;
-  }
-  const tags = asRecord(data.product, "product").tags;
-  /* Outside the catalog the whole-catalog read sees, so not a page. */
-  if (!Array.isArray(tags) || !tags.includes(CATALOG_OWNERSHIP_TAG)) {
     return null;
   }
   const product = mapProduct(data.product, 0);
@@ -1119,7 +1119,8 @@ export function mapProductResult(result: CatalogQueryResult): Product | null {
           const record = asRecord(node, `related product ${index}`);
           return {
             handle: asText(record.handle, `related product ${index} handle`),
-            category: asText(
+            /* Search is not exact, so a candidate may be untyped. */
+            category: asString(
               record.productType,
               `related product ${index} productType`,
             ),

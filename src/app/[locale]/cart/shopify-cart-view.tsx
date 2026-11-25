@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/cn";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { useT } from "@/lib/i18n/t";
+import { PRODUCT_PLACEHOLDER_IMAGE } from "@/lib/storefront/image-source";
 import {
   CART_DISABLED_CTA,
   CART_EMPTY_HEADING,
@@ -46,21 +47,26 @@ function ShopifyCartLine({
   const handle = line.merchandise?.product.handle;
   const href = handle === undefined ? "/shop" : `/products/${handle}`;
   const details = cartLineOptions(line.merchandise?.selectedOptions);
-  const image = line.merchandise?.image;
+  /* Shopify falls back to the product image, so none at all means an
+   * image-less product: show the placeholder. */
+  const image = line.merchandise?.image ?? {
+    url: PRODUCT_PLACEHOLDER_IMAGE.src,
+    altText: null,
+    width: PRODUCT_PLACEHOLDER_IMAGE.width,
+    height: PRODUCT_PLACEHOLDER_IMAGE.height,
+  };
 
   return (
     <article className={CART_LINE}>
       <Link href={href}>
-        {image === null || image === undefined ? null : (
-          <Image
-            alt={image.altText ?? title}
-            className={CART_IMAGE}
-            height={image.height ?? 240}
-            sizes="190px"
-            src={image.url}
-            width={image.width ?? 190}
-          />
-        )}
+        <Image
+          alt={image.altText ?? title}
+          className={CART_IMAGE}
+          height={image.height ?? 240}
+          sizes="190px"
+          src={image.url}
+          width={image.width ?? 190}
+        />
       </Link>
       <div>
         <h2 className={CART_LINE_HEADING}>
