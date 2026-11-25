@@ -16,7 +16,7 @@ export const COLLECTION_CACHE_KEY = "forward-shopify-collection-v1";
 export const PRODUCT_CACHE_KEY = "forward-shopify-product-v1";
 
 /** Navigation/collection reads share the catalog freshness window. */
-export const NAVIGATION_CACHE_KEY = "forward-shopify-navigation-v1";
+export const NAVIGATION_CACHE_KEY = "forward-shopify-navigation-v2";
 
 /** Content reads share the catalog freshness window. */
 export const CONTENT_CACHE_KEY = "forward-shopify-content-v1";

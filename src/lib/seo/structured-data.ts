@@ -74,6 +74,16 @@ export function breadcrumbJsonLd(
   };
 }
 
+/** The business behind the site, named as the shop names itself. */
+export function organizationJsonLd(name: string, locale: LocaleId): JsonLd {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name,
+    url: absoluteUrl("/", locale),
+  };
+}
+
 /** The site, with the search box search engines can show for it. */
 export function websiteJsonLd(name: string, locale: LocaleId): JsonLd {
   return {

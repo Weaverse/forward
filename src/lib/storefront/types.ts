@@ -196,6 +196,8 @@ export interface ShopIdentity {
   id: string;
   /** The permanent `*.myshopify.com` domain. */
   myshopifyDomain: string;
+  /** The shop's own name, as the merchant set it in Shopify. */
+  name: string;
 }
 
 /**

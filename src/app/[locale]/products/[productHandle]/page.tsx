@@ -5,7 +5,11 @@ import { DEFAULT_LOCALE, type LocaleId, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
 import { getTranslator } from "@/lib/i18n/translator";
 import { shopifyRedirectOrNotFound } from "@/lib/routes/not-found";
-import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo/structured-data";
+import {
+  absoluteUrl,
+  breadcrumbJsonLd,
+  productJsonLd,
+} from "@/lib/seo/structured-data";
 import { getStorefront } from "@/lib/storefront/data-source";
 import type { Product } from "@/lib/storefront/types";
 import { WeaversePage } from "@/lib/weaverse/page";
@@ -44,6 +48,10 @@ export async function generateMetadata({
     description: product.subtitle,
     alternates: marketAlternates(`/products/${productHandle}`, locale),
     openGraph: {
+      /* Next's OpenGraph types have no `product`; `website` is the ogp.me
+       * type Next can render for it. */
+      type: "website",
+      url: absoluteUrl(`/products/${product.handle}`, locale),
       title: product.title,
       description: product.subtitle,
       ...(image === undefined

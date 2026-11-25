@@ -439,10 +439,11 @@ describe("Shopify navigation data source", () => {
     assert.deepEqual(await shopifySource().getShop(), {
       id: "gid://shopify/Shop/1234567",
       myshopifyDomain: SYNTHETIC_STORE_DOMAIN,
+      name: "Forward Test Shop",
     });
     const noShop = shopifySource(async () =>
       navigationResponseWith((draft) => {
-        draft.data.shop = { id: "" };
+        draft.data.shop = { id: "", name: "Forward Test Shop" };
       }),
     );
     await assert.rejects(() => noShop.getShop(), ShopifyCatalogError);

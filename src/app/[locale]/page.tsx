@@ -4,8 +4,8 @@ import { JsonLdScript } from "@/components/json-ld";
 import { marketAlternates } from "@/lib/i18n/alternates";
 import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
-import { getTranslator } from "@/lib/i18n/translator";
-import { websiteJsonLd } from "@/lib/seo/structured-data";
+import { organizationJsonLd, websiteJsonLd } from "@/lib/seo/structured-data";
+import { getStorefront } from "@/lib/storefront/data-source";
 import { WeaversePage } from "@/lib/weaverse/page";
 import {
   loadWeaversePage,
@@ -31,11 +31,12 @@ export async function generateMetadata({
  * Home.
  *
  * Composed entirely from the project's `INDEX` template. Every section takes
- * its own data through its loader, so the route loads nothing itself.
+ * its own data through its loader; the route reads only the shop's name, for
+ * the Organization and WebSite structured data.
  */
 export default async function HomePage(props: HomePageProps) {
   const locale = await routeLocale(props.params);
-  const [page, projectId, t] = await Promise.all([
+  const [page, projectId, shop] = await Promise.all([
     loadWeaversePage({
       locale,
       pathname: "/",
@@ -43,7 +44,7 @@ export default async function HomePage(props: HomePageProps) {
       type: "INDEX",
     }),
     Promise.resolve(weaverseProjectId()),
-    getTranslator(locale),
+    getStorefront(locale).getShop(),
   ]);
 
   if (page === null || projectId === null) {
@@ -52,7 +53,12 @@ export default async function HomePage(props: HomePageProps) {
 
   return (
     <div className="-mt-header-compact [--header-inset:var(--spacing-header-compact)] bg-text-inverse md:-mt-header md:[--header-inset:var(--spacing-header)]">
-      <JsonLdScript data={websiteJsonLd(t("meta.siteTitle"), locale)} />
+      <JsonLdScript
+        data={[
+          organizationJsonLd(shop.name, locale),
+          websiteJsonLd(shop.name, locale),
+        ]}
+      />
       <WeaversePage data={page} projectId={projectId} />
     </div>
   );
