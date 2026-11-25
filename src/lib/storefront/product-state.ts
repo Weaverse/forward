@@ -6,6 +6,7 @@
 
 import type { CSSProperties } from "react";
 
+import { isShopifyProductImageUrl } from "./image-source";
 import type {
   Money,
   Product,
@@ -235,9 +236,26 @@ export function productColorwayHref(
 export function colorwaySwatchStyle(colorway: ProductColorway): CSSProperties {
   return colorway.swatchColor === null
     ? {
-        backgroundImage: `url(${colorway.images.primary.src})`,
+        backgroundImage: `url(${swatchImageUrl(colorway.images.primary.src)})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }
     : { backgroundColor: colorway.swatchColor };
+}
+
+/* Every swatch dot renders at 12px (`size-3`); twice that covers 2x screens. */
+const SWATCH_IMAGE_SIZE = "24";
+
+/**
+ * A swatch-sized rendition of a colorway image, cropped square by Shopify's
+ * CDN, instead of the full original. Its other query params (the `v` cache
+ * key) are kept. A non-Shopify source, such as the placeholder, is unchanged.
+ */
+export function swatchImageUrl(src: string): string {
+  if (!isShopifyProductImageUrl(src)) return src;
+  const url = new URL(src);
+  url.searchParams.set("width", SWATCH_IMAGE_SIZE);
+  url.searchParams.set("height", SWATCH_IMAGE_SIZE);
+  url.searchParams.set("crop", "center");
+  return url.toString();
 }
