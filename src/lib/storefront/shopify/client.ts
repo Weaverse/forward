@@ -55,7 +55,6 @@ import {
 } from "./navigation-query";
 import {
   CATALOG_MEDIA_LIMIT,
-  CATALOG_PRODUCT_FILTER,
   CATALOG_PRODUCT_LIMIT,
   CATALOG_QUERY,
   CATALOG_VARIANT_LIMIT,
@@ -223,7 +222,6 @@ export function createCatalogQueryExecutor(
           after,
           variantFirst: CATALOG_VARIANT_LIMIT,
           mediaFirst: CATALOG_MEDIA_LIMIT,
-          query: CATALOG_PRODUCT_FILTER,
         },
       });
       const graphQLErrors = readGraphQLErrors(errors, "catalog");
@@ -277,7 +275,7 @@ export function createCatalogQueryExecutor(
  */
 export function relatedProductsQuery(productType: string): string {
   const quoted = productType.replace(/["\\]/g, "\\$&");
-  return `${CATALOG_PRODUCT_FILTER} AND product_type:"${quoted}"`;
+  return `product_type:"${quoted}"`;
 }
 
 /**
@@ -302,7 +300,12 @@ export function createProductQueryExecutor(
         },
       });
       const productType = product.data?.product?.productType;
-      if (product.errors !== undefined || typeof productType !== "string") {
+      /* An untyped product has no "same type" to search for. */
+      if (
+        product.errors !== undefined ||
+        typeof productType !== "string" ||
+        productType === ""
+      ) {
         return product;
       }
       const related = await client.graphql(RELATED_PRODUCTS_QUERY, {
@@ -499,7 +502,6 @@ export function createAllProductsQueryExecutor(
     (client, variables: Parameters<AllProductsQueryExecutor>[0]) =>
       client.graphql(ALL_PRODUCTS_QUERY, {
         variables: {
-          query: CATALOG_PRODUCT_FILTER,
           sortKey: variables.sortKey,
           reverse: variables.reverse,
           ...pagingVariables(variables),

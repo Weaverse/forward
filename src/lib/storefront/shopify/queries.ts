@@ -13,15 +13,6 @@
 
 import { gql } from "@shopify/hydrogen";
 
-/** Ownership tag every managed Forward product must carry. */
-export const CATALOG_OWNERSHIP_TAG = "forward";
-
-/**
- * Fixed Storefront search filter. This is a constant — no user input is ever
- * interpolated into Shopify GraphQL search syntax.
- */
-export const CATALOG_PRODUCT_FILTER = `tag:${CATALOG_OWNERSHIP_TAG}`;
-
 /** Products per page of the whole-catalog read. */
 export const CATALOG_PRODUCT_LIMIT = 50;
 /** Per-product bounds; exceeding either is a hard adapter failure. */
@@ -128,7 +119,6 @@ export const CATALOG_QUERY = gql(`
     $after: String
     $variantFirst: Int!
     $mediaFirst: Int!
-    $query: String!
     $sortKey: ProductSortKeys
     $reverse: Boolean
     $country: CountryCode
@@ -137,7 +127,6 @@ export const CATALOG_QUERY = gql(`
     products(
       first: $first
       after: $after
-      query: $query
       sortKey: $sortKey
       reverse: $reverse
     ) {

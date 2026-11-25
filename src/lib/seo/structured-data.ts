@@ -6,6 +6,7 @@
 
 import { type LocaleId, localizePath } from "@/lib/i18n/locales";
 import { siteBaseUrl } from "@/lib/routes/site";
+import { isPlaceholderImage } from "@/lib/storefront/image-source";
 import {
   galleryImages,
   productSelectionHref,
@@ -24,8 +25,11 @@ export function absoluteUrl(path: string, locale: LocaleId): string {
  * selects that variant, so a crawler lands on the exact price it read.
  */
 export function productJsonLd(product: Product, locale: LocaleId): JsonLd {
+  /* Only the store's own photos: a placeholder is not an image of it. */
   const images = product.colorways.flatMap((colorway) =>
-    galleryImages(colorway).map((image) => image.src),
+    galleryImages(colorway)
+      .filter((image) => !isPlaceholderImage(image))
+      .map((image) => image.src),
   );
   return {
     "@context": "https://schema.org",
@@ -33,7 +37,7 @@ export function productJsonLd(product: Product, locale: LocaleId): JsonLd {
     name: product.title,
     description: product.description,
     url: absoluteUrl(`/products/${product.handle}`, locale),
-    image: [...new Set(images)],
+    ...(images.length === 0 ? {} : { image: [...new Set(images)] }),
     ...(product.category === "" ? {} : { category: product.category }),
     offers: product.variants.map((variant) => ({
       "@type": "Offer",

@@ -82,7 +82,7 @@ function productVariants(
 interface StaticProductDefinition {
   /** Shopify `productType`, which is what `Product.category` carries. */
   productType: string;
-  /** Shopify tags minus the ownership marker, as `Product.activities`. */
+  /** Shopify tags minus the seed marker, as `Product.activities`. */
   tags: readonly string[];
   /** Shopify Color option values, verbatim. */
   colors: readonly string[];

@@ -14,6 +14,7 @@ import {
 } from "@/lib/seo/structured-data";
 import { getStorefront } from "@/lib/storefront/data-source";
 import { toSearchParams } from "@/lib/storefront/filter-params";
+import { isPlaceholderImage } from "@/lib/storefront/image-source";
 import {
   requestedSelection,
   resolveProductSelection,
@@ -63,7 +64,7 @@ export async function generateMetadata({
       url: absoluteUrl(`/products/${product.handle}`, locale),
       title: product.title,
       description,
-      ...(image === undefined
+      ...(image === undefined || isPlaceholderImage(image)
         ? {}
         : {
             images: [

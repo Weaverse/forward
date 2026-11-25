@@ -20,8 +20,8 @@ const nextConfig: NextConfig = {
   distDir: process.env.FORWARD_DIST_DIR ?? ".next",
   images: {
     /*
-     * Only the exact owned Shopify CDN media path is allowed; no remote
-     * editorial hotlinks are introduced.
+     * Only Shopify CDN media (any shop's `/s/files/` path) is allowed; no
+     * other remote host is. The product placeholder is a local file.
      */
     remotePatterns: [
       {

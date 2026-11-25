@@ -21,7 +21,10 @@ import {
   createStorefrontClient,
 } from "@shopify/hydrogen";
 import { createStorefrontDataSource } from "../src/lib/storefront/data-source.ts";
-import { isShopifyProductImageUrl } from "../src/lib/storefront/image-source.ts";
+import {
+  isPlaceholderImage,
+  isShopifyProductImageUrl,
+} from "../src/lib/storefront/image-source.ts";
 import { readShopifyCatalogConfig } from "../src/lib/storefront/shopify/env.ts";
 import { safeErrorLabel } from "../src/lib/storefront/shopify/errors.ts";
 import { SHOP_IDENTITY_QUERY } from "../src/lib/storefront/shopify/queries.ts";
@@ -312,7 +315,7 @@ try {
       MEDIA_ROLES.every((role) => {
         const image = colorway.images[role];
         return (
-          isShopifyProductImageUrl(image.src) &&
+          (isShopifyProductImageUrl(image.src) || isPlaceholderImage(image)) &&
           Number.isInteger(image.width) &&
           image.width > 0 &&
           Number.isInteger(image.height) &&
@@ -324,7 +327,7 @@ try {
     check(
       `${product.handle} media`,
       mediaOk,
-      `${product.colorways.length} colorways x ${MEDIA_ROLES.length} owned CDN roles`,
+      `${product.colorways.length} colorways x ${MEDIA_ROLES.length} Shopify CDN or placeholder roles`,
     );
 
     check(

@@ -3,7 +3,10 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, it } from "vite-plus/test";
 
-import { isShopifyProductImageUrl } from "../src/lib/storefront/image-source.ts";
+import {
+  isShopifyProductImageUrl,
+  PRODUCT_PLACEHOLDER_IMAGE,
+} from "../src/lib/storefront/image-source.ts";
 import {
   type CatalogQueryResult,
   createCatalogQueryExecutor,
@@ -34,6 +37,7 @@ import {
   type CatalogResponse,
   catalogResponse,
   catalogResponseWith,
+  imagelessProductNode,
   plainProductNode,
   productExecutorFor,
   syntheticMediaIds,
@@ -227,7 +231,6 @@ describe("Hydrogen catalog client seam", () => {
         first: 50,
         language: "EN",
         mediaFirst: 50,
-        query: "tag:forward",
         variantFirst: 50,
       });
     } finally {
@@ -368,7 +371,7 @@ describe("catalog mapping", () => {
     assert.equal(shell.title, "Weatherline Shell");
     assert.deepEqual(shell.price, { amount: 248, currencyCode: "USD" });
     assert.equal(shell.category, "Outerwear");
-    /* Tags verbatim, minus the ownership marker and ops bookkeeping. */
+    /* Tags verbatim, minus the seed marker and ops bookkeeping. */
     assert.deepEqual(
       [...shell.activities],
       [
@@ -897,12 +900,14 @@ describe("catalog mapping failures", () => {
       catalogResponseWith("weatherline-shell", (product) => {
         product.media.nodes[0].image.url = "https://images.example.com/a.webp";
       }),
-      "not an owned Shopify CDN media URL",
+      "not a Shopify CDN media URL",
     );
 
     for (const url of [
       "https://cdn.shopify.com:8443/s/files/1/0978/4757/4828/files/a.webp",
-      "https://cdn.shopify.com/s/files/9/9999/9999/9999/files/foreign.webp",
+      "https://cdn.example.com/s/files/1/0978/4757/4828/files/a.webp",
+      "https://shop.example.com/cdn/shop/files/a.webp",
+      "https://cdn.shopify.com/other/files/a.webp",
       "https://user:password@cdn.shopify.com/s/files/1/0978/4757/4828/files/a.webp",
       "https://cdn.shopify.com/s/files/1/0978/4757/4828/%2e%2e/9999/foreign.webp",
       "https://cdn.shopify.com/s/files/1/0978/4757/4828/files/%252e%252e/foreign.webp",
@@ -911,22 +916,19 @@ describe("catalog mapping failures", () => {
         catalogResponseWith("weatherline-shell", (product) => {
           product.media.nodes[0].image.url = url;
         }),
-        "not an owned Shopify CDN media URL",
+        "not a Shopify CDN media URL",
       );
     }
   });
 
-  it("allows collection images from the owned CDN tenant", () => {
-    assert.ok(
-      isShopifyProductImageUrl(
-        "https://cdn.shopify.com/s/files/1/0978/4757/4828/collections/hero.webp?v=1",
-      ),
-    );
-    assert.ok(
-      !isShopifyProductImageUrl(
-        "https://cdn.shopify.com/s/files/9/9999/9999/9999/collections/hero.webp",
-      ),
-    );
+  it("allows any shop's Shopify CDN images", () => {
+    for (const url of [
+      "https://cdn.shopify.com/s/files/1/0978/4757/4828/collections/hero.webp?v=1",
+      "https://cdn.shopify.com/s/files/1/0612/3456/7890/files/a.webp",
+      "https://cdn.shopify.com/s/files/9/9999/9999/9999/collections/hero.webp",
+    ]) {
+      assert.ok(isShopifyProductImageUrl(url), url);
+    }
   });
 
   it("rejects invalid money and a product priced in mixed currencies", async () => {
@@ -1089,13 +1091,27 @@ describe("catalog mapping failures", () => {
     await assertRejectsCatalog(response, "not a Shopify ProductVariant GID");
   });
 
-  it("rejects a product missing the forward ownership tag", async () => {
-    await assertRejectsCatalog(
-      catalogResponseWith("weatherline-shell", (product) => {
-        product.tags = ["managed-by:forward-seed"];
+  it("maps an untagged product", () => {
+    const product = mapped(
+      catalogResponseWith("weatherline-shell", (entry) => {
+        entry.tags = [];
       }),
-      "ownership tag",
+    ).find((entry) => entry.handle === "weatherline-shell");
+    assert.deepEqual(product?.activities, []);
+  });
+
+  it("maps a product with no images onto the placeholder", () => {
+    const response = catalogResponse();
+    response.data.products.nodes.push(imagelessProductNode("plain-tote"));
+    const product = mapped(response).find(
+      (entry) => entry.handle === "plain-tote",
     );
+    const images = product?.colorways[0]?.images;
+    assert.deepEqual(images?.primary, {
+      ...PRODUCT_PLACEHOLDER_IMAGE,
+      alt: "Plain Tote",
+    });
+    assert.deepEqual(images?.context, images?.primary);
   });
 
   it("ships whatever products the store returns", async () => {
@@ -1233,18 +1249,16 @@ describe("ShopifyCatalogDataSource", () => {
   it("quotes a product type into Shopify search syntax", () => {
     assert.equal(
       relatedProductsQuery('Shell "Pro" \\ X'),
-      'tag:forward AND product_type:"Shell \\"Pro\\" \\\\ X"',
+      'product_type:"Shell \\"Pro\\" \\\\ X"',
     );
   });
 
-  it("treats a product outside the catalog's tag as missing", () => {
-    const response = catalogResponseWith("weatherline-shell", (product) => {
-      product.tags = product.tags.filter((tag: string) => tag !== "forward");
-    });
-    const node = response.data.products.nodes.find(
-      (entry) => entry.handle === "weatherline-shell",
+  it("reads an untagged product by handle, and a missing one as null", () => {
+    const node = plainProductNode("plain-tote");
+    assert.equal(
+      mapProductResult({ data: { product: node } })?.handle,
+      "plain-tote",
     );
-    assert.equal(mapProductResult({ data: { product: node } }), null);
     assert.equal(mapProductResult({ data: { product: null } }), null);
   });
 

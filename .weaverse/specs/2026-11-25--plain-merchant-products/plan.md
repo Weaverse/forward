@@ -26,12 +26,26 @@
 - Image alt falls back to the media alt, then the product title.
 - `productType`, `description` and `descriptionHtml` may be empty strings.
 
-## Out of scope
+## Follow-up: any store's catalog
 
-- The `forward` ownership tag still scopes the catalog.
-- Product images must come from the owned CDN tenant
-  (`SHOPIFY_IMAGE_PATH_PREFIX`), which ties the theme to one store.
-- A product with no images still fails the read.
+- **Images:** `isShopifyProductImageUrl` and the Next `remotePatterns` accept
+  `https://cdn.shopify.com/s/files/**` from any shop, still with no port, no
+  credentials and no traversal segments. No other host is allowed. The
+  `<shop>/cdn/shop/...` form is not accepted: the Storefront API returns
+  `cdn.shopify.com` URLs.
+- **No ownership tag:** the catalog and `/shop` queries send no search filter,
+  and related products search `product_type:"<type>"` only (skipped for an
+  untyped product). `mapProduct` and `mapProductResult` no longer require the
+  tag, so an untagged product in a collection or by handle maps too. The old
+  `forward` tag stays hidden from `activities`, like `namespace:value` tags,
+  so the demo store's products don't show it as a badge.
+- **No images:** every role takes `PRODUCT_PLACEHOLDER_IMAGE`
+  (`public/images/placeholder/product.svg`, 4:5) with the product title as
+  alt. JSON-LD lists only real images and omits `image` when there are none;
+  the PDP OpenGraph image skips the placeholder. Cart and mini-cart lines
+  with no merchandise image show the placeholder too.
+- Accepted ceiling: the sitemap and search still read the whole catalog in
+  sequence.
 
 ## Files touched
 
@@ -46,3 +60,16 @@
 - `tests/fixtures/shopify-catalog-response.ts` (`plainProductNode`),
   `tests/fixtures/storefront/products.ts`,
   `tests/shopify-catalog-adapter.test.ts`
+
+Follow-up:
+
+- `src/lib/storefront/image-source.ts`, `next.config.ts`,
+  `public/images/placeholder/product.svg`
+- `src/lib/storefront/shopify/queries.ts`, `client.ts`, `mapper.ts`
+- `src/lib/seo/structured-data.ts`,
+  `src/app/[locale]/products/[productHandle]/page.tsx`
+- `src/components/site-header/mini-cart.tsx`,
+  `src/app/[locale]/cart/shopify-cart-view.tsx`
+- `scripts/verify-shopify.mts`, `.guides/cookbooks/customer-account-local-mock.md`
+- `tests/fixtures/shopify-catalog-response.ts` (`imagelessProductNode`),
+  `tests/shopify-catalog-adapter.test.ts`, `tests/structured-data.test.ts`
