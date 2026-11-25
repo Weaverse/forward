@@ -78,6 +78,8 @@ export interface Product {
   title: string;
   subtitle: string;
   category: ProductCategory;
+  /** The store's own vendor; empty when the merchant set none. */
+  vendor: string;
   activities: readonly string[];
   price: Money;
   description: string;

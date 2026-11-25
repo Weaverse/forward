@@ -420,6 +420,7 @@ function buildProduct(
      * of the same description the store publishes. */
     subtitle: definition.description.split(/(?<=\.)\s/)[0] ?? "",
     category: definition.productType,
+    vendor: "Forward",
     activities: definition.tags,
     price,
     description: definition.description,

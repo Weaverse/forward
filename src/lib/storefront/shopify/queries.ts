@@ -40,6 +40,7 @@ export const PRODUCT_FIELDS_FRAGMENT = `#graphql
     description
     descriptionHtml
     productType
+    vendor
     tags
     options {
       name

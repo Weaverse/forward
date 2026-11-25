@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { ResourceViewed } from "@/lib/analytics";
 import { localizePath } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
 import { T } from "@/lib/i18n/t";
@@ -40,6 +41,16 @@ export default async function SearchPage({
 
   return (
     <div className="mx-auto w-full max-w-page px-page-gutter pt-26.25 pb-section-block-bottom">
+      {hasQuery ? (
+        <ResourceViewed
+          event="search_viewed"
+          payload={{
+            searchTerm: query,
+            searchResults: { totalCount: results.length },
+          }}
+          viewKey={query}
+        />
+      ) : null}
       <p className={eyebrow()}>
         <T k="search.eyebrow" />
       </p>

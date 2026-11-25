@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { NavigationProgress } from "@/components/navigation-progress";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header/site-header";
+import { PageViewed } from "@/lib/analytics";
 import { ShopifyCartRuntime } from "@/lib/cart/shopify-cart-react";
 import { cn } from "@/lib/cn";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
@@ -136,6 +137,7 @@ export default async function RootLayout({
       <body className="m-0 max-w-full overflow-x-clip bg-canvas font-body text-copy-sm leading-body text-ink antialiased">
         {weaverseEnabled ? <WeaverseNextStudioConnect /> : null}
         <LocaleProvider locale={locale}>
+          <PageViewed />
           <WeaverseRoot
             merchantOverrides={themeResponse?.merchantOverrides}
             publicEnv={weaversePublicEnv(process.env)}

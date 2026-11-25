@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JsonLdScript } from "@/components/json-ld";
+import { ResourceViewed } from "@/lib/analytics";
 import { marketAlternates } from "@/lib/i18n/alternates";
 import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
 import { routeLocale } from "@/lib/i18n/route-locale";
@@ -118,6 +119,13 @@ export default async function CollectionPage(props: CollectionPageProps) {
 
   return (
     <>
+      <ResourceViewed
+        event="collection_viewed"
+        payload={{
+          collection: { id: collection.id, handle: collection.handle },
+        }}
+        viewKey={collection.id}
+      />
       <JsonLdScript
         data={breadcrumbJsonLd(
           [

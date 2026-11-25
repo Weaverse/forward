@@ -4,16 +4,16 @@
 export const CATALOG_REVALIDATE_SECONDS = 3600;
 
 /** Stable cache namespace; the non-secret store domain is added by the client. */
-export const CATALOG_CACHE_KEY = "forward-shopify-catalog-v2";
+export const CATALOG_CACHE_KEY = "forward-shopify-catalog-v3";
 
 /** All-products page reads; the key also carries the request variables. */
-export const ALL_PRODUCTS_CACHE_KEY = "forward-shopify-all-products-v1";
+export const ALL_PRODUCTS_CACHE_KEY = "forward-shopify-all-products-v2";
 
 /** Per-collection page reads; the key also carries the request variables. */
-export const COLLECTION_CACHE_KEY = "forward-shopify-collection-v1";
+export const COLLECTION_CACHE_KEY = "forward-shopify-collection-v2";
 
 /** By-handle product reads; the key also carries the handle. */
-export const PRODUCT_CACHE_KEY = "forward-shopify-product-v1";
+export const PRODUCT_CACHE_KEY = "forward-shopify-product-v2";
 
 /** Navigation/collection reads share the catalog freshness window. */
 export const NAVIGATION_CACHE_KEY = "forward-shopify-navigation-v2";
