@@ -69,6 +69,12 @@ export const PRODUCT_FIELDS_FRAGMENT = `#graphql
           name
           value
         }
+        image {
+          url
+          width
+          height
+          altText
+        }
       }
     }
     media(first: $mediaFirst) {

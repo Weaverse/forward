@@ -45,6 +45,7 @@ export interface ProductOption {
 export interface ProductVariant {
   /** Exact Shopify merchandise GID. */
   id: string;
+  /** `default` when the product has no Color option. */
   colorwayId: string;
   /** Every selected option except Color, in Shopify option order. */
   selectedOptions: readonly {
@@ -85,6 +86,11 @@ export interface Product {
   specs: readonly SpecRow[];
   care: readonly string[];
   repair: string;
+  /**
+   * False for a product without a Color option: it has one implicit colorway
+   * (id `default`, empty name) that surfaces never render as a choice.
+   */
+  hasColorOption: boolean;
   colorways: readonly ProductColorway[];
   options: readonly ProductOption[];
   variants: readonly ProductVariant[];

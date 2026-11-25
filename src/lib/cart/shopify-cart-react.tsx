@@ -78,6 +78,19 @@ export function formatShopifyMoney(
   );
 }
 
+/**
+ * A cart line's option values for display. Shopify's `Default Title` is the
+ * marker of a single-variant product, not something the shopper chose.
+ */
+export function cartLineOptions(
+  selectedOptions: readonly { value: string }[] | undefined,
+): string {
+  return (selectedOptions ?? [])
+    .map(({ value }) => value)
+    .filter((value) => value !== "Default Title")
+    .join(" · ");
+}
+
 export function toHydrogenProductInput(
   product: Product,
   colorwayId: string,
@@ -87,6 +100,10 @@ export function toHydrogenProductInput(
   if (colorway === undefined) {
     throw new Error("Product colorway is unavailable.");
   }
+  /* A product without Color has no Color option to report. */
+  const colorOption = product.hasColorOption
+    ? [{ name: "Color", optionValues: [{ name: colorway.name }] }]
+    : [];
   const variants: ProductVariantInput[] = product.variants
     .filter((variant) => variant.colorwayId === colorwayId)
     .map((variant) => ({
@@ -96,7 +113,7 @@ export function toHydrogenProductInput(
         "Default",
       availableForSale: variant.availableForSale,
       selectedOptions: [
-        { name: "Color", value: colorway.name },
+        ...colorOption.map(({ name }) => ({ name, value: colorway.name })),
         ...variant.selectedOptions.map((option) => ({ ...option })),
       ],
       price: {
@@ -110,10 +127,7 @@ export function toHydrogenProductInput(
     variants[0] ??
     null;
   const options = [
-    {
-      name: "Color",
-      optionValues: [{ name: colorway.name }],
-    },
+    ...colorOption,
     ...product.options
       .filter(({ name }) => name !== "Color")
       .map((option) => ({

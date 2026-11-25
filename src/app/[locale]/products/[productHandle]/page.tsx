@@ -39,13 +39,15 @@ export async function generateMetadata({
     return { title: t("meta.productNotFound") };
   }
   const image = product.colorways[0]?.images.primary;
+  /* A product without the `forward.highlights` metafield has no subtitle. */
+  const description = product.subtitle || product.description;
   return {
     title: product.title,
-    description: product.subtitle,
+    description,
     alternates: marketAlternates(`/products/${productHandle}`, locale),
     openGraph: {
       title: product.title,
-      description: product.subtitle,
+      description,
       ...(image === undefined
         ? {}
         : {

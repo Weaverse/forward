@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Link } from "@/components/link";
 
 import {
+  cartLineOptions,
   formatShopifyMoney as money,
   type ShopifyCartLineData,
   useShopifyCart,
@@ -44,9 +45,7 @@ function ShopifyCartLine({
   const title = line.merchandise?.product.title ?? t("cart.fallbackTitle");
   const handle = line.merchandise?.product.handle;
   const href = handle === undefined ? "/shop" : `/products/${handle}`;
-  const details = line.merchandise?.selectedOptions
-    ?.map(({ value }) => value)
-    .join(" · ");
+  const details = cartLineOptions(line.merchandise?.selectedOptions);
   const image = line.merchandise?.image;
 
   return (
@@ -67,7 +66,7 @@ function ShopifyCartLine({
         <h2 className={CART_LINE_HEADING}>
           <Link href={href}>{title}</Link>
         </h2>
-        {details === undefined || details.length === 0 ? null : (
+        {details.length === 0 ? null : (
           <p className="text-text-muted">{details}</p>
         )}
         <form {...formProps()} className={CART_LINE_CONTROLS}>

@@ -10,6 +10,13 @@
  * colorway ids are derived from the published Color values, and swatch colours
  * are Shopify's own when the merchant set them. Nothing here consults a
  * theme-side table of approved products.
+ *
+ * A plain merchant product maps too. The `forward.*` editorial metafields are
+ * optional (validated only when set), a product without a Color option gets
+ * one implicit colorway, Shopify's `Title / Default Title` option is dropped,
+ * media without a `colorway_media_map` comes from the product's own images,
+ * and an image without alt text takes the product title. Variant ids and
+ * prices stay strictly validated: the cart depends on them.
  */
 
 import { isShopifyProductImageUrl } from "../image-source";
@@ -32,6 +39,13 @@ import { CATALOG_OWNERSHIP_TAG } from "./queries";
 
 /** Shopify option that becomes colorways instead of a normalized option. */
 const COLOR_OPTION_NAME = "Color";
+
+/** The one colorway of a product that has no Color option. */
+const DEFAULT_COLORWAY_ID = "default";
+
+/** Shopify's marker option for a product with a single default variant. */
+const DEFAULT_OPTION_NAME = "Title";
+const DEFAULT_OPTION_VALUE = "Default Title";
 
 /** How many same-type products a PDP offers as related. */
 const RELATED_PRODUCT_LIMIT = 4;
@@ -74,7 +88,7 @@ const COLORWAY_MEDIA_ROLES = [
 
 const MEDIA_IDS_PER_COLORWAY = COLORWAY_MEDIA_ROLES.length;
 
-/** Required Storefront metafield types for the five `forward` metafields. */
+/** Storefront types the five optional `forward` metafields must have when set. */
 const METAFIELD_TYPES = {
   highlights: "list.single_line_text_field",
   materials: "multi_line_text_field",
@@ -120,6 +134,14 @@ function asText(value: unknown, context: string): string {
   return value;
 }
 
+/** A string Shopify always returns, which may legitimately be empty. */
+function asString(value: unknown, context: string): string {
+  if (typeof value !== "string") {
+    fail(`${context} is not a string.`);
+  }
+  return value;
+}
+
 function asPositiveInteger(value: unknown, context: string): number {
   if (typeof value !== "number" || !Number.isInteger(value) || value <= 0) {
     fail(`${context} is not a positive integer.`);
@@ -135,15 +157,16 @@ function parseJsonValue(raw: string, context: string): unknown {
   }
 }
 
-/** Reads a metafield node, enforcing presence and the exact Storefront type. */
+/**
+ * Reads an optional metafield node. An unset metafield is `null`; a set one
+ * must have the exact Storefront type and a value.
+ */
 function readMetafieldValue(
   node: unknown,
   expectedType: string,
   context: string,
-): string {
-  if (node === null || node === undefined) {
-    fail(`${context} is missing.`);
-  }
+): string | null {
+  if (node === null || node === undefined) return null;
   const record = asRecord(node, context);
   if (record.type !== expectedType) {
     fail(`${context} must be a "${expectedType}" metafield.`);
@@ -193,10 +216,14 @@ function mapNullableMoney(value: unknown, context: string): Money | null {
 /* -------------------------------------------------------------------------- */
 
 interface MappedOptions {
-  /** Exact Shopify `Color` labels in Shopify order. */
-  colorLabels: readonly string[];
+  /** Exact Shopify `Color` labels in Shopify order, `null` without Color. */
+  colorLabels: readonly string[] | null;
   /** Every non-Color option, in Shopify order. */
   options: readonly ProductOption[];
+  /** Every option name a variant selects, Color included, in Shopify order. */
+  optionNames: readonly string[];
+  /** Options dropped from the model (`Title / Default Title`). */
+  hiddenOptionNames: ReadonlySet<string>;
   /** Native Shopify swatch colour per Color label, `null` when unset. */
   swatches: ReadonlyMap<string, string | null>;
 }
@@ -207,8 +234,10 @@ function mapOptions(value: unknown, handle: string): MappedOptions {
     fail(`${handle} has no product options.`);
   }
 
-  let colorLabels: readonly string[] | undefined;
+  let colorLabels: readonly string[] | null = null;
   const options: ProductOption[] = [];
+  const optionNames: string[] = [];
+  const hiddenOptionNames = new Set<string>();
   const swatches = new Map<string, string | null>();
 
   for (const [index, node] of nodes.entries()) {
@@ -231,8 +260,19 @@ function mapOptions(value: unknown, handle: string): MappedOptions {
       fail(`${context} has duplicate values.`);
     }
 
+    /* A single-variant product: there is nothing for a shopper to choose. */
+    if (
+      name === DEFAULT_OPTION_NAME &&
+      values.length === 1 &&
+      values[0] === DEFAULT_OPTION_VALUE
+    ) {
+      hiddenOptionNames.add(name);
+      continue;
+    }
+    optionNames.push(name);
+
     if (name === COLOR_OPTION_NAME) {
-      if (colorLabels !== undefined) {
+      if (colorLabels !== null) {
         fail(`${handle} has more than one ${COLOR_OPTION_NAME} option.`);
       }
       colorLabels = values;
@@ -254,19 +294,37 @@ function mapOptions(value: unknown, handle: string): MappedOptions {
     options.push({ name, values });
   }
 
-  if (colorLabels === undefined) {
-    fail(`${handle} has no ${COLOR_OPTION_NAME} option.`);
-  }
-  return { colorLabels, options, swatches };
+  return { colorLabels, options, optionNames, hiddenOptionNames, swatches };
 }
 
 /* -------------------------------------------------------------------------- */
 /* Media                                                                      */
 /* -------------------------------------------------------------------------- */
 
+/** One Storefront `Image`; without alt text it takes `fallbackAlt`. */
+function mapImage(
+  value: unknown,
+  fallbackAlt: string,
+  context: string,
+): StorefrontImage {
+  const image = asRecord(value, context);
+  const src = asText(image.url, `${context} url`);
+  if (!isShopifyProductImageUrl(src)) {
+    fail(`${context} url is not an owned Shopify CDN media URL.`);
+  }
+  const width = asPositiveInteger(image.width, `${context} width`);
+  const height = asPositiveInteger(image.height, `${context} height`);
+  const alt =
+    typeof image.altText === "string" && image.altText.trim().length > 0
+      ? image.altText
+      : fallbackAlt;
+  return { src, alt, width, height };
+}
+
 function mapMediaImages(
   value: unknown,
   handle: string,
+  title: string,
 ): ReadonlyMap<string, StorefrontImage> {
   const connection = asRecord(value, `${handle} media`);
   const pageInfo = asRecord(connection.pageInfo, `${handle} media pageInfo`);
@@ -288,21 +346,12 @@ function mapMediaImages(
     if (images.has(id)) {
       fail(`${handle} returned duplicate media id ${id}.`);
     }
-    const image = asRecord(record.image, `${context} image`);
-    const src = asText(image.url, `${context} image url`);
-    if (!isShopifyProductImageUrl(src)) {
-      fail(`${context} image url is not an owned Shopify CDN media URL.`);
-    }
-    const width = asPositiveInteger(image.width, `${context} image width`);
-    const height = asPositiveInteger(image.height, `${context} image height`);
-    const alt =
-      typeof image.altText === "string" && image.altText.trim().length > 0
-        ? image.altText
-        : record.alt;
-    if (typeof alt !== "string" || alt.trim().length === 0) {
-      fail(`${context} has no meaningful alt text.`);
-    }
-    images.set(id, { src, alt, width, height });
+    /* Image alt, then the media alt, then the product title. */
+    const fallbackAlt =
+      typeof record.alt === "string" && record.alt.trim().length > 0
+        ? record.alt
+        : title;
+    images.set(id, mapImage(record.image, fallbackAlt, `${context} image`));
   }
 
   return images;
@@ -431,6 +480,33 @@ function mapColorways(
   }
 
   return colorways;
+}
+
+/**
+ * The four roles from the product's own images when there is no media map:
+ * the colorway's variant image leads, then the product's images in Shopify
+ * order. Fewer than four repeat; the gallery shows each image once.
+ */
+function fallbackColorwayImages(
+  lead: StorefrontImage | undefined,
+  images: ReadonlyMap<string, StorefrontImage>,
+  handle: string,
+): ColorwayImages {
+  const ordered = [
+    ...(lead === undefined ? [] : [lead]),
+    ...[...images.values()].filter((image) => image.src !== lead?.src),
+  ];
+  const at = (index: number) => ordered[index % ordered.length];
+  const primary = at(0);
+  if (primary === undefined) {
+    fail(`${handle} has no product images.`);
+  }
+  return {
+    primary,
+    alternate: at(1) ?? primary,
+    detail: at(2) ?? primary,
+    context: at(3) ?? primary,
+  };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -660,13 +736,14 @@ function mapCare(raw: string, handle: string): readonly string[] {
 interface MappedVariants {
   price: Money;
   variants: readonly ProductVariant[];
+  /** The first raw variant image of each colorway, by colorway id. */
+  variantImages: ReadonlyMap<string, unknown>;
 }
 
 function mapVariants(
   value: unknown,
   handle: string,
-  colorLabels: readonly string[],
-  options: readonly ProductOption[],
+  { colorLabels, options, optionNames, hiddenOptionNames }: MappedOptions,
 ): MappedVariants {
   const connection = asRecord(value, `${handle} variants`);
   const pageInfo = asRecord(connection.pageInfo, `${handle} variants pageInfo`);
@@ -679,13 +756,10 @@ function mapVariants(
     fail(`${handle} has no variants.`);
   }
 
-  const expectedOptionNames = [
-    COLOR_OPTION_NAME,
-    ...options.map(({ name }) => name),
-  ];
   const merchandiseIds = new Set<string>();
   const selections = new Set<string>();
   const variants: ProductVariant[] = [];
+  const variantImages = new Map<string, unknown>();
   let minimum: Money | undefined;
 
   for (const [index, node] of nodes.entries()) {
@@ -707,28 +781,29 @@ function mapVariants(
     const selectedOptionRecords = asArray(
       record.selectedOptions,
       `${context} selectedOptions`,
-    ).map((entry, optionIndex) => {
-      const option = asRecord(
-        entry,
-        `${context} selectedOption ${optionIndex}`,
-      );
-      return {
-        name: asText(
-          option.name,
-          `${context} selectedOption ${optionIndex} name`,
-        ),
-        value: asText(
-          option.value,
-          `${context} selectedOption ${optionIndex} value`,
-        ),
-      };
-    });
+    )
+      .map((entry, optionIndex) => {
+        const option = asRecord(
+          entry,
+          `${context} selectedOption ${optionIndex}`,
+        );
+        return {
+          name: asText(
+            option.name,
+            `${context} selectedOption ${optionIndex} name`,
+          ),
+          value: asText(
+            option.value,
+            `${context} selectedOption ${optionIndex} value`,
+          ),
+        };
+      })
+      .filter(({ name }) => !hiddenOptionNames.has(name));
 
     if (
-      selectedOptionRecords.length !== expectedOptionNames.length ||
+      selectedOptionRecords.length !== optionNames.length ||
       selectedOptionRecords.some(
-        (option, optionIndex) =>
-          option.name !== expectedOptionNames[optionIndex],
+        (option, optionIndex) => option.name !== optionNames[optionIndex],
       )
     ) {
       fail(
@@ -736,14 +811,20 @@ function mapVariants(
       );
     }
 
-    const color = selectedOptionRecords[0];
+    const color = selectedOptionRecords.find(
+      ({ name }) => name === COLOR_OPTION_NAME,
+    );
     if (
-      color?.name !== COLOR_OPTION_NAME ||
-      !colorLabels.includes(color.value)
+      colorLabels !== null &&
+      (color === undefined || !colorLabels.includes(color.value))
     ) {
       fail(`${context} references an unknown ${COLOR_OPTION_NAME} value.`);
     }
-    const selectedOptions = selectedOptionRecords.slice(1);
+    const variantColorwayId =
+      color === undefined ? DEFAULT_COLORWAY_ID : colorwayId(color.value);
+    const selectedOptions = selectedOptionRecords.filter(
+      ({ name }) => name !== COLOR_OPTION_NAME,
+    );
     for (const [optionIndex, selected] of selectedOptions.entries()) {
       const option = options[optionIndex];
       if (option === undefined || !option.values.includes(selected.value)) {
@@ -752,7 +833,7 @@ function mapVariants(
     }
 
     const selectionKey = [
-      colorwayId(color.value),
+      variantColorwayId,
       ...selectedOptions.map(({ name, value }) => `${name}:${value}`),
     ].join("\u001f");
     if (selections.has(selectionKey)) {
@@ -778,9 +859,16 @@ function mapVariants(
     ) {
       fail(`${context} compareAtPrice is in a different currency.`);
     }
+    if (
+      record.image !== null &&
+      record.image !== undefined &&
+      !variantImages.has(variantColorwayId)
+    ) {
+      variantImages.set(variantColorwayId, record.image);
+    }
     variants.push({
       id,
-      colorwayId: colorwayId(color.value),
+      colorwayId: variantColorwayId,
       selectedOptions,
       price,
       compareAtPrice,
@@ -791,7 +879,7 @@ function mapVariants(
   if (minimum === undefined) {
     fail(`${handle} has no usable variant price.`);
   }
-  return { price: minimum, variants };
+  return { price: minimum, variants, variantImages };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -813,77 +901,90 @@ function mapProduct(node: unknown, index: number): Product {
   if (!id.startsWith("gid://shopify/Product/")) {
     fail(`${handle} id is not a Shopify Product GID.`);
   }
-  const productType = asText(record.productType, `${handle} productType`);
+  /* Both may be empty: a plain merchant product often has no type or copy. */
+  const productType = asString(record.productType, `${handle} productType`);
   const title = asText(record.title, `${handle} title`);
   // Validate both Storefront fields. `descriptionHtml` preserves paragraph
   // boundaries that Shopify removes from the plain `description` string.
-  asText(record.description, `${handle} description`);
+  asString(record.description, `${handle} description`);
   const descriptionParagraphs = descriptionHtmlParagraphs(
-    asText(record.descriptionHtml, `${handle} descriptionHtml`),
+    asString(record.descriptionHtml, `${handle} descriptionHtml`),
   );
-  if (descriptionParagraphs.length === 0) {
-    fail(`${handle} description has no readable text.`);
-  }
 
-  const { colorLabels, options, swatches } = mapOptions(record.options, handle);
-  const { price, variants } = mapVariants(
+  const mappedOptions = mapOptions(record.options, handle);
+  const { colorLabels, options, swatches } = mappedOptions;
+  const { price, variants, variantImages } = mapVariants(
     record.variants,
     handle,
-    colorLabels,
-    options,
+    mappedOptions,
   );
 
-  const images = mapMediaImages(record.media, handle);
-  const mediaMap = parseColorwayMediaMap(
-    readMetafieldValue(
-      record.colorwayMediaMap,
-      METAFIELD_TYPES.colorwayMediaMap,
-      `${handle} forward.colorway_media_map`,
-    ),
-    handle,
+  const images = mapMediaImages(record.media, handle, title);
+  const mediaMapValue = readMetafieldValue(
+    record.colorwayMediaMap,
+    METAFIELD_TYPES.colorwayMediaMap,
+    `${handle} forward.colorway_media_map`,
   );
-  const colorways = mapColorways(
-    colorLabels,
-    mediaMap,
-    images,
-    handle,
-    swatches,
-  );
-
-  const highlights = validateHighlights(
-    readMetafieldValue(
-      record.highlights,
-      METAFIELD_TYPES.highlights,
-      `${handle} forward.highlights`,
-    ),
-    handle,
-  );
-  const materialParagraphs = splitParagraphs(
-    readMetafieldValue(
-      record.materials,
-      METAFIELD_TYPES.materials,
-      `${handle} forward.materials`,
-    ),
-  );
-  if (materialParagraphs.length === 0) {
-    fail(`${handle} forward.materials has no readable text.`);
+  /* A set media map must cover every colour; without one the product's own
+   * images stand in, led by each colorway's variant image. */
+  const colorways: readonly ProductColorway[] =
+    colorLabels !== null && mediaMapValue !== null
+      ? mapColorways(
+          colorLabels,
+          parseColorwayMediaMap(mediaMapValue, handle),
+          images,
+          handle,
+          swatches,
+        )
+      : (colorLabels ?? [""]).map((label) => {
+          const id =
+            colorLabels === null ? DEFAULT_COLORWAY_ID : colorwayId(label);
+          /* Mapped only here: with a media map, variant images are unused. */
+          const lead = variantImages.get(id);
+          return {
+            id,
+            name: label,
+            swatchColor: swatches.get(label) ?? null,
+            images: fallbackColorwayImages(
+              lead === undefined
+                ? undefined
+                : mapImage(lead, title, `${handle} colorway "${label}" image`),
+              images,
+              handle,
+            ),
+          };
+        });
+  if (new Set(colorways.map(({ id }) => id)).size !== colorways.length) {
+    fail(`${handle} has two ${COLOR_OPTION_NAME} values with the same id.`);
   }
-  const specs = mapFieldSpecs(
-    readMetafieldValue(
-      record.fieldSpecs,
-      METAFIELD_TYPES.fieldSpecs,
-      `${handle} forward.field_specs`,
-    ),
-    handle,
+
+  const highlightsValue = readMetafieldValue(
+    record.highlights,
+    METAFIELD_TYPES.highlights,
+    `${handle} forward.highlights`,
   );
-  const care = mapCare(
-    readMetafieldValue(
-      record.care,
-      METAFIELD_TYPES.care,
-      `${handle} forward.care`,
-    ),
-    handle,
+  const highlights =
+    highlightsValue === null ? [] : validateHighlights(highlightsValue, handle);
+  const materialsValue = readMetafieldValue(
+    record.materials,
+    METAFIELD_TYPES.materials,
+    `${handle} forward.materials`,
   );
+  const materialParagraphs =
+    materialsValue === null ? [] : splitParagraphs(materialsValue);
+  const fieldSpecsValue = readMetafieldValue(
+    record.fieldSpecs,
+    METAFIELD_TYPES.fieldSpecs,
+    `${handle} forward.field_specs`,
+  );
+  const specs =
+    fieldSpecsValue === null ? [] : mapFieldSpecs(fieldSpecsValue, handle);
+  const careValue = readMetafieldValue(
+    record.care,
+    METAFIELD_TYPES.care,
+    `${handle} forward.care`,
+  );
+  const care = careValue === null ? [] : mapCare(careValue, handle);
 
   return {
     id,
@@ -903,6 +1004,7 @@ function mapProduct(node: unknown, index: number): Product {
     /* Repair is brand policy, identical for every product, so it is a theme
      * setting rather than a field each product would have to repeat. */
     repair: "",
+    hasColorOption: colorLabels !== null,
     colorways,
     options,
     variants,
