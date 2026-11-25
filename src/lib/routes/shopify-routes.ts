@@ -8,7 +8,7 @@
 
 import {
   createShopifyRequestContext,
-  createShopifyRouteTemplates,
+  defineShopifyRouteTemplates,
   createStorefrontClient,
   handleShopifyRedirects,
 } from "@shopify/hydrogen";
@@ -29,7 +29,7 @@ import { ShopifyConfigurationError } from "@/lib/storefront/shopify/errors";
  * cannot express (it must name the blog), so `/blogs/:blog/:article` keeps
  * its `next.config.ts` redirect.
  */
-export const ROUTE_TEMPLATES = createShopifyRouteTemplates({
+export const ROUTE_TEMPLATES = defineShopifyRouteTemplates({
   collection: "/shop/:collectionHandle",
   collectionList: "/categories",
   blog: "/archive/:blogHandle",
