@@ -181,7 +181,7 @@ describe("Shopify cart request boundary", () => {
     assert.match(cartCookie, /Secure/i);
   });
 
-  it("redacts the Shopify cart identity while retaining server-owned line data", () => {
+  it("strips the cart key from the identity while retaining server-owned line data", () => {
     const result = sanitizeCartHandlerResult(cartResult(), STORE_DOMAIN);
     assert.equal(result.type, "json");
     if (result.type !== "json") return;
@@ -190,7 +190,7 @@ describe("Shopify cart request boundary", () => {
       checkoutUrl: string;
       lines: { nodes: Array<{ id: string }> };
     };
-    assert.equal(cart.id, "");
+    assert.equal(cart.id, "gid://shopify/Cart/synthetic");
     assert.equal(cart.lines.nodes[0]?.id, "gid://shopify/CartLine/1");
     assert.equal(cart.checkoutUrl, `https://${STORE_DOMAIN}/cart/c/synthetic`);
     assert.ok(!JSON.stringify(result).includes("never-expose"));
@@ -317,8 +317,74 @@ describe("pinned Hydrogen cart handler integration", () => {
       );
       assert.equal(get.status, 200);
       const body = (await get.json()) as { cart: { id: string } };
-      assert.equal(body.cart.id, "");
+      assert.equal(body.cart.id, "gid://shopify/Cart/synthetic");
       assert.ok(!JSON.stringify(body).includes("server-cookie-secret"));
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  it("acts on the cookie's cart, never a cart id the browser sends", async () => {
+    const originalFetch = globalThis.fetch;
+    const cartIds: unknown[] = [];
+    globalThis.fetch = async (_input, init) => {
+      const request = JSON.parse(String(init?.body)) as {
+        variables?: { id?: unknown; cartId?: unknown };
+      };
+      const id = request.variables?.cartId ?? request.variables?.id;
+      if (id !== undefined) cartIds.push(id);
+      const cart = {
+        id: "gid://shopify/Cart/synthetic?key=secret",
+        checkoutUrl: `https://${STORE_DOMAIN}/cart/c/synthetic`,
+        totalQuantity: 0,
+        note: null,
+        buyerIdentity: { countryCode: "US" },
+        lines: { nodes: [] },
+        discountCodes: [],
+      };
+      return Response.json({
+        data: { cart, cartLinesAdd: { cart, userErrors: [], warnings: [] } },
+      });
+    };
+    const env = {
+      NODE_ENV: "production",
+      [STORE_DOMAIN_ENV_KEY]: STORE_DOMAIN,
+      [PRIVATE_STOREFRONT_TOKEN_ENV_KEY]: "synthetic-private-token",
+    };
+    const headers = {
+      "x-forwarded-for": "203.0.113.9",
+      cookie: "cart=synthetic%3Fkey%3Dsecret",
+    };
+
+    try {
+      const post = await handleShopifyCartRequest(
+        new Request("https://forward.example/api/cart?cartId=other", {
+          method: "POST",
+          headers: { ...headers, "content-type": "application/json" },
+          body: JSON.stringify({
+            cartId: "gid://shopify/Cart/synthetic",
+            lines: [
+              {
+                merchandiseId: "gid://shopify/ProductVariant/1000",
+                quantity: 1,
+              },
+            ],
+          }),
+        }),
+        env,
+      );
+      assert.equal(post.status, 200);
+      const get = await handleShopifyCartRequest(
+        new Request("https://forward.example/api/cart?cartId=other", {
+          headers,
+        }),
+        env,
+      );
+      assert.equal(get.status, 200);
+      assert.ok(cartIds.length > 0);
+      for (const id of cartIds) {
+        assert.equal(id, "gid://shopify/Cart/synthetic?key=secret");
+      }
     } finally {
       globalThis.fetch = originalFetch;
     }

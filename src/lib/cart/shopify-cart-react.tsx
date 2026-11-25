@@ -9,6 +9,7 @@ import type {
 import {
   createCartComponents,
   createProductComponents,
+  useCartAnalytics,
 } from "@shopify/hydrogen/react";
 import { type ReactNode, useEffect } from "react";
 import { useLocale } from "@/lib/i18n/locale-context";
@@ -57,10 +58,22 @@ function CartMarketSync() {
   return null;
 }
 
+/**
+ * Hydrogen's cart tracker: `cart_updated`, `product_added_to_cart` and
+ * `product_removed_from_cart` on every confirmed cart change. Render once
+ * inside each cart provider; Hydrogen dedupes the layout's and the cart
+ * page's trackers by the cart's `updatedAt`.
+ */
+export function CartAnalytics() {
+  useCartAnalytics();
+  return null;
+}
+
 export function ShopifyCartRuntime({ children }: { children: ReactNode }) {
   return (
     <ShopifyCartProvider>
       <CartMarketSync />
+      <CartAnalytics />
       {children}
     </ShopifyCartProvider>
   );

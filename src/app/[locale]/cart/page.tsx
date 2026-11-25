@@ -3,7 +3,10 @@ import { headers } from "next/headers";
 
 import { CartViewed } from "@/lib/analytics";
 import { readShopifyCart, type ShopifyCartData } from "@/lib/cart/shopify-cart";
-import { ShopifyCartProvider } from "@/lib/cart/shopify-cart-react";
+import {
+  CartAnalytics,
+  ShopifyCartProvider,
+} from "@/lib/cart/shopify-cart-react";
 import { DEFAULT_LOCALE, parseLocale } from "@/lib/i18n/locales";
 import { translatedMetadata } from "@/lib/i18n/translator";
 import { ShopifyCartView } from "./shopify-cart-view";
@@ -39,6 +42,7 @@ export default async function CartPage({
   );
   return (
     <ShopifyCartProvider initialData={data}>
+      <CartAnalytics />
       <CartViewed />
       <ShopifyCartView />
     </ShopifyCartProvider>

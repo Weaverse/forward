@@ -102,6 +102,53 @@ export function validateCheckoutUrl(
   return checkout.toString();
 }
 
+const PUBLIC_CART_ID = /^gid:\/\/shopify\/Cart\/[^?#\s]+$/;
+
+/**
+ * The cart GID the browser may hold: Shopify's id with its `?key=` query cut
+ * off, `gid://shopify/Cart/<token>`. The key, the cart's secret, stays in the
+ * HttpOnly cookie. Hydrogen's cart analytics needs an id to track the cart.
+ */
+export function publicCartId(id: string): string {
+  const [publicId = ""] = id.split("?", 1);
+  if (!PUBLIC_CART_ID.test(publicId)) {
+    throw new Error("Shopify returned a cart without an identity.");
+  }
+  return publicId;
+}
+
+/**
+ * Drops the cart id a browser sends (`cartId` in a JSON body or the query).
+ * Hydrogen's cart client sends back the id it holds, and its handlers prefer
+ * that over the cookie; the browser's id has no key, so the HttpOnly cookie
+ * stays the only cart identity the server acts on.
+ */
+export async function withCookieCartIdentity(
+  request: Request,
+): Promise<Request> {
+  const url = new URL(request.url);
+  url.searchParams.delete("cartId");
+  if (request.method !== "POST") {
+    return new Request(url, {
+      method: request.method,
+      headers: request.headers,
+    });
+  }
+  let body: BodyInit = await request.arrayBuffer();
+  if (request.headers.get("content-type")?.includes("application/json")) {
+    try {
+      const json: unknown = JSON.parse(new TextDecoder().decode(body));
+      if (json !== null && typeof json === "object" && "cartId" in json) {
+        delete json.cartId;
+        body = JSON.stringify(json);
+      }
+    } catch {
+      /* Malformed JSON goes on unchanged; Hydrogen answers it with a 400. */
+    }
+  }
+  return new Request(url, { method: "POST", headers: request.headers, body });
+}
+
 function sanitizeCartData(
   data: Record<string, unknown>,
   storeDomain: string,
@@ -117,7 +164,7 @@ function sanitizeCartData(
   if (typeof cart.id !== "string" || cart.id.length === 0) {
     throw new Error("Shopify returned a cart without an identity.");
   }
-  cart.id = "";
+  cart.id = publicCartId(cart.id);
   if (cart.checkoutUrl !== null && cart.checkoutUrl !== undefined) {
     if (typeof cart.checkoutUrl !== "string") {
       throw new Error("Shopify returned an invalid checkout URL.");

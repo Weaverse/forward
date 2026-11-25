@@ -23,6 +23,7 @@ import {
   type RuntimeEnvironment,
   readTrustedBuyerIp,
   sanitizeCartHandlerResult,
+  withCookieCartIdentity,
 } from "./shopify-cart-server";
 
 export const shopifyCartHandlers = createCartServerHandlers();
@@ -175,10 +176,14 @@ export async function readShopifyCart(
 }
 
 export async function handleShopifyCartRequest(
-  request: Request,
+  incoming: Request,
   source: EnvSource = process.env,
 ): Promise<Response> {
   try {
+    const request =
+      incoming.method === "GET" || incoming.method === "POST"
+        ? await withCookieCartIdentity(incoming)
+        : incoming;
     const context = createCartRequestContext(request, source);
     if (request.method === "GET" || request.method === "POST") {
       await syncCartCountry(request, context);
