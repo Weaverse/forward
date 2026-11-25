@@ -362,7 +362,6 @@ export async function proxy(request: NextRequest): Promise<Response> {
     const sessionManager = await createCustomerAccountSessionManager({
       config: runtime.config,
       cookieHeader: request.headers.get("cookie"),
-      secure: process.env.NODE_ENV === "production",
     });
 
     const shopifyRoute = await handleShopifyRoutes({

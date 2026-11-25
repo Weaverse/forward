@@ -22,14 +22,37 @@
   credentials the inert carrier stays, so the four-key account boundary still
   works alone; there is no cart to sync then.
 
+## Country sync names the customer
+
+Whether Shopify keeps a cart's customer on a `countryCode`-only
+`cartBuyerIdentityUpdate` is undocumented, so with Customer Accounts the
+country update sends `customerAccessToken` too, from the same session manager
+the cart handlers use:
+
+- the signed-in customer's token: attached;
+- `null` when the session has ended (no tokens, or a refresh Shopify rejected
+  with 400/401, which clears them): detached;
+- left out when that can't be told (an expired token whose refresh failed
+  transiently, or one the caller may not refresh): the customer is untouched.
+
+`/api/cart` may refresh an expired token (`getOrRefreshAccessToken`) and
+commits the session on its response, error responses included. The cart page
+(`readShopifyCart`) can't set cookies, so it reads with `getAccessToken` and
+never refreshes.
+
+## Session cookie `Secure`
+
+`createCustomerAccountSessionManager` defaults `secure` to
+`process.env.NODE_ENV === "production"`, and the proxy, the account pages and
+the cart all use that default. The cart used to derive it from the cart's own
+environment source, so the two rules could disagree.
+
 ## Kept as is
 
 - The browser gets the keyless cart GID; the server acts only on the HttpOnly
   `cart` cookie (`withCookieCartIdentity`, `sanitizeCartHandlerResult`).
   Hydrogen's buyer-identity update reads the cart id from the cookie too.
-- `syncCartCountry` still runs before every cart read and change. It sends
-  only `countryCode`; Shopify is expected to keep the cart's customer on a
-  partial buyer-identity update (checked by hand on the preview, below).
+- `syncCartCountry` still runs before every cart read and change.
 - Forward has no programmatic logout or `/cart/checkout` route: a session only
   ends through the protocol routes, which do the detach.
 
@@ -64,7 +87,15 @@ token with the login's nonce) and the Storefront API:
 - a failed detach expires the `cart` cookie;
 - the first add while signed in creates the cart with the customer;
 - a signed-in cart read's checkout URL carries `logged_in=true`, a guest's
-  does not.
+  does not;
+- a market change sends the signed-in customer's token with the country;
+- an expired token is refreshed for it, and the session cookie is committed;
+- a refresh Shopify rejects sends `customerAccessToken: null`;
+- a transient refresh failure leaves the field out;
+- a cart page render never refreshes and leaves the field out.
+
+`tests/shopify-cart.test.ts`'s fakes read the country from the mutation's
+`buyerIdentity` variable.
 
 `tests/customer-account-routes.test.ts` passes an inert Storefront client to
 the handlers it calls directly, since the sync handlers require one.
@@ -74,16 +105,19 @@ the handlers it calls directly, since the sync handlers require one.
 Real sign-in needs an email OTP, so it is checked by hand: add to cart as a
 guest, sign in, `GET /api/cart` shows `buyerIdentity.customer` set and the
 checkout URL has `logged_in=true`; switch market (for example `/de-de`) and
-the customer is still set; sign out, the customer is null and the cart
+the customer is still set (the country update now sends the token); sign out, the customer is null and the cart
 (lines) is kept.
 
 ## Files touched
 
+- `src/lib/account/account-view.ts`
 - `src/lib/account/customer-account.ts`
+- `src/lib/account/session-manager.ts`
 - `src/lib/cart/shopify-cart.ts`
 - `src/lib/routes/shopify-routes.ts`
 - `src/proxy.ts`
 - `tests/customer-cart-sync.test.ts` (new)
 - `tests/customer-account-routes.test.ts`
+- `tests/shopify-cart.test.ts`
 - `vite.config.ts`
 - `.weaverse/specs/2026-11-25--cart-buyer-identity-sync/`

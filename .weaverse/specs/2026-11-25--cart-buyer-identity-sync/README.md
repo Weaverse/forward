@@ -34,3 +34,8 @@ Under `next dev` the account handlers run without `cartServerHandlers`,
 because 2026.10.3's `customer-account` entry has no `development` build and
 the cart-sync brands differ. Tests alias `@shopify/hydrogen` to its production
 build, so they exercise the shipped pairing.
+
+The market sync (`syncCartCountry`) names the customer as well: the signed-in
+token, `null` once the session has ended, or nothing while that can't be told.
+`/api/cart` may refresh the token and commits the session; the cart page never
+refreshes. The session cookie's `Secure` flag follows one rule everywhere.

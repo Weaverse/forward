@@ -3,7 +3,10 @@ import { afterAll, beforeAll, beforeEach, describe, it } from "vite-plus/test";
 
 import { NextRequest } from "next/server";
 import type { CustomerAccountConfig } from "../src/lib/account/env.ts";
-import { handleShopifyCartRequest } from "../src/lib/cart/shopify-cart.ts";
+import {
+  handleShopifyCartRequest,
+  readShopifyCart,
+} from "../src/lib/cart/shopify-cart.ts";
 import {
   PRIVATE_STOREFRONT_TOKEN_ENV_KEY,
   STORE_DOMAIN_ENV_KEY,
@@ -22,6 +25,7 @@ const ISSUER = `https://shopify.com/authentication/${CONFIG.shopId}`;
 const CART_COOKIE = "cart=synthetic%3Fkey%3Dsecret";
 const CART_ID = "gid://shopify/Cart/synthetic?key=secret";
 const ACCESS_TOKEN = "synthetic-access-token";
+const REFRESHED_TOKEN = "synthetic-refreshed-token";
 
 type StorefrontCall = { query: string; variables: Record<string, unknown> };
 
@@ -30,6 +34,10 @@ type StorefrontCall = { query: string; variables: Record<string, unknown> };
 let storefrontCalls: StorefrontCall[] = [];
 let failBuyerIdentityUpdate = false;
 let idTokenNonce = "";
+/* Below Hydrogen's 120 s expiry buffer, a sign-in's token is already expired. */
+let tokenExpiresIn = 3600;
+let refreshStatus = 200;
+let refreshCalls = 0;
 const originalFetch = globalThis.fetch;
 
 function base64Url(value: object): string {
@@ -54,10 +62,17 @@ async function fakeFetch(
 ): Promise<Response> {
   const url = new URL(input instanceof Request ? input.url : input);
   if (url.href === `${ISSUER}/oauth/token`) {
+    if (String(init?.body).includes("grant_type=refresh_token")) {
+      refreshCalls += 1;
+      if (refreshStatus !== 200) {
+        return new Response(null, { status: refreshStatus });
+      }
+      return Response.json({ access_token: REFRESHED_TOKEN, expires_in: 3600 });
+    }
     return Response.json({
       access_token: ACCESS_TOKEN,
       refresh_token: "synthetic-refresh-token",
-      expires_in: 3600,
+      expires_in: tokenExpiresIn,
       id_token: `${base64Url({ alg: "none" })}.${base64Url({
         iss: ISSUER,
         aud: CONFIG.clientId,
@@ -91,6 +106,24 @@ function buyerIdentityUpdates() {
   return storefrontCalls
     .filter(({ query }) => query.includes("mutation CartBuyerIdentityUpdate"))
     .map(({ variables }) => variables);
+}
+
+/** The buyer identity `syncCartCountry` sent. */
+function countryUpdate() {
+  const update = storefrontCalls.find(({ query }) =>
+    query.includes("mutation ForwardCartCountryUpdate"),
+  );
+  assert.ok(update, "expected a country update");
+  return update.variables.buyerIdentity;
+}
+
+/** A cart read from the German market, which moves the US cart. */
+function readFromGermany(session: string) {
+  return handleShopifyCartRequest(
+    new Request(`${ORIGIN}/api/cart`, {
+      headers: { cookie: `${session}; ${CART_COOKIE}; forward_locale=de-de` },
+    }),
+  );
 }
 
 function cookiePair(setCookie: string, name: string): string {
@@ -154,6 +187,9 @@ describe("customer and cart buyer identity sync", () => {
   beforeEach(() => {
     storefrontCalls = [];
     failBuyerIdentityUpdate = false;
+    tokenExpiresIn = 3600;
+    refreshStatus = 200;
+    refreshCalls = 0;
   });
 
   it("attaches the signed-in customer to the guest cart on authorize", async () => {
@@ -231,5 +267,72 @@ describe("customer and cart buyer identity sync", () => {
       new URL(await read(CART_COOKIE)).searchParams.get("logged_in"),
       null,
     );
+  });
+
+  it("names the signed-in customer when the cart changes market", async () => {
+    const { session } = await signIn();
+    storefrontCalls = [];
+    assert.equal((await readFromGermany(session)).status, 200);
+    assert.deepEqual(countryUpdate(), {
+      countryCode: "DE",
+      customerAccessToken: ACCESS_TOKEN,
+    });
+  });
+
+  it("refreshes an expired token for the country update and commits it", async () => {
+    tokenExpiresIn = 60;
+    const { session } = await signIn();
+    storefrontCalls = [];
+    const response = await readFromGermany(session);
+    assert.equal(response.status, 200);
+    assert.deepEqual(countryUpdate(), {
+      countryCode: "DE",
+      customerAccessToken: REFRESHED_TOKEN,
+    });
+    assert.match(
+      response.headers.get("set-cookie") ?? "",
+      /(^|, )forward_customer_account=v1\./,
+    );
+  });
+
+  it("detaches the customer when Shopify rejects the refresh", async () => {
+    tokenExpiresIn = 60;
+    refreshStatus = 400;
+    const { session } = await signIn();
+    storefrontCalls = [];
+    const response = await readFromGermany(session);
+    assert.equal(response.status, 200);
+    assert.deepEqual(countryUpdate(), {
+      countryCode: "DE",
+      customerAccessToken: null,
+    });
+    assert.match(
+      response.headers.get("set-cookie") ?? "",
+      /(^|, )forward_customer_account=/,
+    );
+  });
+
+  it("leaves the customer alone when the refresh fails transiently", async () => {
+    tokenExpiresIn = 60;
+    refreshStatus = 503;
+    const { session } = await signIn();
+    storefrontCalls = [];
+    assert.equal((await readFromGermany(session)).status, 200);
+    assert.equal(refreshCalls, 1);
+    assert.deepEqual(countryUpdate(), { countryCode: "DE" });
+  });
+
+  it("never refreshes on a cart page render", async () => {
+    tokenExpiresIn = 60;
+    const { session } = await signIn();
+    storefrontCalls = [];
+    await readShopifyCart(
+      new Request(`${ORIGIN}/de-de/cart`, {
+        headers: { cookie: `${session}; ${CART_COOKIE}` },
+      }),
+      "de-de",
+    );
+    assert.equal(refreshCalls, 0);
+    assert.deepEqual(countryUpdate(), { countryCode: "DE" });
   });
 });
