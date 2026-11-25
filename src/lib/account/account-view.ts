@@ -40,6 +40,7 @@ import {
   ORDER_LINE_LIMIT,
   ORDER_PREVIEW_LINE_LIMIT,
 } from "./queries";
+import { withRateLimitPolicy } from "./rate-limit";
 import { createCustomerAccountSessionManager } from "./session-manager";
 
 /**
@@ -375,11 +376,13 @@ export async function readAccountSession(options: {
       status: "authenticated",
       accessToken,
       locale: options.locale ?? DEFAULT_LOCALE,
-      client: createCustomerAccountClient({
-        shopId: runtime.config.shopId,
-        requestContext,
-        fetch: fetchReportingRejections,
-      }),
+      client: withRateLimitPolicy(
+        createCustomerAccountClient({
+          shopId: runtime.config.shopId,
+          requestContext,
+          fetch: fetchReportingRejections,
+        }),
+      ),
       commitSession: () => sessionManager.commit(),
     };
   }

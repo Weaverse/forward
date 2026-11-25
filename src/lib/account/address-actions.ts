@@ -62,7 +62,7 @@ export async function saveAddress(
   });
 
   if (result.status === "error") {
-    return { message: result.message };
+    return { message: result.message, variables: result.variables };
   }
   if (result.status === "redirect") {
     redirect(result.href);
