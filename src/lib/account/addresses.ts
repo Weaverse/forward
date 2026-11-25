@@ -31,6 +31,7 @@ import {
   ACCOUNT_ADDRESS_UPDATE_MUTATION,
   ACCOUNT_ADDRESSES_QUERY,
 } from "./queries";
+import { CustomerAccountRateLimitError } from "./rate-limit";
 
 export const ADDRESSES_PATH = "/account/addresses";
 
@@ -51,6 +52,9 @@ export type AddressIntent = (typeof ADDRESS_INTENTS)[number];
 export const ADDRESS_ERROR_REJECTED = "account.addressErrors.rejected";
 export const ADDRESS_ERROR_INVALID = "account.addressErrors.invalid";
 export const ADDRESS_ERROR_FAILED = "account.addressErrors.failed";
+export const ADDRESS_ERROR_RATE_LIMITED = "account.addressErrors.rateLimited";
+export const ADDRESS_ERROR_RATE_LIMITED_BRIEFLY =
+  "account.addressErrors.rateLimitedBriefly";
 
 export type AddressActionResult =
   | { status: "success" }
@@ -60,7 +64,11 @@ export type AddressActionResult =
       message:
         | typeof ADDRESS_ERROR_REJECTED
         | typeof ADDRESS_ERROR_INVALID
-        | typeof ADDRESS_ERROR_FAILED;
+        | typeof ADDRESS_ERROR_FAILED
+        | typeof ADDRESS_ERROR_RATE_LIMITED
+        | typeof ADDRESS_ERROR_RATE_LIMITED_BRIEFLY;
+      /** Values the message interpolates. */
+      variables?: { seconds: number };
     };
 
 /** The exact `CustomerAddressInput` subset Forward writes. */
@@ -376,7 +384,19 @@ async function runAddressMutation(
         );
       }
     }
-  } catch {
+  } catch (error) {
+    // Rate limited: the client never re-sends a mutation, so tell the shopper
+    // when to try again themselves.
+    if (error instanceof CustomerAccountRateLimitError) {
+      const seconds = error.retryAfterSeconds;
+      return seconds !== undefined && seconds > 1
+        ? {
+            status: "error",
+            message: ADDRESS_ERROR_RATE_LIMITED,
+            variables: { seconds },
+          }
+        : { status: "error", message: ADDRESS_ERROR_RATE_LIMITED_BRIEFLY };
+    }
     // Transport failure or an ambiguous timeout: the mutation may already have
     // been applied upstream. Report it and stop; never re-issue.
     return { status: "error", message: ADDRESS_ERROR_FAILED };

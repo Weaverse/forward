@@ -69,7 +69,7 @@ export function AddressActionForm({
       </button>
       {state.message === null ? null : (
         <p className="mt-2 text-caption text-text-muted" role="alert">
-          {t(state.message)}
+          {t(state.message, state.variables)}
         </p>
       )}
     </form>

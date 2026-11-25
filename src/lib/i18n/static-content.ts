@@ -300,6 +300,9 @@ export const STATIC_CONTENT = {
       invalid: "Check the address details and try again.",
       failed:
         "That address change could not be completed. Reload the page to check before trying again.",
+      rateLimited:
+        "Too many requests, please try again in {{seconds}} seconds.",
+      rateLimitedBriefly: "Too many requests, please try again in a moment.",
     },
     payment: {
       authorized: "Authorized",
