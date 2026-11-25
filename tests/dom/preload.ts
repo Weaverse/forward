@@ -108,6 +108,7 @@ interface ImageProps {
   sizes?: string;
   fill?: boolean;
   priority?: boolean;
+  preload?: boolean;
   loading?: string;
   [key: string]: unknown;
 }
@@ -128,6 +129,7 @@ vi.mock("next/image", () => ({
     sizes,
     fill,
     priority,
+    preload,
     loading,
     ...rest
   }: ImageProps) =>
@@ -137,9 +139,11 @@ vi.mock("next/image", () => ({
       width,
       height,
       sizes,
-      loading: loading ?? (priority === true ? "eager" : "lazy"),
+      loading:
+        loading ?? (priority === true || preload === true ? "eager" : "lazy"),
       "data-fill": fill === true ? "true" : undefined,
       "data-priority": priority === true ? "true" : undefined,
+      "data-preload": preload === true ? "true" : undefined,
       ...rest,
     }),
 }));

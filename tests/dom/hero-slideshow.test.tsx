@@ -49,6 +49,19 @@ describe("hero slideshow", () => {
     assert.deepEqual(slideImages(), ["first", "second", "third"]);
   });
 
+  it("preloads only the first slide image, at high fetch priority", () => {
+    renderSlideshow();
+    const [first, second] = ["first", "second"].map((name) =>
+      screen.getByRole("img", { hidden: true, name }),
+    );
+    assert.equal(first?.getAttribute("data-preload"), "true");
+    assert.equal(first?.getAttribute("fetchpriority"), "high");
+    assert.equal(first?.getAttribute("loading"), "eager");
+    assert.equal(second?.getAttribute("data-preload"), null);
+    assert.equal(second?.getAttribute("fetchpriority"), null);
+    assert.equal(second?.getAttribute("loading"), "lazy");
+  });
+
   it("stops advancing while paused and resumes on play", async () => {
     renderSlideshow();
     const pause = screen.getByRole("button", { name: "Pause slideshow" });

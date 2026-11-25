@@ -60,7 +60,8 @@ export interface HeroSlideProps extends WeaverseElementProps {
  * placed against the slideshow section, not against this column.
  *
  * A slide's image mounts one slide ahead of its turn, so the initial page
- * carries only the first image (prioritized) and the second (lazy), and each
+ * carries only the first image (preloaded at high fetch priority, as the
+ * page's LCP element) and the second (lazy), and each
  * later one has loaded by the time it crossfades in without competing with
  * the first for the hero's paint.
  */
@@ -104,7 +105,9 @@ function HeroSlide({
             alt={resolvedImage.alt}
             fill
             sizes="100vw"
-            {...(index === 0 ? { priority: true } : { loading: "lazy" })}
+            {...(index === 0
+              ? { preload: true, fetchPriority: "high" }
+              : { loading: "lazy" })}
           />
         </div>
       )}

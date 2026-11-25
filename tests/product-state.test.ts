@@ -10,6 +10,7 @@ import {
   requestedSelection,
   resolveColorway,
   resolveProductSelection,
+  swatchImageUrl,
 } from "../src/lib/storefront/product-state.ts";
 import type { Product } from "../src/lib/storefront/types.ts";
 import { PRODUCT_FIXTURES } from "./fixtures/storefront/products.ts";
@@ -200,5 +201,31 @@ describe("requestedSelection", () => {
       colorwayId: product.colorways[0]?.id,
       options: { Size: "M" },
     });
+  });
+});
+
+describe("swatchImageUrl", () => {
+  it("asks Shopify's CDN for a small square rendition and keeps ?v=", () => {
+    const url = new URL(
+      swatchImageUrl(
+        "https://cdn.shopify.com/s/files/1/0978/4757/4828/files/ridge-dune-primary.webp?v=1785922464",
+      ),
+    );
+    assert.equal(url.origin, "https://cdn.shopify.com");
+    assert.equal(
+      url.pathname,
+      "/s/files/1/0978/4757/4828/files/ridge-dune-primary.webp",
+    );
+    assert.equal(url.searchParams.get("v"), "1785922464");
+    assert.equal(url.searchParams.get("width"), "24");
+    assert.equal(url.searchParams.get("height"), "24");
+    assert.equal(url.searchParams.get("crop"), "center");
+  });
+
+  it("leaves a non-Shopify source such as the placeholder unchanged", () => {
+    assert.equal(
+      swatchImageUrl("/images/placeholder/product.svg"),
+      "/images/placeholder/product.svg",
+    );
   });
 });
