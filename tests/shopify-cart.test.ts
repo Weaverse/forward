@@ -397,12 +397,13 @@ describe("pinned Hydrogen cart handler integration", () => {
     globalThis.fetch = async (_input, init) => {
       const request = JSON.parse(String(init?.body)) as {
         query?: string;
-        variables?: { countryCode?: string };
+        variables?: { buyerIdentity?: { countryCode?: string } };
       };
       const query = request.query ?? "";
       sent.push(query);
       if (query.includes("ForwardCartCountryUpdate")) {
-        cartCountry = request.variables?.countryCode ?? cartCountry;
+        cartCountry =
+          request.variables?.buyerIdentity?.countryCode ?? cartCountry;
         return Response.json({
           data: { cartBuyerIdentityUpdate: { userErrors: [] } },
         });
@@ -461,10 +462,11 @@ describe("pinned Hydrogen cart handler integration", () => {
     globalThis.fetch = async (_input, init) => {
       const request = JSON.parse(String(init?.body)) as {
         query?: string;
-        variables?: { countryCode?: string };
+        variables?: { buyerIdentity?: { countryCode?: string } };
       };
       if (request.query?.includes("ForwardCartCountryUpdate")) {
-        cartCountry = request.variables?.countryCode ?? cartCountry;
+        cartCountry =
+          request.variables?.buyerIdentity?.countryCode ?? cartCountry;
         return Response.json({
           data: { cartBuyerIdentityUpdate: { userErrors: [] } },
         });

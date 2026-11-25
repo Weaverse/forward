@@ -15,6 +15,7 @@ import {
 
 import { runtimeEnvironment } from "@/lib/cart/shopify-cart";
 import { readTrustedBuyerIp } from "@/lib/cart/shopify-cart-server";
+import type { LocaleI18n } from "@/lib/i18n/locales";
 import { SHOPIFY_I18N } from "@/lib/i18n/shopify-i18n";
 import {
   type EnvSource,
@@ -56,10 +57,12 @@ function trustedBuyerIp(headers: Headers, source: EnvSource): string | null {
  *
  * A request with no trusted buyer IP gets a client without buyer context, so
  * one missing header degrades the Storefront API proxy instead of the page.
+ * `locale` is the market the request context runs in, when the caller knows it.
  */
 export function createShopifyRouteContext(
   request: Request,
   source: EnvSource = process.env,
+  locale?: LocaleI18n,
 ) {
   let config: ReturnType<typeof readShopifyCatalogConfig>;
   try {
@@ -77,6 +80,7 @@ export function createShopifyRouteContext(
     const requestContext = createShopifyRequestContext({
       request,
       i18n: SHOPIFY_I18N,
+      locale,
     });
     const storefrontClient = createStorefrontClient({
       type: "private_no_buyer_context",
@@ -88,6 +92,7 @@ export function createShopifyRouteContext(
   const requestContext = createShopifyRequestContext({
     request,
     i18n: SHOPIFY_I18N,
+    locale,
     buyerIp,
   });
   const storefrontClient = createStorefrontClient({

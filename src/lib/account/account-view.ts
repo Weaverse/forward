@@ -363,7 +363,6 @@ export async function readAccountSession(options: {
   const sessionManager = await createCustomerAccountSessionManager({
     config: runtime.config,
     cookieHeader: requestHeaders.get("cookie"),
-    secure: process.env.NODE_ENV === "production",
   });
 
   const accessToken = await runtime.customerSession.getAccessToken(

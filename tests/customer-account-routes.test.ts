@@ -3,7 +3,11 @@ import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, it } from "vite-plus/test";
 
-import { createShopifyRequestContext } from "@shopify/hydrogen";
+import {
+  createShopifyRequestContext,
+  type ShopifyRequestContext,
+  type StorefrontClient,
+} from "@shopify/hydrogen";
 import {
   createCustomerAccountServerHandlers,
   createCustomerSession,
@@ -52,6 +56,13 @@ function requestContext(request: Request) {
   });
 }
 
+/** No cart cookie in these requests, so the cart sync never calls Shopify. */
+function inertStorefrontClient(
+  context: ShopifyRequestContext,
+): StorefrontClient {
+  return { requestContext: context } as unknown as StorefrontClient;
+}
+
 async function sessionManager(cookieHeader: string | null = null) {
   return createCustomerAccountSessionManager({
     config: CONFIG,
@@ -67,10 +78,12 @@ async function runHandler(
   cookieHeader: string | null = null,
 ) {
   const manager = await sessionManager(cookieHeader);
+  const context = requestContext(request);
   const result = await handler({
     request,
     sessionManager: manager,
-    requestContext: requestContext(request),
+    requestContext: context,
+    storefrontClient: inertStorefrontClient(context),
   });
   return { result, manager };
 }
@@ -541,6 +554,7 @@ describe("response header semantics", () => {
       request,
       sessionManager: await sessionManager(),
       requestContext: context,
+      storefrontClient: inertStorefrontClient(context),
     });
     assert.ok(result.type === "redirect");
 

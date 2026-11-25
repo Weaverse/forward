@@ -26,8 +26,12 @@ export interface CustomerAccountSessionManagerOptions {
   config: CustomerAccountConfig;
   /** Raw `Cookie` request header, or `null`. */
   cookieHeader: string | null;
-  /** `Secure` cookie attribute. Always true in Production. */
-  secure: boolean;
+  /**
+   * `Secure` cookie attribute. Defaults to the one rule every caller shares:
+   * on for production builds (Vercel previews included), off for plain-HTTP
+   * `next dev`.
+   */
+  secure?: boolean;
   now?: () => number;
 }
 
@@ -46,7 +50,12 @@ export interface ForwardCustomerSessionManager {
 export async function createCustomerAccountSessionManager(
   options: CustomerAccountSessionManagerOptions,
 ): Promise<ForwardCustomerSessionManager> {
-  const { config, cookieHeader, secure, now = Date.now } = options;
+  const {
+    config,
+    cookieHeader,
+    secure = process.env.NODE_ENV === "production",
+    now = Date.now,
+  } = options;
   const key = await deriveSessionKey(config.sessionSecret);
   const cookieValue = readSessionCookie(cookieHeader);
   let data: SessionData =
