@@ -130,6 +130,8 @@ tests/                  Unit, DOM and browser coverage
 
 ## Deploying to Vercel
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FWeaverse%2Fforward&env=PUBLIC_STORE_DOMAIN%2CPRIVATE_STOREFRONT_API_TOKEN%2CWEAVERSE_PROJECT_ID&envDescription=Your%20Shopify%20store%20domain%2C%20private%20Storefront%20API%20token%20and%20Weaverse%20project%20ID.&envLink=https%3A%2F%2Fweaverse.io%2Fdocs%2Fguides%2Fdeployment%2Fvercel&project-name=forward&repository-name=forward)
+
 1. Push your storefront to your own Git repository and import it into Vercel with the **Next.js** preset.
 2. Use Bun for installation (`bun install --frozen-lockfile`) and `bun run build` for the build command. Select a supported Node.js version that meets the requirement above.
 3. Add your Shopify and Weaverse environment variables in Vercel before building. Configure Preview and Production separately; do not commit an environment file.
